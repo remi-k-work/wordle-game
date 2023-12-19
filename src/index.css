@@ -1,0 +1,79 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin-inline: 0 0;
+  margin-block: 0 0;
+  padding-inline: 0 0;
+  padding-block: 0 0;
+}
+
+/* || GENERAL STYLES */
+
+img,
+svg,
+picture,
+video {
+  max-inline-size: 100%;
+  display: block;
+  block-size: auto;
+}
+
+button,
+label,
+input,
+select,
+progress,
+meter,
+textarea {
+  display: block;
+  font-family: inherit;
+  font-size: 100%;
+  margin-inline: 0 0;
+  margin-block: 0 0;
+  padding-inline: 0 0;
+  padding-block: 0 0;
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  font-family: Raleway, sans-serif;
+  font-size: 1rem;
+  text-align: center;
+  background: #1b1523;
+  color: #fff;
+  min-block-size: 100vh;
+  min-block-size: 100svh;
+  margin-inline: 0 0;
+  margin-block: 0 0;
+  padding-inline: 0 0;
+  padding-block: 0 0;
+}
+
+#root {
+  min-block-size: 100cqb;
+  display: flex;
+  padding-inline: 1em 1em;
+  padding-block: 1em 1em;
+}
+
+.main-grid {
+  min-block-size: 100%;
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1em;
+}
+
+footer {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  align-items: center;
+}
