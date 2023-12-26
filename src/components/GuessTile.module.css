@@ -1,0 +1,55 @@
+.guess-tile {
+  inline-size: 100%;
+  block-size: 100%;
+  border-inline: 2px solid #666;
+  border-block: 2px solid #666;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  container: guess-tile / size;
+}
+
+.guess-tile--grey {
+  --_background: #a1a1a1;
+  --_border-color: #a1a1a1;
+  background: var(--_background);
+  border-color: var(--_border-color);
+}
+
+.guess-tile--green {
+  --_background: #5ac85a;
+  --_border-color: #5ac85a;
+  background: var(--_background);
+  border-color: var(--_border-color);
+}
+
+.guess-tile--yellow {
+  --_background: #e2cc68;
+  --_border-color: #e2cc68;
+  background: var(--_background);
+  border-color: var(--_border-color);
+}
+
+.guess-tile--bounce-anim {
+  animation: bounce 0.2s ease-in-out forwards;
+}
+
+.guess-tile__letter {
+  font-size: 80cqb;
+}
+
+/* keyframe animations */
+@keyframes bounce {
+  0% {
+    transform: scale(1);
+    border-color: #666;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    border-color: #fff;
+  }
+}
