@@ -15,7 +15,7 @@ import { validateGuessEntry, validateGuessSubmit } from "../features/game/gameLo
 import { guessWordSubmitted } from "../features/game/gameSlice";
 
 export default function CurrentGuess() {
-  const { currentTurn, wordleGuesses } = useSelector((store) => store.game);
+  const { wordleGuesses, currentTurn } = useSelector((store) => store.game);
   const [currentGuessWord, setCurrentGuessWord] = useState("");
   const dispatch = useDispatch();
 
@@ -26,6 +26,7 @@ export default function CurrentGuess() {
 
       validateGuessEntry(key, currentGuessWord, setCurrentGuessWord);
       if (validateGuessSubmit(key, currentGuessWord, currentTurn, wordleGuesses)) {
+        // A new valid guess word was submitted by the user
         dispatch(guessWordSubmitted(currentGuessWord));
 
         // Clear the guess word currently in use

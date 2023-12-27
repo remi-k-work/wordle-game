@@ -1,6 +1,9 @@
 // redux stuff
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+// keypad logic & slice
+import { deriveUsedKeys } from "./keypadLogic";
+
 // helpers
 import { waait } from "../../js/helpers";
 
@@ -10,7 +13,7 @@ export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async functi
 
   const response = await fetch("/data/db.json");
   if (!response.ok) {
-    throw Error("Unable to obtain the letters.");
+    throw new Error("Unable to obtain the letters.");
   }
 
   const data = await response.json();
@@ -19,6 +22,7 @@ export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async functi
 
 const initialState = {
   letters: [],
+  usedKeys: {},
   loading: "idle",
 };
 
@@ -26,7 +30,18 @@ export const keypadSlice = createSlice({
   name: "keypad",
   initialState,
   reducers: {
-    test(state) {},
+    // Because of the new guess submission, the visual clue on the keypad has changed
+    visualClueHasChanged: {
+      reducer(state, action) {
+        // Destructure the payload
+        const { theSecretWord, wordleGuesses } = action.payload;
+
+        state.usedKeys = deriveUsedKeys(theSecretWord, wordleGuesses);
+      },
+      prepare(theSecretWord, wordleGuesses) {
+        return { payload: { theSecretWord, wordleGuesses } };
+      },
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchLetters.pending, (state) => {
@@ -34,6 +49,7 @@ export const keypadSlice = createSlice({
     });
     builder.addCase(fetchLetters.fulfilled, (state, action) => {
       state.loading = "idle";
+      state.letters = action.payload;
     });
     builder.addCase(fetchLetters.rejected, (state, action) => {
       state.loading = "rejected";
@@ -42,6 +58,6 @@ export const keypadSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { test } = keypadSlice.actions;
+export const { visualClueHasChanged } = keypadSlice.actions;
 
 export default keypadSlice.reducer;

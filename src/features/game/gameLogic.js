@@ -71,7 +71,7 @@ export function deriveWordleGrid(theSecretWord, wordleGuesses) {
 
 // Format the current guess word into an array of letter objects
 // e.g. [{ tileKey: "A", color: "yellow" }]
-function formatGuess(theSecretWord, wordleGuess) {
+export function formatGuess(theSecretWord, wordleGuess) {
   // After each guess, the tiles will change color to indicate how close your guess is to the secret word
   const theSecretWordArray = [...theSecretWord];
   const formattedGuess = [...wordleGuess].map((letter) => {

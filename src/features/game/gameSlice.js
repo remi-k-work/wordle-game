@@ -1,11 +1,28 @@
 // redux stuff
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
+// helpers
+import { waait } from "../../js/helpers";
+
+// First, create the thunk
+export const fetchSolutions = createAsyncThunk("game/fetchSolutions", async function () {
+  await waait();
+
+  const response = await fetch("/data/db.json");
+  if (!response.ok) {
+    throw new Error("Unable to obtain the solutions.");
+  }
+
+  const data = await response.json();
+  return data["solutions"];
+});
 
 const initialState = {
-  theSecretWord: "DRAIN",
+  theSecretWord: "",
   wordleGuesses: [],
   currentTurn: 0,
   isCorrect: false,
+  loading: "idle",
 };
 
 export const gameSlice = createSlice({
@@ -28,6 +45,23 @@ export const gameSlice = createSlice({
       // Start a new turn
       state.currentTurn++;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchSolutions.pending, (state) => {
+      state.loading = "pending";
+    });
+    builder.addCase(fetchSolutions.fulfilled, (state, action) => {
+      // Destructure the payload
+      const solutions = action.payload;
+
+      state.loading = "idle";
+      const randomSolution = solutions[Math.floor(Math.random() * solutions.length)].word;
+
+      state.theSecretWord = randomSolution;
+    });
+    builder.addCase(fetchSolutions.rejected, (state, action) => {
+      state.loading = "rejected";
+    });
   },
 });
 
