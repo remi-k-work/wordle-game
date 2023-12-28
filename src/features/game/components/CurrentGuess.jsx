@@ -11,26 +11,26 @@ import { useSelector, useDispatch } from "react-redux";
 import GuessTile from "./GuessTile";
 
 // game logic & slice
-import { validateGuessEntry, validateGuessSubmit } from "../features/game/gameLogic";
-import { guessWordSubmitted } from "../features/game/gameSlice";
+import { isGuessKeyEntryValid, isSubmittedGuessValid } from "../gameLogic";
+import { guessWordChanged, guessWordSubmitted } from "../gameSlice";
 
 export default function CurrentGuess() {
-  const { wordleGuesses, currentTurn } = useSelector((store) => store.game);
-  const [currentGuessWord, setCurrentGuessWord] = useState("");
+  const { currentGuessWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);
   const dispatch = useDispatch();
 
   useEffect(() => {
     // Handle the keyboard input one key at a time
     function handleKeyUp(ev) {
-      const key = ev.key;
+      const pressedKey = ev.key;
 
-      validateGuessEntry(key, currentGuessWord, setCurrentGuessWord);
-      if (validateGuessSubmit(key, currentGuessWord, currentTurn, wordleGuesses)) {
-        // A new valid guess word was submitted by the user
-        dispatch(guessWordSubmitted(currentGuessWord));
+      if (isGuessKeyEntryValid(pressedKey)) {
+        // The user has updated the current guess word by tapping a valid key
+        dispatch(guessWordChanged(pressedKey));
 
-        // Clear the guess word currently in use
-        setCurrentGuessWord("");
+        if (isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses)) {
+          // A new valid guess word was submitted by the user
+          dispatch(guessWordSubmitted());
+        }
       }
     }
 

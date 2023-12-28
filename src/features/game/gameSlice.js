@@ -19,6 +19,7 @@ export const fetchSolutions = createAsyncThunk("game/fetchSolutions", async func
 
 const initialState = {
   theSecretWord: "",
+  currentGuessWord: "",
   wordleGuesses: [],
   currentTurn: 0,
   isCorrect: false,
@@ -29,21 +30,44 @@ export const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
+    // The user has updated the current guess word by tapping a valid key
+    guessWordChanged(state, action) {
+      // Destructure the payload
+      const validKey = action.payload;
+
+      // Is the user attempting to submit a guess word?
+      if (validKey === "Enter") {
+        // Ignore it for the time being, since it will be addressed later
+        return;
+      }
+
+      // Allow the use of <Backspace> to correct any errors
+      if (validKey === "Backspace") {
+        state.currentGuessWord = state.currentGuessWord.slice(0, -1);
+        return;
+      }
+
+      // Make sure the current guess word is no more than 5 letters long
+      if (state.currentGuessWord.length < 5) {
+        state.currentGuessWord += validKey.toUpperCase();
+      }
+    },
+
     // A new valid guess word was submitted by the user
     guessWordSubmitted(state, action) {
-      // Destructure the payload
-      const currentGuessWord = action.payload;
-
       // Do we have a winner?
-      if (state.theSecretWord === currentGuessWord) {
+      if (state.theSecretWord === state.currentGuessWord) {
         state.isCorrect = true;
       }
 
       // Add the most recent guess word to the history
-      state.wordleGuesses.push(currentGuessWord);
+      state.wordleGuesses.push(state.currentGuessWord);
 
       // Start a new turn
       state.currentTurn++;
+
+      // Clear the guess word currently in use
+      state.currentGuessWord = "";
     },
   },
   extraReducers: (builder) => {
@@ -66,6 +90,6 @@ export const gameSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { guessWordSubmitted } = gameSlice.actions;
+export const { guessWordChanged, guessWordSubmitted } = gameSlice.actions;
 
 export default gameSlice.reducer;

@@ -1,40 +1,44 @@
-// Validate the guess entry as the user types in real-time
-export function validateGuessEntry(key, currentGuessWord, setCurrentGuessWord) {
-  // Allow the use of <Backspace> to correct any errors
-  if (key === "Backspace") {
-    setCurrentGuessWord(currentGuessWord.slice(0, -1));
-    return;
+// Validate the guess entry as the user types from the keyboard in real time
+export function isGuessKeyEntryValid(pressedKey) {
+  // Only legitimate and recognized keys are accepted, while everything else is rejected
+  if (pressedKey === "Backspace" || pressedKey === "Enter") {
+    return true;
   }
 
-  // Make sure the current guess word is solely letters and is no more than 5 letters long
-  if (/^[A-Za-z]$/.test(key) && currentGuessWord.length < 5) {
-    setCurrentGuessWord(currentGuessWord + key.toUpperCase());
+  // Apart from the foregoing, only letters will be accepted
+  if (/^[A-Za-z]$/.test(pressedKey)) {
+    return true;
   }
+
+  // The guess entry key is invalid
+  return false;
 }
 
 // Accept or reject the submitted guess after validating it
-export function validateGuessSubmit(key, currentGuessWord, currentTurn, wordleGuesses) {
-  // Is the user attempting to submit a guess word?
-  if (key === "Enter") {
-    // Is this the final turn?
-    if (currentTurn > 5) {
-      // We do not wish to continue the guess word submission
-      return false;
-    }
-
-    // Do not allow duplicate words
-    if (wordleGuesses.includes(currentGuessWord)) {
-      return false;
-    }
-
-    // Make sure the term is at least 5 characters long
-    if (currentGuessWord.length !== 5) {
-      return false;
-    }
-
-    // Allow and proceed because the given guess word is correct
-    return true;
+export function isSubmittedGuessValid(validKey, currentGuessWord, currentTurn, wordleGuesses) {
+  // Make sure the user is attempting to submit a new guess word
+  if (validKey !== "Enter") {
+    return false;
   }
+
+  // Is this the final turn?
+  if (currentTurn > 5) {
+    // We do not wish to continue the guess word submission
+    return false;
+  }
+
+  // Do not allow duplicate words
+  if (wordleGuesses.includes(currentGuessWord)) {
+    return false;
+  }
+
+  // Make sure the term is at least 5 characters long
+  if (currentGuessWord.length !== 5) {
+    return false;
+  }
+
+  // Allow and proceed because the given guess word is correct
+  return true;
 }
 
 // To avoid storing a complex state object that is difficult to mutate, we store a simple one

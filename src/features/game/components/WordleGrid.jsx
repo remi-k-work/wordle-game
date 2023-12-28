@@ -9,7 +9,7 @@ import CurrentGuess from "./CurrentGuess";
 import GuessRow from "./GuessRow";
 
 // game logic & slice
-import { deriveWordleGrid } from "../features/game/gameLogic";
+import { deriveWordleGrid } from "../gameLogic";
 
 export default function WordleGrid() {
   const { theSecretWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);

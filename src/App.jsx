@@ -5,8 +5,8 @@ import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 // components
-import WordleGrid from "./components/WordleGrid";
-import Keypad from "./features/keypad/Keypad";
+import WordleGrid from "./features/game/components/WordleGrid";
+import Keypad from "./features/keypad/components/Keypad";
 
 // game logic & slice
 import { fetchSolutions } from "./features/game/gameSlice";
