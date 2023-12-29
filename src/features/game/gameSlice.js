@@ -6,6 +6,7 @@ import { waait } from "../../js/helpers";
 
 // First, create the thunk
 export const fetchSolutions = createAsyncThunk("game/fetchSolutions", async function () {
+  // Obtain all of the game's solutions from an outside source
   await waait();
 
   const response = await fetch("/data/db.json");
@@ -18,11 +19,10 @@ export const fetchSolutions = createAsyncThunk("game/fetchSolutions", async func
 });
 
 const initialState = {
-  theSecretWord: "",
+  theSecretWord: "*",
   currentGuessWord: "",
   wordleGuesses: [],
   currentTurn: 0,
-  isCorrect: false,
   loading: "idle",
 };
 
@@ -54,12 +54,7 @@ export const gameSlice = createSlice({
     },
 
     // A new valid guess word was submitted by the user
-    guessWordSubmitted(state, action) {
-      // Do we have a winner?
-      if (state.theSecretWord === state.currentGuessWord) {
-        state.isCorrect = true;
-      }
-
+    guessWordSubmitted(state) {
       // Add the most recent guess word to the history
       state.wordleGuesses.push(state.currentGuessWord);
 
@@ -75,15 +70,16 @@ export const gameSlice = createSlice({
       state.loading = "pending";
     });
     builder.addCase(fetchSolutions.fulfilled, (state, action) => {
+      state.loading = "idle";
+
       // Destructure the payload
       const solutions = action.payload;
 
-      state.loading = "idle";
+      // Choose a random solution from the list and make it the secret word
       const randomSolution = solutions[Math.floor(Math.random() * solutions.length)].word;
-
       state.theSecretWord = randomSolution;
     });
-    builder.addCase(fetchSolutions.rejected, (state, action) => {
+    builder.addCase(fetchSolutions.rejected, (state) => {
       state.loading = "rejected";
     });
   },

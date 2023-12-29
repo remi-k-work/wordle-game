@@ -2,7 +2,7 @@
 import styles from "./CurrentGuess.module.css";
 
 // react
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 // redux stuff
 import { useSelector, useDispatch } from "react-redux";
@@ -11,8 +11,7 @@ import { useSelector, useDispatch } from "react-redux";
 import GuessTile from "./GuessTile";
 
 // game logic & slice
-import { isGuessKeyEntryValid, isSubmittedGuessValid } from "../gameLogic";
-import { guessWordChanged, guessWordSubmitted } from "../gameSlice";
+import { handleGuessKeyUp } from "../gameLogic";
 
 export default function CurrentGuess() {
   const { currentGuessWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);
@@ -23,15 +22,7 @@ export default function CurrentGuess() {
     function handleKeyUp(ev) {
       const pressedKey = ev.key;
 
-      if (isGuessKeyEntryValid(pressedKey)) {
-        // The user has updated the current guess word by tapping a valid key
-        dispatch(guessWordChanged(pressedKey));
-
-        if (isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses)) {
-          // A new valid guess word was submitted by the user
-          dispatch(guessWordSubmitted());
-        }
-      }
+      handleGuessKeyUp(pressedKey, currentGuessWord, currentTurn, wordleGuesses, dispatch);
     }
 
     window.addEventListener("keyup", handleKeyUp);

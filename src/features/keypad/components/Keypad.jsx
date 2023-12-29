@@ -11,39 +11,25 @@ import { useSelector, useDispatch } from "react-redux";
 import cn from "classnames";
 
 // keypad logic & slice
-import { fetchLetters, visualClueHasChanged } from "../keypadSlice";
+import { fetchLetters } from "../keypadSlice";
 
 // game logic & slice
-import { isGuessKeyEntryValid, isSubmittedGuessValid } from "../../game/gameLogic";
-import { guessWordChanged, guessWordSubmitted } from "../../game/gameSlice";
+import { handleGuessKeyUp } from "../../game/gameLogic";
 
 export default function Keypad() {
   const { letters, usedKeys, loading } = useSelector((store) => store.keypad);
-  const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);
+  const { currentGuessWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchLetters());
   }, []);
 
-  useEffect(() => {
-    // Because of the new guess submission, the visual clue on the keypad has changed
-    dispatch(visualClueHasChanged(theSecretWord, wordleGuesses));
-  }, [wordleGuesses]);
-
   // Handle the user's keystrokes on the keypad
   function handleKeypadClick(ev) {
     const pressedKey = ev.target.name;
 
-    if (isGuessKeyEntryValid(pressedKey)) {
-      // The user has updated the current guess word by tapping a valid key
-      dispatch(guessWordChanged(pressedKey));
-
-      if (isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses)) {
-        // A new valid guess word was submitted by the user
-        dispatch(guessWordSubmitted());
-      }
-    }
+    handleGuessKeyUp(pressedKey, currentGuessWord, currentTurn, wordleGuesses, dispatch);
   }
 
   if (loading === "pending") {

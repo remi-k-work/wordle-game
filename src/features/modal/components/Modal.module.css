@@ -11,30 +11,29 @@
 
 .modal dialog {
   background: rgb(201, 184, 197);
+  color: #333;
   border-start-start-radius: 0.5em;
   border-end-start-radius: 0.5em;
   border-start-end-radius: 0.5em;
   border-end-end-radius: 0.5em;
   padding-inline: 1em;
   padding-block: 0.5em;
-  text-align: center;
   margin-inline: auto;
   margin-block: auto;
+  text-align: center;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .modal dialog h1 {
   font-size: 1.2em;
-  padding: 20px 0;
-  border-bottom: 1px solid #eee;
-  margin: 0 0 30px 0;
-  color: #333;
+  padding-inline: 0;
+  padding-block: 0;
+  border-block-end: 1px solid #333;
+  margin-inline: 0;
+  margin-block: 0 1.25em;
 }
 
-.modal dialog .solution {
-  color: #ff004c;
-  font-weight: bold;
-  font-size: 0.8em;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.modal dialog button {
+  margin-inline: auto;
+  margin-block: 2em 0;
 }

@@ -2,28 +2,27 @@
 import styles from "./Modal.module.css";
 
 // redux stuff
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
-export default function Modal() {
-  const { theSecretWord, currentTurn, isCorrect } = useSelector((store) => store.game);
+// modal logic & slice
+import { closeModal } from "../modalSlice";
+
+export default function Modal({ title, content }) {
+  const dispatch = useDispatch();
 
   return (
     <aside className={styles["modal"]}>
       <dialog open>
-        {isCorrect && (
-          <article>
-            <h1>You Win!</h1>
-            <p className={styles["solution"]}>{theSecretWord}</p>
-            <p>You found the solution in {currentTurn} guesses 😄</p>
-          </article>
-        )}
-        {!isCorrect && (
-          <article>
-            <h1>Nevermind</h1>
-            <p className={styles["solution"]}>{theSecretWord}</p>
-            <p>Better luck next time 😄</p>
-          </article>
-        )}
+        <h1>{title}</h1>
+        {content}
+        <button
+          type="button"
+          onClick={() => {
+            dispatch(closeModal());
+          }}
+        >
+          Close
+        </button>
       </dialog>
     </aside>
   );

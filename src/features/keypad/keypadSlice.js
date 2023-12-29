@@ -9,6 +9,7 @@ import { waait } from "../../js/helpers";
 
 // First, create the thunk
 export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async function () {
+  // Get all the letters for this keypad from an outside source
   await waait();
 
   const response = await fetch("/data/db.json");
@@ -49,9 +50,14 @@ export const keypadSlice = createSlice({
     });
     builder.addCase(fetchLetters.fulfilled, (state, action) => {
       state.loading = "idle";
-      state.letters = action.payload;
+
+      // Destructure the payload
+      const letters = action.payload;
+
+      // Include only fetched letters in this keypad
+      state.letters = letters;
     });
-    builder.addCase(fetchLetters.rejected, (state, action) => {
+    builder.addCase(fetchLetters.rejected, (state) => {
       state.loading = "rejected";
     });
   },
