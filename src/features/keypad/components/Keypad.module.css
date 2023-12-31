@@ -1,16 +1,18 @@
 .keypad {
   inline-size: 100%;
   block-size: 100%;
-  display: grid;
+  display: flex;
+  flex-flow: row wrap;
   gap: 1em;
-
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
+  justify-content: center;
 }
 
 .keypad__key {
-  inline-size: 100%;
-  block-size: 100%;
+  flex: 0 1 4ch;
+}
+
+.keypad__key img {
+  inline-size: 4ch;
 }
 
 .keypad__key--grey {

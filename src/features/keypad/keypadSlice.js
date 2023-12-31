@@ -8,11 +8,13 @@ import { deriveUsedKeys } from "./keypadLogic";
 import { waait } from "../../js/helpers";
 
 // First, create the thunk
-export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async function () {
+export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async function (arg, thunkAPI) {
   // Get all the letters for this keypad from an outside source
   await waait();
 
-  const response = await fetch("/data/db-pl.json");
+  // Take the chosen language into consideration
+  const { language } = thunkAPI.getState().controlPanel;
+  const response = await fetch(`/data/db-${language}.json`);
   if (!response.ok) {
     throw new Error("Unable to obtain the letters.");
   }

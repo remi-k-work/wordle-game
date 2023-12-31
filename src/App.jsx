@@ -20,6 +20,7 @@ import { doWeHaveaWinner, isGameOver } from "./features/game/gameLogic";
 function App() {
   const { theSecretWord, wordleGuesses, currentTurn, loading } = useSelector((store) => store.game);
   const { isOpen } = useSelector((store) => store.modal);
+  const { language } = useSelector((store) => store.controlPanel);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -46,9 +47,9 @@ function App() {
       {isOpen &&
         isGameOver(currentTurn, theSecretWord, wordleGuesses) &&
         (doWeHaveaWinner(theSecretWord, wordleGuesses) ? (
-          <Modal title={"You Win!"} content={<YouWin />} />
+          <Modal title={language === "en" ? "You Win!" : "Wygrałeś!"} content={<YouWin />} />
         ) : (
-          <Modal title={"Nevermind"} content={<Nevermind />} />
+          <Modal title={language === "en" ? "Nevermind" : "Trudno"} content={<Nevermind />} />
         ))}
     </>
   );

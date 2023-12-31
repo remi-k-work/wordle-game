@@ -61,11 +61,13 @@ export function gameLoopStarted(pressedKey) {
 }
 
 // First, create the thunk
-export const fetchSolutions = createAsyncThunk("game/fetchSolutions", async function () {
+export const fetchSolutions = createAsyncThunk("game/fetchSolutions", async function (arg, thunkAPI) {
   // Obtain all of the game's solutions from an outside source
   await waait();
 
-  const response = await fetch("/data/db.json");
+  // Take the chosen language into consideration
+  const { language } = thunkAPI.getState().controlPanel;
+  const response = await fetch(`/data/db-${language}.json`);
   if (!response.ok) {
     throw new Error("Unable to obtain the solutions.");
   }

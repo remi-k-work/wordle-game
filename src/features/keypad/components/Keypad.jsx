@@ -19,6 +19,10 @@ import { fetchLetters } from "../keypadSlice";
 // game logic & slice
 import { gameLoopStarted } from "../../game/gameSlice";
 
+// assets
+import backspace from "../../../assets/backspace.svg";
+import enter from "../../../assets/enter.svg";
+
 export default function Keypad() {
   const { letters, usedKeys, loading } = useSelector((store) => store.keypad);
   const dispatch = useDispatch();
@@ -57,10 +61,10 @@ export default function Keypad() {
         );
       })}
       <button type="button" aria-disabled="true" tabIndex={-1} name="Backspace" className={styles["keypad__key"]}>
-        ⌫
+        <img src={backspace} width={24} alt="⌫" />
       </button>
       <button type="button" aria-disabled="true" tabIndex={-1} name="Enter" className={styles["keypad__key"]}>
-        ⏎
+        <img src={enter} width={24} alt="⏎" />
       </button>
     </section>
   );

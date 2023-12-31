@@ -5,4 +5,12 @@
   color: #666;
   padding-inline: 1em 1em;
   padding-block: 1em 1em;
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-status img {
+  inline-size: 4em;
 }

@@ -22,8 +22,6 @@ export default function CurrentGuess() {
     function handleKeyUp(ev) {
       const pressedKey = ev.key;
 
-      console.log(pressedKey);
-
       // After processing the user's input, we proceed to update the game's state/logic
       dispatch(gameLoopStarted(pressedKey));
     }

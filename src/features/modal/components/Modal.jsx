@@ -2,12 +2,13 @@
 import styles from "./Modal.module.css";
 
 // redux stuff
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 // modal logic & slice
 import { closeModal } from "../modalSlice";
 
 export default function Modal({ title, content }) {
+  const { language } = useSelector((store) => store.controlPanel);
   const dispatch = useDispatch();
 
   return (
@@ -21,7 +22,7 @@ export default function Modal({ title, content }) {
             dispatch(closeModal());
           }}
         >
-          Close
+          {language === "en" ? "Close" : "Zamknij"}
         </button>
       </dialog>
     </aside>

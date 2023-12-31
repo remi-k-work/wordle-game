@@ -2,23 +2,24 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  isOpen: false,
+  language: "en",
 };
 
 export const controlPanelSlice = createSlice({
   name: "controlPanel",
   initialState,
   reducers: {
-    openModal(state) {
-      state.isOpen = true;
-    },
-    closeModal(state) {
-      state.isOpen = false;
+    languageChanged(state, action) {
+      // Destructure the payload
+      const language = action.payload;
+
+      // Modify the game's language for the vocabulary (solutions) and user interface
+      state.language = language;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { openModal, closeModal } = controlPanelSlice.actions;
+export const { languageChanged } = controlPanelSlice.actions;
 
 export default controlPanelSlice.reducer;

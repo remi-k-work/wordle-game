@@ -6,7 +6,7 @@ export function isGuessKeyEntryValid(pressedKey) {
   }
 
   // Apart from the foregoing, only letters will be accepted
-  if (/^[A-Za-z]$/.test(pressedKey)) {
+  if (/^[a-zA-ZąĄćĆęĘłŁńŃóÓśŚźŹżŻ]$/u.test(pressedKey)) {
     return true;
   }
 
