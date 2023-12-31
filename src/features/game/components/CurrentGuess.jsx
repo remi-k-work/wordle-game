@@ -11,10 +11,10 @@ import { useSelector, useDispatch } from "react-redux";
 import GuessTile from "./GuessTile";
 
 // game logic & slice
-import { handleGuessKeyUp } from "../gameLogic";
+import { gameLoopStarted } from "../gameSlice";
 
 export default function CurrentGuess() {
-  const { currentGuessWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);
+  const { currentGuessWord } = useSelector((store) => store.game);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -22,7 +22,10 @@ export default function CurrentGuess() {
     function handleKeyUp(ev) {
       const pressedKey = ev.key;
 
-      handleGuessKeyUp(pressedKey, currentGuessWord, currentTurn, wordleGuesses, dispatch);
+      console.log(pressedKey);
+
+      // After processing the user's input, we proceed to update the game's state/logic
+      dispatch(gameLoopStarted(pressedKey));
     }
 
     window.addEventListener("keyup", handleKeyUp);

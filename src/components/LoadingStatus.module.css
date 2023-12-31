@@ -1,0 +1,8 @@
+.loading-status {
+  inline-size: 100%;
+  block-size: 100%;
+  background: #fff;
+  color: #666;
+  padding-inline: 1em 1em;
+  padding-block: 1em 1em;
+}

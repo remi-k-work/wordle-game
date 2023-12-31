@@ -1,20 +1,5 @@
-// game logic & slice
-import { guessWordChanged, guessWordSubmitted } from "./gameSlice";
-
-export function handleGuessKeyUp(pressedKey, currentGuessWord, currentTurn, wordleGuesses, dispatch) {
-  if (isGuessKeyEntryValid(pressedKey)) {
-    // The user has updated the current guess word by tapping a valid key
-    dispatch(guessWordChanged(pressedKey));
-
-    if (isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses)) {
-      // A new valid guess word was submitted by the user
-      dispatch(guessWordSubmitted());
-    }
-  }
-}
-
 // Validate the guess entry as the user types from the keyboard in real time
-function isGuessKeyEntryValid(pressedKey) {
+export function isGuessKeyEntryValid(pressedKey) {
   // Only legitimate and recognized keys are accepted, while everything else is rejected
   if (pressedKey === "Backspace" || pressedKey === "Enter") {
     return true;
@@ -30,7 +15,7 @@ function isGuessKeyEntryValid(pressedKey) {
 }
 
 // Accept or reject the submitted guess after validating it
-function isSubmittedGuessValid(validKey, currentGuessWord, currentTurn, wordleGuesses) {
+export function isSubmittedGuessValid(validKey, currentGuessWord, currentTurn, wordleGuesses) {
   // Make sure the user is attempting to submit a new guess word
   if (validKey !== "Enter") {
     return false;
@@ -57,15 +42,15 @@ function isSubmittedGuessValid(validKey, currentGuessWord, currentTurn, wordleGu
 }
 
 // Do we have a winner?
-export function doWeHaveaWinner(theSecretWord, currentGuessWord) {
+export function doWeHaveaWinner(theSecretWord, wordleGuesses) {
   // When the player correctly guesses the secret word, we have a winner
-  return theSecretWord === currentGuessWord;
+  return theSecretWord === wordleGuesses.at(-1);
 }
 
 // Is the game already over, or is it still going on?
-export function isGameOver(currentTurn, theSecretWord, currentGuessWord) {
+export function isGameOver(currentTurn, theSecretWord, wordleGuesses) {
   // When a player runs out of turns or wins the game, the game is ended
-  return currentTurn > 5 || doWeHaveaWinner(theSecretWord, currentGuessWord);
+  return currentTurn > 5 || doWeHaveaWinner(theSecretWord, wordleGuesses);
 }
 
 // To avoid storing a complex state object that is difficult to mutate, we store a simple one

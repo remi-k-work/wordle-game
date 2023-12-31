@@ -10,15 +10,17 @@ import { useSelector, useDispatch } from "react-redux";
 // other libraries
 import cn from "classnames";
 
+// components
+import LoadingStatus from "../../../components/LoadingStatus";
+
 // keypad logic & slice
 import { fetchLetters } from "../keypadSlice";
 
 // game logic & slice
-import { handleGuessKeyUp } from "../../game/gameLogic";
+import { gameLoopStarted } from "../../game/gameSlice";
 
 export default function Keypad() {
   const { letters, usedKeys, loading } = useSelector((store) => store.keypad);
-  const { currentGuessWord, wordleGuesses, currentTurn } = useSelector((store) => store.game);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -29,23 +31,12 @@ export default function Keypad() {
   function handleKeypadClick(ev) {
     const pressedKey = ev.target.name;
 
-    handleGuessKeyUp(pressedKey, currentGuessWord, currentTurn, wordleGuesses, dispatch);
+    // After processing the user's input, we proceed to update the game's state/logic
+    dispatch(gameLoopStarted(pressedKey));
   }
 
-  if (loading === "pending") {
-    return (
-      <section className={styles["keypad-status"]}>
-        <h3>Loading...</h3>
-      </section>
-    );
-  }
-
-  if (loading === "rejected") {
-    return (
-      <section className={styles["keypad-status"]}>
-        <h3>Oops! There was an error!</h3>
-      </section>
-    );
+  if (loading === "pending" || loading === "rejected") {
+    return <LoadingStatus loading={loading} />;
   }
 
   return (

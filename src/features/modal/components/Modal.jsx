@@ -2,7 +2,7 @@
 import styles from "./Modal.module.css";
 
 // redux stuff
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 
 // modal logic & slice
 import { closeModal } from "../modalSlice";

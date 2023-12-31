@@ -12,7 +12,7 @@ export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async functi
   // Get all the letters for this keypad from an outside source
   await waait();
 
-  const response = await fetch("/data/db.json");
+  const response = await fetch("/data/db-pl.json");
   if (!response.ok) {
     throw new Error("Unable to obtain the letters.");
   }
@@ -43,6 +43,10 @@ export const keypadSlice = createSlice({
         return { payload: { theSecretWord, wordleGuesses } };
       },
     },
+
+    keypadRestarted() {
+      return initialState;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchLetters.pending, (state) => {
@@ -64,6 +68,6 @@ export const keypadSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { visualClueHasChanged } = keypadSlice.actions;
+export const { visualClueHasChanged, keypadRestarted } = keypadSlice.actions;
 
 export default keypadSlice.reducer;

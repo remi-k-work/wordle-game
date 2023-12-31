@@ -1,0 +1,20 @@
+.control-panel {
+  display: flex;
+  gap: 1em;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.control-panel__turns {
+  background: none;
+  border-inline: 2px solid #fff;
+  border-block: 2px solid #fff;
+  padding-inline: 1em;
+  padding-block: 0.5em;
+  border-start-start-radius: 0.5em;
+  border-end-start-radius: 0.5em;
+  border-start-end-radius: 0.5em;
+  border-end-end-radius: 0.5em;
+  color: #fff;
+  font-weight: bold;
+}
