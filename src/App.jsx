@@ -60,6 +60,7 @@ function App() {
       )}
 
       {isOpen &&
+        !showHelp &&
         isGameOver(currentTurn, theSecretWord, wordleGuesses) &&
         (doWeHaveaWinner(theSecretWord, wordleGuesses) ? (
           <Modal title={language === "en" ? "You Win!" : "Wygrałeś!"} content={<YouWin />} />
