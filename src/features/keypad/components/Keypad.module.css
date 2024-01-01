@@ -13,6 +13,7 @@
 
 .keypad__key img {
   inline-size: 4ch;
+  pointer-events: none;
 }
 
 .keypad__key--grey {

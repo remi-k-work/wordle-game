@@ -10,7 +10,7 @@ import { waait } from "../../js/helpers";
 // First, create the thunk
 export const fetchLetters = createAsyncThunk("keypad/fetchLetters", async function (arg, thunkAPI) {
   // Get all the letters for this keypad from an outside source
-  await waait();
+  // await waait();
 
   // Take the chosen language into consideration
   const { language } = thunkAPI.getState().controlPanel;

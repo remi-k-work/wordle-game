@@ -11,7 +11,14 @@ import { gameRestarted, fetchSolutions } from "../../game/gameSlice";
 import { keypadRestarted } from "../../keypad/keypadSlice";
 
 // control panel logic & slice
-import { languageChanged } from "../controlPanelSlice";
+import { helpRequested, languageChanged } from "../controlPanelSlice";
+
+// modal logic & slice
+import { openModal } from "../../modal/modalSlice";
+
+// assets
+import turns from "../../../assets/turns.svg";
+import help from "../../../assets/help.svg";
 
 export default function ControlPanel() {
   const { theSecretWord, currentTurn } = useSelector((store) => store.game);
@@ -34,13 +41,18 @@ export default function ControlPanel() {
     dispatch(fetchSolutions());
   }
 
+  // Handle a help click
+  function handleHelpClick(ev) {
+    dispatch(helpRequested());
+    dispatch(openModal());
+  }
+
   return (
     <section className={styles["control-panel"]}>
-      {language === "en" ? (
-        <span className={styles["control-panel__turns"]}>Guesses: {currentTurn}</span>
-      ) : (
-        <span className={styles["control-panel__turns"]}>Odgadnięcia: {currentTurn}</span>
-      )}
+      <div className={styles["control-panel__turns"]}>
+        <img src={turns} width={24} alt="" />
+        {currentTurn}
+      </div>
       <label>
         {language === "en" ? (
           <>
@@ -60,7 +72,6 @@ export default function ControlPanel() {
           </>
         )}
       </label>
-      <span>{theSecretWord}</span>
       {language === "en" ? (
         <button type="button" onClick={handleNewGameClick}>
           New Game
@@ -70,6 +81,9 @@ export default function ControlPanel() {
           Nowa Gra
         </button>
       )}
+      <button type="button" onClick={handleHelpClick}>
+        <img src={help} width={24} alt="" />
+      </button>
     </section>
   );
 }

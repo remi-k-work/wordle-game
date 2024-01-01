@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   language: "en",
+  showHelp: false,
 };
 
 export const controlPanelSlice = createSlice({
@@ -16,10 +17,18 @@ export const controlPanelSlice = createSlice({
       // Modify the game's language for the vocabulary (solutions) and user interface
       state.language = language;
     },
+
+    helpRequested(state) {
+      state.showHelp = true;
+    },
+
+    helpClosed(state) {
+      state.showHelp = false;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { languageChanged } = controlPanelSlice.actions;
+export const { languageChanged, helpRequested, helpClosed } = controlPanelSlice.actions;
 
 export default controlPanelSlice.reducer;

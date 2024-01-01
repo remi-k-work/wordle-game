@@ -9,7 +9,7 @@
   z-index: 1;
 }
 
-.modal dialog {
+.modal > dialog {
   background: rgb(201, 184, 197);
   color: #333;
   border-start-start-radius: 0.5em;
@@ -24,7 +24,7 @@
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
 }
 
-.modal dialog h1 {
+.modal > dialog > h1 {
   font-size: 1.2em;
   padding-inline: 0;
   padding-block: 0;
@@ -33,7 +33,16 @@
   margin-block: 0 1.25em;
 }
 
-.modal dialog button {
+.modal > dialog > button {
   margin-inline: auto;
   margin-block: 2em 0;
+  display: flex;
+  gap: 1ch;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal > dialog > button > img {
+  inline-size: 2ch;
+  pointer-events: none;
 }
