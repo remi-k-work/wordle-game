@@ -49,5 +49,4 @@
 
 .modal > dialog > button > img {
   inline-size: 2ch;
-  pointer-events: none;
 }

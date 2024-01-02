@@ -23,10 +23,8 @@
 
 .control-panel__turns > img {
   inline-size: 3ch;
-  pointer-events: none;
 }
 
 .control-panel > button > img {
   inline-size: 3ch;
-  pointer-events: none;
 }
