@@ -29,7 +29,7 @@ const initialState = {
   loading: "idle",
 };
 
-export const keypadSlice = createSlice({
+const keypadSlice = createSlice({
   name: "keypad",
   initialState,
   reducers: {

@@ -5,7 +5,7 @@ const initialState = {
   isOpen: false,
 };
 
-export const modalSlice = createSlice({
+const modalSlice = createSlice({
   name: "modal",
   initialState,
   reducers: {

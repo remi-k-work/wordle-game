@@ -6,7 +6,7 @@ const initialState = {
   showHelp: false,
 };
 
-export const controlPanelSlice = createSlice({
+const controlPanelSlice = createSlice({
   name: "controlPanel",
   initialState,
   reducers: {

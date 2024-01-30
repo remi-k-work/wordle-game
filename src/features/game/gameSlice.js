@@ -84,7 +84,7 @@ const initialState = {
   loading: "idle",
 };
 
-export const gameSlice = createSlice({
+const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {

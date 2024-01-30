@@ -1,7 +1,7 @@
 // redux stuff
 import { configureStore } from "@reduxjs/toolkit";
 
-// all redux slices contain the specific data
+// all redux slices containing the specific data
 import gameReducer from "../features/game/gameSlice";
 import keypadReducer from "../features/keypad/keypadSlice";
 import modalReducer from "../features/modal/modalSlice";
