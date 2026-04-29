@@ -74,8 +74,15 @@ button {
   color: #fff;
   text-shadow: 1px 1px 1px #000;
   background: #1b1523;
-  background-image: linear-gradient(to top left, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) 30%, rgba(0, 0, 0, 0));
-  box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.6), inset -1px -1px 2px rgba(0, 0, 0, 0.6);
+  background-image: linear-gradient(
+    to top left,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0)
+  );
+  box-shadow:
+    inset 1px 1px 2px rgba(255, 255, 255, 0.6),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.6);
 }
 
 /*
@@ -89,22 +96,23 @@ https://stackoverflow.com/questions/17233804/how-to-prevent-sticky-hover-effects
 }
 
 button:active {
-  box-shadow: inset -1px -1px 2px rgba(255, 255, 255, 0.6), inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+  box-shadow:
+    inset -1px -1px 2px rgba(255, 255, 255, 0.6),
+    inset 1px 1px 2px rgba(0, 0, 0, 0.6);
 }
 
 #root {
   min-block-size: 100cqb;
-  display: flex;
-  padding-inline: 1em 1em;
-  padding-block: 1em 1em;
+  display: grid;
 }
 
 .main-grid {
-  min-block-size: 100%;
-  flex: 1;
+  min-block-size: 100cqb;
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: 1em;
+  padding-inline: 1em 1em;
+  padding-block: 1em 1em;
 }
 
 footer {
