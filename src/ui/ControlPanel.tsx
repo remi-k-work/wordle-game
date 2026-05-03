@@ -1,3 +1,4 @@
+// services, features, and other libraries
 import { useAtom, useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { gameStateAtom, restartGameAction } from "@/atoms/gameAtom";
 import { languageAtom } from "@/atoms/languageAtom";

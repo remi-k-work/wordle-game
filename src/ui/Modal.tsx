@@ -1,11 +1,17 @@
+// services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { languageAtom } from "@/atoms/languageAtom";
 import { closeModalAction } from "@/atoms/modalAtom";
+
+// assets
 import close from "@/assets/close.svg";
+
+// types
+import type { ReactNode } from "react";
 
 interface ModalProps {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function Modal({ title, children }: ModalProps) {

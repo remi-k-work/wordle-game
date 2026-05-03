@@ -16,9 +16,11 @@
     "@effect/experimental": "^0.60.0",
     "@effect/platform": "^0.96.1",
     "@effect/platform-browser": "^0.76.0",
+    "@tailwindcss/vite": "^4.2.4",
     "effect": "^3.21.2",
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "tailwindcss": "^4.2.4"
   },
   "devDependencies": {
     "@effect/language-service": "^0.85.1",
@@ -33,7 +35,6 @@
     "globals": "^17.5.0",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10",

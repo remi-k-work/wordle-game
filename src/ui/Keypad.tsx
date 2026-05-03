@@ -1,6 +1,6 @@
-import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
+// services, features, and other libraries
+import { useAtomValue, useAtomSet, Result } from "@effect-atom/atom-react";
 import { gameDataAtom, keypadStatusAtom, handleKeyAction } from "@/atoms/gameAtom";
-import { Result } from "@effect-atom/atom-react";
 
 // assets
 import backspace from "@/assets/backspace.svg";

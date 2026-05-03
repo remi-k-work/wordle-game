@@ -1,10 +1,14 @@
-import { Atom } from "@effect-atom/atom-react";
+// services, features, and other libraries
 import { Effect, Random } from "effect";
-import { GameState, GameStatus } from "@/domain/models";
+import { Atom } from "@effect-atom/atom-react";
 import { appRuntime } from "./runtime";
 import { languageAtom } from "./languageAtom";
 import { SolutionsService } from "@/services/SolutionsService";
 import { deriveWordleGrid, isGuessKeyEntryValid, isSubmittedGuessValid, doWeHaveAWinner, formatGuess } from "@/domain/game-logic";
+import { GameStatusEnum } from "@/domain/models";
+
+// types
+import type { GameState } from "@/domain/models";
 
 const initialGameState: GameState = {
   theSecretWord: "",
@@ -80,9 +84,9 @@ export const keypadStatusAtom = Atom.make((get) => {
  */
 export const gameStatusAtom = Atom.make((get) => {
   const { currentTurn, theSecretWord, wordleGuesses } = get(gameStateAtom);
-  if (doWeHaveAWinner(theSecretWord, wordleGuesses)) return GameStatus.Won();
-  if (currentTurn > 5) return GameStatus.Lost();
-  return GameStatus.Playing();
+  if (doWeHaveAWinner(theSecretWord, wordleGuesses)) return GameStatusEnum.Won();
+  if (currentTurn > 5) return GameStatusEnum.Lost();
+  return GameStatusEnum.Playing();
 });
 
 /**

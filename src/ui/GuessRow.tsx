@@ -1,7 +1,12 @@
+// services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
 import { gameStateAtom } from "@/atoms/gameAtom";
-import { Tile } from "@/domain/models";
+
+// components
 import GuessTile from "./GuessTile";
+
+// types
+import type { Tile } from "@/domain/models";
 
 interface GuessRowProps {
   wordleGrid: readonly (readonly Tile[])[];

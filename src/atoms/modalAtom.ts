@@ -1,5 +1,6 @@
-import { Atom } from "@effect-atom/atom-react";
+// services, features, and other libraries
 import { Effect } from "effect";
+import { Atom } from "@effect-atom/atom-react";
 
 export const isModalOpenAtom = Atom.make(false);
 export const modalTypeAtom = Atom.make<"help" | "status" | null>(null);

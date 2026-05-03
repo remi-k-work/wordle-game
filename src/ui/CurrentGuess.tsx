@@ -1,6 +1,11 @@
+// react
 import { useEffect } from "react";
+
+// services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { gameStateAtom, handleKeyAction } from "@/atoms/gameAtom";
+
+// components
 import GuessTile from "./GuessTile";
 
 export default function CurrentGuess() {

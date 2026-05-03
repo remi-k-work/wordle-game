@@ -1,4 +1,5 @@
-import { Color } from "@/domain/models";
+// types
+import type { Color } from "@/domain/models";
 
 interface GuessTileProps {
   tileKey: string;

@@ -1,5 +1,8 @@
+// services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
 import { gameStateAtom, gridAtom } from "@/atoms/gameAtom";
+
+// components
 import CurrentGuess from "./CurrentGuess";
 import GuessRow from "./GuessRow";
 

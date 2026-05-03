@@ -1,5 +1,8 @@
+// services, features, and other libraries
 import { Array } from "effect";
-import { Tile, Color } from "./models";
+
+// types
+import type { Tile, Color } from "./models";
 
 export const isGuessKeyEntryValid = (pressedKey: string): boolean => {
   if (pressedKey === "Backspace" || pressedKey === "Enter") {

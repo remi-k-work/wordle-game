@@ -1,7 +1,11 @@
+// services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
 import { languageAtom } from "@/atoms/languageAtom";
+
+// assets
 import spinner from "@/assets/spinner.svg";
 
+// types
 interface LoadingStatusProps {
   status: "pending" | "rejected";
 }

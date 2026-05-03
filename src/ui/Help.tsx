@@ -1,5 +1,8 @@
+// services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
 import { languageAtom } from "@/atoms/languageAtom";
+
+// assets
 import logo from "@/assets/opengraph-image.jpg";
 
 export default function Help() {
