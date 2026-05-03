@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect-atom/atom-react";
-import { languageAtom } from "../atoms/languageAtom";
-import spinner from "../assets/spinner.svg";
+import { languageAtom } from "@/atoms/languageAtom";
+import spinner from "@/assets/spinner.svg";
 
 interface LoadingStatusProps {
   status: "pending" | "rejected";
@@ -11,20 +11,16 @@ export default function LoadingStatus({ status }: LoadingStatusProps) {
 
   if (status === "pending") {
     return (
-      <section className="w-full h-full bg-white text-[#666] p-4 flex gap-4 justify-center items-center">
+      <section className="flex h-full w-full items-center justify-center gap-4 bg-white p-4 text-[#666]">
         <img src={spinner} className="w-16" alt="Loading..." />
-        <h3 className="text-xl font-bold">
-          {language === "en" ? "Loading..." : "Ładuję, proszę czekać..."}
-        </h3>
+        <h3 className="text-xl font-bold">{language === "en" ? "Loading..." : "Ładuję, proszę czekać..."}</h3>
       </section>
     );
   }
 
   return (
-    <section className="w-full h-full bg-white text-[#666] p-4 flex gap-4 justify-center items-center">
-      <h3 className="text-xl font-bold">
-        {language === "en" ? "Oops! There was an error!" : "Uwaga! Wystąpił błąd aplikacji!"}
-      </h3>
+    <section className="flex h-full w-full items-center justify-center gap-4 bg-white p-4 text-[#666]">
+      <h3 className="text-xl font-bold">{language === "en" ? "Oops! There was an error!" : "Uwaga! Wystąpił błąd aplikacji!"}</h3>
     </section>
   );
 }

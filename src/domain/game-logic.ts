@@ -1,4 +1,4 @@
-import * as Arr from "effect/Array";
+import { Array } from "effect";
 import { Tile, Color } from "./models";
 
 export const isGuessKeyEntryValid = (pressedKey: string): boolean => {
@@ -8,12 +8,7 @@ export const isGuessKeyEntryValid = (pressedKey: string): boolean => {
   return /^[a-zA-ZąĄćĆęĘłŁńŃóÓśŚźŹżŻ]$/u.test(pressedKey);
 };
 
-export const isSubmittedGuessValid = (
-  validKey: string,
-  currentGuessWord: string,
-  currentTurn: number,
-  wordleGuesses: readonly string[]
-): boolean => {
+export const isSubmittedGuessValid = (validKey: string, currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[]): boolean => {
   if (validKey !== "Enter") return false;
   if (currentTurn > 5) return false;
   if (wordleGuesses.includes(currentGuessWord)) return false;
@@ -26,11 +21,7 @@ export const doWeHaveAWinner = (theSecretWord: string, wordleGuesses: readonly s
   return theSecretWord === lastGuess;
 };
 
-export const isGameOver = (
-  currentTurn: number,
-  theSecretWord: string,
-  wordleGuesses: readonly string[]
-): boolean => {
+export const isGameOver = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]): boolean => {
   return currentTurn > 5 || doWeHaveAWinner(theSecretWord, wordleGuesses);
 };
 
@@ -50,7 +41,7 @@ export const formatGuess = (theSecretWord: string, wordleGuess: string): readonl
   });
 
   // Yellow pass
-  formattedGuess.forEach((tile, index) => {
+  formattedGuess.forEach((tile) => {
     if (tile.color !== "green" && theSecretWordArray.includes(tile.tileKey)) {
       tile.color = "yellow";
       theSecretWordArray[theSecretWordArray.indexOf(tile.tileKey)] = "";
@@ -60,18 +51,15 @@ export const formatGuess = (theSecretWord: string, wordleGuess: string): readonl
   return formattedGuess;
 };
 
-export const deriveWordleGrid = (
-  theSecretWord: string,
-  wordleGuesses: readonly string[]
-): readonly (readonly Tile[])[] => {
+export const deriveWordleGrid = (theSecretWord: string, wordleGuesses: readonly string[]): readonly (readonly Tile[])[] => {
   const gridRows = 6;
   const gridCols = 5;
 
-  return Arr.makeBy(gridRows, (rowIndex) => {
+  return Array.makeBy(gridRows, (rowIndex) => {
     const guess = wordleGuesses[rowIndex];
     if (guess) {
       return formatGuess(theSecretWord, guess);
     }
-    return Arr.makeBy(gridCols, () => ({ tileKey: "", color: "" as Color }));
+    return Array.makeBy(gridCols, () => ({ tileKey: "", color: "" as Color }));
   });
 };

@@ -1,4 +1,4 @@
-import { Color } from "../domain/models";
+import { Color } from "@/domain/models";
 
 interface GuessTileProps {
   tileKey: string;
@@ -16,12 +16,10 @@ export default function GuessTile({ tileKey, color, bounceAnim = false }: GuessT
 
   return (
     <div
-      className={`w-full h-full border-2 flex justify-center items-center ${
-        colorClasses[color]
-      } ${bounceAnim ? "animate-bounce" : ""}`}
+      className={`flex h-full w-full items-center justify-center border-2 ${colorClasses[color]} ${bounceAnim ? "animate-bounce" : ""}`}
       style={{ containerType: "size" }}
     >
-      <div className="text-[80cqb] uppercase font-bold">{tileKey}</div>
+      <div className="text-[80cqb] font-bold uppercase">{tileKey}</div>
     </div>
   );
 }

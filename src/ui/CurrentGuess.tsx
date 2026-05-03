@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { gameStateAtom, handleKeyAction } from "../atoms/gameAtom";
+import { gameStateAtom, handleKeyAction } from "@/atoms/gameAtom";
 import GuessTile from "./GuessTile";
 
 export default function CurrentGuess() {
@@ -23,14 +23,9 @@ export default function CurrentGuess() {
   const allTiles = [...tiles, ...emptyTiles];
 
   return (
-    <div className="grid gap-4 grid-cols-5 grid-rows-1">
+    <div className="grid grid-cols-5 grid-rows-1 gap-4">
       {allTiles.map((tileKey, tileIndex) => (
-        <GuessTile
-          key={tileIndex}
-          tileKey={tileKey}
-          color=""
-          bounceAnim={tileKey !== "" && tileIndex === tiles.length - 1}
-        />
+        <GuessTile key={tileIndex} tileKey={tileKey} color="" bounceAnim={tileKey !== "" && tileIndex === tiles.length - 1} />
       ))}
     </div>
   );

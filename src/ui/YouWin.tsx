@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect-atom/atom-react";
-import { gameStateAtom } from "../atoms/gameAtom";
-import { languageAtom } from "../atoms/languageAtom";
+import { gameStateAtom } from "@/atoms/gameAtom";
+import { languageAtom } from "@/atoms/languageAtom";
 
 export default function YouWin() {
   const { theSecretWord, currentTurn } = useAtomValue(gameStateAtom);
@@ -8,14 +8,8 @@ export default function YouWin() {
 
   return (
     <article>
-      <p className="text-[#ff004c] font-bold text-[0.8em] uppercase tracking-[1px] mb-2">
-        {theSecretWord}
-      </p>
-      {language === "en" ? (
-        <p>You found the solution in {currentTurn} guesses 😄</p>
-      ) : (
-        <p>Udało Ci się znaleźć rozwiązanie w {currentTurn} odgadnięciach 😄</p>
-      )}
+      <p className="mb-2 text-[0.8em] font-bold tracking-[1px] text-[#ff004c] uppercase">{theSecretWord}</p>
+      {language === "en" ? <p>You found the solution in {currentTurn} guesses 😄</p> : <p>Udało Ci się znaleźć rozwiązanie w {currentTurn} odgadnięciach 😄</p>}
     </article>
   );
 }

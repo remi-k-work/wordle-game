@@ -1,6 +1,6 @@
 import { useAtomValue } from "@effect-atom/atom-react";
-import { gameStateAtom } from "../atoms/gameAtom";
-import { Tile } from "../domain/models";
+import { gameStateAtom } from "@/atoms/gameAtom";
+import { Tile } from "@/domain/models";
 import GuessTile from "./GuessTile";
 
 interface GuessRowProps {
@@ -13,15 +13,11 @@ export default function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const isPreviousTurn = rowIndex === currentTurn - 1;
 
   return (
-    <div className="grid gap-4 grid-cols-5 grid-rows-1">
+    <div className="grid grid-cols-5 grid-rows-1 gap-4">
       {wordleGrid[rowIndex].map((guessTile, tileIndex) => {
         const delay = isPreviousTurn ? `${tileIndex * 0.2}s` : "0s";
         return (
-          <div
-            key={tileIndex}
-            className={isPreviousTurn ? "animate-flip" : ""}
-            style={{ animationDelay: delay }}
-          >
+          <div key={tileIndex} className={isPreviousTurn ? "animate-flip" : ""} style={{ animationDelay: delay }}>
             <GuessTile {...guessTile} />
           </div>
         );

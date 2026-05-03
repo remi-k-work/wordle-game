@@ -1,6 +1,8 @@
-import { Atom } from "@effect-atom/atom";
-import * as Layer from "effect/Layer";
-import { SolutionsService } from "../services/SolutionsService";
+// services, features, and other libraries
+import { Layer, Logger } from "effect";
+import { Atom } from "@effect-atom/atom-react";
+import { SolutionsService } from "@/services/SolutionsService";
 
-export const appLayer = SolutionsService.Default;
-export const appRuntime = Atom.runtime(appLayer);
+const MainLayer = Layer.mergeAll(Logger.pretty, SolutionsService.Default);
+
+export const appRuntime = Atom.runtime(MainLayer);

@@ -1,20 +1,17 @@
-import * as Effect from "effect/Effect";
-import { Language, GameData } from "../domain/models";
+// services, features, and other libraries
+import { Effect, flow } from "effect";
+import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
+import { Language, GameData } from "@/domain/models";
 
 export class SolutionsService extends Effect.Service<SolutionsService>()("SolutionsService", {
-  effect: Effect.gen(function*() {
-    return {
-      fetchGameData: (language: Language) =>
-        Effect.gen(function*() {
-          const response = yield* Effect.tryPromise(() =>
-            fetch(`/data/db-${language}.json`)
-          );
-          if (!response.ok) {
-            return yield* Effect.fail(new Error("Unable to obtain the game data."));
-          }
-          const data = yield* Effect.tryPromise(() => response.json());
-          return data as GameData;
-        }),
-    };
+  dependencies: [FetchHttpClient.layer],
+
+  effect: Effect.gen(function* () {
+    const baseClient = yield* HttpClient.HttpClient.pipe(Effect.map(HttpClient.filterStatusOk));
+    const client = baseClient.pipe(HttpClient.mapRequest(flow(HttpClientRequest.prependUrl("/data/"), HttpClientRequest.acceptJson)));
+
+    const fetchGameData = (language: Language) => client.get(`db-${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(GameData)));
+
+    return { fetchGameData } as const;
   }),
 }) {}

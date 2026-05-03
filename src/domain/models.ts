@@ -1,5 +1,4 @@
-import * as Schema from "effect/Schema";
-import * as Data from "effect/Data";
+import { Data, Schema } from "effect";
 
 export const Language = Schema.Literal("en", "pl");
 export type Language = typeof Language.Type;
@@ -24,12 +23,13 @@ export const GameData = Schema.Struct({
 });
 export type GameData = typeof GameData.Type;
 
-export const GameStatus = Data.TaggedEnum<{
-  Playing: {};
-  Won: {};
-  Lost: {};
-}>();
-export type GameStatus = Data.TaggedEnum.Infer<typeof GameStatus>;
+export type GameStatus = Data.TaggedEnum<{
+  Playing: object;
+  Won: object;
+  Lost: object;
+}>;
+
+export const GameStatus = Data.taggedEnum<GameStatus>();
 
 export interface GameState {
   readonly theSecretWord: string;

@@ -1,11 +1,11 @@
 import { useAtom, useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { gameStateAtom, restartGameAction } from "../atoms/gameAtom";
-import { languageAtom } from "../atoms/languageAtom";
-import { openModalAction } from "../atoms/modalAtom";
+import { gameStateAtom, restartGameAction } from "@/atoms/gameAtom";
+import { languageAtom } from "@/atoms/languageAtom";
+import { openModalAction } from "@/atoms/modalAtom";
 
 // assets
-import turns from "../assets/turns.svg";
-import help from "../assets/help.svg";
+import turns from "@/assets/turns.svg";
+import help from "@/assets/help.svg";
 
 export default function ControlPanel() {
   const { currentTurn } = useAtomValue(gameStateAtom);
@@ -31,8 +31,8 @@ export default function ControlPanel() {
   }
 
   return (
-    <section className="flex gap-4 justify-evenly items-center">
-      <div className="bg-none border-2 border-white px-2 py-1 rounded-lg flex gap-2 justify-center items-center">
+    <section className="flex items-center justify-evenly gap-4">
+      <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-none px-2 py-1">
         <img src={turns} className="w-6" alt="" />
         {currentTurn}
       </div>
@@ -40,27 +40,25 @@ export default function ControlPanel() {
         {language === "en" ? (
           <>
             <small className="block">Language</small>
-            <select
-              name="language"
-              className="bg-transparent border-none text-white cursor-pointer"
-              value={language}
-              onChange={handleLanguageChange}
-            >
-              <option value={"en"} className="bg-[#1b1523]">English</option>
-              <option value={"pl"} className="bg-[#1b1523]">Polish</option>
+            <select name="language" className="cursor-pointer border-none bg-transparent text-white" value={language} onChange={handleLanguageChange}>
+              <option value={"en"} className="bg-[#1b1523]">
+                English
+              </option>
+              <option value={"pl"} className="bg-[#1b1523]">
+                Polish
+              </option>
             </select>
           </>
         ) : (
           <>
             <small className="block">Język</small>
-            <select
-              name="language"
-              className="bg-transparent border-none text-white cursor-pointer"
-              value={language}
-              onChange={handleLanguageChange}
-            >
-              <option value={"en"} className="bg-[#1b1523]">Angielski</option>
-              <option value={"pl"} className="bg-[#1b1523]">Polski</option>
+            <select name="language" className="cursor-pointer border-none bg-transparent text-white" value={language} onChange={handleLanguageChange}>
+              <option value={"en"} className="bg-[#1b1523]">
+                Angielski
+              </option>
+              <option value={"pl"} className="bg-[#1b1523]">
+                Polski
+              </option>
             </select>
           </>
         )}
