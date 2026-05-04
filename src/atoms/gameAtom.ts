@@ -8,14 +8,14 @@ import { deriveWordleGrid, isGuessKeyEntryValid, isSubmittedGuessValid, doWeHave
 import { GameStatusEnum } from "@/domain/models";
 
 // types
-import type { GameState } from "@/domain/models";
+import type { Color, GameState } from "@/domain/models";
 
-const initialGameState: GameState = {
+const initialGameState = {
   theSecretWord: "",
   currentGuessWord: "",
   wordleGuesses: [],
   currentTurn: 0,
-};
+} as const satisfies GameState;
 
 /**
  * Base writable atom for game state.
@@ -37,10 +37,7 @@ export const gameDataAtom = appRuntime.atom(
     const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
     const randomSolution = solutions[randomIndex].word.toUpperCase();
 
-    yield* Atom.set(gameStateAtom, {
-      ...initialGameState,
-      theSecretWord: randomSolution,
-    });
+    yield* Atom.set(gameStateAtom, { ...initialGameState, theSecretWord: randomSolution });
 
     return data;
   })
@@ -60,7 +57,7 @@ export const gridAtom = Atom.make((get) => {
  */
 export const keypadStatusAtom = Atom.make((get) => {
   const { theSecretWord, wordleGuesses } = get(gameStateAtom);
-  const status: Record<string, string> = {};
+  const status: Record<string, Color> = {};
 
   for (const guess of wordleGuesses) {
     const formatted = formatGuess(theSecretWord, guess);
@@ -99,7 +96,7 @@ export const isWinnerAtom = Atom.make((get) => get(gameStatusAtom)._tag === "Won
 /**
  * Action to handle all key presses (letters, Backspace, Enter).
  */
-export const handleKeyAction = Atom.fn((key: string, get) =>
+export const handleKeyAction = Atom.fn((key: string) =>
   Effect.gen(function* () {
     const isFinished = yield* Atom.get(isGameFinishedAtom);
     if (isFinished || !isGuessKeyEntryValid(key)) return;
@@ -138,4 +135,4 @@ export const handleKeyAction = Atom.fn((key: string, get) =>
 /**
  * Action to restart the game by refreshing the data atom.
  */
-export const restartGameAction = Atom.fn((_, get) => Atom.refresh(gameDataAtom));
+export const restartGameAction = Atom.fn(() => Atom.refresh(gameDataAtom));

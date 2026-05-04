@@ -17,9 +17,11 @@
     "@effect/platform": "^0.96.1",
     "@effect/platform-browser": "^0.76.0",
     "@tailwindcss/vite": "^4.2.4",
+    "clsx": "^2.1.1",
     "effect": "^3.21.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {

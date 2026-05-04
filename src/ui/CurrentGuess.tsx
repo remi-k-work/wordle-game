@@ -8,11 +8,15 @@ import { gameStateAtom, handleKeyAction } from "@/atoms/gameAtom";
 // components
 import GuessTile from "./GuessTile";
 
+// types
+import type { Color, Tile } from "@/domain/models";
+
 export default function CurrentGuess() {
   const { currentGuessWord } = useAtomValue(gameStateAtom);
   const handleKey = useAtomSet(handleKeyAction);
 
   useEffect(() => {
+    // Handle the keyboard input one key at a time
     function handleKeyUp(ev: KeyboardEvent) {
       handleKey(ev.key);
     }
@@ -23,14 +27,14 @@ export default function CurrentGuess() {
     };
   }, [handleKey]);
 
-  const tiles = [...currentGuessWord];
-  const emptyTiles = Array(5 - tiles.length).fill("");
-  const allTiles = [...tiles, ...emptyTiles];
+  const currentGuessTiles = [...currentGuessWord].map((tileKey) => ({ tileKey, color: "" as Color }));
+  const remainingEmptyTiles = Array<Tile>(5 - currentGuessTiles.length).fill({ tileKey: "", color: "" as Color });
+  const finalGuessTiles = [...currentGuessTiles, ...remainingEmptyTiles];
 
   return (
     <div className="grid grid-cols-5 grid-rows-1 gap-4">
-      {allTiles.map((tileKey, tileIndex) => (
-        <GuessTile key={tileIndex} tileKey={tileKey} color="" bounceAnim={tileKey !== "" && tileIndex === tiles.length - 1} />
+      {finalGuessTiles.map((tile, tileIndex) => (
+        <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentGuessTiles.length - 1} />
       ))}
     </div>
   );

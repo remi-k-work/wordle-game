@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect-atom/atom-react";
 import { gameStateAtom } from "@/atoms/gameAtom";
 
@@ -6,27 +7,36 @@ import { gameStateAtom } from "@/atoms/gameAtom";
 import GuessTile from "./GuessTile";
 
 // types
-import type { Tile } from "@/domain/models";
+import type { WordleGrid } from "@/domain/models";
 
 interface GuessRowProps {
-  wordleGrid: readonly (readonly Tile[])[];
+  wordleGrid: WordleGrid;
   rowIndex: number;
 }
 
 export default function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const { currentTurn } = useAtomValue(gameStateAtom);
-  const isPreviousTurn = rowIndex === currentTurn - 1;
+  const isCurrentTurn = rowIndex === currentTurn - 1;
 
   return (
-    <div className="grid grid-cols-5 grid-rows-1 gap-4">
-      {wordleGrid[rowIndex].map((guessTile, tileIndex) => {
-        const delay = isPreviousTurn ? `${tileIndex * 0.2}s` : "0s";
-        return (
-          <div key={tileIndex} className={isPreviousTurn ? "animate-flip" : ""} style={{ animationDelay: delay }}>
-            <GuessTile {...guessTile} />
-          </div>
-        );
-      })}
+    <div
+      className={cn(
+        "grid grid-cols-5 grid-rows-1 gap-4",
+        isCurrentTurn && [
+          // Reset backgrounds/borders for children before animation fully executes
+          "[&>div]:border-[#666] [&>div]:bg-transparent",
+          // Apply staggered animation delays
+          "[&>div:nth-child(1)]:animate-flip [&>div:nth-child(1)]:[animation-delay:0s]",
+          "[&>div:nth-child(2)]:animate-flip [&>div:nth-child(2)]:[animation-delay:0.2s]",
+          "[&>div:nth-child(3)]:animate-flip [&>div:nth-child(3)]:[animation-delay:0.4s]",
+          "[&>div:nth-child(4)]:animate-flip [&>div:nth-child(4)]:[animation-delay:0.6s]",
+          "[&>div:nth-child(5)]:animate-flip [&>div:nth-child(5)]:[animation-delay:0.8s]",
+        ]
+      )}
+    >
+      {wordleGrid[rowIndex].map((tile, tileIndex) => (
+        <GuessTile key={tileIndex} tile={tile} />
+      ))}
     </div>
   );
 }

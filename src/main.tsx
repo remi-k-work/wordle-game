@@ -11,5 +11,5 @@ createRoot(document.getElementById("root")!).render(
     <RegistryProvider>
       <App />
     </RegistryProvider>
-  </StrictMode>,
+  </StrictMode>
 );

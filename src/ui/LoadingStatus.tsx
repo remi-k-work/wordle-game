@@ -15,16 +15,18 @@ export default function LoadingStatus({ status }: LoadingStatusProps) {
 
   if (status === "pending") {
     return (
-      <section className="flex h-full w-full items-center justify-center gap-4 bg-white p-4 text-[#666]">
-        <img src={spinner} className="w-16" alt="Loading..." />
-        <h3 className="text-xl font-bold">{language === "en" ? "Loading..." : "Ładuję, proszę czekać..."}</h3>
-      </section>
+      <article className="grid place-items-center bg-white p-4 text-[#666]">
+        <h1 className="flex flex-col items-center gap-4 text-4xl">
+          <img src={spinner} className="w-32" alt="Loading..." />
+          {language === "en" ? "Loading..." : "Ładuję, proszę czekać..."}
+        </h1>
+      </article>
     );
   }
 
   return (
-    <section className="flex h-full w-full items-center justify-center gap-4 bg-white p-4 text-[#666]">
-      <h3 className="text-xl font-bold">{language === "en" ? "Oops! There was an error!" : "Uwaga! Wystąpił błąd aplikacji!"}</h3>
-    </section>
+    <article className="grid place-items-center bg-white p-4 text-[#666]">
+      <h1 className="text-4xl">{language === "en" ? "Oops! There was an error!" : "Uwaga! Wystąpił błąd aplikacji!"}</h1>
+    </article>
   );
 }

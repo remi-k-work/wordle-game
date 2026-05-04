@@ -1,26 +1,28 @@
+// services, features, and other libraries
+import { cn } from "@/lib/utils";
+
 // types
-import type { Color } from "@/domain/models";
+import type { Color, Tile } from "@/domain/models";
 
 interface GuessTileProps {
-  tileKey: string;
-  color: Color;
+  tile: Tile;
   bounceAnim?: boolean;
 }
 
-export default function GuessTile({ tileKey, color, bounceAnim = false }: GuessTileProps) {
-  const colorClasses = {
-    grey: "bg-[#a1a1a1] border-[#a1a1a1] [--_background:#a1a1a1] [--_border-color:#a1a1a1]",
-    green: "bg-[#5ac85a] border-[#5ac85a] [--_background:#5ac85a] [--_border-color:#5ac85a]",
-    yellow: "bg-[#e2cc68] border-[#e2cc68] [--_background:#e2cc68] [--_border-color:#e2cc68]",
-    "": "bg-transparent border-[#666]",
-  };
+// constants
+const COLOR_MAP = {
+  grey: "[--_background:#a1a1a1] [--_border-color:#a1a1a1] bg-(--_background) border-(--_border-color)",
+  green: "[--_background:#5ac85a] [--_border-color:#5ac85a] bg-(--_background) border-(--_border-color)",
+  yellow: "[--_background:#e2cc68] [--_border-color:#e2cc68] bg-(--_background) border-(--_border-color)",
+  "": "[--_background:transparent] [--_border-color:#666] bg-(--_background) border-(--_border-color)",
+} as const satisfies Record<Color, string>;
 
+export default function GuessTile({ tile: { tileKey, color }, bounceAnim = false }: GuessTileProps) {
   return (
     <div
-      className={`flex h-full w-full items-center justify-center border-2 ${colorClasses[color]} ${bounceAnim ? "animate-bounce" : ""}`}
-      style={{ containerType: "size" }}
+      className={cn("flex items-center justify-center border-2 border-[#666] [container:tile/size]", color && COLOR_MAP[color], bounceAnim && "animate-bounce")}
     >
-      <div className="text-[80cqb] font-bold uppercase">{tileKey}</div>
+      <span className="text-[70cqb]">{tileKey}</span>
     </div>
   );
 }
