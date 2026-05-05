@@ -1,15 +1,13 @@
 // services, features, and other libraries
 import { useAtom, useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { gameStateAtom, restartGameAction } from "@/atoms/gameAtom";
-import { languageAtom } from "@/atoms/languageAtom";
-import { openModalAction } from "@/atoms/modalAtom";
+import { currentTurnAtom, languageAtom, openModalAction, restartGameAction } from "@/atoms";
 
 // assets
 import turns from "@/assets/turns.svg";
 import help from "@/assets/help.svg";
 
 export default function ControlPanel() {
-  const { currentTurn } = useAtomValue(gameStateAtom);
+  const currentTurn = useAtomValue(currentTurnAtom);
   const [language, setLanguage] = useAtom(languageAtom);
   const restartGame = useAtomSet(restartGameAction);
   const openModal = useAtomSet(openModalAction);
@@ -18,12 +16,12 @@ export default function ControlPanel() {
   function handleLanguageChange(ev: React.ChangeEvent<HTMLSelectElement>) {
     const newLanguage = ev.target.value as "en" | "pl";
     setLanguage(newLanguage);
-    restartGame(undefined);
+    restartGame();
   }
 
   // Handle a new game click
   function handleNewGameClick() {
-    restartGame(undefined);
+    restartGame();
   }
 
   // Handle a help click

@@ -55,6 +55,7 @@ body {
   color: #fff;
   min-block-size: 100vh;
   min-block-size: 100svh;
+  min-block-size: 100dvh;
   margin-inline: 0 0;
   margin-block: 0 0;
   padding-inline: 0 0;
@@ -65,6 +66,7 @@ body {
   display: grid;
   min-block-size: 100vh;
   min-block-size: 100svh;
+  min-block-size: 100dvh;
 }
 
 button {

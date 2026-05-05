@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
-import { gameStateAtom } from "@/atoms/gameAtom";
-import { languageAtom } from "@/atoms/languageAtom";
+import { currentTurnAtom, languageAtom, theSecretWordAtom } from "@/atoms";
 
 export default function YouWin() {
-  const { theSecretWord, currentTurn } = useAtomValue(gameStateAtom);
+  const theSecretWord = useAtomValue(theSecretWordAtom);
+  const currentTurn = useAtomValue(currentTurnAtom);
   const language = useAtomValue(languageAtom);
 
   return (

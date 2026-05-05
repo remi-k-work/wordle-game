@@ -1,10 +1,9 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
-import { gameStateAtom } from "@/atoms/gameAtom";
-import { languageAtom } from "@/atoms/languageAtom";
+import { languageAtom, theSecretWordAtom } from "@/atoms";
 
 export default function Nevermind() {
-  const { theSecretWord } = useAtomValue(gameStateAtom);
+  const theSecretWord = useAtomValue(theSecretWordAtom);
   const language = useAtomValue(languageAtom);
 
   return (

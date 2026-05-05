@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomSet, Result } from "@effect-atom/atom-react";
-import { gameDataAtom, keypadStatusAtom, handleKeyAction } from "@/atoms/gameAtom";
+import { gameDataAtom, keypadStatusAtom, handleKeyAction } from "@/atoms";
 
 // components
 import LoadingStatus from "@/ui/LoadingStatus";

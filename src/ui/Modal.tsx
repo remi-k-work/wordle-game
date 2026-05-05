@@ -1,7 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { languageAtom } from "@/atoms/languageAtom";
-import { closeModalAction } from "@/atoms/modalAtom";
+import { closeModalAction, languageAtom } from "@/atoms";
 
 // assets
 import close from "@/assets/close.svg";

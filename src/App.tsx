@@ -1,10 +1,7 @@
 // services, features, and other libraries
 import { useEffect } from "react";
-import { useAtomValue, useAtomSet, useAtomMount } from "@effect-atom/atom-react";
-import { gameDataAtom, isGameFinishedAtom, isWinnerAtom } from "./atoms/gameAtom";
-import { isModalOpenAtom, modalTypeAtom, openModalAction } from "./atoms/modalAtom";
-import { languageAtom } from "./atoms/languageAtom";
-import { Result } from "@effect-atom/atom-react";
+import { useAtomValue, useAtomSet, useAtomMount, Result } from "@effect-atom/atom-react";
+import { gameDataAtom, isGameFinishedAtom, isModalOpenAtom, isWinnerAtom, languageAtom, modalTypeAtom, openModalAction } from "./atoms";
 
 // components
 import WordleGrid from "./ui/WordleGrid";
@@ -39,7 +36,7 @@ export default function App() {
     .onFailure(() => <LoadingStatus status="rejected" />)
     .onSuccess(() => (
       <>
-        <div className="grid min-h-screen grid-cols-1 grid-rows-[auto_1fr_auto] gap-4 p-4">
+        <div className="grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr_auto] gap-4 p-4">
           <header>
             <ControlPanel />
           </header>

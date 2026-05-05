@@ -5,4 +5,4 @@ import { SolutionsService } from "@/services/SolutionsService";
 
 const MainLayer = Layer.mergeAll(Logger.pretty, SolutionsService.Default);
 
-export const appRuntime = Atom.runtime(MainLayer);
+export const Runtime = Atom.runtime(MainLayer);

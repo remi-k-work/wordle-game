@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
-import { languageAtom } from "@/atoms/languageAtom";
+import { languageAtom } from "@/atoms";
 
 // assets
 import spinner from "@/assets/spinner.svg";

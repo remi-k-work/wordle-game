@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { gameStateAtom, handleKeyAction } from "@/atoms/gameAtom";
+import { currentGuessWordAtom, handleKeyAction } from "@/atoms";
 
 // components
 import GuessTile from "./GuessTile";
@@ -12,7 +12,7 @@ import GuessTile from "./GuessTile";
 import type { Color, Tile } from "@/domain/models";
 
 export default function CurrentGuess() {
-  const { currentGuessWord } = useAtomValue(gameStateAtom);
+  const currentGuessWord = useAtomValue(currentGuessWordAtom);
   const handleKey = useAtomSet(handleKeyAction);
 
   useEffect(() => {
