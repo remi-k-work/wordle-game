@@ -9,7 +9,7 @@ export default function Help() {
   const language = useAtomValue(languageAtom);
 
   const content =
-    language === "en"
+    language === "En"
       ? {
           welcome:
             "Welcome to Wordle, a daily word game where you have six tries to guess a five-letter word. The game is simple and addictive, but it can also be challenging.",

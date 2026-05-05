@@ -1,6 +1,6 @@
 // services, features, and other libraries
-import { useAtomValue, useAtomSet, Result } from "@effect-atom/atom-react";
-import { gameDataAtom, keypadStatusAtom, handleKeyAction } from "@/atoms";
+import { useAtomValue, useAtomSet, Result, useAtomMount } from "@effect-atom/atom-react";
+import { keypadStatusAtom, handleKeyAction, gameDataKeypadAtom } from "@/atoms";
 
 // components
 import LoadingStatus from "@/ui/LoadingStatus";
@@ -19,28 +19,29 @@ const BASE_KEY_CLASS = "flex-[0_1_8cqi] text-[clamp(1em,0.8em+0.4cqi,1.25em)]";
 const ICON_IMG_CLASS = "pointer-events-none mx-auto w-[clamp(1em,0.8em+0.4cqi,1.25em)]";
 
 export default function Keypad() {
-  const gameData = useAtomValue(gameDataAtom);
+  useAtomMount(gameDataKeypadAtom);
+  const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
   const usedKeys = useAtomValue(keypadStatusAtom);
   const handleKey = useAtomSet(handleKeyAction);
 
-  return Result.builder(gameData)
+  return Result.builder(gameDataKeypad)
     .onInitial(() => <LoadingStatus status="pending" />)
     .onWaiting(() => <LoadingStatus status="pending" />)
     .onFailure(() => <LoadingStatus status="rejected" />)
-    .onSuccess(({ letters }) => (
+    .onSuccess((keys) => (
       <section className="@container flex h-full w-full flex-wrap justify-center gap-4">
-        {letters.map((letter) => {
-          const usedKeyColor = usedKeys[letter.key];
+        {keys.map((key) => {
+          const usedKeyColor = usedKeys[key];
 
           return (
             <button
-              key={letter.key}
+              key={key}
               type="button"
               className={BASE_KEY_CLASS}
               style={{ backgroundColor: usedKeyColor && COLOR_MAP[usedKeyColor] }}
-              onClick={() => handleKey(letter.key)}
+              onClick={() => handleKey(key)}
             >
-              {letter.key}
+              {key}
             </button>
           );
         })}

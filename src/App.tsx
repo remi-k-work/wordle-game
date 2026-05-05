@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useEffect } from "react";
 import { useAtomValue, useAtomSet, useAtomMount, Result } from "@effect-atom/atom-react";
-import { gameDataAtom, isGameFinishedAtom, isModalOpenAtom, isWinnerAtom, languageAtom, modalTypeAtom, openModalAction } from "./atoms";
+import { gameDataSolutionsAtom, isGameFinishedAtom, isModalOpenAtom, isWinnerAtom, languageAtom, modalTypeAtom, openModalAction } from "./atoms";
 
 // components
 import WordleGrid from "./ui/WordleGrid";
@@ -14,9 +14,9 @@ import LoadingStatus from "./ui/LoadingStatus";
 import Help from "./ui/Help";
 
 export default function App() {
-  useAtomMount(gameDataAtom);
-  const gameData = useAtomValue(gameDataAtom);
-  const isFinished = useAtomValue(isGameFinishedAtom);
+  useAtomMount(gameDataSolutionsAtom);
+  const gameDataSolutions = useAtomValue(gameDataSolutionsAtom);
+  const isGameFinished = useAtomValue(isGameFinishedAtom);
   const isWinner = useAtomValue(isWinnerAtom);
   const isModalOpen = useAtomValue(isModalOpenAtom);
   const modalType = useAtomValue(modalTypeAtom);
@@ -25,12 +25,12 @@ export default function App() {
 
   // Automatically open status modal when game finishes
   useEffect(() => {
-    if (isFinished) {
+    if (isGameFinished) {
       openModal("status");
     }
-  }, [isFinished, openModal]);
+  }, [isGameFinished, openModal]);
 
-  return Result.builder(gameData)
+  return Result.builder(gameDataSolutions)
     .onInitial(() => <LoadingStatus status="pending" />)
     .onWaiting(() => <LoadingStatus status="pending" />)
     .onFailure(() => <LoadingStatus status="rejected" />)
@@ -49,13 +49,13 @@ export default function App() {
         </div>
 
         {isModalOpen && modalType === "help" && (
-          <Modal title={language === "en" ? "Help" : "Pomoc"}>
+          <Modal title={language === "En" ? "Help" : "Pomoc"}>
             <Help />
           </Modal>
         )}
 
-        {isModalOpen && modalType === "status" && isFinished && (
-          <Modal title={isWinner ? (language === "en" ? "You Win!" : "Wygrałeś!") : language === "en" ? "Nevermind" : "Trudno"}>
+        {isModalOpen && modalType === "status" && isGameFinished && (
+          <Modal title={isWinner ? (language === "En" ? "You Win!" : "Wygrałeś!") : language === "En" ? "Nevermind" : "Trudno"}>
             {isWinner ? <YouWin /> : <Nevermind />}
           </Modal>
         )}

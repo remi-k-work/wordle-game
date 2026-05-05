@@ -14,7 +14,7 @@ export default function ControlPanel() {
 
   // Handle language change
   function handleLanguageChange(ev: React.ChangeEvent<HTMLSelectElement>) {
-    const newLanguage = ev.target.value as "en" | "pl";
+    const newLanguage = ev.target.value as "En" | "Pl";
     setLanguage(newLanguage);
     restartGame();
   }
@@ -36,14 +36,14 @@ export default function ControlPanel() {
         {currentTurn}
       </div>
       <label className="block">
-        {language === "en" ? (
+        {language === "En" ? (
           <>
             <small className="block">Language</small>
             <select name="language" className="cursor-pointer border-none bg-transparent text-white" value={language} onChange={handleLanguageChange}>
-              <option value={"en"} className="bg-[#1b1523]">
+              <option value="En" className="bg-[#1b1523]">
                 English
               </option>
-              <option value={"pl"} className="bg-[#1b1523]">
+              <option value="Pl" className="bg-[#1b1523]">
                 Polish
               </option>
             </select>
@@ -52,17 +52,17 @@ export default function ControlPanel() {
           <>
             <small className="block">Język</small>
             <select name="language" className="cursor-pointer border-none bg-transparent text-white" value={language} onChange={handleLanguageChange}>
-              <option value={"en"} className="bg-[#1b1523]">
+              <option value="En" className="bg-[#1b1523]">
                 Angielski
               </option>
-              <option value={"pl"} className="bg-[#1b1523]">
+              <option value="Pl" className="bg-[#1b1523]">
                 Polski
               </option>
             </select>
           </>
         )}
       </label>
-      {language === "en" ? (
+      {language === "En" ? (
         <button type="button" onClick={handleNewGameClick}>
           New Game
         </button>

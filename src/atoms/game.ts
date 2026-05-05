@@ -3,7 +3,7 @@ import { Effect, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { Runtime } from "./runtime";
 import { languageAtom } from "./language";
-import { SolutionsService } from "@/services/SolutionsService";
+import { GameData } from "@/services/gameData";
 import { deriveWordleGrid, getGameStatus, deriveKeypadStatus, processKey } from "@/domain/game-logic";
 
 // types
@@ -21,26 +21,39 @@ export const currentGuessWordAtom = gameStateAtom.pipe(Atom.map((state) => state
 export const wordleGuessesAtom = gameStateAtom.pipe(Atom.map((state) => state.wordleGuesses));
 export const currentTurnAtom = gameStateAtom.pipe(Atom.map((state) => state.currentTurn));
 
-// Atom for the full game data (solutions and letters)
-export const gameDataAtom = Runtime.atom(
+// Atom for the game data (solutions)
+export const gameDataSolutionsAtom = Runtime.atom(
   Effect.gen(function* () {
     const language = yield* Atom.get(languageAtom);
-    const service = yield* SolutionsService;
-    const data = yield* service.fetchGameData(language);
+    const service = yield* GameData;
+    const solutions = yield* service.fetchSolutions(language);
 
     // Pick a new secret word and reset the game state
-    const { solutions } = data;
     const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
-    const randomSolution = solutions[randomIndex].word.toUpperCase();
+    const randomSolution = solutions[randomIndex].toUpperCase();
 
     yield* Atom.set(gameStateAtom, { ...INITIAL_GAME_STATE, theSecretWord: randomSolution });
 
-    return data;
+    return solutions;
   })
 );
 
-// Action to restart the game by refreshing the game data atom
-export const restartGameAction = Atom.fn(() => Atom.refresh(gameDataAtom));
+// Atom for the game data (keypad)
+export const gameDataKeypadAtom = Runtime.atom(
+  Effect.gen(function* () {
+    const language = yield* Atom.get(languageAtom);
+    const service = yield* GameData;
+    return yield* service.fetchKeypad(language);
+  })
+);
+
+// Action to restart the game by refreshing the game data atoms
+export const restartGameAction = Atom.fn(() =>
+  Effect.gen(function* () {
+    yield* Atom.refresh(gameDataSolutionsAtom);
+    yield* Atom.refresh(gameDataKeypadAtom);
+  })
+);
 
 // Derived grid atom for rendering the 6x5 wordle grid
 export const wordleGridAtom = Atom.make((get) => {

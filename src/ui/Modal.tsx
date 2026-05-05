@@ -24,7 +24,7 @@ export default function Modal({ title, children }: ModalProps) {
         {children}
         <button type="button" className="mx-auto mt-8 flex items-center justify-center gap-2" onClick={() => closeModal(undefined)}>
           <img src={close} className="w-4" alt="X" />
-          {language === "en" ? "Close" : "Zamknij"}
+          {language === "En" ? "Close" : "Zamknij"}
         </button>
       </dialog>
     </aside>

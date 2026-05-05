@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { Layer, Logger } from "effect";
 import { Atom } from "@effect-atom/atom-react";
-import { SolutionsService } from "@/services/SolutionsService";
+import { GameData } from "@/services/gameData";
 
-const MainLayer = Layer.mergeAll(Logger.pretty, SolutionsService.Default);
+const MainLayer = Layer.mergeAll(Logger.pretty, GameData.Default);
 
 export const Runtime = Atom.runtime(MainLayer);
