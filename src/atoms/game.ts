@@ -3,11 +3,11 @@ import { Effect, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { Runtime } from "./runtime";
 import { languageAtom } from "./language";
-import { GameData } from "@/services/gameData";
-import { deriveWordleGrid, getGameStatus, deriveKeypadStatus, processKey } from "@/domain/game-logic";
+import { GameData } from "@/services";
+import { deriveWordleGrid, getGameStatus, deriveKeypadStatus, processKey } from "@/domain";
 
 // types
-import type { GameState } from "../domain/models";
+import type { GameState } from "@/domain";
 
 // constants
 const INITIAL_GAME_STATE = { theSecretWord: "", currentGuessWord: "", wordleGuesses: [], currentTurn: 0 } as const satisfies GameState;
@@ -82,4 +82,4 @@ export const isGameFinishedAtom = Atom.make((get) => get(gameStatusAtom)._tag !=
 export const isWinnerAtom = Atom.make((get) => get(gameStatusAtom)._tag === "Won");
 
 // Action to handle all key presses (letters, backspace, and enter)
-export const handleKeyAction = Atom.fn((key: string) => Atom.update(gameStateAtom, (state) => processKey(key, state)));
+export const handleKeyAction = Atom.fn((key: string, get) => Atom.update(gameStateAtom, (state) => processKey(key, state)));

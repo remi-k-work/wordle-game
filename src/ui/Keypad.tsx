@@ -10,7 +10,7 @@ import backspace from "@/assets/backspace.svg";
 import enter from "@/assets/enter.svg";
 
 // types
-import type { Color } from "@/domain/models";
+import type { Color } from "@/domain";
 
 // constants
 const COLOR_MAP = { grey: "#a1a1a1", green: "#5ac85a", yellow: "#e2cc68", "": "transparent" } as const satisfies Record<Color, string>;

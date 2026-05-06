@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { Effect, flow } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
-import { KeypadDataSchema, SolutionsDataSchema } from "@/domain/models";
+import { KeypadDataSchema, SolutionsDataSchema } from "@/domain";
 
 // types
-import type { Language } from "@/domain/models";
+import type { Language } from "@/domain";
 
 export class GameData extends Effect.Service<GameData>()("GameData", {
   dependencies: [FetchHttpClient.layer],

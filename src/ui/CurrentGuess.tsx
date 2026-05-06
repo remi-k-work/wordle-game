@@ -9,7 +9,7 @@ import { currentGuessWordAtom, handleKeyAction } from "@/atoms";
 import GuessTile from "./GuessTile";
 
 // types
-import type { Color, Tile } from "@/domain/models";
+import type { Color, Tile } from "@/domain";
 
 export default function CurrentGuess() {
   const currentGuessWord = useAtomValue(currentGuessWordAtom);

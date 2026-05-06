@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { formatGuess, doWeHaveAWinner } from "./game-logic";
+import { formatGuess, doWeHaveAWinner } from "./gameLogic";
 
 describe("Game Logic", () => {
   describe("formatGuess", () => {
     it("should format a perfect guess as all green", () => {
       const result = formatGuess("APPLE", "APPLE");
-      expect(result.every(tile => tile.color === "green")).toBe(true);
+      expect(result.every((tile) => tile.color === "green")).toBe(true);
     });
 
     it("should identify yellow tiles correctly", () => {

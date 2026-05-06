@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 // types
-import type { Color, Tile } from "@/domain/models";
+import type { Color, Tile } from "@/domain";
 
 interface GuessTileProps {
   tile: Tile;
@@ -22,7 +22,7 @@ export default function GuessTile({ tile: { tileKey, color }, bounceAnim = false
     <div
       className={cn("flex items-center justify-center border-2 border-[#666] [container:tile/size]", color && COLOR_MAP[color], bounceAnim && "animate-bounce")}
     >
-      <span className="text-[70cqb]">{tileKey}</span>
+      <span className="text-[80cqb]">{tileKey}</span>
     </div>
   );
 }

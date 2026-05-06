@@ -1,20 +1,11 @@
 // services, features, and other libraries
-import { Effect } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 
-export const isModalOpenAtom = Atom.make(false);
-export const modalTypeAtom = Atom.make<"help" | "status" | null>(null);
+// types
+type ModalType = "help" | "status" | null;
 
-export const openModalAction = Atom.fn((type: "help" | "status") =>
-  Effect.gen(function* () {
-    yield* Atom.set(isModalOpenAtom, true);
-    yield* Atom.set(modalTypeAtom, type);
-  })
-);
+// Single source of truth for the modal state
+export const activeModalAtom = Atom.make<ModalType>(null);
 
-export const closeModalAction = Atom.fn(() =>
-  Effect.gen(function* () {
-    yield* Atom.set(isModalOpenAtom, false);
-    yield* Atom.set(modalTypeAtom, null);
-  })
-);
+export const openModalAction = Atom.fn((modalType: NonNullable<ModalType>) => Atom.set(activeModalAtom, modalType));
+export const closeModalAction = Atom.fn(() => Atom.set(activeModalAtom, null));

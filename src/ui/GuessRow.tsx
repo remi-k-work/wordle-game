@@ -7,7 +7,7 @@ import { currentTurnAtom } from "@/atoms";
 import GuessTile from "./GuessTile";
 
 // types
-import type { WordleGrid } from "@/domain/models";
+import type { WordleGrid } from "@/domain";
 
 interface GuessRowProps {
   wordleGrid: WordleGrid;

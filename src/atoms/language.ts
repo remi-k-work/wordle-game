@@ -2,6 +2,6 @@
 import { Atom } from "@effect-atom/atom-react";
 
 // types
-import type { Language } from "@/domain/models";
+import type { Language } from "@/domain";
 
 export const languageAtom = Atom.make<Language>("En");
