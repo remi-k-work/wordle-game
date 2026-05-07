@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Random } from "effect";
+import { Effect, HashSet, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
 import { deriveWordleGrid, getGameStatus, deriveKeypadStatus, processKey } from "@/domain";
@@ -10,7 +10,7 @@ import { activeModalAtom, languageAtom } from ".";
 import type { GameState } from "@/domain";
 
 // constants
-const INITIAL_GAME_STATE = { theSecretWord: "", currentGuessWord: "", wordleGuesses: [], currentTurn: 0 } as const satisfies GameState;
+import { INITIAL_GAME_STATE } from "@/domain";
 
 // Master atom storing the game state
 const gameStateAtom = Atom.make<GameState>(INITIAL_GAME_STATE);
@@ -20,6 +20,7 @@ export const theSecretWordAtom = gameStateAtom.pipe(Atom.map((state) => state.th
 export const currentGuessWordAtom = gameStateAtom.pipe(Atom.map((state) => state.currentGuessWord));
 export const wordleGuessesAtom = gameStateAtom.pipe(Atom.map((state) => state.wordleGuesses));
 export const currentTurnAtom = gameStateAtom.pipe(Atom.map((state) => state.currentTurn));
+export const isInvalidGuessAtom = gameStateAtom.pipe(Atom.map((state) => state.isInvalidGuess));
 
 // Atom for the game data (solutions)
 export const gameDataSolutionsAtom = Runtime.atom(
@@ -42,7 +43,8 @@ export const gameDataSolutionsAtom = Runtime.atom(
 
     yield* Atom.set(gameStateAtom, { ...INITIAL_GAME_STATE, theSecretWord: randomSolution });
 
-    return solutions;
+    // Return as a HashSet for O(1) lookups
+    return HashSet.fromIterable(solutions.map((solution) => solution.toUpperCase()));
   })
 );
 
@@ -90,7 +92,8 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
   Effect.gen(function* () {
     // Calculate the new game state based purely on the domain logic
     const currGameState = get(gameStateAtom);
-    const newGameState = processKey(pressedKey, currGameState);
+    const dictionary = yield* get.result(gameDataSolutionsAtom);
+    const newGameState = processKey(pressedKey, currGameState, dictionary);
 
     // If the game state has not changed, bail out
     if (currGameState === newGameState) return;

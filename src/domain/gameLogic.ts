@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array } from "effect";
+import { Array, HashSet } from "effect";
 import { GameStatusEnum } from "./models";
 
 // types
@@ -15,7 +15,13 @@ const isGuessKeyEntryValid = (pressedKey: string) => {
 };
 
 // Accept or reject the submitted guess after validating it
-const isSubmittedGuessValid = (validKey: string, currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[]) => {
+const isSubmittedGuessValid = (
+  validKey: string,
+  currentGuessWord: string,
+  currentTurn: number,
+  wordleGuesses: readonly string[],
+  dictionary: HashSet.HashSet<string>
+) => {
   // Make sure the user is attempting to submit a new guess word
   if (validKey !== "Enter") return false;
 
@@ -27,6 +33,9 @@ const isSubmittedGuessValid = (validKey: string, currentGuessWord: string, curre
 
   // Make sure the term is at least 5 characters long
   if (currentGuessWord.length !== 5) return false;
+
+  // The fast lookup whether the guessed word is in the dictionary
+  if (!HashSet.has(dictionary, currentGuessWord)) return false;
 
   // Allow and proceed because the given guess word is correct
   return true;
@@ -105,26 +114,30 @@ export const deriveKeypadStatus = (theSecretWord: string, wordleGuesses: readonl
 };
 
 // Process a key press and return the next game state (encapsulates all state transition logic for key events)
-export const processKey = (pressedKey: string, gameState: GameState) => {
+export const processKey = (pressedKey: string, gameState: GameState, dictionary: HashSet.HashSet<string>) => {
   const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = gameState;
 
   //  If game is already over or key is invalid, exit early (no game state change)
   if (getGameStatus(currentTurn, theSecretWord, wordleGuesses)._tag !== "Playing" || !isGuessKeyEntryValid(pressedKey)) return gameState;
 
   // Handle backspace by removing the last letter from the current guess word
-  if (pressedKey === "Backspace") return { ...gameState, currentGuessWord: currentGuessWord.slice(0, -1) };
+  if (pressedKey === "Backspace") return { ...gameState, currentGuessWord: currentGuessWord.slice(0, -1), isInvalidGuess: false };
 
   // Handle guess submission
   if (pressedKey === "Enter") {
+    // If it is a full 5-letter guess word but not in the dictionary, make sure to flag it as invalid
+    const isValid = isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses, dictionary);
+    if (currentGuessWord.length === 5 && !isValid) return { ...gameState, isInvalidGuess: true };
+
     // If the guess word is invalid, exit early (no game state change)
-    if (!isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses)) return gameState;
+    if (!isValid) return gameState;
 
     // If the guess word is valid, update the game state by adding it to the list of wordle guesses and incrementing the current turn
-    return { ...gameState, wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, currentGuessWord: "" };
+    return { ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, isInvalidGuess: false };
   }
 
   // Handle letter entry by appending to the current guess word
-  if (currentGuessWord.length < 5) return { ...gameState, currentGuessWord: currentGuessWord + pressedKey.toUpperCase() };
+  if (currentGuessWord.length < 5) return { ...gameState, currentGuessWord: currentGuessWord + pressedKey.toUpperCase(), isInvalidGuess: false };
 
   // Otherwise, no game state change
   return gameState;

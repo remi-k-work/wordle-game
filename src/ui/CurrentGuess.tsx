@@ -2,8 +2,9 @@
 import { useEffect } from "react";
 
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { currentGuessWordAtom, handleKeyAction } from "@/atoms";
+import { currentGuessWordAtom, handleKeyAction, isInvalidGuessAtom } from "@/atoms";
 
 // components
 import GuessTile from "./GuessTile";
@@ -13,6 +14,7 @@ import type { Color, Tile } from "@/domain";
 
 export default function CurrentGuess() {
   const currentGuessWord = useAtomValue(currentGuessWordAtom);
+  const isInvalidGuess = useAtomValue(isInvalidGuessAtom);
   const handleKey = useAtomSet(handleKeyAction);
 
   useEffect(() => {
@@ -27,12 +29,12 @@ export default function CurrentGuess() {
     };
   }, [handleKey]);
 
-  const currentGuessTiles = [...currentGuessWord].map((tileKey) => ({ tileKey, color: "" as Color }));
+  const currentGuessTiles = [...currentGuessWord].map((tileKey) => ({ tileKey, color: (isInvalidGuess ? "red" : "") as Color }));
   const remainingEmptyTiles = Array<Tile>(5 - currentGuessTiles.length).fill({ tileKey: "", color: "" as Color });
   const finalGuessTiles = [...currentGuessTiles, ...remainingEmptyTiles];
 
   return (
-    <div className="grid grid-cols-5 grid-rows-1 gap-4">
+    <div className={cn("grid grid-cols-5 grid-rows-1 gap-4", isInvalidGuess && "animate-pulse")}>
       {finalGuessTiles.map((tile, tileIndex) => (
         <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentGuessTiles.length - 1} />
       ))}
