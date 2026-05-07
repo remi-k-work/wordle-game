@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { Effect, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
-import { Runtime } from "./runtime";
-import { languageAtom } from "./language";
 import { GameData } from "@/services";
 import { deriveWordleGrid, getGameStatus, deriveKeypadStatus, processKey } from "@/domain";
+import { Runtime } from "./runtime";
+import { activeModalAtom, languageAtom } from ".";
 
 // types
 import type { GameState } from "@/domain";
@@ -31,6 +31,14 @@ export const gameDataSolutionsAtom = Runtime.atom(
     // Pick a new secret word and reset the game state
     const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
     const randomSolution = solutions[randomIndex].toUpperCase();
+
+    // *** TEST CODE ***
+    // *** TEST CODE ***
+    // *** TEST CODE ***
+    yield* Effect.log("Secret word: " + randomSolution);
+    // *** TEST CODE ***
+    // *** TEST CODE ***
+    // *** TEST CODE ***
 
     yield* Atom.set(gameStateAtom, { ...INITIAL_GAME_STATE, theSecretWord: randomSolution });
 
@@ -77,9 +85,30 @@ export const gameStatusAtom = Atom.make((get) => {
   return getGameStatus(currentTurn, theSecretWord, wordleGuesses);
 });
 
-// Convenience booleans for UI components
-export const isGameFinishedAtom = Atom.make((get) => get(gameStatusAtom)._tag !== "Playing");
-export const isWinnerAtom = Atom.make((get) => get(gameStatusAtom)._tag === "Won");
-
 // Action to handle all key presses (letters, backspace, and enter)
-export const handleKeyAction = Atom.fn((key: string, get) => Atom.update(gameStateAtom, (state) => processKey(key, state)));
+export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
+  Effect.gen(function* () {
+    // Calculate the new game state based purely on the domain logic
+    const currGameState = get(gameStateAtom);
+    const newGameState = processKey(pressedKey, currGameState);
+
+    // If the game state has not changed, bail out
+    if (currGameState === newGameState) return;
+
+    // Otherwise, commit the new game state
+    yield* Atom.set(gameStateAtom, newGameState);
+
+    // Check if this specific keystroke ended the game
+    const prevGameStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
+    const newGameStatus = getGameStatus(newGameState.currentTurn, newGameState.theSecretWord, newGameState.wordleGuesses);
+
+    // If the game transitioned from "Playing" to "Won" or "Lost" just now:
+    if (prevGameStatus._tag === "Playing" && newGameStatus._tag !== "Playing") {
+      // Wait, so the user can see their final tiles turn green/yellow
+      yield* Effect.sleep("1.5 seconds");
+
+      // Open the status modal directly from the action!
+      yield* Atom.set(activeModalAtom, "status");
+    }
+  })
+);

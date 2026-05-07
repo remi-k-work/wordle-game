@@ -6,7 +6,7 @@ import { GameStatusEnum } from "./models";
 import type { Color, GameState } from "./models";
 
 // Validate the guess entry as the user types from the keyboard in real time
-export const isGuessKeyEntryValid = (pressedKey: string) => {
+const isGuessKeyEntryValid = (pressedKey: string) => {
   // Only legitimate and recognized keys are accepted, while everything else is rejected
   if (pressedKey === "Backspace" || pressedKey === "Enter") return true;
 
@@ -15,7 +15,7 @@ export const isGuessKeyEntryValid = (pressedKey: string) => {
 };
 
 // Accept or reject the submitted guess after validating it
-export const isSubmittedGuessValid = (validKey: string, currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[]) => {
+const isSubmittedGuessValid = (validKey: string, currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[]) => {
   // Make sure the user is attempting to submit a new guess word
   if (validKey !== "Enter") return false;
 
@@ -32,19 +32,17 @@ export const isSubmittedGuessValid = (validKey: string, currentGuessWord: string
   return true;
 };
 
-// Do we have a winner? When the player correctly guesses the secret word, we have a winner
-export const doWeHaveAWinner = (theSecretWord: string, wordleGuesses: readonly string[]) => theSecretWord === wordleGuesses.at(-1);
-
 // Get the current game status (centralized status derivation)
 export const getGameStatus = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]) => {
-  if (doWeHaveAWinner(theSecretWord, wordleGuesses)) return GameStatusEnum.Won();
+  // Do we have a winner? When the player correctly guesses the secret word, we have a winner
+  if (theSecretWord === wordleGuesses.at(-1)) return GameStatusEnum.Won();
+
+  // Do we have a loser? When the player runs out of turns, we have a loser
   if (currentTurn > 5) return GameStatusEnum.Lost();
+
+  // Otherwise, the game is still in progress
   return GameStatusEnum.Playing();
 };
-
-// Is the game already over, or is it still going on? When a player runs out of turns or wins the game, the game is ended
-export const isGameOver = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]) =>
-  getGameStatus(currentTurn, theSecretWord, wordleGuesses)._tag !== "Playing";
 
 // Format the current guess word into an array of letter objects (e.g. [{ tileKey: "A", color: "yellow" }])
 export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
@@ -107,19 +105,27 @@ export const deriveKeypadStatus = (theSecretWord: string, wordleGuesses: readonl
 };
 
 // Process a key press and return the next game state (encapsulates all state transition logic for key events)
-export const processKey = (key: string, state: GameState) => {
-  const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = state;
+export const processKey = (pressedKey: string, gameState: GameState) => {
+  const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = gameState;
 
-  if (isGameOver(currentTurn, theSecretWord, wordleGuesses)) return state;
-  if (!isGuessKeyEntryValid(key)) return state;
+  //  If game is already over or key is invalid, exit early (no game state change)
+  if (getGameStatus(currentTurn, theSecretWord, wordleGuesses)._tag !== "Playing" || !isGuessKeyEntryValid(pressedKey)) return gameState;
 
-  if (key === "Backspace") return { ...state, currentGuessWord: currentGuessWord.slice(0, -1) };
-  if (key === "Enter") {
-    if (isSubmittedGuessValid(key, currentGuessWord, currentTurn, wordleGuesses))
-      return { ...state, wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, currentGuessWord: "" };
-    return state;
+  // Handle backspace by removing the last letter from the current guess word
+  if (pressedKey === "Backspace") return { ...gameState, currentGuessWord: currentGuessWord.slice(0, -1) };
+
+  // Handle guess submission
+  if (pressedKey === "Enter") {
+    // If the guess word is invalid, exit early (no game state change)
+    if (!isSubmittedGuessValid(pressedKey, currentGuessWord, currentTurn, wordleGuesses)) return gameState;
+
+    // If the guess word is valid, update the game state by adding it to the list of wordle guesses and incrementing the current turn
+    return { ...gameState, wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, currentGuessWord: "" };
   }
-  if (currentGuessWord.length < 5) return { ...state, currentGuessWord: currentGuessWord + key.toUpperCase() };
 
-  return state;
+  // Handle letter entry by appending to the current guess word
+  if (currentGuessWord.length < 5) return { ...gameState, currentGuessWord: currentGuessWord + pressedKey.toUpperCase() };
+
+  // Otherwise, no game state change
+  return gameState;
 };

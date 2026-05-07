@@ -1,9 +1,6 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
-import { isGameFinishedAtom, activeModalAtom, isWinnerAtom, languageAtom, openModalAction } from "@/atoms";
+import { useAtomValue } from "@effect-atom/atom-react";
+import { activeModalAtom, gameStatusAtom, languageAtom } from "@/atoms";
 
 // components
 import Modal from "./Modal";
@@ -12,19 +9,13 @@ import Nevermind from "./Nevermind";
 
 export default function WinOrLoseModal() {
   const activeModal = useAtomValue(activeModalAtom);
-  const isGameFinished = useAtomValue(isGameFinishedAtom);
-  const isWinner = useAtomValue(isWinnerAtom);
+  const gameStatus = useAtomValue(gameStatusAtom);
   const language = useAtomValue(languageAtom);
-  const openModal = useAtomSet(openModalAction);
 
-  // Automatically open status modal when game finishes
-  useEffect(() => {
-    if (isGameFinished) {
-      openModal("status");
-    }
-  }, [isGameFinished, openModal]);
+  // Do we have a winner? When the player correctly guesses the secret word, we have a winner
+  const isWinner = gameStatus._tag === "Won";
 
-  if (activeModal === "status" && isGameFinished) {
+  if (activeModal === "status") {
     return (
       <Modal title={isWinner ? (language === "En" ? "You Win!" : "Wygrałeś!") : language === "En" ? "Nevermind" : "Trudno"}>
         {isWinner ? <YouWin /> : <Nevermind />}
