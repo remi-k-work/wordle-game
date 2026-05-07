@@ -13,7 +13,7 @@ import enter from "@/assets/enter.svg";
 import type { Color } from "@/domain";
 
 // constants
-const COLOR_MAP = { grey: "#a1a1a1", green: "#5ac85a", yellow: "#e2cc68", "": "transparent" } as const satisfies Record<Color, string>;
+const COLOR_MAP = { grey: "#a1a1a1", green: "#5ac85a", yellow: "#e2cc68", red: "#c85a5a", "": "transparent" } as const satisfies Record<Color, string>;
 
 const BASE_KEY_CLASS = "flex-[0_1_8cqi] text-[clamp(1em,0.8em+0.4cqi,1.25em)]";
 const ICON_IMG_CLASS = "pointer-events-none mx-auto w-[clamp(1em,0.8em+0.4cqi,1.25em)]";
