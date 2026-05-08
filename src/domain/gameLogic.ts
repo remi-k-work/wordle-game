@@ -92,25 +92,27 @@ export const deriveWordleGrid = (theSecretWord: string, wordleGuesses: readonly 
   });
 };
 
-// Derive the status of each key on the keypad based on all guesses so far
-export const deriveKeypadStatus = (theSecretWord: string, wordleGuesses: readonly string[]) => {
-  const status: Record<string, Color> = {};
+// Derive the color of each key on the keypad based on all guesses so far
+export const deriveKeypadColors = (theSecretWord: string, wordleGuesses: readonly string[]) => {
+  const keypadColors: Record<string, Color> = {};
 
   for (const guess of wordleGuesses) {
     const formatted = formatGuess(theSecretWord, guess);
     for (const tile of formatted) {
-      const currentColor = status[tile.tileKey];
+      const currentColor = keypadColors[tile.tileKey];
+
+      // Upgrade the color based on hierarchy: green > yellow > grey
       if (tile.color === "green") {
-        status[tile.tileKey] = "green";
+        keypadColors[tile.tileKey] = "green";
       } else if (tile.color === "yellow" && currentColor !== "green") {
-        status[tile.tileKey] = "yellow";
+        keypadColors[tile.tileKey] = "yellow";
       } else if (tile.color === "grey" && !currentColor) {
-        status[tile.tileKey] = "grey";
+        keypadColors[tile.tileKey] = "grey";
       }
     }
   }
 
-  return status;
+  return keypadColors;
 };
 
 // Process a key press and return the next game state (encapsulates all state transition logic for key events)
