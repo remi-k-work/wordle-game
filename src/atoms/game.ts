@@ -90,17 +90,11 @@ export const gameStatusAtom = Atom.make((get) => {
 // Action to handle all key presses (letters, backspace, and enter)
 export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
   Effect.gen(function* () {
-    // Grab the current colors
-    const keypadColors = get(keypadColorsAtom);
-
-    // If the user pressed a hardware key that is currently "grey" (removed), ignore it!
-    const normalizedKey = pressedKey.toUpperCase();
-    if (keypadColors[normalizedKey] === "grey") return;
-
     // Calculate the new game state based purely on the domain logic
     const currGameState = get(gameStateAtom);
     const dictionary = yield* get.result(gameDataSolutionsAtom);
-    const newGameState = processKey(pressedKey, currGameState, dictionary);
+    const keypadColors = get(keypadColorsAtom);
+    const newGameState = processKey(pressedKey, currGameState, dictionary, keypadColors);
 
     // If the game state has not changed, bail out
     if (currGameState === newGameState) return;

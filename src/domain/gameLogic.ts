@@ -116,10 +116,13 @@ export const deriveKeypadColors = (theSecretWord: string, wordleGuesses: readonl
 };
 
 // Process a key press and return the next game state (encapsulates all state transition logic for key events)
-export const processKey = (pressedKey: string, gameState: GameState, dictionary: HashSet.HashSet<string>) => {
-  const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = gameState;
+export const processKey = (pressedKey: string, gameState: GameState, dictionary: HashSet.HashSet<string>, keypadColors: Record<string, Color>) => {
+  // If the user pressed a hardware key that is currently "grey" (removed), ignore it! (no game state change)
+  const normalizedKey = pressedKey.toUpperCase();
+  if (keypadColors[normalizedKey] === "grey") return gameState;
 
   //  If game is already over or key is invalid, exit early (no game state change)
+  const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = gameState;
   if (getGameStatus(currentTurn, theSecretWord, wordleGuesses)._tag !== "Playing" || !isGuessKeyEntryValid(pressedKey)) return gameState;
 
   // Handle backspace by removing the last letter from the current guess word

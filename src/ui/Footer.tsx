@@ -22,7 +22,7 @@ const ICON_IMG_CLASS = "pointer-events-none mx-auto w-[clamp(1em,0.8em+0.4cqi,1.
 
 const SPRING_TRANSITION = { type: "spring", damping: 40, stiffness: 200 } as const satisfies Transition;
 
-export default function Keypad() {
+export default function Footer() {
   useAtomMount(gameDataKeypadAtom);
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
   const keypadColors = useAtomValue(keypadColorsAtom);
@@ -37,7 +37,7 @@ export default function Keypad() {
       const availableKeys = keys.filter((key) => keypadColors[key] !== "grey");
 
       return (
-        <section className="@container flex h-full w-full flex-wrap justify-center gap-4">
+        <footer className="@container flex h-full w-full flex-wrap justify-center gap-4">
           {/* AnimatePresence handles elements being unmounted (removed from the array) */}
           <AnimatePresence mode="sync">
             {availableKeys.map((key) => {
@@ -88,7 +88,7 @@ export default function Keypad() {
               <img src={enter} className={ICON_IMG_CLASS} alt="⏎" />
             </motion.button>
           </AnimatePresence>
-        </section>
+        </footer>
       );
     })
     .render();

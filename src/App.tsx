@@ -3,9 +3,9 @@ import { useAtomValue, useAtomMount, Result } from "@effect-atom/atom-react";
 import { gameDataSolutionsAtom } from "./atoms";
 
 // components
-import WordleGrid from "./ui/WordleGrid";
-import Keypad from "./ui/Keypad";
-import ControlPanel from "./ui/ControlPanel";
+import Header from "./ui/Header";
+import Main from "./ui/Main";
+import Footer from "./ui/Footer";
 import LoadingStatus from "./ui/LoadingStatus";
 import HelpModal from "./ui/HelpModal";
 import WinOrLoseModal from "./ui/WinOrLoseModal";
@@ -21,15 +21,9 @@ export default function App() {
     .onSuccess(() => (
       <>
         <div className="grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr_auto] gap-4 p-4">
-          <header>
-            <ControlPanel />
-          </header>
-          <main>
-            <WordleGrid />
-          </main>
-          <footer>
-            <Keypad />
-          </footer>
+          <Header />
+          <Main />
+          <Footer />
         </div>
 
         <HelpModal />

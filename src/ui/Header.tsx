@@ -6,7 +6,7 @@ import { currentTurnAtom, languageAtom, openModalAction, restartGameAction } fro
 import turns from "@/assets/turns.svg";
 import help from "@/assets/help.svg";
 
-export default function ControlPanel() {
+export default function Header() {
   const currentTurn = useAtomValue(currentTurnAtom);
   const [language, setLanguage] = useAtom(languageAtom);
   const restartGame = useAtomSet(restartGameAction);
@@ -30,7 +30,7 @@ export default function ControlPanel() {
   }
 
   return (
-    <section className="flex items-center justify-evenly gap-4">
+    <header className="flex items-center justify-evenly gap-4">
       <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-none px-2 py-1">
         <img src={turns} className="w-6" alt="" />
         {currentTurn}
@@ -74,6 +74,6 @@ export default function ControlPanel() {
       <button type="button" onClick={handleHelpClick}>
         <img src={help} className="w-6" alt="" />
       </button>
-    </section>
+    </header>
   );
 }
