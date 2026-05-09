@@ -1,3 +1,6 @@
+// next
+import Image from "next/image";
+
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { closeModalAction, languageAtom } from "@/atoms";
@@ -13,7 +16,7 @@ interface ModalProps {
   children: ReactNode;
 }
 
-export default function Modal({ title, children }: ModalProps) {
+export function Modal({ title, children }: ModalProps) {
   const language = useAtomValue(languageAtom);
   const closeModal = useAtomSet(closeModalAction);
 
@@ -23,7 +26,7 @@ export default function Modal({ title, children }: ModalProps) {
         <h1 className="m-0 mb-5 border-b border-[#333] p-0 text-xl">{title}</h1>
         {children}
         <button type="button" className="mx-auto mt-8 flex items-center justify-center gap-2" onClick={() => closeModal()}>
-          <img src={close} className="w-4" alt="X" />
+          <Image src={close} className="w-4" alt="X" />
           {language === "En" ? "Close" : "Zamknij"}
         </button>
       </dialog>

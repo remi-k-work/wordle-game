@@ -1,10 +1,13 @@
+// next
+import Image from "next/image";
+
 // services, features, and other libraries
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomValue, useAtomSet, Result, useAtomMount } from "@effect-atom/atom-react";
 import { handleKeyAction, gameDataKeypadAtom, keypadColorsAtom } from "@/atoms";
 
 // components
-import LoadingStatus from "@/ui/LoadingStatus";
+import { Loading } from "@/ui/Loading";
 
 // assets
 import backspace from "@/assets/backspace.svg";
@@ -29,9 +32,9 @@ export default function Footer() {
   const handleKey = useAtomSet(handleKeyAction);
 
   return Result.builder(gameDataKeypad)
-    .onInitial(() => <LoadingStatus status="pending" />)
-    .onWaiting(() => <LoadingStatus status="pending" />)
-    .onFailure(() => <LoadingStatus status="rejected" />)
+    .onInitial(() => <Loading status="pending" />)
+    .onWaiting(() => <Loading status="pending" />)
+    .onFailure(() => <Loading status="rejected" />)
     .onSuccess((keys) => {
       // Dynamically filter out the grey keys
       const availableKeys = keys.filter((key) => keypadColors[key] !== "grey");
@@ -72,7 +75,7 @@ export default function Footer() {
               className={BASE_KEY_CLASS}
               onClick={() => handleKey("Backspace")}
             >
-              <img src={backspace} className={ICON_IMG_CLASS} alt="⌫" />
+              <Image src={backspace} className={ICON_IMG_CLASS} alt="⌫" />
             </motion.button>
 
             <motion.button
@@ -85,7 +88,7 @@ export default function Footer() {
               className={BASE_KEY_CLASS}
               onClick={() => handleKey("Enter")}
             >
-              <img src={enter} className={ICON_IMG_CLASS} alt="⏎" />
+              <Image src={enter} className={ICON_IMG_CLASS} alt="⏎" />
             </motion.button>
           </AnimatePresence>
         </footer>

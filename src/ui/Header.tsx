@@ -1,3 +1,6 @@
+// next
+import Image from "next/image";
+
 // services, features, and other libraries
 import { useAtom, useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { currentTurnAtom, languageAtom, openModalAction, restartGameAction } from "@/atoms";
@@ -32,7 +35,7 @@ export default function Header() {
   return (
     <header className="flex items-center justify-evenly gap-4">
       <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-none px-2 py-1">
-        <img src={turns} className="w-6" alt="" />
+        <Image src={turns} className="w-6" alt="" />
         {currentTurn}
       </div>
       <label className="block">
@@ -72,7 +75,7 @@ export default function Header() {
         </button>
       )}
       <button type="button" onClick={handleHelpClick}>
-        <img src={help} className="w-6" alt="" />
+        <Image src={help} className="w-6" alt="" />
       </button>
     </header>
   );

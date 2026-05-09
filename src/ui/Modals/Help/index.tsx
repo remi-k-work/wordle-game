@@ -3,17 +3,17 @@ import { useAtomValue } from "@effect-atom/atom-react";
 import { activeModalAtom, languageAtom } from "@/atoms";
 
 // components
-import Modal from "./Modal";
-import Help from "./Help";
+import { Modal } from "@/ui/Modals";
+import { Content } from "./Content";
 
-export default function HelpModal() {
+export function HelpModal() {
   const activeModal = useAtomValue(activeModalAtom);
   const language = useAtomValue(languageAtom);
 
   if (activeModal === "help") {
     return (
       <Modal title={language === "En" ? "Help" : "Pomoc"}>
-        <Help />
+        <Content />
       </Modal>
     );
   }

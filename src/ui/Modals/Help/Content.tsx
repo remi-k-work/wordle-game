@@ -1,3 +1,6 @@
+// next
+import Image from "next/image";
+
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
 import { languageAtom } from "@/atoms";
@@ -5,7 +8,7 @@ import { languageAtom } from "@/atoms";
 // assets
 import logo from "@/assets/opengraph-image.jpg";
 
-export default function Help() {
+export function Content() {
   const language = useAtomValue(languageAtom);
 
   const content =
@@ -33,7 +36,7 @@ export default function Help() {
 
   return (
     <article className="max-w-[65ch] text-justify">
-      <img src={logo} className="mb-4 h-auto w-full" loading="lazy" alt="Logo" />
+      <Image src={logo} className="mb-4 h-auto w-full" loading="lazy" alt="Logo" />
 
       <p className="my-4">{content.welcome}</p>
       <p className="my-4">{content.objective}</p>

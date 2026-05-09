@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect-atom/atom-react";
 import { currentTurnAtom, languageAtom, theSecretWordAtom } from "@/atoms";
 
-export default function YouWin() {
+export function YouWin() {
   const theSecretWord = useAtomValue(theSecretWordAtom);
   const currentTurn = useAtomValue(currentTurnAtom);
   const language = useAtomValue(languageAtom);

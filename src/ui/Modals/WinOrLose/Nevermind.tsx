@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect-atom/atom-react";
 import { languageAtom, theSecretWordAtom } from "@/atoms";
 
-export default function Nevermind() {
+export function Nevermind() {
   const theSecretWord = useAtomValue(theSecretWordAtom);
   const language = useAtomValue(languageAtom);
 

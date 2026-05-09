@@ -3,11 +3,11 @@ import { useAtomValue } from "@effect-atom/atom-react";
 import { activeModalAtom, gameStatusAtom, languageAtom } from "@/atoms";
 
 // components
-import Modal from "./Modal";
-import YouWin from "./YouWin";
-import Nevermind from "./Nevermind";
+import { Modal } from "@/ui/Modals";
+import { YouWin } from "./YouWin";
+import { Nevermind } from "./Nevermind";
 
-export default function WinOrLoseModal() {
+export function WinOrLoseModal() {
   const activeModal = useAtomValue(activeModalAtom);
   const gameStatus = useAtomValue(gameStatusAtom);
   const language = useAtomValue(languageAtom);

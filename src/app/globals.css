@@ -68,13 +68,6 @@ body {
   padding-block: 0 0;
 }
 
-#root {
-  display: grid;
-  min-block-size: 100vh;
-  min-block-size: 100svh;
-  min-block-size: 100dvh;
-}
-
 button {
   border-inline: 0;
   border-block: 0;
