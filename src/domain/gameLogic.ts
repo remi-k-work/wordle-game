@@ -1,44 +1,28 @@
 // services, features, and other libraries
-import { Array, HashSet } from "effect";
-import { GameStatusEnum } from "./models";
+import { Array, HashSet, Duration, DateTime } from "effect";
+import { formatGuess, GameStatusEnum, isGuessKeyEntryValid, isSubmittedGuessValid } from ".";
 
 // types
-import type { Color, GameState } from "./models";
+import type { Color, GameState, Score } from ".";
 
-// Validate the guess entry as the user types from the keyboard in real time
-const isGuessKeyEntryValid = (pressedKey: string) => {
-  // Only legitimate and recognized keys are accepted, while everything else is rejected
-  if (pressedKey === "Backspace" || pressedKey === "Enter") return true;
+// constants
+import { BASE_POINTS_PER_TURN_MAP } from ".";
 
-  // Apart from the foregoing, only letters will be accepted
-  return /^[a-zA-ZąĄćĆęĘłŁńŃóÓśŚźŹżŻ]$/u.test(pressedKey);
-};
+// Calculates the player's score based on the turn they won on and how long it took them
+export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, endTime: DateTime.Utc) => {
+  // Establish the base points based on the turn number in which the secret word was solved
+  const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
 
-// Accept or reject the submitted guess after validating it
-const isSubmittedGuessValid = (
-  validKey: string,
-  currentGuessWord: string,
-  currentTurn: number,
-  wordleGuesses: readonly string[],
-  dictionary: HashSet.HashSet<string>
-) => {
-  // Make sure the user is attempting to submit a new guess word
-  if (validKey !== "Enter") return false;
+  // Establish the speed multiplier based on the time it took
+  const seconds = DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds);
+  const speedMultiplier = seconds < 30 ? 1.5 : seconds < 60 ? 1.2 : seconds < 180 ? 1.0 : 0.8;
 
-  // Is this the final turn? We do not wish to continue the guess word submission
-  if (currentTurn > 5) return false;
-
-  // Do not allow duplicate words
-  if (wordleGuesses.includes(currentGuessWord)) return false;
-
-  // Make sure the term is at least 5 characters long
-  if (currentGuessWord.length !== 5) return false;
-
-  // The fast lookup whether the guessed word is in the dictionary
-  if (!HashSet.has(dictionary, currentGuessWord)) return false;
-
-  // Allow and proceed because the given guess word is correct
-  return true;
+  return {
+    totalScore: Math.round(basePointsPerTurn * speedMultiplier),
+    basePointsPerTurn,
+    speedMultiplier,
+    timeSeconds: Math.floor(seconds),
+  } as const satisfies Score;
 };
 
 // Get the current game status (centralized status derivation)
@@ -51,33 +35,6 @@ export const getGameStatus = (currentTurn: number, theSecretWord: string, wordle
 
   // Otherwise, the game is still in progress
   return GameStatusEnum.Playing();
-};
-
-// Format the current guess word into an array of letter objects (e.g. [{ tileKey: "A", color: "yellow" }])
-export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
-  // After each guess, the tiles will change color to indicate how close your guess is to the secret word
-  const theSecretWordArray = [...theSecretWord];
-
-  // By default, all tiles are gray; letters are not in the secret word
-  const formattedGuess = [...wordleGuess].map((letter) => ({ tileKey: letter, color: "grey" as Color }));
-
-  // Look for green tiles: letters in the correct place
-  formattedGuess.forEach((tile, index) => {
-    if (theSecretWordArray[index] === tile.tileKey) {
-      formattedGuess[index].color = "green";
-      theSecretWordArray[index] = "";
-    }
-  });
-
-  // Look for yellow tiles: letters in the word, but in the wrong place
-  formattedGuess.forEach((tile, index) => {
-    if (tile.color !== "green" && theSecretWordArray.includes(tile.tileKey)) {
-      formattedGuess[index].color = "yellow";
-      theSecretWordArray[theSecretWordArray.indexOf(tile.tileKey)] = "";
-    }
-  });
-
-  return formattedGuess;
 };
 
 // To avoid storing a complex state object that is difficult to mutate, we store a simple one
