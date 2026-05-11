@@ -25,7 +25,7 @@ export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, end
   } as const satisfies Score;
 };
 
-// Get the current game status (centralized status derivation)
+// Get the current game status by checking the last guess and current turn
 export const getGameStatus = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]) => {
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
   if (theSecretWord === wordleGuesses.at(-1)) return GameStatusEnum.Won();
@@ -37,13 +37,13 @@ export const getGameStatus = (currentTurn: number, theSecretWord: string, wordle
   return GameStatusEnum.Playing();
 };
 
-// To avoid storing a complex state object that is difficult to mutate, we store a simple one
+// Derive the full 6x5 grid state for rendering based on completed guesses
 export const deriveWordleGrid = (theSecretWord: string, wordleGuesses: readonly string[]) =>
   Array.makeBy(6, (rowIndex) =>
     pipe(wordleGuesses[rowIndex], (guess) => (guess ? formatGuess(theSecretWord, guess) : Array.makeBy(5, () => ({ tileKey: "", color: "" as Color }))))
   );
 
-// Compute final keypad state from all guesses
+// Compute the final keypad state by reducing all guesses and picking the strongest colors
 export const computeKeypadState = (theSecretWord: string, wordleGuesses: readonly string[]) =>
   pipe(
     wordleGuesses,
@@ -54,7 +54,7 @@ export const computeKeypadState = (theSecretWord: string, wordleGuesses: readonl
     })
   );
 
-// Translate raw DOM events into pure domain actions
+// Translate raw keyboard input into pure domain actions based on current keypad state
 export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>) => {
   // Invalid key -> Ignore
   if (!isGuessKeyValid(pressedKey)) return GameActionEnum.Ignore();
@@ -77,7 +77,7 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
   );
 };
 
-// A pure reducer that handles the state transition logic
+// A pure reducer that handles the state transition logic for each game action
 export const applyGameAction = (state: GameState, action: GameAction, dictionary: HashSet.HashSet<string>, now: DateTime.Utc): GameState => {
   // If game is over, freeze state and return exact reference
   const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = state;

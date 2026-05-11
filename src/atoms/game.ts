@@ -12,10 +12,10 @@ import type { GameState } from "@/domain";
 // constants
 import { INITIAL_GAME_STATE } from "@/domain";
 
-// Master atom storing the game state
+// Primary state container for the active game session
 const gameStateAtom = Atom.make<GameState>(INITIAL_GAME_STATE);
 
-// Granular selectors derived from the master atom to minimize unnecessary re-renders
+// Specialized selectors for granular state access and optimized re-renders
 export const theSecretWordAtom = gameStateAtom.pipe(Atom.map((state) => state.theSecretWord));
 export const currentGuessWordAtom = gameStateAtom.pipe(Atom.map((state) => state.currentGuessWord));
 export const wordleGuessesAtom = gameStateAtom.pipe(Atom.map((state) => state.wordleGuesses));
@@ -24,7 +24,7 @@ export const isInvalidGuessAtom = gameStateAtom.pipe(Atom.map((state) => state.i
 export const scoreAtom = gameStateAtom.pipe(Atom.map((state) => state.score));
 export const startTimeAtom = gameStateAtom.pipe(Atom.map((state) => state.startTime));
 
-// Atom for the game data (solutions)
+// Effectful atom that fetches the solution dictionary and initializes a new secret word
 export const gameDataSolutionsAtom = Runtime.atom(
   Effect.gen(function* () {
     const language = yield* Atom.get(languageAtom);
@@ -50,7 +50,7 @@ export const gameDataSolutionsAtom = Runtime.atom(
   })
 );
 
-// Atom for the game data (keypad)
+// Effectful atom that fetches the valid keypad layout for the selected language
 export const gameDataKeypadAtom = Runtime.atom(
   Effect.gen(function* () {
     const language = yield* Atom.get(languageAtom);
@@ -59,7 +59,7 @@ export const gameDataKeypadAtom = Runtime.atom(
   })
 );
 
-// Action to restart the game by refreshing the game data atoms
+// Reset the entire game state by refreshing the underlying data sources
 export const restartGameAction = Atom.fn(() =>
   Effect.gen(function* () {
     yield* Atom.refresh(gameDataSolutionsAtom);
@@ -67,21 +67,21 @@ export const restartGameAction = Atom.fn(() =>
   })
 );
 
-// Derived grid atom for rendering the 6x5 wordle grid
+// View-ready representation of the 6x5 game grid derived from current guesses
 export const wordleGridAtom = Atom.make((get) => {
   const theSecretWord = get(theSecretWordAtom);
   const wordleGuesses = get(wordleGuessesAtom);
   return deriveWordleGrid(theSecretWord, wordleGuesses);
 });
 
-// Derived keypad colors atom
+// Current coloring state of the keypad keys based on guess history
 export const keypadColorsAtom = Atom.make((get) => {
   const theSecretWord = get(theSecretWordAtom);
   const wordleGuesses = get(wordleGuessesAtom);
   return computeKeypadState(theSecretWord, wordleGuesses);
 });
 
-// Game status derived from current game state
+// High-level game progress indicator (Playing, Won, or Lost)
 export const gameStatusAtom = Atom.make((get) => {
   const currentTurn = get(currentTurnAtom);
   const theSecretWord = get(theSecretWordAtom);
@@ -89,7 +89,7 @@ export const gameStatusAtom = Atom.make((get) => {
   return getGameStatus(currentTurn, theSecretWord, wordleGuesses);
 });
 
-// Action to handle all key presses (letters, backspace, and enter)
+// Central action handler for processing user input and executing state transitions
 export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
   Effect.gen(function* () {
     const currGameState = get(gameStateAtom);
@@ -113,7 +113,7 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     const prevStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
     const nextStatus = getGameStatus(nextGameState.currentTurn, nextGameState.theSecretWord, nextGameState.wordleGuesses);
 
-    // Calculate Final Score if we just Won
+    // Calculate and attach the final score upon a successful game resolution
     const finalGameState = yield* Match.value(nextStatus).pipe(
       Match.when({ _tag: "Won" }, () =>
         Effect.gen(function* () {
@@ -131,7 +131,7 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     // Update the game state atom
     yield* Atom.set(gameStateAtom, finalGameState);
 
-    // Handle Side Effects (Modals)
+    // Trigger modal visibility as a side effect when the game concludes
     if (prevStatus._tag === "Playing" && nextStatus._tag !== "Playing") {
       yield* Effect.sleep("1.5 seconds");
       yield* Atom.set(activeModalAtom, "status");

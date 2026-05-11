@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Duration } from "effect";
+import { Array, Duration, pipe } from "effect";
 
 // types
 import type { Color, Language } from ".";
@@ -19,15 +19,18 @@ export const formatDuration = (duration: Duration.Duration) => {
   return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
 };
 
-// Format the current guess word into an array of letter objects (e.g. [{ tileKey: "A", color: "yellow" }])
+// Format the current guess word into an array of letter objects with color coding
 export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
   // After each guess, the tiles will change color to indicate how close your guess is to the secret word
   const theSecretWordArray = [...theSecretWord];
 
-  // By default, all tiles are gray; letters are not in the secret word
-  const formattedGuess = [...wordleGuess].map((letter) => ({ tileKey: letter, color: "grey" as Color }));
+  // Initialize all tiles as grey (not in word)
+  const formattedGuess = pipe(
+    [...wordleGuess],
+    Array.map((letter) => ({ tileKey: letter, color: "grey" as Color }))
+  );
 
-  // Look for green tiles: letters in the correct place
+  // Perform a first pass to mark green tiles (correct letter and position)
   formattedGuess.forEach((tile, index) => {
     if (theSecretWordArray[index] === tile.tileKey) {
       formattedGuess[index].color = "green";
@@ -35,7 +38,7 @@ export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
     }
   });
 
-  // Look for yellow tiles: letters in the word, but in the wrong place
+  // Perform a second pass to mark yellow tiles (correct letter, wrong position)
   formattedGuess.forEach((tile, index) => {
     if (tile.color !== "green" && theSecretWordArray.includes(tile.tileKey)) {
       formattedGuess[index].color = "yellow";
