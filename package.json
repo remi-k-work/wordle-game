@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest",
+    "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
     "seedPl": "tsx ./src/seed/solutionsPl.ts",
     "seedEn": "tsx ./src/seed/solutionsEn.ts"

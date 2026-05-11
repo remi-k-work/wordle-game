@@ -1,6 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, DateTime, Duration, TestClock } from "effect";
-import { calculateScore, formatDuration } from ".";
+import { Effect, DateTime, Duration, TestClock, HashSet } from "effect";
+import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction } from ".";
+import { GameStatusEnum, GameActionEnum, INITIAL_GAME_STATE } from "./models";
 
 describe("gameLogic", () => {
   describe("calculateScore", () => {
@@ -50,6 +51,67 @@ describe("gameLogic", () => {
         expect(scoreVerySlow.totalScore).toBe(320); // 400 * 0.8
       })
     );
+  });
+
+  describe("getGameStatus", () => {
+    it("returns Won when last guess matches secret word", () => {
+      const status = getGameStatus(1, "APPLE", ["APPLE"]);
+      expect(status._tag).toBe("Won");
+    });
+
+    it("returns Lost when turn exceeds limit", () => {
+      const status = getGameStatus(6, "APPLE", ["BIRDS", "CARDS", "TABLE", "CHAIR", "HOUSE", "PIANO"]);
+      expect(status._tag).toBe("Lost");
+    });
+
+    it("returns Playing when game is in progress", () => {
+      const status = getGameStatus(1, "APPLE", ["BIRDS"]);
+      expect(status._tag).toBe("Playing");
+    });
+  });
+
+  describe("computeKeypadState", () => {
+    it("accumulates colors correctly", () => {
+      const keypad = computeKeypadState("APPLE", ["AMPLE", "PAPER"]);
+      // AMPLE -> A:green, M:grey, P:green, L:green, E:green
+      // PAPER -> P:green, A:yellow, P:green, E:green, R:grey
+      expect(keypad["A"]).toBe("green"); // yellow in PAPER, but green in AMPLE
+      expect(keypad["M"]).toBe("grey");
+      expect(keypad["P"]).toBe("green");
+      expect(keypad["R"]).toBe("grey");
+    });
+  });
+
+  describe("applyGameAction", () => {
+    const dictionary = HashSet.fromIterable(["APPLE"]);
+    const now = DateTime.unsafeMake(0);
+
+    it("handles AddLetter", () => {
+      const state = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
+      expect(state.currentGuessWord).toBe("A");
+    });
+
+    it("handles RemoveLetter", () => {
+      const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "AB" };
+      const state2 = applyGameAction(state1, GameActionEnum.RemoveLetter(), dictionary, now);
+      expect(state2.currentGuessWord).toBe("A");
+    });
+
+    it("handles SubmitGuess (valid)", () => {
+      const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APPLE", theSecretWord: "APPLE" };
+      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionary, now);
+      expect(state2.wordleGuesses).toContain("APPLE");
+      expect(state2.currentTurn).toBe(1);
+      expect(state2.currentGuessWord).toBe("");
+    });
+
+    it("handles SubmitGuess (invalid word)", () => {
+      const dictionaryEmpty = HashSet.empty<string>();
+      const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APPLE" };
+      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionaryEmpty, now);
+      expect(state2.isInvalidGuess).toBe(true);
+      expect(state2.wordleGuesses).toHaveLength(0);
+    });
   });
 
   describe("formatTime", () => {
