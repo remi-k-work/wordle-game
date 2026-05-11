@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { DateTime, Effect, HashSet, Random } from "effect";
+import { DateTime, Effect, HashSet, Random, Match } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
-import { deriveWordleGrid, getGameStatus, processKey, deriveKeypadColors, calculateScore } from "@/domain";
+import { deriveWordleGrid, getGameStatus, calculateScore, computeKeypadState, parseKey, applyGameAction } from "@/domain";
 import { Runtime } from "./runtime";
 import { activeModalAtom, languageAtom } from ".";
 
@@ -78,7 +78,7 @@ export const wordleGridAtom = Atom.make((get) => {
 export const keypadColorsAtom = Atom.make((get) => {
   const theSecretWord = get(theSecretWordAtom);
   const wordleGuesses = get(wordleGuessesAtom);
-  return deriveKeypadColors(theSecretWord, wordleGuesses);
+  return computeKeypadState(theSecretWord, wordleGuesses);
 });
 
 // Game status derived from current game state
@@ -92,51 +92,48 @@ export const gameStatusAtom = Atom.make((get) => {
 // Action to handle all key presses (letters, backspace, and enter)
 export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
   Effect.gen(function* () {
-    // Calculate the new game state based purely on the domain logic
     const currGameState = get(gameStateAtom);
-    const dictionary = yield* get.result(gameDataSolutionsAtom);
     const keypadColors = get(keypadColorsAtom);
 
-    /**
-     * Start the timer on the very first keystroke of the game session.
-     * We capture the current time using Effect's DateTime.now and store it
-     * in the state to ensure we have a precise reference point for scoring.
-     */
-    let nextGameState = currGameState;
-    if (currGameState.startTime === null && /^[a-zA-ZąĄćĆęĘłŁńŃóÓśŚźŹżŻ]$/u.test(pressedKey)) {
-      const now = yield* DateTime.now;
-      nextGameState = { ...currGameState, startTime: now };
-    }
+    // Map raw input to domain action and exit early if it is junk
+    const action = parseKey(pressedKey, keypadColors);
+    if (action._tag === "Ignore") return;
 
-    const newGameState = processKey(pressedKey, nextGameState, dictionary, keypadColors);
+    // Gather pure dependencies
+    const dictionary = yield* get.result(gameDataSolutionsAtom);
+    const now = yield* DateTime.now;
 
-    // If the game state has not changed, bail out
-    if (currGameState === newGameState) return;
+    // Process via purely functional domain logic
+    const nextGameState = applyGameAction(currGameState, action, dictionary, now);
 
-    /**
-     * Check if this specific keystroke ended the game with a win.
-     * If so, we capture the endTime, calculate the final score using our domain
-     * logic, and commit the updated state including the score.
-     */
-    const prevGameStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
-    const newGameStatus = getGameStatus(newGameState.currentTurn, newGameState.theSecretWord, newGameState.wordleGuesses);
+    // Referential equality check (anything has changed?)
+    if (currGameState === nextGameState) return;
 
-    let finalGameState = newGameState;
-    if (prevGameStatus._tag === "Playing" && newGameStatus._tag === "Won" && newGameState.startTime) {
-      const endTime = yield* DateTime.now;
-      const score = calculateScore(newGameState.currentTurn, newGameState.startTime, endTime);
-      finalGameState = { ...newGameState, score };
-    }
+    // Detect transitions
+    const prevStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
+    const nextStatus = getGameStatus(nextGameState.currentTurn, nextGameState.theSecretWord, nextGameState.wordleGuesses);
 
-    // Otherwise, commit the new game state
+    // Calculate Final Score if we just Won
+    const finalGameState = yield* Match.value(nextStatus).pipe(
+      Match.when({ _tag: "Won" }, () =>
+        Effect.gen(function* () {
+          if (prevStatus._tag === "Playing" && nextGameState.startTime) {
+            const endTime = yield* DateTime.now;
+            const score = calculateScore(nextGameState.currentTurn, nextGameState.startTime, endTime);
+            return { ...nextGameState, score };
+          }
+          return nextGameState;
+        })
+      ),
+      Match.orElse(() => Effect.succeed(nextGameState))
+    );
+
+    // Update the game state atom
     yield* Atom.set(gameStateAtom, finalGameState);
 
-    // If the game transitioned from "Playing" to "Won" or "Lost" just now:
-    if (prevGameStatus._tag === "Playing" && newGameStatus._tag !== "Playing") {
-      // Wait, so the user can see their final tiles turn green/yellow
+    // Handle Side Effects (Modals)
+    if (prevStatus._tag === "Playing" && nextStatus._tag !== "Playing") {
       yield* Effect.sleep("1.5 seconds");
-
-      // Open the status modal directly from the action!
       yield* Atom.set(activeModalAtom, "status");
     }
   })

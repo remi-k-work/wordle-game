@@ -4,7 +4,6 @@ import { Data, DateTime, Schema } from "effect";
 // schemas
 export const SolutionsDataSchema = Schema.Array(Schema.Trim);
 export const KeypadDataSchema = Schema.Array(Schema.Trim);
-export const GameStatusEnum = Data.taggedEnum<GameStatus>();
 
 // types
 export type Score = Readonly<{
@@ -28,9 +27,13 @@ export type Language = "En" | "Pl";
 export type Color = "grey" | "yellow" | "green" | "red" | "";
 export type Tile = Readonly<{ tileKey: string; color: Color }>;
 export type WordleGrid = Readonly<Tile[][]>;
+export type GameAction = Data.TaggedEnum<{ AddLetter: { readonly letter: string }; RemoveLetter: object; SubmitGuess: object; Ignore: object }>;
 export type GameStatus = Data.TaggedEnum<{ Playing: object; Won: object; Lost: object }>;
 
 // constants
+export const GameActionEnum = Data.taggedEnum<GameAction>();
+export const GameStatusEnum = Data.taggedEnum<GameStatus>();
+
 export const INITIAL_GAME_STATE = {
   theSecretWord: "",
   currentGuessWord: "",
@@ -42,6 +45,13 @@ export const INITIAL_GAME_STATE = {
 } as const satisfies GameState;
 
 export const BASE_POINTS_PER_TURN_MAP = { 1: 1000, 2: 800, 3: 600, 4: 400, 5: 200, 6: 100 } as const as Readonly<Record<number, number>>;
+
+export const SPEED_MULTIPLIER_RULES = [
+  { maxSeconds: 30, multiplier: 1.5 },
+  { maxSeconds: 60, multiplier: 1.2 },
+  { maxSeconds: 180, multiplier: 1.0 },
+  { maxSeconds: Infinity, multiplier: 0.8 },
+] as const;
 
 export const SPEED_MULTIPLIER_CATEGORY_MAP_EN = {
   1.5: "Speed Demon",

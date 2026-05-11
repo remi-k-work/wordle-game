@@ -1,38 +1,44 @@
 // services, features, and other libraries
-import { HashSet } from "effect";
+import { Array, HashSet, Match, pipe } from "effect";
+
+// constants
+const LETTER_REGEX = /^[A-ZĄĆĘŁŃÓŚŹŻ]$/u;
+const CONTROL_KEYS = HashSet.fromIterable(["BACKSPACE", "ENTER"]);
 
 // Validate the guess entry as the user types from the keyboard in real time
-export const isGuessKeyEntryValid = (pressedKey: string) => {
-  // Only legitimate and recognized keys are accepted, while everything else is rejected
-  if (pressedKey === "Backspace" || pressedKey === "Enter") return true;
+export const isGuessKeyValid = (pressedKey: string) =>
+  Match.value(pressedKey.toUpperCase()).pipe(
+    // Only legitimate and recognized keys are accepted, while everything else is rejected
+    Match.when(
+      (normalizedKey) => HashSet.has(CONTROL_KEYS, normalizedKey),
+      () => true
+    ),
 
-  // Apart from the foregoing, only letters will be accepted
-  return /^[a-zA-ZąĄćĆęĘłŁńŃóÓśŚźŹżŻ]$/u.test(pressedKey);
-};
+    // Apart from the foregoing, only letters will be accepted
+    Match.when(
+      (normalizedKey) => LETTER_REGEX.test(normalizedKey),
+      () => true
+    ),
 
-// Accept or reject the submitted guess after validating it
-export const isSubmittedGuessValid = (
-  validKey: string,
-  currentGuessWord: string,
-  currentTurn: number,
-  wordleGuesses: readonly string[],
-  dictionary: HashSet.HashSet<string>
-) => {
-  // Make sure the user is attempting to submit a new guess word
-  if (validKey !== "Enter") return false;
+    // All other keys are rejected
+    Match.orElse(() => false)
+  );
 
-  // Is this the final turn? We do not wish to continue the guess word submission
-  if (currentTurn > 5) return false;
+// Accept or reject the submitted guess purely based on domain rules
+export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[], dictionary: HashSet.HashSet<string>) =>
+  pipe(
+    [
+      // Is this not the final turn?
+      currentTurn <= 5,
 
-  // Do not allow duplicate words
-  if (wordleGuesses.includes(currentGuessWord)) return false;
+      // Do not allow duplicate words
+      !wordleGuesses.includes(currentGuessWord),
 
-  // Make sure the term is at least 5 characters long
-  if (currentGuessWord.length !== 5) return false;
+      // Make sure the term is exactly 5 characters long
+      currentGuessWord.length === 5,
 
-  // The fast lookup whether the guessed word is in the dictionary
-  if (!HashSet.has(dictionary, currentGuessWord)) return false;
-
-  // Allow and proceed because the given guess word is correct
-  return true;
-};
+      // Ensure the word exists in the dictionary
+      HashSet.has(dictionary, currentGuessWord),
+    ],
+    Array.every(Boolean)
+  );
