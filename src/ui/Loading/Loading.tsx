@@ -3,7 +3,7 @@ import { useAtomValue } from "@effect-atom/atom-react";
 import { languageAtom } from "@/atoms";
 
 // components
-import Spinner from "./Spinner";
+import Spinner from "@/assets/icons/Spinner";
 
 // types
 interface LoadingProps {
@@ -16,8 +16,8 @@ export default function Loading({ status }: LoadingProps) {
   if (status === "pending") {
     return (
       <article className="grid place-items-center">
-        <h1 className="flex flex-col items-center gap-4 text-4xl">
-          <Spinner />
+        <h1 className="flex flex-col items-center gap-4 text-center text-4xl">
+          <Spinner className="w-32" />
           {language === "En" ? "Loading..." : "Ładuję, proszę czekać..."}
         </h1>
       </article>
@@ -26,7 +26,7 @@ export default function Loading({ status }: LoadingProps) {
 
   return (
     <article className="grid place-items-center">
-      <h1 className="text-4xl">{language === "En" ? "Oops! There was an error!" : "Uwaga! Wystąpił błąd aplikacji!"}</h1>
+      <h1 className="text-center text-4xl">{language === "En" ? "Oops! There was an error!" : "Uwaga! Wystąpił błąd aplikacji!"}</h1>
     </article>
   );
 }

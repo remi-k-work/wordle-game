@@ -1,6 +1,9 @@
-export default function Spinner() {
+// types
+import type { ComponentPropsWithoutRef } from "react";
+
+export default function Spinner({ className }: ComponentPropsWithoutRef<"svg">) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-32">
+    <svg viewBox="0 0 24 24" className={className}>
       <circle cx="18" cy="12" r="0" fill="currentColor">
         <animate
           attributeName="r"

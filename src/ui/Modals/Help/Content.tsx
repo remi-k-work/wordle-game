@@ -35,28 +35,28 @@ export function Content() {
         };
 
   return (
-    <article className="max-w-[65ch] text-justify">
+    <article className="max-w-prose">
       <Image src={logo} className="mb-4 h-auto w-full" loading="lazy" alt="Logo" />
 
       <p className="my-4">{content.welcome}</p>
       <p className="my-4">{content.objective}</p>
 
-      <ul className="mx-auto max-w-[45ch] list-none p-0 text-start">
-        <li className="mb-2 flex items-center justify-start gap-2">
-          <i className="block h-4 w-4 rounded-sm border border-[#333] bg-[#5ac85a]"></i>
-          <span>{content.green}</span>
+      <ul className="mx-auto grid list-none place-content-center gap-2 text-start font-sans">
+        <li className="flex items-center gap-2">
+          <i className="block size-9 border bg-[#5ac85a]"></i>
+          {content.green}
         </li>
-        <li className="mb-2 flex items-center justify-start gap-2">
-          <i className="block h-4 w-4 rounded-sm border border-[#333] bg-[#e2cc68]"></i>
-          <span>{content.yellow}</span>
+        <li className="flex items-center gap-2">
+          <i className="block size-9 border bg-[#e2cc68]"></i>
+          {content.yellow}
         </li>
-        <li className="mb-2 flex items-center justify-start gap-2">
-          <i className="block h-4 w-4 rounded-sm border border-[#333] bg-[#a1a1a1]"></i>
-          <span>{content.grey}</span>
+        <li className="flex items-center gap-2">
+          <i className="block size-9 border bg-[#a1a1a1]"></i>
+          {content.grey}
         </li>
       </ul>
 
-      <p className="mt-4 text-center text-sm font-bold text-[#333]">{content.tip}</p>
+      <p className="mx-auto mt-4 font-sans text-sm font-semibold">{content.tip}</p>
     </article>
   );
 }

@@ -15,7 +15,7 @@ export function YouWin() {
   return (
     <article className="space-y-4">
       <div>
-        <p className="text-4xl text-[#ff004c] uppercase">{theSecretWord}</p>
+        <p className="text-4xl text-destructive uppercase">{theSecretWord}</p>
         {language === "En" ? (
           <p>You found the solution in {currentTurn} guesses 😄</p>
         ) : (
@@ -42,7 +42,7 @@ export function YouWin() {
           </div>
           <div>
             <p className="font-bold tracking-widest">{language === "En" ? "FINAL SCORE" : "WYNIK FINALNY"}</p>
-            <p className="text-4xl text-green-700">{score.totalScore}</p>
+            <p className="text-4xl text-accent">{score.totalScore}</p>
           </div>
         </>
       )}

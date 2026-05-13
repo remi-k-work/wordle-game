@@ -1,12 +1,12 @@
-// next
-import Image from "next/image";
-
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { closeModalAction, languageAtom } from "@/atoms";
 
+// components
+import { Button } from "@base-ui/react/button";
+
 // assets
-import close from "@/assets/close.svg";
+import { XCircleIcon } from "@heroicons/react/24/outline";
 
 // types
 import type { ReactNode } from "react";
@@ -22,13 +22,15 @@ export function Modal({ title, children }: ModalProps) {
 
   return (
     <aside className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <dialog open className="mx-auto my-auto block max-h-[80vh] overflow-auto rounded-lg bg-[#c9b8c5] p-4 text-center text-[#333] shadow-lg">
-        <h1 className="m-0 mb-5 border-b border-[#333] p-0 text-xl">{title}</h1>
+      <dialog open className="mx-auto my-auto block max-h-[80dvh] overflow-auto bg-surface-1 p-3 text-center text-text-1 shadow-lg">
+        <h1 className="mb-5 max-w-none bg-linear-to-b from-surface-1 via-surface-3 to-surface-1 p-2 font-sans text-4xl tracking-widest text-text-2 uppercase">
+          {title}
+        </h1>
         {children}
-        <button type="button" className="mx-auto mt-8 flex items-center justify-center gap-2" onClick={() => closeModal()}>
-          <Image src={close} className="w-4" alt="X" />
+        <Button className="button mx-auto mt-8" onClick={() => closeModal()}>
+          <XCircleIcon className="size-11" />
           {language === "En" ? "Close" : "Zamknij"}
-        </button>
+        </Button>
       </dialog>
     </aside>
   );

@@ -1,29 +1,30 @@
-// next
-import Image from "next/image";
-
 // services, features, and other libraries
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomValue, useAtomSet, Result, useAtomMount } from "@effect-atom/atom-react";
 import { handleKeyAction, gameDataKeypadAtom, keypadColorsAtom } from "@/atoms";
 
 // components
+import { Button } from "@base-ui/react/button";
 import { Loading } from "@/ui/Loading";
 
 // assets
-import backspace from "@/assets/backspace.svg";
-import enter from "@/assets/enter.svg";
+import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
 import type { Color } from "@/domain";
 import type { Transition } from "motion/react";
 
 // constants
-const COLOR_MAP = { grey: "#a1a1a1", green: "#5ac85a", yellow: "#e2cc68", red: "#c85a5a", "": "transparent" } as const satisfies Record<Color, string>;
-
-const BASE_KEY_CLASS = "flex-[0_1_8cqi] text-[clamp(1em,0.8em+0.4cqi,1.25em)]";
-const ICON_IMG_CLASS = "pointer-events-none mx-auto w-[clamp(1em,0.8em+0.4cqi,1.25em)]";
-
+const COLOR_MAP = {
+  grey: "var(--color-gray-700)",
+  green: "var(--color-green-700)",
+  yellow: "var(--color-yellow-700)",
+  red: "var(--color-destructive)",
+  "": "transparent",
+} as const satisfies Record<Color, string>;
 const SPRING_TRANSITION = { type: "spring", damping: 40, stiffness: 200 } as const satisfies Transition;
+
+const MotionButton = motion.create(Button);
 
 export default function Footer() {
   useAtomMount(gameDataKeypadAtom);
@@ -40,56 +41,53 @@ export default function Footer() {
       const availableKeys = keys.filter((key) => keypadColors[key] !== "grey");
 
       return (
-        <footer className="@container flex h-full w-full flex-wrap justify-center gap-4">
+        <footer className="flex flex-wrap justify-center gap-1">
           {/* AnimatePresence handles elements being unmounted (removed from the array) */}
           <AnimatePresence mode="sync">
             {availableKeys.map((key) => {
               const usedKeyColor = keypadColors[key];
 
               return (
-                <motion.button
+                <MotionButton
                   key={key}
                   layout
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
                   transition={SPRING_TRANSITION}
-                  type="button"
-                  className={BASE_KEY_CLASS}
+                  className="button flex-[0_1_3rem] border-secondary px-2 py-1 font-sans text-3xl"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
                   onClick={() => handleKey(key)}
                 >
                   {key}
-                </motion.button>
+                </MotionButton>
               );
             })}
 
             {/* Always include Enter and Backspace, and make sure they animate alongside the letters */}
-            <motion.button
+            <MotionButton
               key="Backspace"
               layout
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
-              type="button"
-              className={BASE_KEY_CLASS}
+              className="button bg-secondary px-2 py-1"
               onClick={() => handleKey("Backspace")}
             >
-              <Image src={backspace} className={ICON_IMG_CLASS} alt="⌫" />
-            </motion.button>
+              <BackspaceIcon className="size-9" />
+            </MotionButton>
 
-            <motion.button
+            <MotionButton
               key="Enter"
               layout
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
-              type="button"
-              className={BASE_KEY_CLASS}
+              className="button bg-secondary px-2 py-1"
               onClick={() => handleKey("Enter")}
             >
-              <Image src={enter} className={ICON_IMG_CLASS} alt="⏎" />
-            </motion.button>
+              <PaperAirplaneIcon className="size-9" />
+            </MotionButton>
           </AnimatePresence>
         </footer>
       );
