@@ -1,13 +1,12 @@
-// next
-import Image from "next/image";
-
 // services, features, and other libraries
 import { useAtom, useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { currentTurnAtom, languageAtom, openModalAction, restartGameAction } from "@/atoms";
 
+// components
+import { Button } from "@base-ui/react/button";
+
 // assets
-import turns from "@/assets/turns.svg";
-import help from "@/assets/help.svg";
+import { CogIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
 export default function Header() {
   const currentTurn = useAtomValue(currentTurnAtom);
@@ -22,20 +21,10 @@ export default function Header() {
     restartGame();
   }
 
-  // Handle a new game click
-  function handleNewGameClick() {
-    restartGame();
-  }
-
-  // Handle a help click
-  function handleHelpClick() {
-    openModal("help");
-  }
-
   return (
     <header className="flex items-center justify-evenly gap-4">
-      <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-white bg-none px-2 py-1">
-        <Image src={turns} className="w-6" alt="" />
+      <div className="flex items-center justify-center gap-2 rounded-md border px-2 py-1 text-2xl">
+        <CogIcon className="size-9" />
         {currentTurn}
       </div>
       <label className="block">
@@ -66,17 +55,17 @@ export default function Header() {
         )}
       </label>
       {language === "En" ? (
-        <button type="button" onClick={handleNewGameClick}>
+        <Button className="button" onClick={() => restartGame()}>
           New Game
-        </button>
+        </Button>
       ) : (
-        <button type="button" onClick={handleNewGameClick}>
+        <Button className="button" onClick={() => restartGame()}>
           Nowa Gra
-        </button>
+        </Button>
       )}
-      <button type="button" onClick={handleHelpClick}>
-        <Image src={help} className="w-6" alt="" />
-      </button>
+      <Button className="button p-1" onClick={() => openModal("help")}>
+        <QuestionMarkCircleIcon className="size-9" />
+      </Button>
     </header>
   );
 }

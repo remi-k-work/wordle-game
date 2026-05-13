@@ -20,9 +20,7 @@ const COLOR_MAP = {
 
 export default function GuessTile({ tile: { tileKey, color }, bounceAnim = false }: GuessTileProps) {
   return (
-    <div
-      className={cn("flex items-center justify-center border-2 border-[#666] [container:tile/size]", color && COLOR_MAP[color], bounceAnim && "animate-bounce")}
-    >
+    <div className={cn("flex items-center justify-center border-2 [container:tile/size]", color && COLOR_MAP[color], bounceAnim && "animate-bounce")}>
       <span className="text-[80cqb]">{tileKey}</span>
     </div>
   );

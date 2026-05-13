@@ -4,11 +4,15 @@ import "./globals.css";
 import Image from "next/image";
 
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/next";
 
 // components
 import { RegistryProvider } from "@effect-atom/atom-react";
 import { HelpModal, WinOrLoseModal } from "@/ui/Modals";
+
+// assets
+import { fontSans, fontMono } from "@/assets/fonts";
 
 // types
 import type { Metadata } from "next";
@@ -31,7 +35,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" translate="no" className="antialiased">
-      <body>
+      <body className={cn(`${fontSans.variable} ${fontMono.variable}`)}>
         <RegistryProvider>
           <div className="grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr_auto] gap-4 p-4">{children}</div>
           <HelpModal />
@@ -49,7 +53,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
             className="h-auto w-full rounded-lg shadow-md"
           />
 
-          <p className="mx-auto my-12 max-w-[65ch] text-center text-gray-300">
+          <p className="mx-auto my-12 max-w-prose text-center text-text-1">
             Immerse yourselves in the captivating world of word puzzles with my Wordle Game clone, the ultimate vocabulary challenge. Each day, a new mystery
             word awaits you for deciphering, offering a fresh challenge to flex your linguistic muscles. With each guess, you will receive clues to unravel the
             secret word, gradually narrowing down the possibilities. Utilize the vibrant color-coded feedback system to guide your journey, savoring the

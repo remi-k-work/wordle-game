@@ -24,7 +24,7 @@ export default function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
         "grid grid-cols-5 grid-rows-1 gap-4",
         isCurrentTurn && [
           // Reset backgrounds/borders for children before animation fully executes
-          "[&>div]:border-[#666] [&>div]:bg-transparent",
+          "[&>div]:border-primary [&>div]:bg-transparent",
           // Apply staggered animation delays
           "[&>div:nth-child(1)]:animate-flip [&>div:nth-child(1)]:[animation-delay:0s]",
           "[&>div:nth-child(2)]:animate-flip [&>div:nth-child(2)]:[animation-delay:0.2s]",
