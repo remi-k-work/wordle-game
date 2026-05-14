@@ -8,7 +8,9 @@ import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/next";
 
 // components
+import { ThemeProvider } from "next-themes";
 import { RegistryProvider } from "@effect-atom/atom-react";
+import Header from "@/ui/Header";
 import { HelpModal, WinOrLoseModal } from "@/ui/Modals";
 
 // assets
@@ -34,63 +36,49 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" translate="no" className="antialiased">
+    <html lang="en" translate="no" className="antialiased" suppressHydrationWarning>
       <body className={cn(`${fontSans.variable} ${fontMono.variable}`)}>
-        <RegistryProvider>
-          <div className="isolate mx-auto grid min-h-dvh max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-3 p-2">{children}</div>
-          <HelpModal />
-          <WinOrLoseModal />
-        </RegistryProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <RegistryProvider>
+            <div className="isolate grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr]">
+              <Header />
+              <main className="mx-auto grid max-w-4xl p-2">{children}</main>
+            </div>
+            <HelpModal />
+            <WinOrLoseModal />
+          </RegistryProvider>
+        </ThemeProvider>
 
         <Analytics debug={false} />
-        <div className="mx-auto max-w-433.5 p-4">
+
+        <a
+          href="https://www.remiforge.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Visit RemiForge Portfolio (opens in a new tab)"
+          className="mx-auto flex max-w-xl flex-wrap items-center gap-5 rounded-xl border border-gray-700 bg-neutral-900 p-4 text-start text-neutral-200 no-underline transition-colors hover:border-gray-500"
+        >
           <Image
-            src="/opengraph-image.jpg"
-            width="1734"
-            height="907"
+            src="https://www.remiforge.dev/opengraph-image.jpg"
+            width="1200"
+            height="630"
+            alt="RemiForge Portfolio"
             loading="lazy"
-            alt="Wordle Game Clone Logo"
-            className="h-auto w-full rounded-lg shadow-md"
+            className="aspect-1200/630 h-auto w-32 flex-none rounded-lg object-cover"
           />
-
-          <p className="mx-auto my-12 max-w-prose text-center text-text-1">
-            Immerse yourselves in the captivating world of word puzzles with my Wordle Game clone, the ultimate vocabulary challenge. Each day, a new mystery
-            word awaits you for deciphering, offering a fresh challenge to flex your linguistic muscles. With each guess, you will receive clues to unravel the
-            secret word, gradually narrowing down the possibilities. Utilize the vibrant color-coded feedback system to guide your journey, savoring the
-            satisfaction of each correct letter placement. Whether you are a seasoned wordsmith or a budding linguist, this game offers an engaging and
-            rewarding experience for all. Unleash your creativity, hone your vocabulary, and relish the thrill of solving each puzzle. Let the word-solving
-            adventure begin! This game can be played with either English or Polish vocabulary sets.
-          </p>
-
-          <a
-            href="https://www.remiforge.dev"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Visit RemiForge Portfolio (opens in a new tab)"
-            className="mx-auto flex max-w-xl flex-wrap items-center gap-5 rounded-xl border border-gray-700 bg-neutral-900 p-4 text-start text-neutral-200 no-underline transition-colors hover:border-gray-500"
-          >
-            <Image
-              src="https://www.remiforge.dev/opengraph-image.jpg"
-              width="1200"
-              height="630"
-              alt="RemiForge Portfolio"
-              loading="lazy"
-              className="aspect-1200/630 h-auto w-32 flex-none rounded-lg object-cover"
-            />
-            <div className="min-w-56 flex-1">
-              <div className="mb-1 text-sm tracking-wider text-neutral-400 uppercase">
-                <span aria-hidden="true">👨‍💻</span> Built By
-              </div>
-              <div className="flex items-center gap-2 text-2xl font-bold text-white">
-                RemiForge
-                <span aria-hidden="true" className="text-xl font-normal text-gray-500">
-                  ↗
-                </span>
-              </div>
-              <div className="mt-1 text-sm text-neutral-400">Portfolio of Projects, Experiments & Contact</div>
+          <div className="min-w-56 flex-1">
+            <div className="mb-1 text-sm tracking-wider text-neutral-400 uppercase">
+              <span aria-hidden="true">👨‍💻</span> Built By
             </div>
-          </a>
-        </div>
+            <div className="flex items-center gap-2 text-2xl font-bold text-white">
+              RemiForge
+              <span aria-hidden="true" className="text-xl font-normal text-gray-500">
+                ↗
+              </span>
+            </div>
+            <div className="mt-1 text-sm text-neutral-400">Portfolio of Projects, Experiments & Contact</div>
+          </div>
+        </a>
       </body>
     </html>
   );

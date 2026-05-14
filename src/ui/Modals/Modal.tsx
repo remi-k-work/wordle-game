@@ -45,7 +45,7 @@ export function Modal({ isOpen = false, title, children }: ModalProps) {
               {title}
             </h1>
             {children}
-            <Button className="button mx-auto mt-8" onClick={() => closeModal()}>
+            <Button className="button mx-auto mt-8" tabIndex={-1} onClick={() => closeModal()}>
               <XCircleIcon className="size-11" />
               {language === "En" ? "Close" : "Zamknij"}
             </Button>

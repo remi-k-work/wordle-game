@@ -7,9 +7,9 @@ import { Button } from "@base-ui/react";
 
 // assets
 import { CogIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
-import LangChanger from "./LangChanger";
+import LangChanger from "@/ui/LangChanger";
 
-export default function Header() {
+export function Header() {
   const currentTurn = useAtomValue(currentTurnAtom);
   const language = useAtomValue(languageAtom);
   const restartGame = useAtomSet(restartGameAction);

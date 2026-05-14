@@ -6,8 +6,7 @@ import { languageAtom, restartGameAction } from "@/atoms";
 import { Button } from "@base-ui/react";
 
 // assets
-import UsFlagIcon from "@/assets/icons/UsFlag";
-import PlFlagIcon from "@/assets/icons/PlFlag";
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 export default function LangChanger() {
   const [language, setLanguage] = useAtom(languageAtom);

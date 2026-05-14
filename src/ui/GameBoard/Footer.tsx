@@ -26,7 +26,7 @@ const SPRING_TRANSITION = { type: "spring", damping: 40, stiffness: 200 } as con
 
 const MotionButton = motion.create(Button);
 
-export default function Footer() {
+export function Footer() {
   useAtomMount(gameDataKeypadAtom);
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
   const keypadColors = useAtomValue(keypadColorsAtom);
