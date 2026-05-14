@@ -3,7 +3,7 @@ import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { currentTurnAtom, languageAtom, openModalAction, restartGameAction } from "@/atoms";
 
 // components
-import { Button } from "@base-ui/react/button";
+import { Button } from "@base-ui/react";
 
 // assets
 import { CogIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
@@ -16,7 +16,7 @@ export default function Header() {
   const openModal = useAtomSet(openModalAction);
 
   return (
-    <header className="flex items-center justify-evenly gap-4">
+    <header className="flex items-center justify-evenly gap-3">
       <div className="flex items-center justify-center gap-2 rounded-md border px-2 py-1 text-2xl">
         <CogIcon className="size-11" />
         {currentTurn}

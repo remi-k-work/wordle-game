@@ -85,7 +85,7 @@
   }
 
   body {
-    @apply min-h-dvh bg-surface-1 font-mono text-base font-light text-text-1;
+    @apply relative min-h-dvh bg-surface-1 font-mono text-base font-light text-text-1;
   }
 
   a,

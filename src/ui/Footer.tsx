@@ -4,7 +4,7 @@ import { useAtomValue, useAtomSet, Result, useAtomMount } from "@effect-atom/ato
 import { handleKeyAction, gameDataKeypadAtom, keypadColorsAtom } from "@/atoms";
 
 // components
-import { Button } from "@base-ui/react/button";
+import { Button } from "@base-ui/react";
 import { Loading } from "@/ui/Loading";
 
 // assets

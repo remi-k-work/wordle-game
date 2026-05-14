@@ -15,13 +15,9 @@ export function WinOrLoseModal() {
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
   const isWinner = gameStatus._tag === "Won";
 
-  if (activeModal === "status") {
-    return (
-      <Modal title={isWinner ? (language === "En" ? "You Win!" : "Wygrałeś!") : language === "En" ? "Nevermind" : "Trudno"}>
-        {isWinner ? <YouWin /> : <Nevermind />}
-      </Modal>
-    );
-  }
-
-  return null;
+  return (
+    <Modal isOpen={activeModal === "status"} title={isWinner ? (language === "En" ? "You Win!" : "Wygrałeś!") : language === "En" ? "Nevermind" : "Trudno"}>
+      {isWinner ? <YouWin /> : <Nevermind />}
+    </Modal>
+  );
 }

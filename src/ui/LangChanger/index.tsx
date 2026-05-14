@@ -3,7 +3,7 @@ import { useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { languageAtom, restartGameAction } from "@/atoms";
 
 // components
-import { Button } from "@base-ui/react/button";
+import { Button } from "@base-ui/react";
 
 // assets
 import UsFlagIcon from "@/assets/icons/UsFlag";

@@ -10,13 +10,9 @@ export function HelpModal() {
   const activeModal = useAtomValue(activeModalAtom);
   const language = useAtomValue(languageAtom);
 
-  if (activeModal === "help") {
-    return (
-      <Modal title={language === "En" ? "Help" : "Pomoc"}>
-        <Content />
-      </Modal>
-    );
-  }
-
-  return null;
+  return (
+    <Modal isOpen={activeModal === "help"} title={language === "En" ? "Help" : "Pomoc"}>
+      <Content />
+    </Modal>
+  );
 }
