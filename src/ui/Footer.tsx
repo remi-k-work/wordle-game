@@ -51,8 +51,6 @@ export default function Footer() {
                 <MotionButton
                   key={key}
                   layout
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
                   transition={SPRING_TRANSITION}
                   className="button flex-[0_1_3rem] border-secondary text-center font-sans text-xl"
@@ -68,8 +66,6 @@ export default function Footer() {
             <MotionButton
               key="Backspace"
               layout
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
               className="button flex-[0_1_3rem] bg-secondary px-2 py-1"
               onClick={() => handleKey("Backspace")}
@@ -80,8 +76,6 @@ export default function Footer() {
             <MotionButton
               key="Enter"
               layout
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
               className="button flex-[0_1_3rem] bg-secondary px-2 py-1"
               onClick={() => handleKey("Enter")}
