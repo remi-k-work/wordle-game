@@ -55,7 +55,7 @@ export default function Footer() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
                   transition={SPRING_TRANSITION}
-                  className="button flex-[0_1_4rem] border-secondary text-center font-sans text-3xl"
+                  className="button flex-[0_1_3rem] border-secondary text-center font-sans text-xl"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
                   onClick={() => handleKey(key)}
                 >
@@ -71,7 +71,7 @@ export default function Footer() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
-              className="button flex-[0_1_4rem] bg-secondary px-2 py-1"
+              className="button flex-[0_1_3rem] bg-secondary px-2 py-1"
               onClick={() => handleKey("Backspace")}
             >
               <BackspaceIcon className="size-9" />
@@ -83,7 +83,7 @@ export default function Footer() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
-              className="button flex-[0_1_4rem] bg-secondary px-2 py-1"
+              className="button flex-[0_1_3rem] bg-secondary px-2 py-1"
               onClick={() => handleKey("Enter")}
             >
               <PaperAirplaneIcon className="size-9" />
