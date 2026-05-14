@@ -5,22 +5,18 @@
     0% {
       transform: rotateX(0);
       background: transparent;
-      border-color: var(--color-primary);
     }
     45% {
       transform: rotateX(90deg);
       background: transparent;
-      border-color: var(--color-primary);
     }
     55% {
       transform: rotateX(90deg);
       background: var(--_background);
-      border-color: var(--_border-color);
     }
     100% {
       transform: rotateX(0deg);
       background: var(--_background);
-      border-color: var(--_border-color);
     }
   }
 }

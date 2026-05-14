@@ -34,7 +34,7 @@ export default function CurrentGuess() {
   const finalGuessTiles = [...currentGuessTiles, ...remainingEmptyTiles];
 
   return (
-    <div className={cn("grid grid-cols-5 grid-rows-1 gap-4", isInvalidGuess && "animate-pulse")}>
+    <div className={cn("grid grid-cols-5 grid-rows-1 gap-2", isInvalidGuess && "animate-pulse")}>
       {finalGuessTiles.map((tile, tileIndex) => (
         <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentGuessTiles.length - 1} />
       ))}

@@ -16,9 +16,9 @@ import type { Transition } from "motion/react";
 
 // constants
 const COLOR_MAP = {
-  grey: "var(--color-gray-700)",
-  green: "var(--color-green-700)",
-  yellow: "var(--color-yellow-700)",
+  grey: "var(--color-tile-grey)",
+  yellow: "var(--color-tile-yellow)",
+  green: "var(--color-tile-green)",
   red: "var(--color-destructive)",
   "": "transparent",
 } as const satisfies Record<Color, string>;
@@ -41,7 +41,7 @@ export default function Footer() {
       const availableKeys = keys.filter((key) => keypadColors[key] !== "grey");
 
       return (
-        <footer className="flex flex-wrap justify-center gap-1">
+        <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1">
           {/* AnimatePresence handles elements being unmounted (removed from the array) */}
           <AnimatePresence mode="sync">
             {availableKeys.map((key) => {
@@ -55,7 +55,7 @@ export default function Footer() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
                   transition={SPRING_TRANSITION}
-                  className="button flex-[0_1_3rem] border-secondary px-2 py-1 font-sans text-3xl"
+                  className="button flex-[0_1_4rem] border-secondary text-center font-sans text-3xl"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
                   onClick={() => handleKey(key)}
                 >
@@ -71,7 +71,7 @@ export default function Footer() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
-              className="button bg-secondary px-2 py-1"
+              className="button flex-[0_1_4rem] bg-secondary px-2 py-1"
               onClick={() => handleKey("Backspace")}
             >
               <BackspaceIcon className="size-9" />
@@ -83,7 +83,7 @@ export default function Footer() {
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={SPRING_TRANSITION}
-              className="button bg-secondary px-2 py-1"
+              className="button flex-[0_1_4rem] bg-secondary px-2 py-1"
               onClick={() => handleKey("Enter")}
             >
               <PaperAirplaneIcon className="size-9" />

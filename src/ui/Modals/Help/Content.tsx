@@ -43,15 +43,15 @@ export function Content() {
 
       <ul className="mx-auto grid list-none place-content-center gap-2 text-start font-sans">
         <li className="flex items-center gap-2">
-          <i className="block size-9 border bg-[#5ac85a]"></i>
+          <i className="block size-9 border bg-tile-green"></i>
           {content.green}
         </li>
         <li className="flex items-center gap-2">
-          <i className="block size-9 border bg-[#e2cc68]"></i>
+          <i className="block size-9 border bg-tile-yellow"></i>
           {content.yellow}
         </li>
         <li className="flex items-center gap-2">
-          <i className="block size-9 border bg-[#a1a1a1]"></i>
+          <i className="block size-9 border bg-tile-grey"></i>
           {content.grey}
         </li>
       </ul>

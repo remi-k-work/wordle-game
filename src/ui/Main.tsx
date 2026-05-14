@@ -11,10 +11,10 @@ export default function Main() {
   const wordleGrid = useAtomValue(wordleGridAtom);
 
   return (
-    <main className="grid min-h-full grid-cols-1 grid-rows-6 gap-4">
-      {wordleGrid.map((_, rowIndex) => {
-        return rowIndex === currentTurn ? <CurrentGuess key={rowIndex} /> : <GuessRow key={rowIndex} wordleGrid={wordleGrid} rowIndex={rowIndex} />;
-      })}
+    <main className="grid min-h-full grid-cols-1 grid-rows-6 gap-2">
+      {wordleGrid.map((_, rowIndex) =>
+        rowIndex === currentTurn ? <CurrentGuess key={rowIndex} /> : <GuessRow key={rowIndex} wordleGrid={wordleGrid} rowIndex={rowIndex} />
+      )}
     </main>
   );
 }

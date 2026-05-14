@@ -37,7 +37,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
     <html lang="en" translate="no" className="antialiased">
       <body className={cn(`${fontSans.variable} ${fontMono.variable}`)}>
         <RegistryProvider>
-          <div className="grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr_auto] gap-4 p-4">{children}</div>
+          <div className="mx-auto grid min-h-dvh max-w-6xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-3 p-2">{children}</div>
           <HelpModal />
           <WinOrLoseModal />
         </RegistryProvider>

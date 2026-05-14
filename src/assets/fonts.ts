@@ -1,5 +1,5 @@
 // next
-import { Outfit, Fira_Code } from "next/font/google";
+import { Roboto, Roboto_Slab } from "next/font/google";
 
-export const fontSans = Outfit({ variable: "--font-sans", subsets: ["latin"] });
-export const fontMono = Fira_Code({ variable: "--font-mono", subsets: ["latin"] });
+export const fontSans = Roboto({ variable: "--font-sans", subsets: ["latin-ext"] });
+export const fontMono = Roboto_Slab({ variable: "--font-mono", subsets: ["latin-ext"] });
