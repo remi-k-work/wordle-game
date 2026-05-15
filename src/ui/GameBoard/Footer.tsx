@@ -53,7 +53,7 @@ export function Footer() {
                   layout
                   exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
                   transition={SPRING_TRANSITION}
-                  className="button border-secondary p-3 font-sans text-xl leading-3"
+                  className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
                   onClick={() => handleKey(key)}
                 >
@@ -63,11 +63,17 @@ export function Footer() {
             })}
 
             {/* Always include Enter and Backspace, and make sure they animate alongside the letters */}
-            <MotionButton key="Backspace" layout transition={SPRING_TRANSITION} className="button bg-secondary p-1" onClick={() => handleKey("Backspace")}>
+            <MotionButton
+              key="Backspace"
+              layout
+              transition={SPRING_TRANSITION}
+              className="button basis-12 bg-secondary p-0"
+              onClick={() => handleKey("Backspace")}
+            >
               <BackspaceIcon className="size-7" />
             </MotionButton>
 
-            <MotionButton key="Enter" layout transition={SPRING_TRANSITION} className="button bg-secondary p-1" onClick={() => handleKey("Enter")}>
+            <MotionButton key="Enter" layout transition={SPRING_TRANSITION} className="button basis-12 bg-secondary p-0" onClick={() => handleKey("Enter")}>
               <PaperAirplaneIcon className="size-7" />
             </MotionButton>
           </AnimatePresence>
