@@ -41,7 +41,7 @@ export function Footer() {
       const availableKeys = keys.filter((key) => keypadColors[key] !== "grey");
 
       return (
-        <footer className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-1">
+        <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1">
           {/* AnimatePresence handles elements being unmounted (removed from the array) */}
           <AnimatePresence mode="sync">
             {availableKeys.map((key) => {
@@ -53,7 +53,7 @@ export function Footer() {
                   layout
                   exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
                   transition={SPRING_TRANSITION}
-                  className="button border-secondary px-3 py-3 font-sans text-xl leading-3"
+                  className="button border-secondary p-3 font-sans text-xl leading-3"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
                   onClick={() => handleKey(key)}
                 >
@@ -64,11 +64,11 @@ export function Footer() {
 
             {/* Always include Enter and Backspace, and make sure they animate alongside the letters */}
             <MotionButton key="Backspace" layout transition={SPRING_TRANSITION} className="button bg-secondary p-1" onClick={() => handleKey("Backspace")}>
-              <BackspaceIcon className="size-9" />
+              <BackspaceIcon className="size-7" />
             </MotionButton>
 
             <MotionButton key="Enter" layout transition={SPRING_TRANSITION} className="button bg-secondary p-1" onClick={() => handleKey("Enter")}>
-              <PaperAirplaneIcon className="size-9" />
+              <PaperAirplaneIcon className="size-7" />
             </MotionButton>
           </AnimatePresence>
         </footer>
