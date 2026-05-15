@@ -25,13 +25,26 @@ export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, end
   } as const satisfies Score;
 };
 
+// Calculates the "live" potential score based on current turn and time elapsed
+export const calculatePotentialScore = (currentTurn: number, startTime: DateTime.Utc | null, now: DateTime.Utc) => {
+  // Establish the base points based on the turn number in which the secret word was solved
+  const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
+  if (!startTime) return basePointsPerTurn;
+
+  // Establish the speed multiplier based on the time it took
+  const seconds = DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds);
+  const speedMultiplier = SPEED_MULTIPLIER_RULES.find((rule) => seconds < rule.maxSeconds)?.multiplier ?? 0.8;
+
+  return Math.round(basePointsPerTurn * speedMultiplier);
+};
+
 // Get the current game status by checking the last guess and current turn
 export const getGameStatus = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]) => {
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
   if (theSecretWord === wordleGuesses.at(-1)) return GameStatusEnum.Won();
 
   // Do we have a loser? When the player runs out of turns, we have a loser
-  if (currentTurn > 5) return GameStatusEnum.Lost();
+  if (currentTurn > 6) return GameStatusEnum.Lost();
 
   // Otherwise, the game is still in progress
   return GameStatusEnum.Playing();

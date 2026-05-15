@@ -29,7 +29,7 @@ export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wo
   pipe(
     [
       // Is this not the final turn?
-      currentTurn <= 5,
+      currentTurn <= 6,
 
       // Do not allow duplicate words
       !wordleGuesses.includes(currentGuessWord),

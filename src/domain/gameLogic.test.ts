@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, TestClock, HashSet } from "effect";
-import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction } from ".";
-import { GameStatusEnum, GameActionEnum, INITIAL_GAME_STATE } from "./models";
+import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction, calculatePotentialScore } from ".";
+import { GameActionEnum, INITIAL_GAME_STATE } from "./models";
 
 describe("gameLogic", () => {
   describe("calculateScore", () => {
@@ -53,6 +53,26 @@ describe("gameLogic", () => {
     );
   });
 
+  describe("calculatePotentialScore", () => {
+    it.effect("calculates potential score correctly based on turn and speed", () =>
+      Effect.gen(function* () {
+        const start = yield* DateTime.now;
+
+        // Turn 1 (first guess), no time elapsed -> Full base points for turn 1 (1000)
+        expect(calculatePotentialScore(1, null, start)).toBe(1000);
+
+        // Turn 1, 20s elapsed -> 1000 * 1.5 = 1500
+        yield* TestClock.adjust(Duration.seconds(20));
+        expect(calculatePotentialScore(1, start, yield* DateTime.now)).toBe(1500);
+
+        // Turn 3 (two guesses completed), 45s elapsed -> 600 * 1.2 = 720
+        // We are at 20s, add 25s more to reach 45s
+        yield* TestClock.adjust(Duration.seconds(25));
+        expect(calculatePotentialScore(3, start, yield* DateTime.now)).toBe(720);
+      })
+    );
+  });
+
   describe("getGameStatus", () => {
     it("returns Won when last guess matches secret word", () => {
       const status = getGameStatus(1, "APPLE", ["APPLE"]);
@@ -60,7 +80,7 @@ describe("gameLogic", () => {
     });
 
     it("returns Lost when turn exceeds limit", () => {
-      const status = getGameStatus(6, "APPLE", ["BIRDS", "CARDS", "TABLE", "CHAIR", "HOUSE", "PIANO"]);
+      const status = getGameStatus(7, "APPLE", ["BIRDS", "CARDS", "TABLE", "CHAIR", "HOUSE", "PIANO"]);
       expect(status._tag).toBe("Lost");
     });
 
@@ -101,7 +121,7 @@ describe("gameLogic", () => {
       const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APPLE", theSecretWord: "APPLE" };
       const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionary, now);
       expect(state2.wordleGuesses).toContain("APPLE");
-      expect(state2.currentTurn).toBe(1);
+      expect(state2.currentTurn).toBe(2);
       expect(state2.currentGuessWord).toBe("");
     });
 

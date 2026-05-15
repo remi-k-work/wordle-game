@@ -16,7 +16,7 @@ interface GuessRowProps {
 
 export default function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const currentTurn = useAtomValue(currentTurnAtom);
-  const isCurrentTurn = rowIndex === currentTurn - 1;
+  const isCurrentTurn = rowIndex === currentTurn - 2;
 
   return (
     <div

@@ -13,7 +13,7 @@ export function Main() {
   return (
     <article className="grid min-h-full grid-cols-1 grid-rows-6 gap-2">
       {wordleGrid.map((_, rowIndex) =>
-        rowIndex === currentTurn ? <CurrentGuess key={rowIndex} /> : <GuessRow key={rowIndex} wordleGrid={wordleGrid} rowIndex={rowIndex} />
+        rowIndex === currentTurn - 1 ? <CurrentGuess key={rowIndex} /> : <GuessRow key={rowIndex} wordleGrid={wordleGrid} rowIndex={rowIndex} />
       )}
     </article>
   );

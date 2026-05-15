@@ -13,6 +13,12 @@ export type Score = Readonly<{
   timeSeconds: number;
 }>;
 
+export type Session = Readonly<{
+  totalScore: number;
+  currentStreak: number;
+  bestRun: number;
+}>;
+
 export type GameState = Readonly<{
   theSecretWord: string;
   currentGuessWord: string;
@@ -38,7 +44,7 @@ export const INITIAL_GAME_STATE = {
   theSecretWord: "",
   currentGuessWord: "",
   wordleGuesses: [],
-  currentTurn: 0,
+  currentTurn: 1,
   isInvalidGuess: false,
   startTime: null,
   score: null,

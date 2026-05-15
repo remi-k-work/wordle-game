@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { closeModalAction, languageAtom } from "@/atoms";
+import { useAtomSet } from "@effect-atom/atom-react";
+import { closeModalAction } from "@/atoms";
 
 // components
 import { Button, Dialog } from "@base-ui/react";
@@ -19,7 +19,6 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen = false, title, children }: ModalProps) {
-  const language = useAtomValue(languageAtom);
   const closeModal = useAtomSet(closeModalAction);
 
   return (
@@ -47,7 +46,7 @@ export function Modal({ isOpen = false, title, children }: ModalProps) {
             {children}
             <Button className="button mx-auto mt-8" tabIndex={-1} onClick={() => closeModal()}>
               <XCircleIcon className="size-11" />
-              {language === "En" ? "Close" : "Zamknij"}
+              Close
             </Button>
           </Dialog.Popup>
         </Dialog.Viewport>

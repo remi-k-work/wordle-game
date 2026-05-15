@@ -2,9 +2,9 @@
 import { DateTime, Effect, HashSet, Random, Match } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
-import { deriveWordleGrid, getGameStatus, calculateScore, computeKeypadState, parseKey, applyGameAction } from "@/domain";
+import { deriveWordleGrid, getGameStatus, calculateScore, computeKeypadState, parseKey, applyGameAction, calculatePotentialScore } from "@/domain";
 import { Runtime } from "./runtime";
-import { activeModalAtom, languageAtom } from ".";
+import { activeModalAtom, languageAtom, sessionAtom } from ".";
 
 // types
 import type { GameState } from "@/domain";
@@ -23,6 +23,14 @@ export const currentTurnAtom = gameStateAtom.pipe(Atom.map((state) => state.curr
 export const isInvalidGuessAtom = gameStateAtom.pipe(Atom.map((state) => state.isInvalidGuess));
 export const scoreAtom = gameStateAtom.pipe(Atom.map((state) => state.score));
 export const startTimeAtom = gameStateAtom.pipe(Atom.map((state) => state.startTime));
+
+// Reactive selector for real-time score projection
+export const potentialScoreAtom = Atom.make((get) => {
+  const currentTurn = get(currentTurnAtom);
+  const startTime = get(startTimeAtom);
+  const now = DateTime.unsafeNow();
+  return calculatePotentialScore(currentTurn, startTime, now);
+});
 
 // Effectful atom that fetches the solution dictionary and initializes a new secret word
 export const gameDataSolutionsAtom = Runtime.atom(
@@ -120,7 +128,26 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
           if (prevStatus._tag === "Playing" && nextGameState.startTime) {
             const endTime = yield* DateTime.now;
             const score = calculateScore(nextGameState.currentTurn, nextGameState.startTime, endTime);
+
+            // Update persistent session
+            const session = yield* Atom.get(sessionAtom);
+            const newTotalScore = session.totalScore + score.totalScore;
+            const newStreak = session.currentStreak + 1;
+            const newBestRun = Math.max(session.bestRun, newTotalScore);
+
+            yield* Atom.set(sessionAtom, { totalScore: newTotalScore, currentStreak: newStreak, bestRun: newBestRun });
+
             return { ...nextGameState, score };
+          }
+          return nextGameState;
+        })
+      ),
+      Match.when({ _tag: "Lost" }, () =>
+        Effect.gen(function* () {
+          if (prevStatus._tag === "Playing") {
+            // Reset session on loss
+            const session = yield* Atom.get(sessionAtom);
+            yield* Atom.set(sessionAtom, { ...session, totalScore: 0, currentStreak: 0 });
           }
           return nextGameState;
         })
