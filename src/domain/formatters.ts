@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { Array, Duration, pipe } from "effect";
+import { Array, Duration, Option, pipe } from "effect";
 
 // types
-import type { Color, Language } from ".";
+import type { Color, Language, Tile } from ".";
 
 // constants
 import { SPEED_MULTIPLIER_CATEGORY_MAP_EN, SPEED_MULTIPLIER_CATEGORY_MAP_PL } from ".";
@@ -21,30 +21,38 @@ export const formatDuration = (duration: Duration.Duration) => {
 
 // Format the current guess word into an array of letter objects with color coding
 export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
-  // After each guess, the tiles will change color to indicate how close your guess is to the secret word
-  const theSecretWordArray = [...theSecretWord];
+  const secretChars = [...theSecretWord];
+  const guessChars = [...wordleGuess];
 
-  // Initialize all tiles as grey (not in word)
-  const formattedGuess = pipe(
-    [...wordleGuess],
-    Array.map((letter) => ({ tileKey: letter, color: "grey" as Color }))
-  );
+  // Identify letters that are not perfect "green" matches to form our remaining pool
+  const initialPool = Array.filter(secretChars, (char, i) => char !== guessChars[i]);
 
-  // Perform a first pass to mark green tiles (correct letter and position)
-  formattedGuess.forEach((tile, index) => {
-    if (theSecretWordArray[index] === tile.tileKey) {
-      formattedGuess[index].color = "green";
-      theSecretWordArray[index] = "";
+  // Reduce to final tiles, functionally removing used letters from the pool for "yellows"
+  return Array.reduce(guessChars, { pool: initialPool, tiles: [] as Tile[] }, (acc, guessChar, i) => {
+    if (guessChar === secretChars[i]) {
+      return { ...acc, tiles: Array.append(acc.tiles, { tileKey: guessChar, color: "green" as Color }) };
     }
-  });
 
-  // Perform a second pass to mark yellow tiles (correct letter, wrong position)
-  formattedGuess.forEach((tile, index) => {
-    if (tile.color !== "green" && theSecretWordArray.includes(tile.tileKey)) {
-      formattedGuess[index].color = "yellow";
-      theSecretWordArray[theSecretWordArray.indexOf(tile.tileKey)] = "";
-    }
-  });
+    const poolIndex = Array.findFirstIndex(acc.pool, (c) => c === guessChar);
 
-  return formattedGuess;
+    return Option.match(poolIndex, {
+      onNone: () => ({ ...acc, tiles: Array.append(acc.tiles, { tileKey: guessChar, color: "grey" as Color }) }),
+      onSome: (idx) => ({
+        pool: Array.remove(acc.pool, idx),
+        tiles: Array.append(acc.tiles, { tileKey: guessChar, color: "yellow" as Color }),
+      }),
+    });
+  }).tiles;
 };
+
+// Derive the full 6x5 grid state for rendering based on completed guesses
+export const deriveWordleGrid = (theSecretWord: string, wordleGuesses: readonly string[]) =>
+  Array.makeBy(6, (rowIndex) =>
+    pipe(
+      Array.get(wordleGuesses, rowIndex),
+      Option.match({
+        onNone: () => Array.makeBy(5, () => ({ tileKey: "", color: "" as Color })),
+        onSome: (guess) => formatGuess(theSecretWord, guess),
+      })
+    )
+  );

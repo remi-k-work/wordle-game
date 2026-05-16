@@ -1,12 +1,12 @@
 // services, features, and other libraries
 import { Array, HashSet, Duration, DateTime, Match, pipe } from "effect";
-import { canSubmitGuess, formatGuess, GameActionEnum, GameStatusEnum, isGuessKeyValid, pickStrongerColor } from ".";
+import { canSubmitGuess, formatGuess, GameActionEnum, GameStatusEnum, getSpeedMultiplier, isGuessKeyValid, pickStrongerColor } from ".";
 
 // types
 import type { Color, GameAction, GameState, Score } from ".";
 
 // constants
-import { BASE_POINTS_PER_TURN_MAP, SPEED_MULTIPLIER_RULES } from ".";
+import { BASE_POINTS_PER_TURN_MAP } from ".";
 
 // Calculates the player's score based on the turn they won on and how long it took them
 export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, endTime: DateTime.Utc) => {
@@ -15,7 +15,7 @@ export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, end
 
   // Establish the speed multiplier based on the time it took
   const seconds = DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds);
-  const speedMultiplier = SPEED_MULTIPLIER_RULES.find((rule) => seconds < rule.maxSeconds)?.multiplier ?? 0.8;
+  const speedMultiplier = getSpeedMultiplier(seconds);
 
   return {
     totalScore: Math.round(basePointsPerTurn * speedMultiplier),
@@ -33,9 +33,8 @@ export const calculatePotentialScore = (currentTurn: number, startTime: DateTime
   // Establish the speed multiplier based on the time it took
   // If the timer has not started yet, assume the maximum possible speed multiplier (0s elapsed)
   const seconds = startTime ? DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds) : 0;
-  const speedMultiplier = SPEED_MULTIPLIER_RULES.find((rule) => seconds < rule.maxSeconds)?.multiplier ?? 0.8;
 
-  return Math.round(basePointsPerTurn * speedMultiplier);
+  return Math.round(basePointsPerTurn * getSpeedMultiplier(seconds));
 };
 
 // Get the current game status by checking the last guess and current turn
@@ -49,12 +48,6 @@ export const getGameStatus = (currentTurn: number, theSecretWord: string, wordle
   // Otherwise, the game is still in progress
   return GameStatusEnum.Playing();
 };
-
-// Derive the full 6x5 grid state for rendering based on completed guesses
-export const deriveWordleGrid = (theSecretWord: string, wordleGuesses: readonly string[]) =>
-  Array.makeBy(6, (rowIndex) =>
-    pipe(wordleGuesses[rowIndex], (guess) => (guess ? formatGuess(theSecretWord, guess) : Array.makeBy(5, () => ({ tileKey: "", color: "" as Color }))))
-  );
 
 // Compute the final keypad state by reducing all guesses and picking the strongest colors
 export const computeKeypadState = (theSecretWord: string, wordleGuesses: readonly string[]) =>
