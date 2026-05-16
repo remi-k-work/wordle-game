@@ -4,7 +4,8 @@ import { currentStreakAtom, openModalAction, potentialScoreAtom, restartGameActi
 
 // components
 import { Button } from "@base-ui/react";
-import LangChanger from "@/ui/LangChanger";
+import LangChanger from "@/ui/Game/LangChanger";
+import { GameMenu } from "@/ui/Game/Menu";
 
 // assets
 import { FireIcon, TrophyIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
@@ -32,7 +33,7 @@ export function Header() {
         </div>
       </section>
 
-      <section className="flex flex-1 items-center justify-center gap-4">
+      <section className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-center sm:gap-3">
         <LangChanger />
         <Button className="button py-4" onClick={() => restartGame()}>
           New Game
@@ -44,9 +45,10 @@ export function Header() {
         <span className="text-2xl font-semibold tabular-nums">{potentialScore}</span>
       </section>
 
-      <Button className="button p-1" onClick={() => openModal("help")}>
+      <Button className="button hidden sm:block" title="Help" onClick={() => openModal("help")}>
         <QuestionMarkCircleIcon className="size-11" />
       </Button>
+      <GameMenu />
     </header>
   );
 }

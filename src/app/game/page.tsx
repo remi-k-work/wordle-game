@@ -5,7 +5,7 @@ import { useAtomValue, useAtomMount, Result } from "@effect-atom/atom-react";
 import { gameDataSolutionsAtom } from "@/atoms";
 
 // components
-import { Footer, Header, Main } from "@/ui/GameBoard";
+import { Footer, Header, Main } from "@/ui/Game/Board";
 import { Loading } from "@/ui/Loading";
 
 export default function Page() {

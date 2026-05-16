@@ -18,7 +18,7 @@ export default function LangChanger() {
   }
 
   return (
-    <Button className="button p-1" title={language === "En" ? "Language" : "Język"} onClick={handleLangToggled}>
+    <Button className="button bg-secondary" title="Language" onClick={handleLangToggled}>
       {language === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
     </Button>
   );
@@ -26,7 +26,7 @@ export default function LangChanger() {
 
 export function LangChangerSkeleton() {
   return (
-    <Button className="button p-1" title="Language" disabled>
+    <Button className="button bg-secondary" title="Language" disabled>
       <UsFlagIcon className="size-11" />
     </Button>
   );
