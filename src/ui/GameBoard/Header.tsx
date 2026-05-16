@@ -1,5 +1,4 @@
 // services, features, and other libraries
-import { motion } from "motion/react";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { currentStreakAtom, openModalAction, potentialScoreAtom, restartGameAction, sessionTotalScoreAtom } from "@/atoms";
 
@@ -19,17 +18,16 @@ export function Header() {
 
   return (
     <header className="flex items-center justify-between gap-3">
-      {/* Run Scoreboard */}
       <section className="grid place-items-center rounded-md border bg-secondary px-3 py-1">
         <h2 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run</h2>
-        <div className="flex items-center gap-2 text-2xl font-semibold">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <TrophyIcon className="size-7 text-accent" />
-            {totalScore}
+            <span className="text-2xl font-semibold tabular-nums">{totalScore}</span>
           </div>
           <div className="flex items-center gap-1 text-destructive">
             <FireIcon className="size-7" />
-            {currentStreak}
+            <span className="text-2xl font-semibold tabular-nums">{currentStreak}</span>
           </div>
         </div>
       </section>
@@ -41,12 +39,9 @@ export function Header() {
         </Button>
       </section>
 
-      {/* This Word Potential */}
       <section className="grid place-items-center rounded-md border border-accent bg-surface-2 px-3 py-1">
         <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">Potential</h2>
-        <motion.div key={potentialScore} initial={{ scale: 1.2 }} animate={{ scale: 1 }} className="text-2xl font-semibold tabular-nums">
-          {potentialScore}
-        </motion.div>
+        <span className="text-2xl font-semibold tabular-nums">{potentialScore}</span>
       </section>
 
       <Button className="button p-1" onClick={() => openModal("help")}>

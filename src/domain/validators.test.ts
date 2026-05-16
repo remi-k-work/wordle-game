@@ -27,7 +27,7 @@ describe("validators", () => {
   describe("canSubmitGuess", () => {
     const dictionary = HashSet.fromIterable(["APPLE", "BANAN", "CHERRY"]);
     const wordleGuesses: string[] = [];
-    const currentTurn = 0;
+    const currentTurn = 1;
 
     it("accepts valid 5-letter word in dictionary", () => {
       expect(canSubmitGuess("APPLE", currentTurn, wordleGuesses, dictionary)).toBe(true);
@@ -44,11 +44,11 @@ describe("validators", () => {
 
     it("rejects duplicate guesses", () => {
       const guesses = ["APPLE"];
-      expect(canSubmitGuess("APPLE", 1, guesses, dictionary)).toBe(false);
+      expect(canSubmitGuess("APPLE", 2, guesses, dictionary)).toBe(false);
     });
 
     it("rejects guesses after turn limit", () => {
-      expect(canSubmitGuess("APPLE", 6, wordleGuesses, dictionary)).toBe(false);
+      expect(canSubmitGuess("APPLE", 7, wordleGuesses, dictionary)).toBe(false);
     });
   });
 });

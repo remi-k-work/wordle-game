@@ -7,52 +7,46 @@ import { formatDuration, speedMultiplierToCategory } from "@/domain";
 export function YouWin() {
   const theSecretWord = useAtomValue(theSecretWordAtom);
   const currentTurn = useAtomValue(currentTurnAtom);
-  const score = useAtomValue(scoreAtom);
-  const totalScore = useAtomValue(sessionTotalScoreAtom);
+  const sessionTotalScore = useAtomValue(sessionTotalScoreAtom);
   const currentStreak = useAtomValue(currentStreakAtom);
-
-  const formattedTime = score ? formatDuration(Duration.seconds(score.timeSeconds)) : "00:00";
+  const { totalScore, basePointsPerTurn, speedMultiplier, timeSeconds } = useAtomValue(scoreAtom)!;
 
   return (
-    <article className="space-y-4">
-      <div className="text-center">
-        <p className="text-4xl font-black text-destructive uppercase">{theSecretWord}</p>
-        <p>You found the solution in {currentTurn} guesses 😄</p>
-      </div>
+    <article className="max-w-prose space-y-4">
+      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
+      <p>
+        You found the solution in <b>{currentTurn - 1}</b> guesses 😄
+      </p>
 
-      <div className="grid grid-cols-2 gap-4 rounded-xl bg-secondary p-4 text-center">
+      <section className="grid grid-cols-2 gap-4 rounded-xl border bg-secondary p-4">
         <div>
-          <p className="text-muted-foreground text-xs font-bold tracking-widest uppercase">Total Run</p>
-          <p className="text-3xl font-black text-accent">{totalScore}</p>
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Total Run</h3>
+          <span className="text-3xl font-semibold text-accent">{sessionTotalScore}</span>
         </div>
         <div>
-          <p className="text-muted-foreground text-xs font-bold tracking-widest uppercase">Streak</p>
-          <p className="text-3xl font-black text-destructive">{currentStreak}</p>
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Streak</h3>
+          <span className="text-3xl font-semibold text-destructive">{currentStreak}</span>
         </div>
-      </div>
+      </section>
 
-      {score && (
-        <div className="space-y-2 border-t pt-4 text-sm">
-          <div className="flex justify-between">
-            <span className="font-sans text-text-2">Base Points</span>
-            <span>{score.basePointsPerTurn}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-sans text-text-2">Speed Multiplier</span>
-            <span>
-              x{score.speedMultiplier} ({speedMultiplierToCategory("En", score.speedMultiplier)})
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-sans text-text-2">Time</span>
-            <span>{formattedTime}</span>
-          </div>
-          <div className="flex justify-between border-t pt-2 font-semibold">
-            <span className="font-sans text-text-2">Final Score</span>
-            <span className="text-accent">{score.totalScore}</span>
-          </div>
+      <footer className="space-y-2 border-t pt-2">
+        <div className="flex items-center justify-between gap-24">
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Base Points</h3>
+          {basePointsPerTurn}
         </div>
-      )}
+        <div className="flex items-center justify-between gap-24">
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Speed Multiplier</h3>x{speedMultiplier} (
+          {speedMultiplierToCategory("En", speedMultiplier)})
+        </div>
+        <div className="flex items-center justify-between gap-24">
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Time</h3>
+          {formatDuration(Duration.seconds(timeSeconds))}
+        </div>
+        <div className="flex items-center justify-between gap-24 border-t pt-2">
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Final Score</h3>
+          <span className="font-semibold text-accent">{totalScore}</span>
+        </div>
+      </footer>
     </article>
   );
 }

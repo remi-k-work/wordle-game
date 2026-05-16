@@ -7,7 +7,7 @@ export function Nevermind() {
 
   return (
     <article>
-      <p className="text-4xl text-destructive uppercase">{theSecretWord}</p>
+      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
       <p>Better luck next time 😄</p>
     </article>
   );

@@ -29,10 +29,10 @@ export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, end
 export const calculatePotentialScore = (currentTurn: number, startTime: DateTime.Utc | null, now: DateTime.Utc) => {
   // Establish the base points based on the turn number in which the secret word was solved
   const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
-  if (!startTime) return basePointsPerTurn;
 
   // Establish the speed multiplier based on the time it took
-  const seconds = DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds);
+  // If the timer has not started yet, assume the maximum possible speed multiplier (0s elapsed)
+  const seconds = startTime ? DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds) : 0;
   const speedMultiplier = SPEED_MULTIPLIER_RULES.find((rule) => seconds < rule.maxSeconds)?.multiplier ?? 0.8;
 
   return Math.round(basePointsPerTurn * speedMultiplier);

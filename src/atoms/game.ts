@@ -127,7 +127,7 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
         Effect.gen(function* () {
           if (prevStatus._tag === "Playing" && nextGameState.startTime) {
             const endTime = yield* DateTime.now;
-            const score = calculateScore(nextGameState.currentTurn, nextGameState.startTime, endTime);
+            const score = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
 
             // Update persistent session
             const session = yield* Atom.get(sessionAtom);

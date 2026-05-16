@@ -21,6 +21,6 @@ export const sessionAtom = Atom.kvs({
 });
 
 // Specialized selectors for session-level state
-export const sessionTotalScoreAtom = sessionAtom.pipe(Atom.map((s) => s.totalScore));
-export const currentStreakAtom = sessionAtom.pipe(Atom.map((s) => s.currentStreak));
-export const bestRunAtom = sessionAtom.pipe(Atom.map((s) => s.bestRun));
+export const sessionTotalScoreAtom = sessionAtom.pipe(Atom.map((state) => state.totalScore));
+export const currentStreakAtom = sessionAtom.pipe(Atom.map((state) => state.currentStreak));
+export const bestRunAtom = sessionAtom.pipe(Atom.map((state) => state.bestRun));

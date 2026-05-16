@@ -58,8 +58,8 @@ describe("gameLogic", () => {
       Effect.gen(function* () {
         const start = yield* DateTime.now;
 
-        // Turn 1 (first guess), no time elapsed -> Full base points for turn 1 (1000)
-        expect(calculatePotentialScore(1, null, start)).toBe(1000);
+        // Turn 1 (first guess), no time elapsed -> Full base points (1000) * max multiplier (1.5) = 1500
+        expect(calculatePotentialScore(1, null, start)).toBe(1500);
 
         // Turn 1, 20s elapsed -> 1000 * 1.5 = 1500
         yield* TestClock.adjust(Duration.seconds(20));
