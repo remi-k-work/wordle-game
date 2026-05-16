@@ -16,7 +16,7 @@ export function GameMenu() {
 
   return (
     <Popover.Root>
-      <Popover.Trigger className="button p-1 data-popup-open:bg-accent sm:hidden">
+      <Popover.Trigger className="button p-1 data-popup-open:bg-accent md:hidden">
         <Bars3Icon className="size-11" />
       </Popover.Trigger>
       <Popover.Portal>

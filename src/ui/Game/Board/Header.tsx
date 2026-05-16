@@ -33,7 +33,7 @@ export function Header() {
         </div>
       </section>
 
-      <section className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-center sm:gap-3">
+      <section className="hidden md:flex md:flex-1 md:items-center md:justify-center md:gap-3">
         <LangChanger />
         <Button className="button py-4" onClick={() => restartGame()}>
           New Game
@@ -45,7 +45,7 @@ export function Header() {
         <span className="text-2xl font-semibold tabular-nums">{potentialScore}</span>
       </section>
 
-      <Button className="button hidden sm:block" title="Help" onClick={() => openModal("help")}>
+      <Button className="button hidden md:block" title="Help" onClick={() => openModal("help")}>
         <QuestionMarkCircleIcon className="size-11" />
       </Button>
       <GameMenu />
