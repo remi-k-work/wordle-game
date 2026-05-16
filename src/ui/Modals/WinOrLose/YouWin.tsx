@@ -29,22 +29,24 @@ export function YouWin() {
         </div>
       </section>
 
-      <footer className="space-y-2 border-t pt-2">
+      <footer className="space-y-2 border-t pt-2 text-start">
         <div className="flex items-center justify-between gap-24">
           <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Base Points</h3>
-          {basePointsPerTurn}
+          <span className="text-end">{basePointsPerTurn}</span>
         </div>
         <div className="flex items-center justify-between gap-24">
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Speed Multiplier</h3>x{speedMultiplier} (
-          {speedMultiplierToCategory("En", speedMultiplier)})
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Speed Multiplier</h3>
+          <span className="text-end">
+            x{speedMultiplier} ({speedMultiplierToCategory("En", speedMultiplier)})
+          </span>
         </div>
         <div className="flex items-center justify-between gap-24">
           <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Time</h3>
-          {formatDuration(Duration.seconds(timeSeconds))}
+          <span className="text-end">{formatDuration(Duration.seconds(timeSeconds))}</span>
         </div>
         <div className="flex items-center justify-between gap-24 border-t pt-2">
           <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Final Score</h3>
-          <span className="font-semibold text-accent">{totalScore}</span>
+          <span className="text-end font-semibold text-accent">{totalScore}</span>
         </div>
       </footer>
     </article>
