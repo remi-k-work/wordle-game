@@ -1,8 +1,14 @@
 // services, features, and other libraries
 import { Duration } from "effect";
-import { useAtomValue } from "@effect-atom/atom-react";
-import { currentTurnAtom, theSecretWordAtom, scoreAtom, sessionTotalScoreAtom, currentStreakAtom } from "@/atoms";
+import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
+import { currentTurnAtom, theSecretWordAtom, scoreAtom, sessionTotalScoreAtom, currentStreakAtom, nextWordAction } from "@/atoms";
 import { formatDuration, speedMultiplierToCategory } from "@/domain";
+
+// components
+import { Button } from "@base-ui/react";
+
+// assets
+import { ForwardIcon } from "@heroicons/react/24/outline";
 
 export function YouWin() {
   const theSecretWord = useAtomValue(theSecretWordAtom);
@@ -10,6 +16,7 @@ export function YouWin() {
   const sessionTotalScore = useAtomValue(sessionTotalScoreAtom);
   const currentStreak = useAtomValue(currentStreakAtom);
   const { totalScore, basePointsPerTurn, speedMultiplier, timeSeconds } = useAtomValue(scoreAtom)!;
+  const nextWord = useAtomSet(nextWordAction);
 
   return (
     <article className="max-w-prose space-y-4">
@@ -49,6 +56,11 @@ export function YouWin() {
           <span className="text-end font-semibold text-accent">{totalScore}</span>
         </div>
       </footer>
+
+      <Button className="button mx-auto" onClick={() => nextWord()}>
+        <ForwardIcon className="size-11" />
+        Next Word
+      </Button>
     </article>
   );
 }

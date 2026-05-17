@@ -17,6 +17,8 @@ export type Session = Readonly<{
   totalScore: number;
   currentStreak: number;
   bestRun: number;
+  lastRunScore: number;
+  lastRunStreak: number;
 }>;
 
 export type GameState = Readonly<{

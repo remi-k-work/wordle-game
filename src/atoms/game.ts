@@ -4,7 +4,7 @@ import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
 import { deriveWordleGrid, getGameStatus, calculateScore, computeKeypadState, parseKey, applyGameAction, calculatePotentialScore } from "@/domain";
 import { Runtime } from "./runtime";
-import { activeModalAtom, languageAtom, sessionAtom } from ".";
+import { activeModalAtom, closeModalAction, languageAtom, sessionAtom } from ".";
 
 // types
 import type { GameState } from "@/domain";
@@ -67,14 +67,6 @@ export const gameDataKeypadAtom = Runtime.atom(
   })
 );
 
-// Reset the entire game state by refreshing the underlying data sources
-export const restartGameAction = Atom.fn(() =>
-  Effect.gen(function* () {
-    yield* Atom.refresh(gameDataSolutionsAtom);
-    yield* Atom.refresh(gameDataKeypadAtom);
-  })
-);
-
 // View-ready representation of the 6x5 game grid derived from current guesses
 export const wordleGridAtom = Atom.make((get) => {
   const theSecretWord = get(theSecretWordAtom);
@@ -130,12 +122,12 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
             const score = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
 
             // Update persistent session
-            const session = yield* Atom.get(sessionAtom);
-            const newTotalScore = session.totalScore + score.totalScore;
-            const newStreak = session.currentStreak + 1;
+            const { totalScore, currentStreak, ...session } = get(sessionAtom);
+            const newTotalScore = totalScore + score.totalScore;
+            const newStreak = currentStreak + 1;
             const newBestRun = Math.max(session.bestRun, newTotalScore);
 
-            yield* Atom.set(sessionAtom, { totalScore: newTotalScore, currentStreak: newStreak, bestRun: newBestRun });
+            get.set(sessionAtom, { ...session, totalScore: newTotalScore, currentStreak: newStreak, bestRun: newBestRun });
 
             return { ...nextGameState, score };
           }
@@ -145,9 +137,9 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
       Match.when({ _tag: "Lost" }, () =>
         Effect.gen(function* () {
           if (prevStatus._tag === "Playing") {
-            // Reset session on loss
-            const session = yield* Atom.get(sessionAtom);
-            yield* Atom.set(sessionAtom, { ...session, totalScore: 0, currentStreak: 0 });
+            // Record last run and reset session on loss
+            const { totalScore, currentStreak, ...session } = get(sessionAtom);
+            get.set(sessionAtom, { ...session, lastRunScore: totalScore, lastRunStreak: currentStreak, totalScore: 0, currentStreak: 0 });
           }
           return nextGameState;
         })
@@ -156,12 +148,46 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     );
 
     // Update the game state atom
-    yield* Atom.set(gameStateAtom, finalGameState);
+    get.set(gameStateAtom, finalGameState);
 
     // Trigger modal visibility as a side effect when the game concludes
     if (prevStatus._tag === "Playing" && nextStatus._tag !== "Playing") {
       yield* Effect.sleep("1.5 seconds");
-      yield* Atom.set(activeModalAtom, "status");
+      get.set(activeModalAtom, "status");
     }
+  })
+);
+
+// Continue the current run with a fresh word
+export const nextWordAction = Atom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    get.set(closeModalAction, void 0);
+
+    get.refresh(gameDataSolutionsAtom);
+    get.refresh(gameDataKeypadAtom);
+  })
+);
+
+// Start a completely new run from scratch
+export const startNewRunAction = Atom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    get.set(closeModalAction, void 0);
+
+    const session = get(sessionAtom);
+    get.set(sessionAtom, { ...session, totalScore: 0, currentStreak: 0 });
+
+    get.refresh(gameDataSolutionsAtom);
+    get.refresh(gameDataKeypadAtom);
+  })
+);
+
+// Manually end the current run and record progress
+export const forfeitRunAction = Atom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const { totalScore, currentStreak, ...session } = get(sessionAtom);
+    get.set(sessionAtom, { ...session, totalScore: 0, currentStreak: 0, lastRunScore: totalScore, lastRunStreak: currentStreak });
+
+    get.refresh(gameDataSolutionsAtom);
+    get.refresh(gameDataKeypadAtom);
   })
 );

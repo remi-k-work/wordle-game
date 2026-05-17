@@ -1,10 +1,20 @@
 // next
 import Image from "next/image";
 
+// services, features, and other libraries
+import { useAtomSet } from "@effect-atom/atom-react";
+import { closeModalAction } from "@/atoms";
+
+// components
+import { Button } from "@base-ui/react";
+
 // assets
 import logo from "@/assets/opengraph-image.jpg";
+import { XCircleIcon } from "@heroicons/react/24/outline";
 
 export function Content() {
+  const closeModal = useAtomSet(closeModalAction);
+
   return (
     <article className="max-w-prose space-y-9">
       <Image src={logo} className="h-auto w-full" loading="lazy" alt="Logo" />
@@ -35,6 +45,11 @@ export function Content() {
       </ul>
 
       <footer className="mx-auto mt-4 font-sans text-sm font-semibold">*Tip: When using a PC, you can type your guesses right on the keyboard.</footer>
+
+      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => closeModal()}>
+        <XCircleIcon className="size-11" />
+        Close
+      </Button>
     </article>
   );
 }

@@ -1,17 +1,17 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect-atom/atom-react";
-import { openModalAction, restartGameAction } from "@/atoms";
+import { openModalAction } from "@/atoms";
 
 // components
 import { Button, Popover } from "@base-ui/react";
-import LangChanger from "@/ui/Game/LangChanger";
+import { LangChanger } from "@/ui/Game/LangChanger";
+import { GameFlowButton } from "@/ui/Game/FlowButton";
 
 // assets
 import { Bars3Icon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
 export function GameMenu() {
-  const restartGame = useAtomSet(restartGameAction);
   const openModal = useAtomSet(openModalAction);
 
   return (
@@ -30,9 +30,7 @@ export function GameMenu() {
             )}
           >
             <LangChanger />
-            <Button className="button py-4" onClick={() => restartGame()}>
-              New Game
-            </Button>
+            <GameFlowButton />
             <Button className="button" title="Help" onClick={() => openModal("help")}>
               <QuestionMarkCircleIcon className="size-11" />
             </Button>

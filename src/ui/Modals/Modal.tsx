@@ -4,10 +4,7 @@ import { useAtomSet } from "@effect-atom/atom-react";
 import { closeModalAction } from "@/atoms";
 
 // components
-import { Button, Dialog } from "@base-ui/react";
-
-// assets
-import { XCircleIcon } from "@heroicons/react/24/outline";
+import { Dialog } from "@base-ui/react";
 
 // types
 import type { ReactNode } from "react";
@@ -44,10 +41,6 @@ export function Modal({ isOpen = false, title, children }: ModalProps) {
               {title}
             </h1>
             {children}
-            <Button className="button mx-auto mt-8" tabIndex={-1} onClick={() => closeModal()}>
-              <XCircleIcon className="size-11" />
-              Close
-            </Button>
           </Dialog.Popup>
         </Dialog.Viewport>
       </Dialog.Portal>

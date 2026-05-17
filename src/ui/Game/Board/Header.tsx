@@ -1,10 +1,11 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { currentStreakAtom, openModalAction, potentialScoreAtom, restartGameAction, sessionTotalScoreAtom } from "@/atoms";
+import { currentStreakAtom, openModalAction, potentialScoreAtom, sessionTotalScoreAtom } from "@/atoms";
 
 // components
 import { Button } from "@base-ui/react";
-import LangChanger from "@/ui/Game/LangChanger";
+import { LangChanger } from "@/ui/Game/LangChanger";
+import { GameFlowButton } from "@/ui/Game/FlowButton";
 import { GameMenu } from "@/ui/Game/Menu";
 
 // assets
@@ -14,7 +15,6 @@ export function Header() {
   const totalScore = useAtomValue(sessionTotalScoreAtom);
   const currentStreak = useAtomValue(currentStreakAtom);
   const potentialScore = useAtomValue(potentialScoreAtom);
-  const restartGame = useAtomSet(restartGameAction);
   const openModal = useAtomSet(openModalAction);
 
   return (
@@ -35,9 +35,7 @@ export function Header() {
 
       <section className="hidden md:flex md:flex-1 md:items-center md:justify-center md:gap-3">
         <LangChanger />
-        <Button className="button py-4" onClick={() => restartGame()}>
-          New Game
-        </Button>
+        <GameFlowButton />
       </section>
 
       <section className="grid place-items-center rounded-md border border-accent bg-surface-2 px-3 py-1">
