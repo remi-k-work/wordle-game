@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Duration } from "effect";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { currentTurnAtom, theSecretWordAtom, scoreAtom, sessionTotalScoreAtom, currentStreakAtom, nextWordAction } from "@/atoms";
+import { currentTurnAtom, theSecretWordAtom, wordScoreAtom, runScoreAtom, streakAtom, nextWordAction } from "@/atoms";
 import { formatDuration, speedMultiplierToCategory } from "@/domain";
 
 // components
@@ -13,9 +13,9 @@ import { ForwardIcon } from "@heroicons/react/24/outline";
 export function YouWin() {
   const theSecretWord = useAtomValue(theSecretWordAtom);
   const currentTurn = useAtomValue(currentTurnAtom);
-  const sessionTotalScore = useAtomValue(sessionTotalScoreAtom);
-  const currentStreak = useAtomValue(currentStreakAtom);
-  const { totalScore, basePointsPerTurn, speedMultiplier, timeSeconds } = useAtomValue(scoreAtom)!;
+  const runScore = useAtomValue(runScoreAtom);
+  const streak = useAtomValue(streakAtom);
+  const { wordScore, basePointsPerTurn, speedMultiplier, timeSeconds } = useAtomValue(wordScoreAtom)!;
   const nextWord = useAtomSet(nextWordAction);
 
   return (
@@ -27,12 +27,12 @@ export function YouWin() {
 
       <section className="grid grid-cols-2 gap-4 rounded-xl border bg-secondary p-4">
         <div>
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Total Run</h3>
-          <span className="text-3xl font-semibold text-accent">{sessionTotalScore}</span>
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Score</h3>
+          <span className="text-3xl font-semibold text-accent">{runScore}</span>
         </div>
         <div>
           <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Streak</h3>
-          <span className="text-3xl font-semibold text-destructive">{currentStreak}</span>
+          <span className="text-3xl font-semibold text-destructive">{streak}</span>
         </div>
       </section>
 
@@ -52,8 +52,8 @@ export function YouWin() {
           <span className="text-end">{formatDuration(Duration.seconds(timeSeconds))}</span>
         </div>
         <div className="flex items-center justify-between gap-24 border-t pt-2">
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Final Score</h3>
-          <span className="text-end font-semibold text-accent">{totalScore}</span>
+          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Word Score</h3>
+          <span className="text-end font-semibold text-accent">{wordScore}</span>
         </div>
       </footer>
 

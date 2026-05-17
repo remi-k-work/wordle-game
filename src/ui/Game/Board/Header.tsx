@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { currentStreakAtom, openModalAction, potentialScoreAtom, sessionTotalScoreAtom } from "@/atoms";
+import { streakAtom, openModalAction, potentialScoreAtom, runScoreAtom } from "@/atoms";
 
 // components
 import { Button } from "@base-ui/react";
@@ -12,8 +12,8 @@ import { GameMenu } from "@/ui/Game/Menu";
 import { FireIcon, TrophyIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 
 export function Header() {
-  const totalScore = useAtomValue(sessionTotalScoreAtom);
-  const currentStreak = useAtomValue(currentStreakAtom);
+  const runScore = useAtomValue(runScoreAtom);
+  const streak = useAtomValue(streakAtom);
   const potentialScore = useAtomValue(potentialScoreAtom);
   const openModal = useAtomSet(openModalAction);
 
@@ -24,11 +24,11 @@ export function Header() {
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1">
             <TrophyIcon className="size-7 text-accent" />
-            <span className="text-2xl font-semibold tabular-nums">{totalScore}</span>
+            <span className="text-2xl font-semibold tabular-nums">{runScore}</span>
           </div>
           <div className="flex items-center gap-1 text-destructive">
             <FireIcon className="size-7" />
-            <span className="text-2xl font-semibold tabular-nums">{currentStreak}</span>
+            <span className="text-2xl font-semibold tabular-nums">{streak}</span>
           </div>
         </div>
       </section>

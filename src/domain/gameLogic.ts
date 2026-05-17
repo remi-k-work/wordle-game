@@ -3,12 +3,13 @@ import { Array, HashSet, Duration, DateTime, Match, pipe } from "effect";
 import { canSubmitGuess, formatGuess, GameActionEnum, GameStatusEnum, getSpeedMultiplier, isGuessKeyValid, pickStrongerColor } from ".";
 
 // types
-import type { Color, GameAction, GameState, Score } from ".";
+import type { Color, GameAction, GameState, WordScore } from ".";
 
 // constants
 import { BASE_POINTS_PER_TURN_MAP } from ".";
 
-// Calculates the player's score based on the turn they won on and how long it took them
+// Calculates the player's word score based on the turn they won on and how long it took them
+// This denotes the volatile points earned for the current word before they are banked into the run
 export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, endTime: DateTime.Utc) => {
   // Establish the base points based on the turn number in which the secret word was solved
   const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
@@ -18,14 +19,15 @@ export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, end
   const speedMultiplier = getSpeedMultiplier(seconds);
 
   return {
-    totalScore: Math.round(basePointsPerTurn * speedMultiplier),
+    wordScore: Math.round(basePointsPerTurn * speedMultiplier),
     basePointsPerTurn,
     speedMultiplier,
     timeSeconds: Math.floor(seconds),
-  } as const satisfies Score;
+  } as const satisfies WordScore;
 };
 
-// Calculates the "live" potential score based on current turn and time elapsed
+// Calculates the "live" potential word score based on current turn and time elapsed
+// This projects what the player stands to gain based on their current speed and turn count
 export const calculatePotentialScore = (currentTurn: number, startTime: DateTime.Utc | null, now: DateTime.Utc) => {
   // Establish the base points based on the turn number in which the secret word was solved
   const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;

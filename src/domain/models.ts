@@ -6,19 +6,21 @@ export const SolutionsDataSchema = Schema.Array(Schema.Trim);
 export const KeypadDataSchema = Schema.Array(Schema.Trim);
 
 // types
-export type Score = Readonly<{
-  totalScore: number;
+// Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)
+export type WordScore = Readonly<{
+  wordScore: number;
   basePointsPerTurn: number;
   speedMultiplier: number;
   timeSeconds: number;
 }>;
 
-export type Session = Readonly<{
-  totalScore: number;
-  currentStreak: number;
-  bestRun: number;
+// Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
+export type RunSession = Readonly<{
+  runScore: number;
+  streak: number;
   lastRunScore: number;
   lastRunStreak: number;
+  bestRunScore: number;
 }>;
 
 export type GameState = Readonly<{
@@ -28,7 +30,7 @@ export type GameState = Readonly<{
   currentTurn: number;
   isInvalidGuess: boolean;
   startTime: DateTime.Utc | null;
-  score: Score | null;
+  wordScore: WordScore | null;
 }>;
 
 export type Language = "En" | "Pl";
@@ -49,7 +51,7 @@ export const INITIAL_GAME_STATE = {
   currentTurn: 1,
   isInvalidGuess: false,
   startTime: null,
-  score: null,
+  wordScore: null,
 } as const satisfies GameState;
 
 export const BASE_POINTS_PER_TURN_MAP = { 1: 1000, 2: 800, 3: 600, 4: 400, 5: 200, 6: 100 } as const as Readonly<Record<number, number>>;

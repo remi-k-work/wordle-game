@@ -27,28 +27,28 @@ describe("gameLogic", () => {
         yield* TestClock.adjust(Duration.seconds(20));
         const scoreFast = calculateScore(4, start, yield* DateTime.now);
         expect(scoreFast.speedMultiplier).toBe(1.5);
-        expect(scoreFast.totalScore).toBe(600); // 400 * 1.5
+        expect(scoreFast.wordScore).toBe(600); // 400 * 1.5
 
         // < 60s: 1.2x
         // We are already at 20s, add 25s more to reach 45s
         yield* TestClock.adjust(Duration.seconds(25));
         const scoreMedium = calculateScore(4, start, yield* DateTime.now);
         expect(scoreMedium.speedMultiplier).toBe(1.2);
-        expect(scoreMedium.totalScore).toBe(480); // 400 * 1.2
+        expect(scoreMedium.wordScore).toBe(480); // 400 * 1.2
 
         // < 180s: 1.0x
         // We are at 45s, add 75s more to reach 120s
         yield* TestClock.adjust(Duration.seconds(75));
         const scoreSlow = calculateScore(4, start, yield* DateTime.now);
         expect(scoreSlow.speedMultiplier).toBe(1.0);
-        expect(scoreSlow.totalScore).toBe(400); // 400 * 1.0
+        expect(scoreSlow.wordScore).toBe(400); // 400 * 1.0
 
         // >= 180s: 0.8x
         // We are at 120s, add 80s more to reach 200s
         yield* TestClock.adjust(Duration.seconds(80));
         const scoreVerySlow = calculateScore(4, start, yield* DateTime.now);
         expect(scoreVerySlow.speedMultiplier).toBe(0.8);
-        expect(scoreVerySlow.totalScore).toBe(320); // 400 * 0.8
+        expect(scoreVerySlow.wordScore).toBe(320); // 400 * 0.8
       })
     );
   });

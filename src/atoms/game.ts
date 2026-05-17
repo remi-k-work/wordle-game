@@ -4,7 +4,7 @@ import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
 import { deriveWordleGrid, getGameStatus, calculateScore, computeKeypadState, parseKey, applyGameAction, calculatePotentialScore } from "@/domain";
 import { Runtime } from "./runtime";
-import { activeModalAtom, closeModalAction, languageAtom, sessionAtom } from ".";
+import { activeModalAtom, closeModalAction, languageAtom, runSessionAtom } from ".";
 
 // types
 import type { GameState } from "@/domain";
@@ -12,7 +12,7 @@ import type { GameState } from "@/domain";
 // constants
 import { INITIAL_GAME_STATE } from "@/domain";
 
-// Primary state container for the active game session
+// Primary state container for the active word challenge within the current arcade run
 const gameStateAtom = Atom.make<GameState>(INITIAL_GAME_STATE);
 
 // Specialized selectors for granular state access and optimized re-renders
@@ -21,10 +21,10 @@ export const currentGuessWordAtom = gameStateAtom.pipe(Atom.map((state) => state
 export const wordleGuessesAtom = gameStateAtom.pipe(Atom.map((state) => state.wordleGuesses));
 export const currentTurnAtom = gameStateAtom.pipe(Atom.map((state) => state.currentTurn));
 export const isInvalidGuessAtom = gameStateAtom.pipe(Atom.map((state) => state.isInvalidGuess));
-export const scoreAtom = gameStateAtom.pipe(Atom.map((state) => state.score));
+export const wordScoreAtom = gameStateAtom.pipe(Atom.map((state) => state.wordScore));
 export const startTimeAtom = gameStateAtom.pipe(Atom.map((state) => state.startTime));
 
-// Reactive selector for real-time score projection
+// Reactive selector for the "live" potential word score based on current progress
 export const potentialScoreAtom = Atom.make((get) => {
   const currentTurn = get(currentTurnAtom);
   const startTime = get(startTimeAtom);
@@ -32,7 +32,7 @@ export const potentialScoreAtom = Atom.make((get) => {
   return calculatePotentialScore(currentTurn, startTime, now);
 });
 
-// Effectful atom that fetches the solution dictionary and initializes a new secret word
+// Effectful atom that fetches the solution dictionary and initializes a new word challenge
 export const gameDataSolutionsAtom = Runtime.atom(
   Effect.gen(function* () {
     const language = yield* Atom.get(languageAtom);
@@ -81,7 +81,7 @@ export const keypadColorsAtom = Atom.make((get) => {
   return computeKeypadState(theSecretWord, wordleGuesses);
 });
 
-// High-level game progress indicator (Playing, Won, or Lost)
+// High-level progress indicator (Playing, Won, or Lost) for the current word
 export const gameStatusAtom = Atom.make((get) => {
   const currentTurn = get(currentTurnAtom);
   const theSecretWord = get(theSecretWordAtom);
@@ -89,7 +89,7 @@ export const gameStatusAtom = Atom.make((get) => {
   return getGameStatus(currentTurn, theSecretWord, wordleGuesses);
 });
 
-// Central action handler for processing user input and executing state transitions
+// Central action handler for processing user input and managing state transitions
 export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
   Effect.gen(function* () {
     const currGameState = get(gameStateAtom);
@@ -113,23 +113,23 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     const prevStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
     const nextStatus = getGameStatus(nextGameState.currentTurn, nextGameState.theSecretWord, nextGameState.wordleGuesses);
 
-    // Calculate and attach the final score upon a successful game resolution
+    // Resolve the challenge: bank volatile points on win, or end the entire run on loss
     const finalGameState = yield* Match.value(nextStatus).pipe(
       Match.when({ _tag: "Won" }, () =>
         Effect.gen(function* () {
           if (prevStatus._tag === "Playing" && nextGameState.startTime) {
             const endTime = yield* DateTime.now;
-            const score = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
+            const wordScore = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
 
-            // Update persistent session
-            const { totalScore, currentStreak, ...session } = get(sessionAtom);
-            const newTotalScore = totalScore + score.totalScore;
-            const newStreak = currentStreak + 1;
-            const newBestRun = Math.max(session.bestRun, newTotalScore);
+            // Bank volatile points into the persistent run session
+            const { runScore, streak, ...session } = get(runSessionAtom);
+            const newRunScore = runScore + wordScore.wordScore;
+            const newStreak = streak + 1;
+            const newBestRunScore = Math.max(session.bestRunScore, newRunScore);
 
-            get.set(sessionAtom, { ...session, totalScore: newTotalScore, currentStreak: newStreak, bestRun: newBestRun });
+            get.set(runSessionAtom, { ...session, runScore: newRunScore, streak: newStreak, bestRunScore: newBestRunScore });
 
-            return { ...nextGameState, score };
+            return { ...nextGameState, wordScore };
           }
           return nextGameState;
         })
@@ -137,9 +137,9 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
       Match.when({ _tag: "Lost" }, () =>
         Effect.gen(function* () {
           if (prevStatus._tag === "Playing") {
-            // Record last run and reset session on loss
-            const { totalScore, currentStreak, ...session } = get(sessionAtom);
-            get.set(sessionAtom, { ...session, lastRunScore: totalScore, lastRunStreak: currentStreak, totalScore: 0, currentStreak: 0 });
+            // End the entire arcade run: record results and reset progress to zero
+            const { runScore, streak, ...session } = get(runSessionAtom);
+            get.set(runSessionAtom, { ...session, lastRunScore: runScore, lastRunStreak: streak, runScore: 0, streak: 0 });
           }
           return nextGameState;
         })
@@ -150,7 +150,7 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     // Update the game state atom
     get.set(gameStateAtom, finalGameState);
 
-    // Trigger modal visibility as a side effect when the game concludes
+    // Trigger modal visibility as a side effect when the word resolution occurs
     if (prevStatus._tag === "Playing" && nextStatus._tag !== "Playing") {
       yield* Effect.sleep("1.5 seconds");
       get.set(activeModalAtom, "status");
@@ -158,7 +158,7 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
   })
 );
 
-// Continue the current run with a fresh word
+// Transition to the next word challenge while maintaining the current run streak
 export const nextWordAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(closeModalAction, void 0);
@@ -168,24 +168,24 @@ export const nextWordAction = Atom.fn(
   })
 );
 
-// Start a completely new run from scratch
+// Wipe the current session and start a completely new arcade run from scratch
 export const startNewRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(closeModalAction, void 0);
 
-    const session = get(sessionAtom);
-    get.set(sessionAtom, { ...session, totalScore: 0, currentStreak: 0 });
+    const session = get(runSessionAtom);
+    get.set(runSessionAtom, { ...session, runScore: 0, streak: 0 });
 
     get.refresh(gameDataSolutionsAtom);
     get.refresh(gameDataKeypadAtom);
   })
 );
 
-// Manually end the current run and record progress
+// Manually abandon the current arcade run and record its final progress
 export const forfeitRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
-    const { totalScore, currentStreak, ...session } = get(sessionAtom);
-    get.set(sessionAtom, { ...session, totalScore: 0, currentStreak: 0, lastRunScore: totalScore, lastRunStreak: currentStreak });
+    const { runScore, streak, ...session } = get(runSessionAtom);
+    get.set(runSessionAtom, { ...session, runScore: 0, streak: 0, lastRunScore: runScore, lastRunStreak: streak });
 
     get.refresh(gameDataSolutionsAtom);
     get.refresh(gameDataKeypadAtom);

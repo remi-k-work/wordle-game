@@ -1,6 +1,6 @@
 secrets.txt
 .env
-docs/
+src/docs/
 src/seed/dictionaryPl.txt
 
 # dependencies
