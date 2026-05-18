@@ -12,17 +12,17 @@ export const gameLifecycleAtom = Runtime.atom(
         Match.tag("WordWon", ({ nextGameState, endTime }) =>
           Effect.gen(function* () {
             // Calculate the final score for the word
-            const wordScore = Option.some(calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime));
+            const wordScore = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
 
             // Update the game state with the calculated score (so the UI can display it)
-            yield* Atom.set(gameStateAtom, { ...nextGameState, wordScore });
+            yield* Atom.set(gameStateAtom, { ...nextGameState, wordScore: Option.some(wordScore) });
 
             // Bank volatile points into the persistent run session
             yield* Atom.update(runSessionAtom, ({ runScore, streak, bestRunScore, ...session }) => ({
               ...session,
-              runScore: runScore + Option.getOrThrow(wordScore).wordScore,
+              runScore: runScore + wordScore.wordScore,
               streak: streak + 1,
-              bestRunScore: Math.max(bestRunScore, runScore + Option.getOrThrow(wordScore).wordScore),
+              bestRunScore: Math.max(bestRunScore, runScore + wordScore.wordScore),
             }));
 
             // Trigger modal visibility after a delay (fork the UI delay so the stream consumer is not blocked)

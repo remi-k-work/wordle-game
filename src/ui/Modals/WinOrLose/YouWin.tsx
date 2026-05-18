@@ -15,8 +15,12 @@ export function YouWin() {
   const currentTurn = useAtomValue(currentTurnAtom);
   const runScore = useAtomValue(runScoreAtom);
   const streak = useAtomValue(streakAtom);
-  const { wordScore, basePointsPerTurn, speedMultiplier, timeSeconds } = Option.getOrThrow(useAtomValue(wordScoreAtom));
+  const wordScoreOption = useAtomValue(wordScoreAtom);
   const nextWord = useAtomSet(nextWordAction);
+
+  if (Option.isNone(wordScoreOption)) return null;
+
+  const { wordScore, basePointsPerTurn, speedMultiplier, timeSeconds } = wordScoreOption.value;
 
   return (
     <article className="max-w-prose space-y-4">
