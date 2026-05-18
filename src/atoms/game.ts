@@ -2,16 +2,7 @@
 import { DateTime, Effect, HashSet, Random, PubSub } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
-import {
-  deriveWordleGrid,
-  getGameStatus,
-  calculateScore,
-  computeKeypadState,
-  parseKey,
-  applyGameAction,
-  calculatePotentialScore,
-  GameEventEnum,
-} from "@/domain";
+import { deriveWordleGrid, getGameStatus, computeKeypadState, parseKey, applyGameAction, calculatePotentialScore, GameEventEnum } from "@/domain";
 import { Runtime } from "./runtime";
 import { closeModalAction, languageAtom, runSessionAtom, gameEventsPubSub } from ".";
 
@@ -22,7 +13,7 @@ import type { GameState } from "@/domain";
 import { INITIAL_GAME_STATE } from "@/domain";
 
 // Primary state container for the active word challenge within the current arcade run
-const gameStateAtom = Atom.make<GameState>(INITIAL_GAME_STATE);
+export const gameStateAtom = Atom.make<GameState>(INITIAL_GAME_STATE);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const theSecretWordAtom = gameStateAtom.pipe(Atom.map((state) => state.theSecretWord));
@@ -122,23 +113,12 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     const prevStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
     const nextStatus = getGameStatus(nextGameState.currentTurn, nextGameState.theSecretWord, nextGameState.wordleGuesses);
 
-    // Calculate score if won
-    let finalGameState = nextGameState;
-    if (prevStatus._tag === "Playing" && nextStatus._tag === "Won" && nextGameState.startTime) {
-      const wordScore = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, now);
-      finalGameState = { ...nextGameState, wordScore };
-    }
-
     // Update the game state atom
-    get.set(gameStateAtom, finalGameState);
+    get.set(gameStateAtom, nextGameState);
 
-    if (prevStatus._tag === "Playing") {
-      if (nextStatus._tag === "Won") {
-        yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordWon({ wordScore: finalGameState.wordScore!, nextGameState: finalGameState }));
-      } else if (nextStatus._tag === "Lost") {
-        yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordLost({ nextGameState: finalGameState }));
-      }
-    }
+    if (prevStatus._tag !== "Playing") return;
+    if (nextStatus._tag === "Won") yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordWon({ nextGameState, endTime: now }));
+    if (nextStatus._tag === "Lost") yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordLost());
   })
 );
 
