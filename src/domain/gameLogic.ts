@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, HashSet, Duration, DateTime, Match, pipe } from "effect";
+import { Array, HashSet, Duration, DateTime, Match, pipe, Option } from "effect";
 import { canSubmitGuess, formatGuess, GameActionEnum, GameStatusEnum, getSpeedMultiplier, isGuessKeyValid, pickStrongerColor } from ".";
 
 // types
@@ -10,12 +10,15 @@ import { BASE_POINTS_PER_TURN_MAP } from ".";
 
 // Calculates the player's word score based on the turn they won on and how long it took them
 // This denotes the volatile points earned for the current word before they are banked into the run
-export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, endTime: DateTime.Utc) => {
+export const calculateScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) => {
   // Establish the base points based on the turn number in which the secret word was solved
   const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
 
   // Establish the speed multiplier based on the time it took
-  const seconds = DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds);
+  const seconds = Option.match(startTime, {
+    onNone: () => 0,
+    onSome: (startTime) => DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds),
+  });
   const speedMultiplier = getSpeedMultiplier(seconds);
 
   return {
@@ -28,13 +31,16 @@ export const calculateScore = (currentTurn: number, startTime: DateTime.Utc, end
 
 // Calculates the "live" potential word score based on current turn and time elapsed
 // This projects what the player stands to gain based on their current speed and turn count
-export const calculatePotentialScore = (currentTurn: number, startTime: DateTime.Utc | null, now: DateTime.Utc) => {
+export const calculatePotentialScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, now: DateTime.Utc) => {
   // Establish the base points based on the turn number in which the secret word was solved
   const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
 
   // Establish the speed multiplier based on the time it took
   // If the timer has not started yet, assume the maximum possible speed multiplier (0s elapsed)
-  const seconds = startTime ? DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds) : 0;
+  const seconds = Option.match(startTime, {
+    onNone: () => 0,
+    onSome: (startTime) => DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds),
+  });
 
   return Math.round(basePointsPerTurn * getSpeedMultiplier(seconds));
 };
@@ -101,7 +107,14 @@ export const applyGameAction = (state: GameState, action: GameAction, dictionary
 
     // Lazily assign startTime on the very first letter typed
     Match.tag("AddLetter", ({ letter }) =>
-      currentGuessWord.length < 5 ? { ...state, currentGuessWord: currentGuessWord + letter, isInvalidGuess: false, startTime: state.startTime ?? now } : state
+      currentGuessWord.length < 5
+        ? {
+            ...state,
+            currentGuessWord: currentGuessWord + letter,
+            isInvalidGuess: false,
+            startTime: Option.isNone(state.startTime) ? Option.some(now) : state.startTime,
+          }
+        : state
     ),
 
     Match.tag("SubmitGuess", () => {

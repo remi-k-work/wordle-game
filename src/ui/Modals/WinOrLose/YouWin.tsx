@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Duration } from "effect";
+import { Duration, Option } from "effect";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { currentTurnAtom, theSecretWordAtom, wordScoreAtom, runScoreAtom, streakAtom, nextWordAction } from "@/atoms";
 import { formatDuration, speedMultiplierToCategory } from "@/domain";
@@ -15,7 +15,7 @@ export function YouWin() {
   const currentTurn = useAtomValue(currentTurnAtom);
   const runScore = useAtomValue(runScoreAtom);
   const streak = useAtomValue(streakAtom);
-  const { wordScore, basePointsPerTurn, speedMultiplier, timeSeconds } = useAtomValue(wordScoreAtom)!;
+  const { wordScore, basePointsPerTurn, speedMultiplier, timeSeconds } = Option.getOrThrow(useAtomValue(wordScoreAtom));
   const nextWord = useAtomSet(nextWordAction);
 
   return (

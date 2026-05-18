@@ -24,25 +24,19 @@ export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
   const secretChars = [...theSecretWord];
   const guessChars = [...wordleGuess];
 
-  // Identify letters that are not perfect "green" matches to form our remaining pool
-  const initialPool = Array.filter(secretChars, (char, i) => char !== guessChars[i]);
+  // Build count pool of remaining characters available for yellow matches
+  const pool: Record<string, number> = {};
+  for (let i = 0; i < secretChars.length; i++) if (secretChars[i] !== guessChars[i]) pool[secretChars[i]] = (pool[secretChars[i]] || 0) + 1;
 
-  // Reduce to final tiles, functionally removing used letters from the pool for "yellows"
-  return Array.reduce(guessChars, { pool: initialPool, tiles: [] as Tile[] }, (acc, guessChar, i) => {
-    if (guessChar === secretChars[i]) {
-      return { ...acc, tiles: Array.append(acc.tiles, { tileKey: guessChar, color: "green" as Color }) };
+  // Map characters directly to their correct colors without modifying arrays
+  return guessChars.map((char, i): Tile => {
+    if (char === secretChars[i]) return { tileKey: char, color: "green" };
+    if (pool[char] > 0) {
+      pool[char]--;
+      return { tileKey: char, color: "yellow" };
     }
-
-    const poolIndex = Array.findFirstIndex(acc.pool, (c) => c === guessChar);
-
-    return Option.match(poolIndex, {
-      onNone: () => ({ ...acc, tiles: Array.append(acc.tiles, { tileKey: guessChar, color: "grey" as Color }) }),
-      onSome: (idx) => ({
-        pool: Array.remove(acc.pool, idx),
-        tiles: Array.append(acc.tiles, { tileKey: guessChar, color: "yellow" as Color }),
-      }),
-    });
-  }).tiles;
+    return { tileKey: char, color: "grey" };
+  });
 };
 
 // Derive the full 6x5 grid state for rendering based on completed guesses

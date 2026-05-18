@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, DateTime, Duration, TestClock, HashSet } from "effect";
+import { Effect, DateTime, Duration, TestClock, HashSet, Option } from "effect";
 import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction, calculatePotentialScore } from ".";
 import { GameActionEnum, INITIAL_GAME_STATE } from "./models";
 
@@ -7,7 +7,7 @@ describe("gameLogic", () => {
   describe("calculateScore", () => {
     it.effect("calculates base points correctly for different turns", () =>
       Effect.gen(function* () {
-        const start = yield* DateTime.now;
+        const start = Option.some(yield* DateTime.now);
         yield* TestClock.adjust(Duration.seconds(45));
         const end = yield* DateTime.now;
 
@@ -21,7 +21,7 @@ describe("gameLogic", () => {
 
     it.effect("applies speed multipliers correctly", () =>
       Effect.gen(function* () {
-        const start = yield* DateTime.now;
+        const start = Option.some(yield* DateTime.now);
 
         // < 30s: 1.5x
         yield* TestClock.adjust(Duration.seconds(20));
@@ -59,16 +59,16 @@ describe("gameLogic", () => {
         const start = yield* DateTime.now;
 
         // Turn 1 (first guess), no time elapsed -> Full base points (1000) * max multiplier (1.5) = 1500
-        expect(calculatePotentialScore(1, null, start)).toBe(1500);
+        expect(calculatePotentialScore(1, Option.none(), start)).toBe(1500);
 
         // Turn 1, 20s elapsed -> 1000 * 1.5 = 1500
         yield* TestClock.adjust(Duration.seconds(20));
-        expect(calculatePotentialScore(1, start, yield* DateTime.now)).toBe(1500);
+        expect(calculatePotentialScore(1, Option.some(start), yield* DateTime.now)).toBe(1500);
 
         // Turn 3 (two guesses completed), 45s elapsed -> 600 * 1.2 = 720
         // We are at 20s, add 25s more to reach 45s
         yield* TestClock.adjust(Duration.seconds(25));
-        expect(calculatePotentialScore(3, start, yield* DateTime.now)).toBe(720);
+        expect(calculatePotentialScore(3, Option.some(start), yield* DateTime.now)).toBe(720);
       })
     );
   });

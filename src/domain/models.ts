@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Data, DateTime, Schema } from "effect";
+import { Data, DateTime, Option, Schema } from "effect";
 
 // schemas
 export const SolutionsDataSchema = Schema.Array(Schema.Trim);
@@ -29,8 +29,8 @@ export type GameState = Readonly<{
   wordleGuesses: Readonly<string[]>;
   currentTurn: number;
   isInvalidGuess: boolean;
-  startTime: DateTime.Utc | null;
-  wordScore: WordScore | null;
+  startTime: Option.Option<DateTime.Utc>;
+  wordScore: Option.Option<WordScore>;
 }>;
 
 export type Language = "En" | "Pl";
@@ -50,8 +50,8 @@ export const INITIAL_GAME_STATE = {
   wordleGuesses: [],
   currentTurn: 1,
   isInvalidGuess: false,
-  startTime: null,
-  wordScore: null,
+  startTime: Option.none(),
+  wordScore: Option.none(),
 } as const satisfies GameState;
 
 export const BASE_POINTS_PER_TURN_MAP = { 1: 1000, 2: 800, 3: 600, 4: 400, 5: 200, 6: 100 } as const as Readonly<Record<number, number>>;
