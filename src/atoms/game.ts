@@ -1,10 +1,19 @@
 // services, features, and other libraries
-import { DateTime, Effect, HashSet, Random, Match } from "effect";
+import { DateTime, Effect, HashSet, Random, PubSub } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
-import { deriveWordleGrid, getGameStatus, calculateScore, computeKeypadState, parseKey, applyGameAction, calculatePotentialScore } from "@/domain";
+import {
+  deriveWordleGrid,
+  getGameStatus,
+  calculateScore,
+  computeKeypadState,
+  parseKey,
+  applyGameAction,
+  calculatePotentialScore,
+  GameEventEnum,
+} from "@/domain";
 import { Runtime } from "./runtime";
-import { activeModalAtom, closeModalAction, languageAtom, runSessionAtom } from ".";
+import { closeModalAction, languageAtom, runSessionAtom, gameEventsPubSub } from ".";
 
 // types
 import type { GameState } from "@/domain";
@@ -113,47 +122,22 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     const prevStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
     const nextStatus = getGameStatus(nextGameState.currentTurn, nextGameState.theSecretWord, nextGameState.wordleGuesses);
 
-    // Resolve the challenge: bank volatile points on win, or end the entire run on loss
-    const finalGameState = yield* Match.value(nextStatus).pipe(
-      Match.when({ _tag: "Won" }, () =>
-        Effect.gen(function* () {
-          if (prevStatus._tag === "Playing" && nextGameState.startTime) {
-            const endTime = yield* DateTime.now;
-            const wordScore = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
-
-            // Bank volatile points into the persistent run session
-            const { runScore, streak, ...session } = get(runSessionAtom);
-            const newRunScore = runScore + wordScore.wordScore;
-            const newStreak = streak + 1;
-            const newBestRunScore = Math.max(session.bestRunScore, newRunScore);
-
-            get.set(runSessionAtom, { ...session, runScore: newRunScore, streak: newStreak, bestRunScore: newBestRunScore });
-
-            return { ...nextGameState, wordScore };
-          }
-          return nextGameState;
-        })
-      ),
-      Match.when({ _tag: "Lost" }, () =>
-        Effect.gen(function* () {
-          if (prevStatus._tag === "Playing") {
-            // End the entire arcade run: record results and reset progress to zero
-            const { runScore, streak, ...session } = get(runSessionAtom);
-            get.set(runSessionAtom, { ...session, lastRunScore: runScore, lastRunStreak: streak, runScore: 0, streak: 0 });
-          }
-          return nextGameState;
-        })
-      ),
-      Match.orElse(() => Effect.succeed(nextGameState))
-    );
+    // Calculate score if won
+    let finalGameState = nextGameState;
+    if (prevStatus._tag === "Playing" && nextStatus._tag === "Won" && nextGameState.startTime) {
+      const wordScore = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, now);
+      finalGameState = { ...nextGameState, wordScore };
+    }
 
     // Update the game state atom
     get.set(gameStateAtom, finalGameState);
 
-    // Trigger modal visibility as a side effect when the word resolution occurs
-    if (prevStatus._tag === "Playing" && nextStatus._tag !== "Playing") {
-      yield* Effect.sleep("1.5 seconds");
-      get.set(activeModalAtom, "status");
+    if (prevStatus._tag === "Playing") {
+      if (nextStatus._tag === "Won") {
+        yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordWon({ wordScore: finalGameState.wordScore!, nextGameState: finalGameState }));
+      } else if (nextStatus._tag === "Lost") {
+        yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordLost({ nextGameState: finalGameState }));
+      }
     }
   })
 );

@@ -13,7 +13,7 @@ import { ThemeChanger, ThemeChangerSkeleton } from "./ThemeChanger";
 import { NAV_ITEMS } from "./constants";
 
 // Component remains the fast, static shell
-export default function Header() {
+export function Header() {
   return (
     <Suspense fallback={<HeaderSkeleton />}>
       <HeaderContent />

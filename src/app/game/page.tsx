@@ -2,13 +2,14 @@
 
 // services, features, and other libraries
 import { useAtomValue, useAtomMount, Result } from "@effect-atom/atom-react";
-import { gameDataSolutionsAtom } from "@/atoms";
+import { gameDataSolutionsAtom, gameLifecycleAtom } from "@/atoms";
 
 // components
 import { Footer, Header, Main } from "@/ui/Game/Board";
 import { Loading } from "@/ui/Loading";
 
 export default function Page() {
+  useAtomMount(gameLifecycleAtom);
   useAtomMount(gameDataSolutionsAtom);
   const gameDataSolutions = useAtomValue(gameDataSolutionsAtom);
 

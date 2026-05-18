@@ -10,7 +10,7 @@ import { Analytics } from "@vercel/analytics/next";
 // components
 import { ThemeProvider } from "next-themes";
 import { RegistryProvider } from "@effect-atom/atom-react";
-import Header from "@/ui/Header";
+import { Header } from "@/ui/Header";
 import { HelpModal, WinOrLoseModal } from "@/ui/Modals";
 
 // assets
