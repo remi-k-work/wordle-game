@@ -3,7 +3,7 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { Atom } from "@effect-atom/atom-react";
-import { Runtime } from "./runtime";
+import { Runtime } from ".";
 
 // types
 import type { RunSession } from "@/domain";
