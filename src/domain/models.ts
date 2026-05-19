@@ -44,6 +44,9 @@ export type GameStatus = Data.TaggedEnum<{ Playing: object; Won: object; Lost: o
 export const GameActionEnum = Data.taggedEnum<GameAction>();
 export const GameStatusEnum = Data.taggedEnum<GameStatus>();
 
+export const WORD_LENGTH = 5;
+export const MAX_TURNS = 6;
+
 export const INITIAL_GAME_STATE = {
   theSecretWord: "",
   currentGuessWord: "",

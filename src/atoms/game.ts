@@ -1,8 +1,18 @@
 // services, features, and other libraries
-import { DateTime, Effect, HashSet, Random, PubSub } from "effect";
+import { DateTime, Effect, HashSet, Option, Random, PubSub } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { GameData } from "@/services";
-import { deriveWordleGrid, getGameStatus, computeKeypadState, parseKey, applyGameAction, calculatePotentialScore, GameEventEnum } from "@/domain";
+import {
+  deriveWordleGrid,
+  getGameStatus,
+  computeKeypadState,
+  parseKey,
+  applyGameAction,
+  calculatePotentialScore,
+  deriveGameEvent,
+  finishRunSession,
+  resetCurrentRunSession,
+} from "@/domain";
 import { Runtime } from "./runtime";
 import { closeModalAction, languageAtom, runSessionAtom, gameEventsPubSub } from ".";
 
@@ -42,14 +52,6 @@ export const gameDataSolutionsAtom = Runtime.atom(
     // Pick a new secret word and reset the game state
     const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
     const randomSolution = solutions[randomIndex].toUpperCase();
-
-    // *** TEST CODE ***
-    // *** TEST CODE ***
-    // *** TEST CODE ***
-    yield* Effect.log("Secret word: " + randomSolution);
-    // *** TEST CODE ***
-    // *** TEST CODE ***
-    // *** TEST CODE ***
 
     yield* Atom.set(gameStateAtom, { ...INITIAL_GAME_STATE, theSecretWord: randomSolution });
 
@@ -109,26 +111,28 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
     // Referential equality check (anything has changed?)
     if (currGameState === nextGameState) return;
 
-    // Detect transitions
-    const prevStatus = getGameStatus(currGameState.currentTurn, currGameState.theSecretWord, currGameState.wordleGuesses);
-    const nextStatus = getGameStatus(nextGameState.currentTurn, nextGameState.theSecretWord, nextGameState.wordleGuesses);
-
     // Update the game state atom
     get.set(gameStateAtom, nextGameState);
 
-    if (prevStatus._tag !== "Playing") return;
-    if (nextStatus._tag === "Won") yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordWon({ nextGameState, endTime: now }));
-    if (nextStatus._tag === "Lost") yield* PubSub.publish(gameEventsPubSub, GameEventEnum.WordLost());
+    yield* Option.match(deriveGameEvent(currGameState, nextGameState, now), {
+      onNone: () => Effect.void,
+      onSome: (event) => PubSub.publish(gameEventsPubSub, event),
+    });
   })
 );
+
+// Refresh the dictionary-backed atoms that define the current word challenge
+const refreshActiveChallenge = (get: Atom.FnContext) => {
+  get.refresh(gameDataSolutionsAtom);
+  get.refresh(gameDataKeypadAtom);
+};
 
 // Transition to the next word challenge while maintaining the current run streak
 export const nextWordAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(closeModalAction, void 0);
 
-    get.refresh(gameDataSolutionsAtom);
-    get.refresh(gameDataKeypadAtom);
+    refreshActiveChallenge(get);
   })
 );
 
@@ -138,20 +142,17 @@ export const startNewRunAction = Atom.fn(
     get.set(closeModalAction, void 0);
 
     const session = get(runSessionAtom);
-    get.set(runSessionAtom, { ...session, runScore: 0, streak: 0 });
+    get.set(runSessionAtom, resetCurrentRunSession(session));
 
-    get.refresh(gameDataSolutionsAtom);
-    get.refresh(gameDataKeypadAtom);
+    refreshActiveChallenge(get);
   })
 );
 
 // Manually abandon the current arcade run and record its final progress
 export const forfeitRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
-    const { runScore, streak, ...session } = get(runSessionAtom);
-    get.set(runSessionAtom, { ...session, runScore: 0, streak: 0, lastRunScore: runScore, lastRunStreak: streak });
+    get.set(runSessionAtom, finishRunSession(get(runSessionAtom)));
 
-    get.refresh(gameDataSolutionsAtom);
-    get.refresh(gameDataKeypadAtom);
+    refreshActiveChallenge(get);
   })
 );

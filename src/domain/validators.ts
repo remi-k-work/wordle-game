@@ -2,6 +2,8 @@
 import { HashSet, Match } from "effect";
 
 // constants
+import { MAX_TURNS, WORD_LENGTH } from ".";
+
 const LETTER_REGEX = /^[A-ZĄĆĘŁŃÓŚŹŻ]$/u;
 const CONTROL_KEYS = HashSet.fromIterable(["BACKSPACE", "ENTER"]);
 
@@ -27,9 +29,9 @@ export const isGuessKeyValid = (pressedKey: string) =>
 // Accept or reject the submitted guess purely based on domain rules (we use && for instant short-circuiting)
 export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[], dictionary: HashSet.HashSet<string>) =>
   // Is this not the final turn?
-  currentTurn <= 6 &&
+  currentTurn <= MAX_TURNS &&
   // Make sure the term is exactly 5 characters long
-  currentGuessWord.length === 5 &&
+  currentGuessWord.length === WORD_LENGTH &&
   // Do not allow duplicate words
   !wordleGuesses.includes(currentGuessWord) &&
   // Ensure the word exists in the dictionary

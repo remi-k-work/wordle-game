@@ -1,24 +1,31 @@
 // services, features, and other libraries
-import { Array, HashSet, Duration, DateTime, Match, pipe, Option } from "effect";
-import { canSubmitGuess, formatGuess, GameActionEnum, GameStatusEnum, getSpeedMultiplier, isGuessKeyValid, pickStrongerColor } from ".";
+import { Array, HashSet, DateTime, Match, pipe, Option } from "effect";
+import {
+  canSubmitGuess,
+  elapsedSeconds,
+  formatGuess,
+  GameActionEnum,
+  GameEventEnum,
+  GameStatusEnum,
+  getBasePointsForTurn,
+  getGameStateStatus,
+  getSpeedMultiplier,
+  isGamePlaying,
+  isGuessKeyValid,
+  pickStrongerColor,
+} from ".";
 
 // types
-import type { Color, GameAction, GameState, WordScore } from ".";
+import type { Color, GameAction, GameEvent, GameState, WordScore } from ".";
 
 // constants
-import { BASE_POINTS_PER_TURN_MAP } from ".";
+import { MAX_TURNS, WORD_LENGTH } from ".";
 
 // Calculates the player's word score based on the turn they won on and how long it took them
 // This denotes the volatile points earned for the current word before they are banked into the run
 export const calculateScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) => {
-  // Establish the base points based on the turn number in which the secret word was solved
-  const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
-
-  // Establish the speed multiplier based on the time it took
-  const seconds = Option.match(startTime, {
-    onNone: () => 0,
-    onSome: (startTime) => DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds),
-  });
+  const basePointsPerTurn = getBasePointsForTurn(currentTurn);
+  const seconds = elapsedSeconds(startTime, endTime);
   const speedMultiplier = getSpeedMultiplier(seconds);
 
   return {
@@ -31,19 +38,8 @@ export const calculateScore = (currentTurn: number, startTime: Option.Option<Dat
 
 // Calculates the "live" potential word score based on current turn and time elapsed
 // This projects what the player stands to gain based on their current speed and turn count
-export const calculatePotentialScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, now: DateTime.Utc) => {
-  // Establish the base points based on the turn number in which the secret word was solved
-  const basePointsPerTurn = BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
-
-  // Establish the speed multiplier based on the time it took
-  // If the timer has not started yet, assume the maximum possible speed multiplier (0s elapsed)
-  const seconds = Option.match(startTime, {
-    onNone: () => 0,
-    onSome: (startTime) => DateTime.distanceDuration(startTime, now).pipe(Duration.toSeconds),
-  });
-
-  return Math.round(basePointsPerTurn * getSpeedMultiplier(seconds));
-};
+export const calculatePotentialScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, now: DateTime.Utc) =>
+  Math.round(getBasePointsForTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds(startTime, now)));
 
 // Get the current game status by checking the last guess and current turn
 export const getGameStatus = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]) => {
@@ -51,10 +47,20 @@ export const getGameStatus = (currentTurn: number, theSecretWord: string, wordle
   if (theSecretWord === wordleGuesses.at(-1)) return GameStatusEnum.Won();
 
   // Do we have a loser? When the player runs out of turns, we have a loser
-  if (currentTurn > 6) return GameStatusEnum.Lost();
+  if (currentTurn > MAX_TURNS) return GameStatusEnum.Lost();
 
   // Otherwise, the game is still in progress
   return GameStatusEnum.Playing();
+};
+
+// Derive the lifecycle event caused by a state transition, if the transition ended the word
+export const deriveGameEvent = (prevState: GameState, nextGameState: GameState, endTime: DateTime.Utc): Option.Option<GameEvent> => {
+  if (!isGamePlaying(prevState)) return Option.none();
+
+  const nextStatus = getGameStateStatus(nextGameState);
+  if (nextStatus._tag === "Won") return Option.some(GameEventEnum.WordWon({ nextGameState, endTime }));
+  if (nextStatus._tag === "Lost") return Option.some(GameEventEnum.WordLost());
+  return Option.none();
 };
 
 // Compute the final keypad state by reducing all guesses and picking the strongest colors
@@ -94,8 +100,8 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
 // A pure reducer that handles the state transition logic for each game action
 export const applyGameAction = (state: GameState, action: GameAction, dictionary: HashSet.HashSet<string>, now: DateTime.Utc): GameState => {
   // If game is over, freeze state and return exact reference
-  const { theSecretWord, currentGuessWord, wordleGuesses, currentTurn } = state;
-  if (getGameStatus(currentTurn, theSecretWord, wordleGuesses)._tag !== "Playing") return state;
+  const { currentGuessWord, wordleGuesses, currentTurn } = state;
+  if (!isGamePlaying(state)) return state;
 
   return Match.value(action).pipe(
     Match.tag("Ignore", () => state),
@@ -107,7 +113,7 @@ export const applyGameAction = (state: GameState, action: GameAction, dictionary
 
     // Lazily assign startTime on the very first letter typed
     Match.tag("AddLetter", ({ letter }) =>
-      currentGuessWord.length < 5
+      currentGuessWord.length < WORD_LENGTH
         ? {
             ...state,
             currentGuessWord: currentGuessWord + letter,
@@ -120,7 +126,7 @@ export const applyGameAction = (state: GameState, action: GameAction, dictionary
     Match.tag("SubmitGuess", () => {
       // If it is a full 5-letter guess word but not in the dictionary, make sure to flag it as invalid
       const canSubmit = canSubmitGuess(currentGuessWord, currentTurn, wordleGuesses, dictionary);
-      if (currentGuessWord.length === 5 && !canSubmit) return { ...state, isInvalidGuess: true };
+      if (currentGuessWord.length === WORD_LENGTH && !canSubmit) return { ...state, isInvalidGuess: true };
 
       // If the guess word is invalid, exit early (no game state change)
       if (!canSubmit) return state;

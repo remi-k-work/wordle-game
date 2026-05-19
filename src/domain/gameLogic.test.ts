@@ -1,6 +1,17 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, TestClock, HashSet, Option } from "effect";
-import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction, calculatePotentialScore } from ".";
+import {
+  calculateScore,
+  formatDuration,
+  getGameStatus,
+  computeKeypadState,
+  applyGameAction,
+  calculatePotentialScore,
+  deriveGameEvent,
+  bankWordScore,
+  finishRunSession,
+  resetCurrentRunSession,
+} from ".";
 import { GameActionEnum, INITIAL_GAME_STATE } from "./models";
 
 describe("gameLogic", () => {
@@ -111,6 +122,15 @@ describe("gameLogic", () => {
       expect(state.currentGuessWord).toBe("A");
     });
 
+    it("sets startTime on first letter and preserves it afterward", () => {
+      const firstLetterState = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
+      expect(Option.isSome(firstLetterState.startTime)).toBe(true);
+
+      const later = DateTime.unsafeMake(10_000);
+      const secondLetterState = applyGameAction(firstLetterState, GameActionEnum.AddLetter({ letter: "P" }), dictionary, later);
+      expect(secondLetterState.startTime).toBe(firstLetterState.startTime);
+    });
+
     it("handles RemoveLetter", () => {
       const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "AB" };
       const state2 = applyGameAction(state1, GameActionEnum.RemoveLetter(), dictionary, now);
@@ -131,6 +151,74 @@ describe("gameLogic", () => {
       const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionaryEmpty, now);
       expect(state2.isInvalidGuess).toBe(true);
       expect(state2.wordleGuesses).toHaveLength(0);
+    });
+
+    it("does not mutate state when submitting an incomplete guess", () => {
+      const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APP" };
+      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionary, now);
+      expect(state2).toBe(state1);
+    });
+
+    it("returns the same state reference after a terminal status", () => {
+      const wonState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", wordleGuesses: ["APPLE"], currentTurn: 2 };
+      const nextState = applyGameAction(wonState, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
+      expect(nextState).toBe(wonState);
+    });
+  });
+
+  describe("deriveGameEvent", () => {
+    const now = DateTime.unsafeMake(0);
+
+    it("emits WordWon when a playing state transitions to won", () => {
+      const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentGuessWord: "APPLE" };
+      const nextState = { ...prevState, currentGuessWord: "", wordleGuesses: ["APPLE"], currentTurn: 2 };
+      const event = deriveGameEvent(prevState, nextState, now);
+
+      expect(Option.isSome(event)).toBe(true);
+      if (Option.isSome(event)) expect(event.value._tag).toBe("WordWon");
+    });
+
+    it("emits WordLost when a playing state transitions past the final turn", () => {
+      const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentTurn: 6 };
+      const nextState = { ...prevState, wordleGuesses: ["BIRDS", "CARDS", "TABLE", "CHAIR", "HOUSE", "PIANO"], currentTurn: 7 };
+      const event = deriveGameEvent(prevState, nextState, now);
+
+      expect(Option.isSome(event)).toBe(true);
+      if (Option.isSome(event)) expect(event.value._tag).toBe("WordLost");
+    });
+
+    it("does not emit an event while play continues", () => {
+      const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentGuessWord: "BIRDS" };
+      const nextState = { ...prevState, currentGuessWord: "", wordleGuesses: ["BIRDS"], currentTurn: 2 };
+      expect(Option.isNone(deriveGameEvent(prevState, nextState, now))).toBe(true);
+    });
+  });
+
+  describe("run session helpers", () => {
+    const session = { runScore: 100, streak: 2, lastRunScore: 50, lastRunStreak: 1, bestRunScore: 120 };
+
+    it("banks word score into run score, streak, and best score", () => {
+      expect(bankWordScore(session, { wordScore: 75, basePointsPerTurn: 100, speedMultiplier: 0.8, timeSeconds: 70 })).toEqual({
+        runScore: 175,
+        streak: 3,
+        lastRunScore: 50,
+        lastRunStreak: 1,
+        bestRunScore: 175,
+      });
+    });
+
+    it("resets only the active run for a new run", () => {
+      expect(resetCurrentRunSession(session)).toEqual({ ...session, runScore: 0, streak: 0 });
+    });
+
+    it("finishes a run by preserving last run results", () => {
+      expect(finishRunSession(session)).toEqual({
+        runScore: 0,
+        streak: 0,
+        lastRunScore: 100,
+        lastRunStreak: 2,
+        bestRunScore: 120,
+      });
     });
   });
 
