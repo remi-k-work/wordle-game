@@ -2,7 +2,7 @@
 import { Effect, Stream, Match, Option } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { bankWordScore, calculateScore, finishRunSession } from "@/domain";
-import { gameEventsPubSub, activeModalAtom, runSessionAtom, Runtime, gameStateAtom } from "@/atoms";
+import { gameEventsPubSub, activeModalAtom, runSessionAtom, Runtime, gameStateAtom } from ".";
 
 // Show the win/loss modal after tile animations have had time to finish
 const showStatusModalAfterDelay = Effect.sleep("1.5 seconds").pipe(Effect.andThen(Atom.set(activeModalAtom, "status")), Effect.fork);
