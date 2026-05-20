@@ -12,6 +12,7 @@ export const gameStateAtom = Atom.make<GameState>(INITIAL_GAME_STATE);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const theSecretWordAtom = gameStateAtom.pipe(Atom.map((state) => state.theSecretWord));
+export const riddleAtom = gameStateAtom.pipe(Atom.map((state) => state.riddle));
 export const currentGuessWordAtom = gameStateAtom.pipe(Atom.map((state) => state.currentGuessWord));
 export const wordleGuessesAtom = gameStateAtom.pipe(Atom.map((state) => state.wordleGuesses));
 export const currentTurnAtom = gameStateAtom.pipe(Atom.map((state) => state.currentTurn));

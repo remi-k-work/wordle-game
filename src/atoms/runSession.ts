@@ -3,14 +3,14 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { Atom } from "@effect-atom/atom-react";
-import { Runtime } from ".";
+import { RuntimeAtom } from "@/lib/RuntimeClient";
 
 // types
 import type { RunSession } from "@/domain";
 
 // Persistent storage for tracking the current arcade run progress and high water marks
 export const runSessionAtom = Atom.kvs({
-  runtime: Runtime as any,
+  runtime: RuntimeAtom as any,
   key: "@wordle/runSession",
   schema: Schema.Struct({
     runScore: Schema.Int.pipe(Schema.nonNegative()),

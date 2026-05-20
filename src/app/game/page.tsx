@@ -5,7 +5,7 @@ import { useAtomValue, useAtomMount, Result } from "@effect-atom/atom-react";
 import { gameDataSolutionsAtom, gameLifecycleAtom } from "@/atoms";
 
 // components
-import { Footer, Header, Main } from "@/ui/Game/Board";
+import { Footer, Header, Main, Riddle } from "@/ui/Game/Board";
 import { Loading } from "@/ui/Loading";
 
 export default function Page() {
@@ -36,8 +36,9 @@ export default function Page() {
       </article>
     ))
     .onSuccess(() => (
-      <article className="grid grid-cols-1 grid-rows-[auto_1fr_auto] gap-3">
+      <article className="grid grid-cols-1 grid-rows-[auto_auto_1fr_auto] gap-3">
         <Header />
+        <Riddle />
         <Main />
         <Footer />
       </article>

@@ -1,13 +1,14 @@
 // services, features, and other libraries
 import { Effect, Stream, Match, Option } from "effect";
 import { Atom } from "@effect-atom/atom-react";
+import { RuntimeAtom } from "@/lib/RuntimeClient";
 import { bankWordScore, calculateScore, finishRunSession } from "@/domain";
-import { gameEventsPubSub, activeModalAtom, runSessionAtom, Runtime, gameStateAtom } from ".";
+import { gameEventsPubSub, activeModalAtom, runSessionAtom, gameStateAtom } from ".";
 
 // Show the win/loss modal after tile animations have had time to finish
 const showStatusModalAfterDelay = Effect.sleep("1.5 seconds").pipe(Effect.andThen(Atom.set(activeModalAtom, "status")), Effect.fork);
 
-export const gameLifecycleAtom = Runtime.atom(
+export const gameLifecycleAtom = RuntimeAtom.atom(
   Stream.fromPubSub(gameEventsPubSub).pipe(
     Stream.runForEach((event) =>
       Match.value(event).pipe(

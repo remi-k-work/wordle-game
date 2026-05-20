@@ -6,4 +6,4 @@ import { GameData } from "@/services";
 
 const MainLayer = Layer.mergeAll(Logger.pretty, GameData.Default, BrowserKeyValueStore.layerLocalStorage);
 
-export const Runtime = Atom.runtime(MainLayer);
+export const RuntimeAtom = Atom.runtime(MainLayer);

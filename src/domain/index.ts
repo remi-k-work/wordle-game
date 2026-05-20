@@ -4,6 +4,7 @@ export * from "./formatters";
 export * from "./gameLogic";
 export * from "./helpers";
 export * from "./models";
+export * from "./riddle";
 export * from "./runSession";
 export * from "./schemas";
 export * from "./validators";

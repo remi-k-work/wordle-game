@@ -21,6 +21,7 @@ export type RunSession = Readonly<{
 
 export type GameState = Readonly<{
   theSecretWord: string;
+  riddle: string;
   currentGuessWord: string;
   wordleGuesses: ReadonlyArray<string>;
   currentTurn: number;
@@ -42,6 +43,7 @@ export const GameStatusEnum = Data.taggedEnum<GameStatus>();
 
 export const INITIAL_GAME_STATE = {
   theSecretWord: "",
+  riddle: "",
   currentGuessWord: "",
   wordleGuesses: [],
   currentTurn: 1,

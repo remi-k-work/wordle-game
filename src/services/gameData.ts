@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, flow } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
-import { KeypadDataSchema, SolutionsDataSchema } from "@/domain";
+import { KeypadDataSchema, RiddleRequestSchema, RiddleResponseSchema, SolutionsDataSchema } from "@/domain";
 
 // types
 import type { Language } from "@/domain";
@@ -11,12 +11,23 @@ export class GameData extends Effect.Service<GameData>()("GameData", {
 
   effect: Effect.gen(function* () {
     const baseClient = yield* HttpClient.HttpClient.pipe(Effect.map(HttpClient.filterStatusOk));
-    const client = baseClient.pipe(HttpClient.mapRequest(flow(HttpClientRequest.prependUrl("/data/"), HttpClientRequest.acceptJson)));
+    const dataClient = baseClient.pipe(HttpClient.mapRequest(flow(HttpClientRequest.prependUrl("/data/"), HttpClientRequest.acceptJson)));
+    const apiClient = baseClient.pipe(HttpClient.mapRequest(flow(HttpClientRequest.prependUrl("/api/"), HttpClientRequest.acceptJson)));
 
     const fetchSolutions = (language: Language) =>
-      client.get(`solutions${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(SolutionsDataSchema)));
-    const fetchKeypad = (language: Language) => client.get(`keypad${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(KeypadDataSchema)));
+      dataClient.get(`solutions${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(SolutionsDataSchema)));
 
-    return { fetchSolutions, fetchKeypad } as const;
+    const fetchKeypad = (language: Language) =>
+      dataClient.get(`keypad${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(KeypadDataSchema)));
+
+    const fetchRiddle = (theSecretWord: string, language: Language) =>
+      HttpClientRequest.post("riddle").pipe(
+        HttpClientRequest.schemaBodyJson(RiddleRequestSchema)({ theSecretWord, language }),
+        Effect.flatMap(apiClient.execute),
+        Effect.flatMap(HttpClientResponse.schemaBodyJson(RiddleResponseSchema)),
+        Effect.map(({ riddle }) => riddle)
+      );
+
+    return { fetchSolutions, fetchKeypad, fetchRiddle } as const;
   }),
 }) {}
