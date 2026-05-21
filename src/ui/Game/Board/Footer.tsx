@@ -1,11 +1,10 @@
 // services, features, and other libraries
 import { motion, AnimatePresence } from "motion/react";
-import { useAtomValue, useAtomSet, Result, useAtomMount } from "@effect-atom/atom-react";
+import { useAtomValue, useAtomSet, Result } from "@effect-atom/atom-react";
 import { handleKeyAction, gameDataKeypadAtom, keypadColorsAtom } from "@/atoms";
 
 // components
 import { Button } from "@base-ui/react";
-import { Loading } from "@/ui/Loading";
 
 // assets
 import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
@@ -27,21 +26,19 @@ const SPRING_TRANSITION = { type: "spring", damping: 40, stiffness: 200 } as con
 const MotionButton = motion.create(Button);
 
 export function Footer() {
-  useAtomMount(gameDataKeypadAtom);
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
   const keypadColors = useAtomValue(keypadColorsAtom);
   const handleKey = useAtomSet(handleKeyAction);
 
   return Result.builder(gameDataKeypad)
-    .onInitial(() => <Loading status="pending" />)
-    .onWaiting(() => <Loading status="pending" />)
-    .onFailure(() => <Loading status="rejected" />)
+    .onInitialOrWaiting(() => <FooterSkeleton />)
+    .onFailure(() => <FooterSkeleton />)
     .onSuccess((keys) => {
       // Dynamically filter out the grey keys
       const availableKeys = keys.filter((key) => keypadColors[key] !== "grey");
 
       return (
-        <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1">
+        <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
           {/* AnimatePresence handles elements being unmounted (removed from the array) */}
           <AnimatePresence mode="sync">
             {availableKeys.map((key) => {
@@ -81,4 +78,22 @@ export function Footer() {
       );
     })
     .render();
+}
+
+export function FooterSkeleton() {
+  return (
+    <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
+      {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].map((key) => (
+        <Button key={key} className="button basis-12 border-secondary bg-transparent p-0 font-sans text-xl leading-9" disabled>
+          {key}
+        </Button>
+      ))}
+      <Button className="button basis-12 bg-secondary p-0" disabled>
+        <BackspaceIcon className="size-7" />
+      </Button>
+      <Button className="button basis-12 bg-secondary p-0" disabled>
+        <PaperAirplaneIcon className="size-7" />
+      </Button>
+    </footer>
+  );
 }

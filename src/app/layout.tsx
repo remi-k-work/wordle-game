@@ -42,7 +42,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
           <RegistryProvider>
             <div className="isolate grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr]">
               <Header />
-              <main className="mx-auto grid max-w-4xl p-2">{children}</main>
+              <main className="mx-auto grid max-w-4xl p-1">{children}</main>
             </div>
             <HelpModal />
             <WinOrLoseModal />

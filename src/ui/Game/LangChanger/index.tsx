@@ -18,16 +18,18 @@ export function LangChanger() {
   }
 
   return (
-    <Button className="button bg-secondary" title="Language" onClick={handleLangToggled}>
+    <Button className="button" onClick={handleLangToggled}>
       {language === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
+      Language
     </Button>
   );
 }
 
 export function LangChangerSkeleton() {
   return (
-    <Button className="button bg-secondary" title="Language" disabled>
+    <Button className="button" disabled>
       <UsFlagIcon className="size-11" />
+      Language
     </Button>
   );
 }

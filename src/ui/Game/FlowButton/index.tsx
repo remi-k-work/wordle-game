@@ -37,3 +37,11 @@ export function GameFlowButton() {
     </>
   );
 }
+
+export function GameFlowButtonSkeleton() {
+  return (
+    <Button className="button" disabled>
+      &bnsp;
+    </Button>
+  );
+}

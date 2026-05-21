@@ -7,12 +7,12 @@ import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
 import { currentGuessWordAtom, handleKeyAction, isInvalidGuessAtom } from "@/atoms";
 
 // components
-import GuessTile from "./GuessTile";
+import { GuessTile } from "./GuessTile";
 
 // types
 import type { Color, Tile } from "@/domain";
 
-export default function CurrentGuess() {
+export function CurrentGuess() {
   const currentGuessWord = useAtomValue(currentGuessWordAtom);
   const isInvalidGuess = useAtomValue(isInvalidGuessAtom);
   const handleKey = useAtomSet(handleKeyAction);
@@ -34,7 +34,7 @@ export default function CurrentGuess() {
   const finalGuessTiles = [...currentGuessTiles, ...remainingEmptyTiles];
 
   return (
-    <div className={cn("grid grid-cols-5 grid-rows-1 gap-2", isInvalidGuess && "animate-pulse")}>
+    <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isInvalidGuess && "animate-pulse")}>
       {finalGuessTiles.map((tile, tileIndex) => (
         <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentGuessTiles.length - 1} />
       ))}

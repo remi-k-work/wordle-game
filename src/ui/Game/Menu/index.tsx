@@ -16,14 +16,14 @@ export function GameMenu() {
 
   return (
     <Popover.Root>
-      <Popover.Trigger className="button p-1 data-popup-open:bg-accent md:hidden">
+      <Popover.Trigger openOnHover title="Menu" className="button flex-none p-1 data-popup-open:bg-accent">
         <Bars3Icon className="size-11" />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8}>
           <Popover.Popup
             className={cn(
-              "grid gap-3 bg-surface-2 p-3",
+              "grid gap-3 rounded-md bg-surface-2 p-3 shadow-sm",
               "transition duration-300 ease-in-out",
               "origin-(--transform-origin)",
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
@@ -31,12 +31,21 @@ export function GameMenu() {
           >
             <LangChanger />
             <GameFlowButton />
-            <Button className="button" title="Help" onClick={() => openModal("help")}>
+            <Button className="button" onClick={() => openModal("help")}>
               <QuestionMarkCircleIcon className="size-11" />
+              Help
             </Button>
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>
+  );
+}
+
+export function GameMenuSkeleton() {
+  return (
+    <Button className="button flex-none p-1" disabled>
+      <Bars3Icon className="size-11" />
+    </Button>
   );
 }

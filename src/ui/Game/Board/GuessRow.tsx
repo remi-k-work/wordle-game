@@ -4,7 +4,7 @@ import { useAtomValue } from "@effect-atom/atom-react";
 import { currentTurnAtom } from "@/atoms";
 
 // components
-import GuessTile from "./GuessTile";
+import { GuessTile, GuessTileSkeleton } from "./GuessTile";
 
 // types
 import type { WordleGrid } from "@/domain";
@@ -14,14 +14,14 @@ interface GuessRowProps {
   rowIndex: number;
 }
 
-export default function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
+export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const currentTurn = useAtomValue(currentTurnAtom);
   const isCurrentTurn = rowIndex === currentTurn - 2;
 
   return (
     <div
       className={cn(
-        "grid grid-cols-5 grid-rows-1 gap-2",
+        "grid grid-cols-5 grid-rows-1 gap-1",
         isCurrentTurn && [
           // Reset backgrounds for children before animation fully executes
           "[&>div]:bg-transparent",
@@ -37,6 +37,18 @@ export default function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
       {wordleGrid[rowIndex].map((tile, tileIndex) => (
         <GuessTile key={tileIndex} tile={tile} />
       ))}
+    </div>
+  );
+}
+
+export function GuessRowSkeleton() {
+  return (
+    <div className="grid grid-cols-5 grid-rows-1 gap-1">
+      <GuessTileSkeleton />
+      <GuessTileSkeleton />
+      <GuessTileSkeleton />
+      <GuessTileSkeleton />
+      <GuessTileSkeleton />
     </div>
   );
 }
