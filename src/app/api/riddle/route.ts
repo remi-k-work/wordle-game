@@ -3,6 +3,9 @@ import { Effect, Schema } from "effect";
 import { RuntimeServer } from "@/lib/RuntimeServer";
 import { generateRiddle, RiddleRequestSchema } from "@/domain";
 
+// Allow streaming responses up to 60 seconds
+export const maxDuration = 60;
+
 const decodeRequest = (request: Request) => Effect.promise(() => request.json()).pipe(Effect.flatMap(Schema.decodeUnknown(RiddleRequestSchema)));
 
 const main = (request: Request) =>
