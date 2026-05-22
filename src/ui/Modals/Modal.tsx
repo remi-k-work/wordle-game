@@ -32,7 +32,7 @@ export function Modal({ isOpen = false, title, children }: ModalProps) {
         <Dialog.Viewport className="fixed inset-0 flex items-center justify-center overflow-hidden">
           <Dialog.Popup
             className={cn(
-              "relative max-h-[80dvh] overflow-auto bg-surface-1 p-3 text-center text-text-1",
+              "relative max-h-[80dvh] max-w-[90dvw] overflow-auto bg-surface-1 p-3 text-center text-text-1",
               "transition duration-300 ease-in-out",
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}

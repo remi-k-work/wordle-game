@@ -22,7 +22,7 @@ export function Riddle() {
         <Popover.Positioner sideOffset={8}>
           <Popover.Popup
             className={cn(
-              "grid gap-3 rounded-md bg-surface-2 p-3 text-center text-xl shadow-sm",
+              "grid max-w-[90dvw] gap-3 rounded-md bg-surface-2 p-3 text-center text-xl shadow-sm",
               "transition duration-300 ease-in-out",
               "origin-(--transform-origin)",
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"

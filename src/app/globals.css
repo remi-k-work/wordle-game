@@ -99,7 +99,7 @@
   h4,
   h5,
   h6 {
-    @apply max-w-[35ch] text-balance;
+    @apply max-w-prose text-balance;
   }
 
   p {

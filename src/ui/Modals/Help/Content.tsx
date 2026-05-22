@@ -9,7 +9,7 @@ import { closeModalAction } from "@/atoms";
 import { Button } from "@base-ui/react";
 
 // assets
-import logo from "@/assets/opengraph-image.jpg";
+import hero from "@/assets/hero.webp";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
 export function Content() {
@@ -17,16 +17,16 @@ export function Content() {
 
   return (
     <article className="max-w-prose space-y-9">
-      <Image src={logo} className="h-auto w-full" loading="lazy" alt="Logo" />
+      <Image src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
 
       <p>
-        Welcome to Wordle, a daily word game where you have six tries to guess a five-letter word. The game is simple and addictive, but it can also be
-        challenging.
+        Welcome to <b>Wordle Overdrive</b>, a daily word game where you have six tries to guess a five-letter word. The game is simple and addictive, but it can
+        also be challenging.
       </p>
       <p>
-        The objective of Wordle is to guess the secret five-letter word in as few attempts as possible. Each guess is made by typing a five-letter word into the
-        provided field. Upon entering each guess, the game will provide feedback on the correctness of the letters entered, indicating whether they are in the
-        correct position or not. This feedback is provided through a color-coding system:
+        The objective of <b>Wordle Overdrive</b> is to guess the secret five-letter word in as few attempts as possible. Each guess is made by typing a
+        five-letter word into the provided field. Upon entering each guess, the game will provide feedback on the correctness of the letters entered, indicating
+        whether they are in the correct position or not. This feedback is provided through a color-coding system:
       </p>
 
       <ul className="mx-auto grid list-none place-content-center gap-2 text-start font-sans">

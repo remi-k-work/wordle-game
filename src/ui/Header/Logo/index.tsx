@@ -6,7 +6,7 @@ import { LogoIcon } from "@/assets/icons";
 
 export default function Logo() {
   return (
-    <Link href="/" title="Wordle Game" className="flex-none">
+    <Link href="/" title="Wordle Overdrive" className="flex-none">
       <LogoIcon className="size-13" />
     </Link>
   );

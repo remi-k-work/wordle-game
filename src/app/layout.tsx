@@ -21,13 +21,23 @@ import type { Metadata } from "next";
 
 // constants
 export const metadata: Metadata = {
-  title: "Wordle Clone — Free Word Puzzle Game in English & Polish",
+  title: "Wordle Overdrive — The High-Stakes Arcade Word Survival Game",
   description:
-    "Play a free Wordle-inspired word puzzle game. Guess the hidden word in 6 tries using color-coded hints and challenge your vocabulary in English or Polish.",
+    "Take the classic word puzzle into overdrive. Survive an endless arcade run, unlock dynamic scoring multipliers, and solve AI-generated riddles in English or Polish.",
   authors: [{ name: "Remi" }],
   robots: { index: true, follow: true },
   category: "game",
-  keywords: ["wordle", "wordle clone", "word puzzle", "word guessing game", "vocabulary game", "english word game", "polish word game"],
+  keywords: [
+    "wordle overdrive",
+    "arcade wordle",
+    "endless wordle",
+    "word survival game",
+    "wordle with riddles",
+    "wordle arcade run",
+    "english word game",
+    "polish word game",
+    "word puzzle",
+  ],
   other: { google: "notranslate" },
 
   metadataBase: new URL("https://wordle-game.remiforge.dev"),
@@ -42,7 +52,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
           <RegistryProvider>
             <div className="isolate grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr]">
               <Header />
-              <main className="mx-auto grid max-w-4xl p-1">{children}</main>
+              <main className="grid p-1">{children}</main>
             </div>
             <HelpModal />
             <WinOrLoseModal />
@@ -56,7 +66,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Visit RemiForge Portfolio (opens in a new tab)"
-          className="mx-auto flex max-w-xl flex-wrap items-center gap-5 rounded-xl border border-gray-700 bg-neutral-900 p-4 text-start text-neutral-200 no-underline transition-colors hover:border-gray-500"
+          className="mx-auto mt-9 flex max-w-xl flex-wrap items-center gap-5 rounded-xl border border-gray-700 bg-neutral-900 p-4 text-start text-neutral-200 no-underline transition-colors hover:border-gray-500"
         >
           <Image
             src="https://www.remiforge.dev/opengraph-image.jpg"

@@ -13,21 +13,21 @@ export default function Page() {
 
   return Result.builder(gameDataSolutions)
     .onInitialOrWaiting(() => (
-      <article className="grid grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
+      <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
         <HeaderSkeleton />
         <MainSkeleton />
         <FooterSkeleton />
       </article>
     ))
     .onFailure(() => (
-      <article className="grid grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
+      <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
         <HeaderSkeleton />
         <MainSkeleton />
         <FooterSkeleton />
       </article>
     ))
     .onSuccess(() => (
-      <article className="grid grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
+      <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
         <Header />
         <Main />
         <Footer />
