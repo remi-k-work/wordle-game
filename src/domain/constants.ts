@@ -15,12 +15,18 @@ export const SPEED_MULTIPLIER_RULES = [
   { maxSeconds: Infinity, multiplier: 0.8 },
 ] as const;
 
+export const POTENTIAL_SCORE_RANGE = {
+  min: Math.round(Math.min(...Object.values(BASE_POINTS_PER_TURN_MAP)) * Math.min(...SPEED_MULTIPLIER_RULES.map(({ multiplier }) => multiplier))),
+  max: Math.round(Math.max(...Object.values(BASE_POINTS_PER_TURN_MAP)) * Math.max(...SPEED_MULTIPLIER_RULES.map(({ multiplier }) => multiplier))),
+} as const;
+
 export const SPEED_MULTIPLIER_CATEGORY_MAP_EN = {
   1.5: "Speed Demon",
   1.2: "Quick Thinker",
   1.0: "Average Pacer",
   0.8: "Slow Learner",
 } as const as Readonly<Record<number, string>>;
+
 export const SPEED_MULTIPLIER_CATEGORY_MAP_PL = {
   1.5: "Demon Szybkości",
   1.2: "Szybki Myśliciel",

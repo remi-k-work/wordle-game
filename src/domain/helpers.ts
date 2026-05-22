@@ -6,7 +6,7 @@ import { getGameStatus } from ".";
 import type { Color, GameState } from ".";
 
 // constants
-import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, SPEED_MULTIPLIER_RULES } from ".";
+import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from ".";
 
 // Pick the color with the higher priority
 export const pickStrongerColor = (a: Color | undefined, b: Color) => {
@@ -32,6 +32,9 @@ export const elapsedSeconds = (startTime: Option.Option<DateTime.Utc>, endTime: 
     onNone: () => 0,
     onSome: (startTime) => DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds),
   });
+
+// Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
+export const potentialScoreAsPercentage = (potentialScore: number) => Math.max(0, Math.min(100, Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100));
 
 // Get the status for a full game state without threading individual state fields around
 export const getGameStateStatus = ({ currentTurn, theSecretWord, wordleGuesses }: GameState) => getGameStatus(currentTurn, theSecretWord, wordleGuesses);
