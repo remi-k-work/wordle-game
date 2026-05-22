@@ -48,7 +48,7 @@ export function YouWin() {
         <div className="flex items-center justify-between gap-24">
           <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Speed Multiplier</h3>
           <span className="text-end">
-            x{speedMultiplier} ({speedMultiplierToCategory("En", speedMultiplier)})
+            x{speedMultiplier} ({speedMultiplierToCategory(speedMultiplier)})
           </span>
         </div>
         <div className="flex items-center justify-between gap-24">

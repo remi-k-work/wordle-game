@@ -20,16 +20,9 @@ export const POTENTIAL_SCORE_RANGE = {
   max: Math.round(Math.max(...Object.values(BASE_POINTS_PER_TURN_MAP)) * Math.max(...SPEED_MULTIPLIER_RULES.map(({ multiplier }) => multiplier))),
 } as const;
 
-export const SPEED_MULTIPLIER_CATEGORY_MAP_EN = {
+export const SPEED_MULTIPLIER_CATEGORY_MAP = {
   1.5: "Speed Demon",
   1.2: "Quick Thinker",
   1.0: "Average Pacer",
   0.8: "Slow Learner",
-} as const as Readonly<Record<number, string>>;
-
-export const SPEED_MULTIPLIER_CATEGORY_MAP_PL = {
-  1.5: "Demon Szybkości",
-  1.2: "Szybki Myśliciel",
-  1.0: "Przeciętny Pacer",
-  0.8: "Powolny Uczeń",
 } as const as Readonly<Record<number, string>>;

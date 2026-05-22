@@ -2,14 +2,13 @@
 import { Array, Duration, Option, pipe } from "effect";
 
 // types
-import type { Color, Language, Tile } from ".";
+import type { Color, Tile } from ".";
 
 // constants
-import { MAX_TURNS, SPEED_MULTIPLIER_CATEGORY_MAP_EN, SPEED_MULTIPLIER_CATEGORY_MAP_PL, WORD_LENGTH } from ".";
+import { MAX_TURNS, SPEED_MULTIPLIER_CATEGORY_MAP, WORD_LENGTH } from ".";
 
 // Maps a speed multiplier to a category of a player (e.g. "Speed Demon")
-export const speedMultiplierToCategory = (language: Language, speedMultiplier: number) =>
-  language === "En" ? SPEED_MULTIPLIER_CATEGORY_MAP_EN[speedMultiplier] : SPEED_MULTIPLIER_CATEGORY_MAP_PL[speedMultiplier];
+export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
 
 // Formats an Effect Duration into a human-readable HH:mm:ss string
 export const formatDuration = (duration: Duration.Duration) => {
