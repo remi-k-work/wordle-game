@@ -10,8 +10,8 @@ const decodeRequest = (request: Request) => Effect.promise(() => request.json())
 
 const main = (request: Request) =>
   Effect.gen(function* () {
-    const { theSecretWord, language } = yield* decodeRequest(request);
-    const riddle = yield* generateRiddle(theSecretWord, language);
+    const { theSecretWord, solutionsLanguage } = yield* decodeRequest(request);
+    const riddle = yield* generateRiddle(theSecretWord, solutionsLanguage);
     return Response.json({ riddle });
   }).pipe(Effect.catchAll((error) => Effect.logError(`[RIDDLE] recovering from ${error._tag}`)));
 

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtom, useAtomSet } from "@effect-atom/atom-react";
-import { forfeitRunAction, languageAtom } from "@/atoms";
+import { forfeitRunAction, solutionsLanguageAtom } from "@/atoms";
 
 // components
 import { Button } from "@base-ui/react";
@@ -9,17 +9,17 @@ import { Button } from "@base-ui/react";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 export function LangChanger() {
-  const [language, setLanguage] = useAtom(languageAtom);
+  const [solutionsLanguage, setSolutionsLanguage] = useAtom(solutionsLanguageAtom);
   const forfeitRun = useAtomSet(forfeitRunAction);
 
   function handleLangToggled() {
-    setLanguage(language === "En" ? "Pl" : "En");
+    setSolutionsLanguage(solutionsLanguage === "En" ? { solutionsLanguage: "Pl" } : { solutionsLanguage: "En" });
     forfeitRun();
   }
 
   return (
     <Button className="button" onClick={handleLangToggled}>
-      {language === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
+      {solutionsLanguage === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
       Language
     </Button>
   );

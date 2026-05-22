@@ -19,6 +19,10 @@ export type RunSession = Readonly<{
   bestRunScore: number;
 }>;
 
+export type GameSettings = Readonly<{
+  solutionsLanguage: SolutionsLanguage;
+}>;
+
 export type GameState = Readonly<{
   theSecretWord: string;
   currentGuessWord: string;
@@ -29,7 +33,7 @@ export type GameState = Readonly<{
   wordScore: Option.Option<WordScore>;
 }>;
 
-export type Language = "En" | "Pl";
+export type SolutionsLanguage = "En" | "Pl";
 export type Color = "grey" | "yellow" | "green" | "red" | "";
 export type Tile = Readonly<{ tileKey: string; color: Color }>;
 export type WordleGrid = ReadonlyArray<ReadonlyArray<Tile>>;

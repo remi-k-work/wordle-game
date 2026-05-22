@@ -4,7 +4,7 @@ import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } fr
 import { KeypadDataSchema, RiddleRequestSchema, RiddleResponseSchema, SolutionsDataSchema } from "@/domain";
 
 // types
-import type { Language } from "@/domain";
+import type { SolutionsLanguage } from "@/domain";
 
 export class GameData extends Effect.Service<GameData>()("GameData", {
   dependencies: [FetchHttpClient.layer],
@@ -14,15 +14,15 @@ export class GameData extends Effect.Service<GameData>()("GameData", {
     const dataClient = baseClient.pipe(HttpClient.mapRequest(flow(HttpClientRequest.prependUrl("/data/"), HttpClientRequest.acceptJson)));
     const apiClient = baseClient.pipe(HttpClient.mapRequest(flow(HttpClientRequest.prependUrl("/api/"), HttpClientRequest.acceptJson)));
 
-    const fetchSolutions = (language: Language) =>
-      dataClient.get(`solutions${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(SolutionsDataSchema)));
+    const fetchSolutions = (solutionsLanguage: SolutionsLanguage) =>
+      dataClient.get(`solutions${solutionsLanguage}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(SolutionsDataSchema)));
 
-    const fetchKeypad = (language: Language) =>
-      dataClient.get(`keypad${language}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(KeypadDataSchema)));
+    const fetchKeypad = (solutionsLanguage: SolutionsLanguage) =>
+      dataClient.get(`keypad${solutionsLanguage}.json`).pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(KeypadDataSchema)));
 
-    const fetchRiddle = (theSecretWord: string, language: Language) =>
+    const fetchRiddle = (theSecretWord: string, solutionsLanguage: SolutionsLanguage) =>
       HttpClientRequest.post("riddle").pipe(
-        HttpClientRequest.schemaBodyJson(RiddleRequestSchema)({ theSecretWord, language }),
+        HttpClientRequest.schemaBodyJson(RiddleRequestSchema)({ theSecretWord, solutionsLanguage }),
         Effect.flatMap(apiClient.execute),
         Effect.flatMap(HttpClientResponse.schemaBodyJson(RiddleResponseSchema)),
         Effect.map(({ riddle }) => riddle)

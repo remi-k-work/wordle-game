@@ -4,7 +4,7 @@ import { LanguageModel } from "@effect/ai";
 import { GoogleLanguageModel } from "@effect/ai-google";
 
 // types
-import type { Language } from "./models";
+import type { SolutionsLanguage } from "./models";
 
 // constants
 const RIDDLE_PROMPT_EN = (theSecretWord: string) =>
@@ -19,8 +19,8 @@ const RiddlePlan = ExecutionPlan.make(
   { provide: GoogleLanguageModel.model("gemini-2.5-flash-lite"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
 );
 
-export const generateRiddle = (theSecretWord: string, language: Language) =>
-  LanguageModel.generateText({ prompt: language === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord) }).pipe(
+export const generateRiddle = (theSecretWord: string, solutionsLanguage: SolutionsLanguage) =>
+  LanguageModel.generateText({ prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord) }).pipe(
     Effect.withExecutionPlan(RiddlePlan),
     Effect.map(({ text }) => text)
   );

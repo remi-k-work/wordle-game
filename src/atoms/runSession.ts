@@ -22,7 +22,7 @@ export const runSessionAtom = Atom.kvs({
   defaultValue: () => ({ runScore: 0, streak: 0, lastRunScore: 0, lastRunStreak: 0, bestRunScore: 0 }) as const satisfies RunSession,
 });
 
-// Specialized selectors for session-level state
+// Specialized selectors for granular state access and optimized re-renders
 export const runScoreAtom = runSessionAtom.pipe(Atom.map((state) => state.runScore));
 export const streakAtom = runSessionAtom.pipe(Atom.map((state) => state.streak));
 export const lastRunScoreAtom = runSessionAtom.pipe(Atom.map((state) => state.lastRunScore));

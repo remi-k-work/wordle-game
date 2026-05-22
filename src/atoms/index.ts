@@ -3,7 +3,7 @@ export * from "./events";
 export * from "./gameActions";
 export * from "./gameData";
 export * from "./gameDerived";
+export * from "./gameSettings";
 export * from "./gameState";
-export * from "./language";
 export * from "./modal";
 export * from "./runSession";

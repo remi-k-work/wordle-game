@@ -3,8 +3,7 @@ import { Effect, HashSet, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { RuntimeAtom } from "@/lib/RuntimeClient";
 import { GameData } from "@/services";
-import { gameStateAtom, theSecretWordAtom } from "./gameState";
-import { languageAtom } from "./language";
+import { gameStateAtom, solutionsLanguageAtom, theSecretWordAtom } from ".";
 
 // constants
 import { INITIAL_GAME_STATE } from "@/domain";
@@ -12,9 +11,9 @@ import { INITIAL_GAME_STATE } from "@/domain";
 // Effectful atom that fetches the solution dictionary and initializes a new word challenge
 export const gameDataSolutionsAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
-    const language = yield* Atom.get(languageAtom);
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
     const gameData = yield* GameData;
-    const solutions = yield* gameData.fetchSolutions(language);
+    const solutions = yield* gameData.fetchSolutions(solutionsLanguage);
 
     // Pick a new secret word and reset the game state
     const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
@@ -39,21 +38,21 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom(
 export const riddleAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
     const theSecretWord = yield* Atom.get(theSecretWordAtom);
-    const language = yield* Atom.get(languageAtom);
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 
     // If no secret word yet, do not fetch
     if (!theSecretWord) return "";
 
     const gameData = yield* GameData;
-    return yield* gameData.fetchRiddle(theSecretWord, language);
+    return yield* gameData.fetchRiddle(theSecretWord, solutionsLanguage);
   })
 );
 
 // Effectful atom that fetches the valid keypad layout for the selected language
 export const gameDataKeypadAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
-    const language = yield* Atom.get(languageAtom);
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
     const gameData = yield* GameData;
-    return yield* gameData.fetchKeypad(language);
+    return yield* gameData.fetchKeypad(solutionsLanguage);
   })
 );

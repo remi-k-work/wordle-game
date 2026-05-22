@@ -7,6 +7,6 @@ export const KeypadDataSchema = Schema.Array(Schema.Trim.pipe(Schema.nonEmptyStr
 
 export const RiddleRequestSchema = Schema.Struct({
   theSecretWord: Schema.Trim.pipe(Schema.nonEmptyString(), Schema.maxLength(5)),
-  language: Schema.Literal("En", "Pl"),
+  solutionsLanguage: Schema.Literal("En", "Pl"),
 });
 export const RiddleResponseSchema = Schema.Struct({ riddle: Schema.Trim });
