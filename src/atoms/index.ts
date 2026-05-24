@@ -5,5 +5,6 @@ export * from "./gameData";
 export * from "./gameDerived";
 export * from "./gameSettings";
 export * from "./gameState";
+export * from "./highScore";
 export * from "./modal";
 export * from "./runSession";

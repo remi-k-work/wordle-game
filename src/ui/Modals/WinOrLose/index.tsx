@@ -15,7 +15,7 @@ export function WinOrLoseModal() {
   const isWinner = gameStatus._tag === "Won";
 
   return (
-    <Modal isOpen={activeModal === "status"} title={isWinner ? "You Win!" : "Nevermind"}>
+    <Modal isOpen={activeModal === "status"} title={isWinner ? "You Win!" : "Run Over"}>
       {isWinner ? <YouWin /> : <Nevermind />}
     </Modal>
   );

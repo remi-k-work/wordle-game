@@ -3,6 +3,7 @@ export * from "./events";
 export * from "./formatters";
 export * from "./gameLogic";
 export * from "./helpers";
+export * from "./highScore";
 export * from "./models";
 export * from "./riddle";
 export * from "./runSession";

@@ -1,0 +1,7 @@
+CREATE TABLE high_score (
+  id SERIAL PRIMARY KEY,
+  player_name VARCHAR(3) NOT NULL,
+  score INT NOT NULL,
+  streak INT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

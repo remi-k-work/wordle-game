@@ -10,6 +10,7 @@ const decodeRequest = (request: Request) => Effect.promise(() => request.json())
 
 const main = (request: Request) =>
   Effect.gen(function* () {
+    return Response.json({ riddle: "No riddle available" });
     const { theSecretWord, solutionsLanguage } = yield* decodeRequest(request);
     const riddle = yield* generateRiddle(theSecretWord, solutionsLanguage);
     return Response.json({ riddle });

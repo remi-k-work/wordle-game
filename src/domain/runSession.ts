@@ -2,8 +2,14 @@
 import type { RunSession, WordScore } from ".";
 
 // Add a solved word score into the ongoing arcade run
-export const bankWordScore = ({ runScore, streak, bestRunScore, ...runSession }: RunSession, { wordScore }: WordScore) => {
-  return { ...runSession, runScore: runScore + wordScore, streak: streak + 1, bestRunScore: Math.max(bestRunScore, runScore + wordScore) };
+export const bankWordScore = ({ runScore, streak, bestRunScore, bestStreak, ...runSession }: RunSession, { wordScore }: WordScore) => {
+  return {
+    ...runSession,
+    runScore: runScore + wordScore,
+    streak: streak + 1,
+    bestRunScore: Math.max(bestRunScore, runScore + wordScore),
+    bestStreak: Math.max(bestStreak, streak + 1),
+  };
 };
 
 // Reset only the active run progress while preserving historical session stats
@@ -15,5 +21,5 @@ export const finishRunSession = ({ runScore, streak, ...runSession }: RunSession
   runScore: 0,
   streak: 0,
   lastRunScore: runScore,
-  lastRunStreak: streak,
+  lastStreak: streak,
 });
