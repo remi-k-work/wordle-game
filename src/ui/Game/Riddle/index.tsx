@@ -16,7 +16,7 @@ export function Riddle() {
   return (
     <Popover.Root>
       <Popover.Trigger openOnHover title="Riddle" className="button flex-none p-1 data-popup-open:bg-accent">
-        {Result.isWaiting(riddle) ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
+        {riddle.waiting ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8}>

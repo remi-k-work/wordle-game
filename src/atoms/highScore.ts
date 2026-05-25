@@ -31,6 +31,14 @@ export const qualifiesForHighScoreAtom = Atom.make((get) => {
   const lastRunScore = get(lastRunScoreAtom);
   const lastStreak = get(lastStreakAtom);
 
+  // *** TEST CODE ***
+  // *** TEST CODE ***
+  // *** TEST CODE ***
+  console.log({ top10HighScores, lastRunScore, lastStreak });
+  // *** TEST CODE ***
+  // *** TEST CODE ***
+  // *** TEST CODE ***
+
   // If we do not have a successful fetch yet, we cannot determine qualification
   return Option.match(Result.value(top10HighScores), {
     onNone: () => false,

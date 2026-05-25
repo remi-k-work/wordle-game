@@ -22,8 +22,9 @@ export class HighScoreDB extends Effect.Service<HighScoreDB>()("HighScoreDB", {
     const addHighScore = SqlSchema.void({ Request: AddHighScoreSchema, execute: (request) => sql`INSERT INTO high_score ${sql.insert(request)}` });
 
     return {
-      top10HighScores: top10HighScores().pipe(Effect.catchTags({ ParseError: Effect.die, SqlError: Effect.die })),
-      addHighScore: (request: AddHighScore) => addHighScore(request).pipe(Effect.catchTags({ ParseError: Effect.die, SqlError: Effect.die })),
+      top10HighScores: top10HighScores().pipe(Effect.tapError(Effect.logError), Effect.catchTags({ ParseError: Effect.die, SqlError: Effect.die })),
+      addHighScore: (request: AddHighScore) =>
+        addHighScore(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ ParseError: Effect.die, SqlError: Effect.die })),
     };
   }),
 }) {}

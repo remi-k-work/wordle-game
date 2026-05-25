@@ -2,7 +2,7 @@
 import { Effect, HashSet, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { RuntimeAtom } from "@/lib/RuntimeClient";
-import { GameData } from "@/services";
+import { GameData } from "@/services/gameData";
 import { gameStateAtom, solutionsLanguageAtom, theSecretWordAtom } from ".";
 
 // constants

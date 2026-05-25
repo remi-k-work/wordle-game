@@ -29,7 +29,7 @@ export function YouWin() {
         You found the solution in <b>{currentTurn - 1}</b> guesses 😄
       </p>
 
-      <section className="grid grid-cols-2 gap-4 rounded-xl border bg-secondary p-4">
+      <section className="grid grid-cols-2 gap-4 rounded-md border bg-secondary p-4">
         <div>
           <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Score</h3>
           <span className="text-3xl font-semibold text-accent">{runScore}</span>

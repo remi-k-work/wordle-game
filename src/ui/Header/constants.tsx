@@ -1,5 +1,5 @@
 // assets
-import { HomeModernIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
+import { HomeModernIcon, PuzzlePieceIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 // constants
 export const NAV_ITEMS = [
@@ -14,5 +14,11 @@ export const NAV_ITEMS = [
     match: "^/game(/.*)?$",
     title: "Game",
     icon: <PuzzlePieceIcon />,
+  },
+  {
+    href: "/highScore",
+    match: "^/highScore(/.*)?$",
+    title: "High Score",
+    icon: <TrophyIcon />,
   },
 ] as const;
