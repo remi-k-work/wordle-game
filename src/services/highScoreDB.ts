@@ -16,7 +16,7 @@ export class HighScoreDB extends Effect.Service<HighScoreDB>()("HighScoreDB", {
     const top10HighScores = SqlSchema.findAll({
       Request: Schema.Void,
       Result: HighScoreSchema,
-      execute: () => sql`SELECT player_name, score, streak, created_at FROM high_score ORDER BY score DESC, streak DESC LIMIT 10`,
+      execute: () => sql`SELECT player_name, score, streak, solutions_lang, created_at FROM high_score ORDER BY score DESC, streak DESC LIMIT 10`,
     });
 
     const addHighScore = SqlSchema.void({ Request: AddHighScoreSchema, execute: (request) => sql`INSERT INTO high_score ${sql.insert(request)}` });
@@ -25,6 +25,6 @@ export class HighScoreDB extends Effect.Service<HighScoreDB>()("HighScoreDB", {
       top10HighScores: top10HighScores().pipe(Effect.tapError(Effect.logError), Effect.catchTags({ ParseError: Effect.die, SqlError: Effect.die })),
       addHighScore: (request: AddHighScore) =>
         addHighScore(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ ParseError: Effect.die, SqlError: Effect.die })),
-    };
+    } as const;
   }),
 }) {}

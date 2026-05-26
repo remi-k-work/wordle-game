@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
-import { lastRunScoreAtom, lastStreakAtom } from "@/atoms";
+import { lastRunScoreAtom, lastStreakAtom, solutionsLanguageAtom } from "@/atoms";
 
 // components
 import { Button, Input } from "@base-ui/react";
@@ -25,6 +25,7 @@ interface InitialsProps {
 export function Initials({ addHighScoreResult, addHighScore }: InitialsProps) {
   const lastRunScore = useAtomValue(lastRunScoreAtom);
   const lastStreak = useAtomValue(lastStreakAtom);
+  const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
 
   const [initials, setInitials] = useState("");
 
@@ -41,7 +42,7 @@ export function Initials({ addHighScoreResult, addHighScore }: InitialsProps) {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    addHighScore({ playerName: sanitizedInitials, score: lastRunScore, streak: lastStreak });
+    addHighScore({ playerName: sanitizedInitials, score: lastRunScore, streak: lastStreak, solutionsLang: solutionsLanguage });
   };
 
   return (

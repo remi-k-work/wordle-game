@@ -21,7 +21,7 @@ import type { Metadata } from "next";
 
 // constants
 export const metadata: Metadata = {
-  title: "Wordle Overdrive — The High-Stakes Arcade Word Survival Game",
+  title: "Wordle Overdrive ► The High-Stakes Arcade Word Survival Game",
   description:
     "Take the classic word puzzle into overdrive. Survive an endless arcade run, unlock dynamic scoring multipliers, and solve AI-generated riddles in English or Polish.",
   authors: [{ name: "Remi" }],

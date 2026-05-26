@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { useAtom, useAtomValue, Result } from "@effect-atom/atom-react";
 import { addHighScoreAction, qualifiesForHighScoreAtom } from "@/atoms";

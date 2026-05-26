@@ -16,14 +16,14 @@ import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 
 export default function Page() {
   return (
-    <>
+    <article className="mx-auto w-full max-w-384">
       <PageHeader
         title="Wordle, Unlocked. Welcome to Wordle Overdrive. Welcome to the Loop."
         description="The classic word game transformed into a continuous, high-stakes survival run. No daily limits. No safety nets. Decipher AI riddles and stack your streak. How long can you survive the wipeout risk?"
       />
-      <Image src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
+      <Image src={hero} loading="eager" alt="Wordle Overdrive" className="h-auto w-full" />
       <Button
-        className="button mx-auto mt-4"
+        className="button mx-auto mt-4 w-fit"
         nativeButton={false}
         render={
           <Link href="/game">
@@ -79,6 +79,6 @@ export default function Page() {
         Combined with our dedicated Survival Keypad that dynamically vanishes incorrect grey letters as you play, you have all the tools you need to forge a
         legendary, high-scoring run. You can never waste a keystroke by accident again.
       </p>
-    </>
+    </article>
   );
 }

@@ -15,16 +15,6 @@ const RpcHighScoreLayer = RpcHighScore.toLayer({
   addHighScore: (payload) =>
     Effect.gen(function* () {
       const highScoreDB = yield* HighScoreDB;
-
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      yield* Effect.sleep("5 seconds");
-      return yield* Effect.dieMessage("TEST ERROR");
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-
       yield* highScoreDB.addHighScore(payload);
     }),
 }).pipe(Layer.provide(HighScoreDB.Default));
