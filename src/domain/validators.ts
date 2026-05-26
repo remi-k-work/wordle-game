@@ -35,4 +35,4 @@ export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wo
   // Do not allow duplicate words
   !wordleGuesses.includes(currentGuessWord) &&
   // Ensure the word exists in the dictionary
-  true; //HashSet.has(dictionary, currentGuessWord);
+  HashSet.has(dictionary, currentGuessWord);
