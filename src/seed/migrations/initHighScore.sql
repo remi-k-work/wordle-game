@@ -25,3 +25,16 @@ CREATE TABLE high_score (
 -- Optimized for language-filtered high score queries
 CREATE INDEX high_score_ranking_idx
   ON high_score (solutions_lang, score DESC, streak DESC);
+
+INSERT INTO high_score (player_name, score, streak, solutions_lang)
+VALUES
+  ('ACE', 4200, 18, 'En'),
+  ('FOX', 3900, 16, 'En'),
+  ('JET', 3600, 15, 'Pl'),
+  ('MAX', 3300, 14, 'En'),
+  ('ZED', 3000, 13, 'En'),
+  ('NIX', 2700, 12, 'En'),
+  ('KAI', 2400, 10, 'Pl'),
+  ('ORB', 2100, 9, 'En'),
+  ('VEX', 1800, 8, 'Pl'),
+  ('PIP', 1500, 7, 'En');
