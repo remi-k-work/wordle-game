@@ -16,8 +16,8 @@ export const NAV_ITEMS = [
     icon: <PuzzlePieceIcon />,
   },
   {
-    href: "/highScore",
-    match: "^/highScore(/.*)?$",
+    href: "/high-score",
+    match: "^/high-score(/.*)?$",
     title: "High Score",
     icon: <TrophyIcon />,
   },

@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect-atom/atom-react";
-import { closeModalAction } from "@/atoms";
+import { closeModalAction } from "@/features/game/state";
 
 // components
 import { Dialog } from "@base-ui/react";

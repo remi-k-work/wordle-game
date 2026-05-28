@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Config, Effect, Schema } from "effect";
-import { RuntimeServer } from "@/lib/RuntimeServer";
-import { generateRiddle, RiddleRequestSchema } from "@/domain";
+import { RuntimeServer } from "@/lib/runtime-server";
+import { generateRiddle, RiddleRequestSchema } from "@/features/game/domain";
 
 // Allow streaming responses up to 60 seconds
 export const maxDuration = 60;

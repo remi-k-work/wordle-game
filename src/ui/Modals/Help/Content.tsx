@@ -3,7 +3,7 @@ import Image from "next/image";
 
 // services, features, and other libraries
 import { useAtomSet } from "@effect-atom/atom-react";
-import { closeModalAction } from "@/atoms";
+import { closeModalAction } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
-import { activeModalAtom } from "@/atoms";
+import { activeModalAtom } from "@/features/game/state";
 
 // components
 import { Modal } from "@/ui/Modals";

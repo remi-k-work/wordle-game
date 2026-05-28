@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { Duration, Option } from "effect";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { currentTurnAtom, theSecretWordAtom, wordScoreAtom, runScoreAtom, streakAtom, nextWordAction } from "@/atoms";
-import { formatDuration, speedMultiplierToCategory } from "@/domain";
+import { currentTurnAtom, theSecretWordAtom, wordScoreAtom, runScoreAtom, streakAtom, nextWordAction } from "@/features/game/state";
+import { formatDuration, speedMultiplierToCategory } from "@/features/game/domain";
 
 // components
 import { Button } from "@base-ui/react";

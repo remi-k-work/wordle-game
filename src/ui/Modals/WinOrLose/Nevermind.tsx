@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { theSecretWordAtom, startNewRunAction, lastRunScoreAtom, lastStreakAtom } from "@/atoms";
+import { theSecretWordAtom, startNewRunAction, lastRunScoreAtom, lastStreakAtom } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
-import { NewHighScore } from "./NewHighScore";
+import { NewHighScore } from "@/features/high-score/ui/NewHighScore";
 
 // assets
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
