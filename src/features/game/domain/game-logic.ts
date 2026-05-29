@@ -2,12 +2,12 @@
 import { Array, HashSet, DateTime, Match, pipe, Option } from "effect";
 import {
   canSubmitGuess,
-  elapsedSeconds,
   formatGuess,
   GameActionEnum,
   GameEventEnum,
   GameStatusEnum,
-  getBasePointsForTurn,
+  getBasePointsPerTurn,
+  getElapsedSeconds,
   getGameStateStatus,
   getSpeedMultiplier,
   isGamePlaying,
@@ -24,22 +24,26 @@ import { MAX_TURNS, WORD_LENGTH } from ".";
 // Calculates the player's word score based on the turn they won on and how long it took them
 // This denotes the volatile points earned for the current word before they are banked into the run
 export const calculateScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) => {
-  const basePointsPerTurn = getBasePointsForTurn(currentTurn);
-  const seconds = elapsedSeconds(startTime, endTime);
-  const speedMultiplier = getSpeedMultiplier(seconds);
+  const basePointsPerTurn = getBasePointsPerTurn(currentTurn);
+  const elapsedSeconds = getElapsedSeconds(startTime, endTime);
+  const speedMultiplier = getSpeedMultiplier(elapsedSeconds);
 
   return {
     wordScore: Math.round(basePointsPerTurn * speedMultiplier),
     basePointsPerTurn,
     speedMultiplier,
-    timeSeconds: Math.floor(seconds),
+    timeSeconds: Math.floor(elapsedSeconds),
   } as const satisfies WordScore;
 };
 
 // Calculates the "live" potential word score based on current turn and time elapsed
 // This projects what the player stands to gain based on their current speed and turn count
-export const calculatePotentialScore = (currentTurn: number, startTime: Option.Option<DateTime.Utc>, now: DateTime.Utc) =>
-  Math.round(getBasePointsForTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds(startTime, now)));
+export function calculatePotentialScore(currentTurn: number, startTime: Option.Option<DateTime.Utc>, now: DateTime.Utc): number;
+export function calculatePotentialScore(currentTurn: number, elapsedSeconds: number): number;
+export function calculatePotentialScore(currentTurn: number, startTimeOrSeconds: Option.Option<DateTime.Utc> | number, now?: DateTime.Utc) {
+  const elapsedSeconds = typeof startTimeOrSeconds === "number" ? startTimeOrSeconds : getElapsedSeconds(startTimeOrSeconds, now!);
+  return Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds));
+}
 
 // Get the current game status by checking the last guess and current turn
 export const getGameStatus = (currentTurn: number, theSecretWord: string, wordleGuesses: readonly string[]) => {

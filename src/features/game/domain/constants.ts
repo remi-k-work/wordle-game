@@ -21,8 +21,8 @@ export const POTENTIAL_SCORE_RANGE = {
 } as const;
 
 export const SPEED_MULTIPLIER_CATEGORY_MAP = {
-  1.5: "Speed Demon",
-  1.2: "Quick Thinker",
-  1.0: "Average Pacer",
-  0.8: "Slow Learner",
+  1.5: "🚀 Speed Demon",
+  1.2: "⚡ Quick Thinker",
+  1.0: "⏱️ Average Pacer",
+  0.8: "🐌 Slow Learner",
 } as const as Readonly<Record<number, string>>;

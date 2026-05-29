@@ -15,19 +15,19 @@ export const pickStrongerColor = (a: Color | undefined, b: Color) => {
 };
 
 // Establish the speed multiplier based on the time it took
-export const getSpeedMultiplier = (seconds: number) =>
+export const getSpeedMultiplier = (elapsedSeconds: number) =>
   pipe(
     SPEED_MULTIPLIER_RULES,
-    Array.findFirst(({ maxSeconds }) => seconds < maxSeconds),
+    Array.findFirst(({ maxSeconds }) => elapsedSeconds < maxSeconds),
     Option.map(({ multiplier }) => multiplier),
     Option.getOrElse(() => 0.8)
   );
 
-// Resolve the base score value for the turn in which the word is solved
-export const getBasePointsForTurn = (currentTurn: number) => BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
+// Resolve the base score value per the turn in which the word is solved
+export const getBasePointsPerTurn = (currentTurn: number) => BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
 
 // Calculate elapsed time in seconds, treating an unstarted timer as zero seconds
-export const elapsedSeconds = (startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) =>
+export const getElapsedSeconds = (startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) =>
   Option.match(startTime, {
     onNone: () => 0,
     onSome: (startTime) => DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds),

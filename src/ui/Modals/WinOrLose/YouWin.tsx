@@ -1,11 +1,21 @@
 // services, features, and other libraries
-import { Duration, Option } from "effect";
+import { Option } from "effect";
 import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
-import { currentTurnAtom, theSecretWordAtom, wordScoreAtom, runScoreAtom, streakAtom, nextWordAction } from "@/features/game/state";
-import { formatDuration, speedMultiplierToCategory } from "@/features/game/domain";
+import {
+  currentTurnAtom,
+  theSecretWordAtom,
+  wordScoreAtom,
+  runScoreAtom,
+  streakAtom,
+  nextWordAction,
+  bestRunScoreAtom,
+  bestStreakAtom,
+} from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
+import { RunScore } from "./RunScore";
+import { ScoringSimulator } from "@/features/high-score/ui/ScoringSimulator";
 
 // assets
 import { ForwardIcon } from "@heroicons/react/24/outline";
@@ -15,12 +25,14 @@ export function YouWin() {
   const currentTurn = useAtomValue(currentTurnAtom);
   const runScore = useAtomValue(runScoreAtom);
   const streak = useAtomValue(streakAtom);
+  const bestRunScore = useAtomValue(bestRunScoreAtom);
+  const bestStreak = useAtomValue(bestStreakAtom);
   const wordScoreOption = useAtomValue(wordScoreAtom);
   const nextWord = useAtomSet(nextWordAction);
 
   if (Option.isNone(wordScoreOption)) return null;
 
-  const { wordScore, basePointsPerTurn, speedMultiplier, timeSeconds } = wordScoreOption.value;
+  const { timeSeconds } = wordScoreOption.value;
 
   return (
     <article className="max-w-prose space-y-4">
@@ -29,39 +41,10 @@ export function YouWin() {
         You found the solution in <b>{currentTurn - 1}</b> guesses 😄
       </p>
 
-      <section className="grid grid-cols-2 gap-4 rounded-md border bg-secondary p-4">
-        <div>
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Score</h3>
-          <span className="text-3xl font-semibold text-accent">{runScore}</span>
-        </div>
-        <div>
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Streak</h3>
-          <span className="text-3xl font-semibold text-destructive">{streak}</span>
-        </div>
-      </section>
+      <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={timeSeconds} />
+      <RunScore runScore={runScore} bestRunScore={bestRunScore} streak={streak} bestStreak={bestStreak} />
 
-      <footer className="space-y-2 border-t pt-2 text-start">
-        <div className="flex items-center justify-between gap-24">
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Base Points</h3>
-          <span className="text-end">{basePointsPerTurn}</span>
-        </div>
-        <div className="flex items-center justify-between gap-24">
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Speed Multiplier</h3>
-          <span className="text-end">
-            x{speedMultiplier} ({speedMultiplierToCategory(speedMultiplier)})
-          </span>
-        </div>
-        <div className="flex items-center justify-between gap-24">
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Time</h3>
-          <span className="text-end">{formatDuration(Duration.seconds(timeSeconds))}</span>
-        </div>
-        <div className="flex items-center justify-between gap-24 border-t pt-2">
-          <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Word Score</h3>
-          <span className="text-end font-semibold text-accent">{wordScore}</span>
-        </div>
-      </footer>
-
-      <Button className="button mx-auto" onClick={() => nextWord()}>
+      <Button tabIndex={-1} className="button mx-auto" onClick={() => nextWord()}>
         <ForwardIcon className="size-11" />
         Next Word
       </Button>
