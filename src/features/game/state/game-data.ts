@@ -2,7 +2,6 @@
 import { Effect, HashSet, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { GameData } from "@/features/game/services/game-data";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { gameStateAtom, solutionsLanguageAtom, theSecretWordAtom } from ".";
 
@@ -13,8 +12,9 @@ import { INITIAL_GAME_STATE } from "@/features/game/domain";
 export const gameDataSolutionsAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
     const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-    const gameData = yield* GameData;
-    const solutions = yield* gameData.fetchSolutions(solutionsLanguage);
+
+    const { fetchSolutions } = yield* RpcGameClient;
+    const solutions = yield* fetchSolutions({ solutionsLanguage });
 
     // Pick a new secret word and reset the game state
     const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
@@ -44,8 +44,8 @@ export const riddleAtom = RuntimeAtom.atom(
     // If no secret word yet, do not fetch
     if (!theSecretWord) return "";
 
-    const gameData = yield* GameData;
-    return yield* gameData.fetchRiddle(theSecretWord, solutionsLanguage);
+    const { fetchRiddle } = yield* RpcGameClient;
+    return yield* fetchRiddle({ theSecretWord, solutionsLanguage });
   })
 );
 
@@ -64,7 +64,8 @@ export const wordDefinitionAtom = RuntimeAtom.atom(
 export const gameDataKeypadAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
     const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-    const gameData = yield* GameData;
-    return yield* gameData.fetchKeypad(solutionsLanguage);
+
+    const { fetchKeypad } = yield* RpcGameClient;
+    return yield* fetchKeypad({ solutionsLanguage });
   })
 );

@@ -10,6 +10,5 @@ export class RpcHighScore extends RpcGroup.make(
 
   Rpc.make("addHighScore", {
     payload: AddHighScoreSchema,
-    success: Schema.Void,
   })
 ) {}
