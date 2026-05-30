@@ -14,8 +14,9 @@ import {
 
 // components
 import { Button } from "@base-ui/react";
-import { RunScore } from "./RunScore";
+import { Definition } from "./Definition";
 import { ScoringSimulator } from "@/features/high-score/ui/ScoringSimulator";
+import { RunScore } from "./RunScore";
 
 // assets
 import { ForwardIcon } from "@heroicons/react/24/outline";
@@ -35,11 +36,13 @@ export function YouWin() {
   const { timeSeconds } = wordScoreOption.value;
 
   return (
-    <article className="max-w-prose space-y-4">
-      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
+    <article className="mx-auto max-w-prose space-y-4">
       <p>
         You found the solution in <b>{currentTurn - 1}</b> guesses 😄
       </p>
+
+      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
+      <Definition />
 
       <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={timeSeconds} />
       <RunScore runScore={runScore} bestRunScore={bestRunScore} streak={streak} bestStreak={bestStreak} />

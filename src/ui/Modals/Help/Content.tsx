@@ -16,7 +16,7 @@ export function Content() {
   const closeModal = useAtomSet(closeModalAction);
 
   return (
-    <article className="max-w-prose space-y-9">
+    <article className="mx-auto max-w-prose space-y-9">
       <Image src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
 
       <p>

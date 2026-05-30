@@ -4,6 +4,7 @@ import { theSecretWordAtom, startNewRunAction, lastRunScoreAtom, lastStreakAtom,
 
 // components
 import { Button } from "@base-ui/react";
+import { Definition } from "./Definition";
 import { RunScore } from "./RunScore";
 import { NewHighScore } from "@/features/high-score/ui/NewHighScore";
 
@@ -19,9 +20,11 @@ export function Nevermind() {
   const startNewRun = useAtomSet(startNewRunAction);
 
   return (
-    <article className="max-w-prose space-y-4">
-      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
+    <article className="mx-auto max-w-prose space-y-4">
       <p>Better luck next time 😄</p>
+
+      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
+      <Definition />
 
       <RunScore runScore={lastRunScore} bestRunScore={bestRunScore} streak={lastStreak} bestStreak={bestStreak} />
       <NewHighScore />

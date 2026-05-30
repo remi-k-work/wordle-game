@@ -1,11 +1,12 @@
 // services, features, and other libraries
 import { Schema } from "effect";
+import { SolutionsLanguageSchema } from "@/features/game/domain";
 
 export const HighScoreSchema = Schema.Struct({
   playerName: Schema.Trim.pipe(Schema.nonEmptyString(), Schema.maxLength(3)),
   score: Schema.Int.pipe(Schema.nonNegative()),
   streak: Schema.Int.pipe(Schema.nonNegative()),
-  solutionsLang: Schema.Literal("En", "Pl"),
+  solutionsLang: SolutionsLanguageSchema,
   createdAt: Schema.DateTimeUtc,
 });
 

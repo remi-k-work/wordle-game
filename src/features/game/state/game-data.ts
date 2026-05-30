@@ -3,6 +3,7 @@ import { Effect, HashSet, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { GameData } from "@/features/game/services/game-data";
+import { RpcGameClient } from "@/features/game/rpc/client";
 import { gameStateAtom, solutionsLanguageAtom, theSecretWordAtom } from ".";
 
 // constants
@@ -45,6 +46,17 @@ export const riddleAtom = RuntimeAtom.atom(
 
     const gameData = yield* GameData;
     return yield* gameData.fetchRiddle(theSecretWord, solutionsLanguage);
+  })
+);
+
+// Effectful atom that reactively fetches the secret word definition
+export const wordDefinitionAtom = RuntimeAtom.atom(
+  Effect.gen(function* () {
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+    const theSecretWord = yield* Atom.get(theSecretWordAtom);
+
+    const { wordDefinition } = yield* RpcGameClient;
+    return yield* wordDefinition({ solutionsLanguage, theSecretWord });
   })
 );
 

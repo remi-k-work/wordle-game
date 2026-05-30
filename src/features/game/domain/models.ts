@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Data, DateTime, Option, Schema } from "effect";
-import { RunSessionSchema, GameSettingsSchema } from ".";
+import { RunSessionSchema, SolutionsLanguageSchema } from ".";
 
 // types
 // Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)
@@ -24,7 +24,7 @@ export type GameState = Readonly<{
   wordScore: Option.Option<WordScore>;
 }>;
 
-export type SolutionsLanguage = Schema.Schema.Type<typeof GameSettingsSchema>["solutionsLanguage"];
+export type SolutionsLanguage = Schema.Schema.Type<typeof SolutionsLanguageSchema>;
 export type Color = "grey" | "yellow" | "green" | "red" | "";
 export type Tile = Readonly<{ tileKey: string; color: Color }>;
 export type WordleGrid = ReadonlyArray<ReadonlyArray<Tile>>;

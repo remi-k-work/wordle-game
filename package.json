@@ -10,7 +10,9 @@
     "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
     "seedPl": "tsx ./src/seed/solutionsPl.ts",
-    "seedEn": "tsx ./src/seed/solutionsEn.ts"
+    "seedEn": "tsx ./src/seed/solutionsEn.ts",
+    "seedDefEn": "tsx ./src/seed/definitionsEn.ts",
+    "seedDefPl": "tsx ./src/seed/definitionsPl.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -19,8 +21,8 @@
     "@effect/ai-google": "^0.14.0",
     "@effect/experimental": "^0.60.0",
     "@effect/platform": "^0.96.1",
-    "@effect/platform-node": "^0.106.0",
     "@effect/platform-browser": "^0.76.0",
+    "@effect/platform-node": "^0.106.0",
     "@effect/rpc": "^0.75.1",
     "@effect/sql": "^0.51.1",
     "@effect/sql-pg": "^0.52.1",
@@ -44,6 +46,7 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "prettier": "^3.8.3",
