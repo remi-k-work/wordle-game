@@ -60,11 +60,11 @@ const main = Effect.gen(function* () {
   yield* Effect.log("📚 Initializing Dictionary Generation Pipeline...");
 
   // Load the words that need definitions
-  const solutionsRaw = yield* fs.readFileString("./src/seed/solutionsEn.json", "utf8");
+  const solutionsRaw = yield* fs.readFileString("./src/seed/solutions-en.json", "utf8");
   const words: string[] = JSON.parse(solutionsRaw);
 
   // Load existing definitions (to resume safely if script was interrupted)
-  const definitionsFile = "./src/seed/definitionsEn.json";
+  const definitionsFile = "./src/seed/definitions-en.json";
   const existingDefsRaw = yield* fs.readFileString(definitionsFile, "utf8").pipe(
     Effect.catchAll(() => Effect.succeed("{}")) // Fallback if file doesn't exist yet
   );

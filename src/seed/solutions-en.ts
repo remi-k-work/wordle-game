@@ -11,23 +11,28 @@ const main = Effect.gen(function* () {
   yield* Effect.log("Reading the raw dictionary...");
 
   // Read the entire dictionary into memory
-  const rawText = yield* fs.readFileString("./src/seed/dictionaryPl.txt", "utf8");
+  const rawText1 = yield* fs.readFileString("./src/seed/wordle-La.txt", "utf8");
+  const rawText2 = yield* fs.readFileString("./src/seed/wordle-Ta.txt", "utf8");
 
   yield* Effect.log("Processing and filtering words...");
 
   // Parse, filter, and uppercase the words
-  const validWords = rawText
+  const validWords1 = rawText1
+    .split("\n")
+    .map((word) => word.trim().toUpperCase())
+    .filter((word) => word.length === 5);
+  const validWords2 = rawText2
     .split("\n")
     .map((word) => word.trim().toUpperCase())
     .filter((word) => word.length === 5);
 
   // Deduplicate (just in case the raw file has duplicates)
-  const uniqueWords = Array.from(new Set(validWords));
+  const uniqueWords = Array.from(new Set([...validWords1, ...validWords2]));
 
   yield* Effect.log(`Found ${uniqueWords.length} valid 5-letter words. Saving...`);
 
   // Write to the new JSON file
-  yield* fs.writeFileString("./src/seed/solutionsPl.json", JSON.stringify(uniqueWords, null, 2));
+  yield* fs.writeFileString("./src/seed/solutions-en.json", JSON.stringify(uniqueWords, null, 2));
 
   yield* Effect.log("Solutions successfully generated!");
 }).pipe(Effect.provide(MainLayer));

@@ -1,16 +1,17 @@
-/** @effect-diagnostics globalErrorInEffectCatch:skip-file */
-/** @effect-diagnostics globalErrorInEffectFailure:skip-file */
-
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Effect, Layer, Logger, Schedule, Array as EffectArray, ExecutionPlan, Config } from "effect";
+import { Effect, Layer, Logger, Schedule, Array, ExecutionPlan, Config, Schema } from "effect";
 import { FileSystem } from "@effect/platform";
 import { NodeContext, NodeHttpClient, NodeRuntime } from "@effect/platform-node";
 import { LanguageModel } from "@effect/ai";
 import { GoogleClient, GoogleLanguageModel } from "@effect/ai-google";
+import { TheSecretWordSchema } from "@/features/game/domain";
 
 // constants
+const SOLUTIONS_PATH = "./src/seed/solutions-pl.json";
+const DEFINITIONS_PATH = "./src/seed/definitions-pl.json";
+
 const BATCH_SIZE = 50;
 const DELAY_BETWEEN_BATCHES = "5 seconds";
 
@@ -23,32 +24,15 @@ const DictionaryPlan = ExecutionPlan.make(
 );
 
 // Strictly commanding the model to output raw JSON mapping words to one-sentence definitions
-const DICTIONARY_PROMPT_PL = (
-  words: string[]
-) => `Jesteś precyzyjnym asystentem języka polskiego i moderatorem gry słownej typu Wordle. Dla każdego z poniższych 5-literowych słów przygotuj jasną, krótką, jednozdaniową definicję.
-⚠️ ZASADA SPECJALNA: Jeśli słowo nie istnieje w języku polskim, jest skrajnie archaiczną formą gramatyczną, błędem zapisu, skrótem lub jest tak rzadkie, że przeciętny gracz go nie zrozumie – przypisz mu wartość null zamiast definicji. Nie wymyślaj definicji na siłę.
-Zwróć odpowiedź WYŁĄCZNIE jako surowy obiekt JSON (bez bloków \`\`\`json), gdzie kluczem jest słowo pisane wielkimi literami, a wartością definicja (string) lub null.
-
-Słowa do zdefiniowania:
-${JSON.stringify(words)}
+const DICTIONARY_PROMPT = (words: string[]) => `
+Jesteś precyzyjnym asystentem języka polskiego i moderatorem gry słownej typu Wordle.
+Dla każdego z poniższych 5-literowych słów przygotuj jasną, krótką, jednozdaniową definicję.
+Jeśli słowo nie istnieje w języku polskim, jest archaizmem, błędem, skrótem lub zbyt rzadkie – przypisz mu wartość null.
+Słowa do zdefiniowania: ${JSON.stringify(words)}
 `;
 
-// Utility to sanitize and parse LLM JSON output safely inside an Effect channel
-const parseAIJsonEffect = (rawText: string) =>
-  Effect.try({
-    try: () => {
-      let sanitized = rawText
-        .replace(/^```json\s*/, "")
-        .replace(/\s*```$/, "")
-        .trim();
-
-      // Strip trailing commas before closing curly braces or square brackets
-      sanitized = sanitized.replace(/,(\s*[}\]])/g, "$1");
-
-      return JSON.parse(sanitized) as Record<string, string | null>;
-    },
-    catch: (error) => new Error(`Failed to parse AI output as JSON: ${rawText}. Internal error: ${error}`),
-  });
+// Schema for the dictionary output: Record<string, string | null>
+const DictionarySchema = Schema.Record({ key: TheSecretWordSchema, value: Schema.NullOr(Schema.String) });
 
 const MainLayer = Layer.mergeAll(
   Logger.pretty,
@@ -59,15 +43,14 @@ const MainLayer = Layer.mergeAll(
 const main = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
 
-  yield* Effect.log("📚 Initializing Polish Dictionary Generation & Moderation Pipeline...");
+  yield* Effect.log("📚 Initializing Polish Dictionary Generation & Moderation Pipeline (generateObject version)...");
 
   // Load the words that need definitions
-  const solutionsRaw = yield* fs.readFileString("./src/seed/solutionsPl.json", "utf8");
+  const solutionsRaw = yield* fs.readFileString(SOLUTIONS_PATH, "utf8");
   const words: string[] = JSON.parse(solutionsRaw);
 
   // Load existing definitions (to resume safely if script was interrupted)
-  const definitionsFile = "./src/seed/definitionsPl.json";
-  const existingDefsRaw = yield* fs.readFileString(definitionsFile, "utf8").pipe(
+  const existingDefsRaw = yield* fs.readFileString(DEFINITIONS_PATH, "utf8").pipe(
     Effect.catchAll(() => Effect.succeed("{}")) // Fallback if file doesn't exist yet
   );
   const definitions: Record<string, string> = JSON.parse(existingDefsRaw);
@@ -82,7 +65,7 @@ const main = Effect.gen(function* () {
   yield* Effect.log(`Found ${pendingWords.length} words left to process.`);
 
   // Chunk into batches
-  const batches = EffectArray.chunksOf(pendingWords, BATCH_SIZE);
+  const batches = Array.chunksOf(pendingWords, BATCH_SIZE);
 
   // Keep track of our master words array using a mutable copy for in-memory splicing
   let activeSolutions = [...words];
@@ -94,13 +77,13 @@ const main = Effect.gen(function* () {
 
     yield* Effect.log(`⏳ Processing batch ${i + 1}/${batches.length} [${preview}]`);
 
-    // We execute the text generation AND the JSON parsing together inside the ExecutionPlan!
-    const newResponse = yield* LanguageModel.generateText({
-      prompt: DICTIONARY_PROMPT_PL(batch),
+    // Use generateObject to get structured output directly
+    const newResponse = yield* LanguageModel.generateObject({
+      prompt: DICTIONARY_PROMPT(batch),
+      schema: DictionarySchema,
     }).pipe(
-      Effect.flatMap(({ text }) => parseAIJsonEffect(text)),
       Effect.withExecutionPlan(DictionaryPlan),
-      // If a batch fully fails all fallback models or breaks parsing repeatedly, pause 30s and re-attempt
+      // If a batch fully fails all fallback models or breaks repeatedly, pause 30s and re-attempt
       Effect.retry(Schedule.spaced("30 seconds").pipe(Schedule.upTo("2 minutes")))
     );
 
@@ -109,7 +92,7 @@ const main = Effect.gen(function* () {
 
     // Iterate through the batch to split definitions from deletions
     for (const word of batch) {
-      const value = newResponse[word];
+      const value = newResponse.value[word];
 
       if (value === null || value === undefined) {
         // Remove from solutions array
@@ -122,8 +105,8 @@ const main = Effect.gen(function* () {
     }
 
     // Progressively save BOTH files simultaneously
-    yield* fs.writeFileString(definitionsFile, JSON.stringify(definitions, null, 2));
-    yield* fs.writeFileString("./src/seed/solutionsPl.json", JSON.stringify(activeSolutions, null, 2));
+    yield* fs.writeFileString(DEFINITIONS_PATH, JSON.stringify(definitions, null, 2));
+    yield* fs.writeFileString(SOLUTIONS_PATH, JSON.stringify(activeSolutions, null, 2));
 
     if (wordsPruned > 0) {
       yield* Effect.log(`💾 Batch ${i + 1} saved. Pruned ${wordsPruned} obscure words from solutions list.`);

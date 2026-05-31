@@ -9,10 +9,10 @@
     "lint": "eslint",
     "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
-    "seedPl": "tsx ./src/seed/solutionsPl.ts",
-    "seedEn": "tsx ./src/seed/solutionsEn.ts",
-    "seedDefEn": "tsx ./src/seed/definitionsEn.ts",
-    "seedDefPl": "tsx ./src/seed/definitionsPl.ts"
+    "seedPl": "tsx ./src/seed/solutions-pl.ts",
+    "seedEn": "tsx ./src/seed/solutions-en.ts",
+    "seedDefEn": "tsx ./src/seed/definitions-en.ts",
+    "seedDefPl": "tsx ./src/seed/definitions-pl-2.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

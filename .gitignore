@@ -2,7 +2,7 @@
 secrets.txt
 .env
 src/docs/
-src/seed/dictionaryPl.txt
+src/seed/dictionary-pl.txt
 
 # dependencies
 /node_modules
