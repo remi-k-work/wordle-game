@@ -40,4 +40,5 @@ const RpcGameLayer = RpcGame.toLayer({
 
 export const { dispose, handler } = RpcServer.toWebHandler(RpcGame, {
   layer: Layer.mergeAll(RpcGameLayer, RpcSerialization.layerNdjson, HttpServer.layerContext),
+  disableFatalDefects: true,
 });
