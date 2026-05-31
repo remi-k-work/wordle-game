@@ -2,7 +2,7 @@
 import { DateTime, Effect, Option, PubSub } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { applyGameAction, deriveGameEvent, finishRunSession, parseKey, resetCurrentRunSession } from "@/features/game/domain";
-import { closeModalAction, gameDataKeypadAtom, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
+import { closeModalAction, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
 
 // Central action handler for processing user input and managing state transitions
 export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
@@ -37,7 +37,6 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
 // Refresh the dictionary-backed atoms that define the current word challenge
 const refreshActiveChallenge = (get: Atom.FnContext) => {
   get.refresh(gameDataSolutionsAtom);
-  get.refresh(gameDataKeypadAtom);
 };
 
 // Transition to the next word challenge while maintaining the current run streak

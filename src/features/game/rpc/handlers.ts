@@ -39,6 +39,6 @@ const RpcGameLayer = RpcGame.toLayer({
 }).pipe(Layer.provideMerge(Layer.provide(GoogleClient.layerConfig({ apiKey: Config.redacted("GOOGLE_GENERATIVE_AI_API_KEY") }), NodeHttpClient.layerUndici)));
 
 export const { dispose, handler } = RpcServer.toWebHandler(RpcGame, {
-  layer: Layer.mergeAll(RpcGameLayer, RpcSerialization.layerNdjson, HttpServer.layerContext),
+  layer: Layer.mergeAll(RpcGameLayer, RpcSerialization.layerJson, HttpServer.layerContext),
   disableFatalDefects: true,
 });

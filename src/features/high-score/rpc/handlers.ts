@@ -20,6 +20,6 @@ const RpcHighScoreLayer = RpcHighScore.toLayer({
 }).pipe(Layer.provide(HighScoreDB.Default));
 
 export const { dispose, handler } = RpcServer.toWebHandler(RpcHighScore, {
-  layer: Layer.mergeAll(RpcHighScoreLayer, RpcSerialization.layerNdjson, HttpServer.layerContext),
+  layer: Layer.mergeAll(RpcHighScoreLayer, RpcSerialization.layerJson, HttpServer.layerContext),
   disableFatalDefects: true,
 });
