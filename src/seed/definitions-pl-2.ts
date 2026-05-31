@@ -6,7 +6,6 @@ import { FileSystem } from "@effect/platform";
 import { NodeContext, NodeHttpClient, NodeRuntime } from "@effect/platform-node";
 import { LanguageModel } from "@effect/ai";
 import { GoogleClient, GoogleLanguageModel } from "@effect/ai-google";
-import { TheSecretWordSchema } from "@/features/game/domain";
 
 // constants
 const SOLUTIONS_PATH = "./src/seed/solutions-pl.json";
@@ -32,7 +31,7 @@ Słowa do zdefiniowania: ${JSON.stringify(words)}
 `;
 
 // Schema for the dictionary output: Record<string, string | null>
-const DictionarySchema = Schema.Record({ key: TheSecretWordSchema, value: Schema.NullOr(Schema.String) });
+const DictionarySchema = Schema.Record({ key: Schema.String, value: Schema.NullOr(Schema.String) });
 
 const MainLayer = Layer.mergeAll(
   Logger.pretty,
