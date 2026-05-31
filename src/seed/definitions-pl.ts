@@ -23,37 +23,15 @@ const DictionaryPlan = ExecutionPlan.make(
 );
 
 // Strictly commanding the model to output raw JSON mapping words to one-sentence definitions
-const DICTIONARY_PROMPT = (
-  words: string[]
-) => `Jesteś precyzyjnym asystentem języka polskiego i moderatorem gry słownej typu Wordle. Dla każdego z poniższych 5-literowych słów przygotuj jasną, krótką, jednozdaniową definicję.
-⚠️ ZASADA SPECJALNA: Jeśli słowo nie istnieje w języku polskim, jest skrajnie archaiczną formą gramatyczną, błędem zapisu, skrótem lub jest tak rzadkie, że przeciętny gracz go nie zrozumie – przypisz mu wartość null zamiast definicji. Nie wymyślaj definicji na siłę.
-Zwróć odpowiedź WYŁĄCZNIE jako surowy obiekt JSON (bez bloków \`\`\`json), gdzie kluczem jest słowo pisane wielkimi literami, a wartością definicja (string) lub null.
-
-Słowa do zdefiniowania:
-${JSON.stringify(words)}
+const DICTIONARY_PROMPT = (words: string[]) => `
+Jesteś precyzyjnym asystentem języka polskiego i moderatorem gry słownej typu Wordle.
+Dla każdego z poniższych 5-literowych słów przygotuj jasną, krótką, jednozdaniową definicję.
+Jeśli słowo nie istnieje w języku polskim, jest archaizmem, błędem, skrótem lub zbyt rzadkie – przypisz mu wartość null.
+Słowa do zdefiniowania: ${JSON.stringify(words)}
 `;
 
-// Utility to sanitize and parse LLM JSON output safely inside an Effect channel
-export class ParseAIJsonError extends Schema.TaggedError<ParseAIJsonError>()("ParseAIJsonError", {
-  message: Schema.String,
-  cause: Schema.optional(Schema.Defect),
-}) {}
-
-const parseAIJsonEffect = (rawText: string) =>
-  Effect.try({
-    try: () => {
-      let sanitized = rawText
-        .replace(/^```json\s*/, "")
-        .replace(/\s*```$/, "")
-        .trim();
-
-      // Strip trailing commas before closing curly braces or square brackets
-      sanitized = sanitized.replace(/,(\s*[}\]])/g, "$1");
-
-      return JSON.parse(sanitized) as Record<string, string | null>;
-    },
-    catch: (cause) => new ParseAIJsonError({ message: `Failed to parse AI output as JSON: ${rawText}. Internal error: ${cause}`, cause }),
-  });
+// We ask for an array of specific results to completely eliminate key confusion
+const DictionarySchema = Schema.Struct({ results: Schema.Array(Schema.Struct({ word: Schema.String, definition: Schema.NullOr(Schema.String) })) });
 
 const MainLayer = Layer.mergeAll(
   Logger.pretty,
@@ -98,30 +76,44 @@ const main = Effect.gen(function* () {
 
     yield* Effect.log(`⏳ Processing batch ${i + 1}/${batches.length} [${preview}]`);
 
-    // We execute the text generation AND the JSON parsing together inside the ExecutionPlan!
-    const newResponse = yield* LanguageModel.generateText({
+    // Use generateObject to get structured output directly
+    const newResponse = yield* LanguageModel.generateObject({
       prompt: DICTIONARY_PROMPT(batch),
+      schema: DictionarySchema,
     }).pipe(
-      Effect.flatMap(({ text }) => parseAIJsonEffect(text)),
       Effect.withExecutionPlan(DictionaryPlan),
-      // If a batch fully fails all fallback models or breaks parsing repeatedly, pause 30s and re-attempt
+      // If a batch fully fails all fallback models or breaks repeatedly, pause 30s and re-attempt
       Effect.retry(Schedule.spaced("30 seconds").pipe(Schedule.upTo("2 minutes")))
     );
+
+    // The AI now returns an array of objects: { word: string, definition: string | null }
+    const aiData = newResponse.value.results;
 
     // Track if we actually pruned anything in this batch
     let wordsPruned = 0;
 
-    // Iterate through the batch to split definitions from deletions
-    for (const word of batch) {
-      const value = newResponse[word];
+    // Iterate through the structured array
+    for (const item of aiData) {
+      // Normalize the word to uppercase just to be safe
+      const word = item.word.toUpperCase();
+      const value = item.definition;
 
-      if (value === null || value === undefined) {
-        // Remove from solutions array
+      if (value === null) {
+        // AI explicitly evaluated this and said it's invalid
         activeSolutions = activeSolutions.filter((w) => w !== word);
         wordsPruned++;
       } else {
-        // Save the valid definition
+        // Save the valid string definition
         definitions[word] = value;
+      }
+    }
+
+    // Now we must check if the AI missed any words from the original batch
+    // (This prevents the undefined skip bug from breaking the script)
+    const returnedWords = aiData.map((item) => item.word.toUpperCase());
+    for (const originalWord of batch) {
+      if (!returnedWords.includes(originalWord)) {
+        yield* Effect.logWarning(`⚠️ AI completely missed word: ${originalWord}. Keeping it pending.`);
       }
     }
 

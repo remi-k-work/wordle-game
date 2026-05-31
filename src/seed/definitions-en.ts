@@ -1,17 +1,20 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Effect, Layer, Logger, Schedule, Array as EffectArray, ExecutionPlan, Config } from "effect";
+import { Effect, Layer, Logger, Schedule, Array, ExecutionPlan, Config, Schema } from "effect";
 import { FileSystem } from "@effect/platform";
 import { NodeContext, NodeHttpClient, NodeRuntime } from "@effect/platform-node";
 import { LanguageModel } from "@effect/ai";
 import { GoogleClient, GoogleLanguageModel } from "@effect/ai-google";
 
 // constants
+const SOLUTIONS_PATH = "./src/seed/solutions-en.json";
+const DEFINITIONS_PATH = "./src/seed/definitions-en.json";
+
 const BATCH_SIZE = 50;
 const DELAY_BETWEEN_BATCHES = "5 seconds";
 
-// Identical to our Riddle implementation, gracefully degrading if rate-limited
+// Identical to our Riddle implementation, gracefully degrading if rate-limited OR on parsing failure
 const DictionaryPlan = ExecutionPlan.make(
   { provide: GoogleLanguageModel.model("gemini-flash-latest"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
   { provide: GoogleLanguageModel.model("gemini-2.5-flash"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
@@ -20,33 +23,15 @@ const DictionaryPlan = ExecutionPlan.make(
 );
 
 // Strictly commanding the model to output raw JSON mapping words to one-sentence definitions
-const DICTIONARY_PROMPT_EN = (
-  words: string[]
-) => `You are a highly precise dictionary assistant. For each of the following 5-letter English words, provide a clear, concise, one-sentence definition suitable for a general audience.
-Return your answer STRICTLY as a raw JSON object where the keys are the uppercase words and the values are their definitions. Do not include any conversational text. Do not wrap the output in markdown blocks (e.g., no \`\`\`json).
+const DICTIONARY_PROMPT = (words: string[]) => `
+ You are a precise English language assistant and a moderator for a Wordle-style word game.
+ For each of the following 5-letter words, provide a clear, concise, one-sentence definition.
+ If a word does not exist in English, is an archaism, a misspelling, an abbreviation, or is so rare that an average player would not understand it, assign it a value of null.
+ Words to define: ${JSON.stringify(words)}
+ `;
 
-Words to define:
-${JSON.stringify(words)}
-`;
-
-// Utility to sanitize LLM JSON output
-const parseAIJson = (rawText: string): Record<string, string> => {
-  try {
-    // Strip out markdown code blocks if present
-    let sanitized = rawText
-      .replace(/^```json\s*/, "")
-      .replace(/\s*```$/, "")
-      .trim();
-
-    // Strip trailing commas before closing curly braces or square brackets
-    // Matches a comma followed by optional whitespace and a closing } or ]
-    sanitized = sanitized.replace(/,(\s*[}\]])/g, "$1");
-
-    return JSON.parse(sanitized);
-  } catch {
-    throw new Error(`Failed to parse AI output as JSON: ${rawText}`);
-  }
-};
+// We ask for an array of specific results to completely eliminate key confusion
+const DictionarySchema = Schema.Struct({ results: Schema.Array(Schema.Struct({ word: Schema.String, definition: Schema.NullOr(Schema.String) })) });
 
 const MainLayer = Layer.mergeAll(
   Logger.pretty,
@@ -57,15 +42,14 @@ const MainLayer = Layer.mergeAll(
 const main = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;
 
-  yield* Effect.log("📚 Initializing Dictionary Generation Pipeline...");
+  yield* Effect.log("📚 Initializing English Dictionary Generation & Moderation Pipeline...");
 
   // Load the words that need definitions
-  const solutionsRaw = yield* fs.readFileString("./src/seed/solutions-en.json", "utf8");
+  const solutionsRaw = yield* fs.readFileString(SOLUTIONS_PATH, "utf8");
   const words: string[] = JSON.parse(solutionsRaw);
 
   // Load existing definitions (to resume safely if script was interrupted)
-  const definitionsFile = "./src/seed/definitions-en.json";
-  const existingDefsRaw = yield* fs.readFileString(definitionsFile, "utf8").pipe(
+  const existingDefsRaw = yield* fs.readFileString(DEFINITIONS_PATH, "utf8").pipe(
     Effect.catchAll(() => Effect.succeed("{}")) // Fallback if file doesn't exist yet
   );
   const definitions: Record<string, string> = JSON.parse(existingDefsRaw);
@@ -74,13 +58,16 @@ const main = Effect.gen(function* () {
   const pendingWords = words.filter((w) => !definitions[w]);
 
   if (pendingWords.length === 0) {
-    return yield* Effect.log("✅ All words have definitions! Nothing left to do.");
+    return yield* Effect.log("✅ All English words have definitions! Nothing left to do.");
   }
 
-  yield* Effect.log(`Found ${pendingWords.length} words left to define.`);
+  yield* Effect.log(`Found ${pendingWords.length} words left to process.`);
 
   // Chunk into batches
-  const batches = EffectArray.chunksOf(pendingWords, BATCH_SIZE);
+  const batches = Array.chunksOf(pendingWords, BATCH_SIZE);
+
+  // Keep track of our master words array using a mutable copy for in-memory splicing
+  let activeSolutions = [...words];
 
   // Process batches iteratively
   for (let i = 0; i < batches.length; i++) {
@@ -89,32 +76,64 @@ const main = Effect.gen(function* () {
 
     yield* Effect.log(`⏳ Processing batch ${i + 1}/${batches.length} [${preview}]`);
 
-    // Call the LLM using your ExecutionPlan
-    const aiResponseText = yield* LanguageModel.generateText({
-      prompt: DICTIONARY_PROMPT_EN(batch),
+    // Use generateObject to get structured output directly
+    const newResponse = yield* LanguageModel.generateObject({
+      prompt: DICTIONARY_PROMPT(batch),
+      schema: DictionarySchema,
     }).pipe(
       Effect.withExecutionPlan(DictionaryPlan),
-      Effect.map(({ text }) => text),
-      // If the entire execution plan fails (e.g. strict rate limit), wait 30s and try the batch again
+      // If a batch fully fails all fallback models or breaks repeatedly, pause 30s and re-attempt
       Effect.retry(Schedule.spaced("30 seconds").pipe(Schedule.upTo("2 minutes")))
     );
 
-    // Parse the AI's JSON output
-    const newDefinitions = parseAIJson(aiResponseText);
+    // The AI now returns an array of objects: { word: string, definition: string | null }
+    const aiData = newResponse.value.results;
 
-    // Merge and save incrementally
-    Object.assign(definitions, newDefinitions);
-    yield* fs.writeFileString(definitionsFile, JSON.stringify(definitions, null, 2));
+    // Track if we actually pruned anything in this batch
+    let wordsPruned = 0;
 
-    yield* Effect.log(`💾 Batch ${i + 1} saved successfully.`);
+    // Iterate through the structured array
+    for (const item of aiData) {
+      // Normalize the word to uppercase just to be safe
+      const word = item.word.toUpperCase();
+      const value = item.definition;
 
-    // Sleep to respect the Free Tier Limits
+      if (value === null) {
+        // AI explicitly evaluated this and said it's invalid
+        activeSolutions = activeSolutions.filter((w) => w !== word);
+        wordsPruned++;
+      } else {
+        // Save the valid string definition
+        definitions[word] = value;
+      }
+    }
+
+    // Now we must check if the AI missed any words from the original batch
+    // (This prevents the undefined skip bug from breaking the script)
+    const returnedWords = aiData.map((item) => item.word.toUpperCase());
+    for (const originalWord of batch) {
+      if (!returnedWords.includes(originalWord)) {
+        yield* Effect.logWarning(`⚠️ AI completely missed word: ${originalWord}. Keeping it pending.`);
+      }
+    }
+
+    // Progressively save BOTH files simultaneously
+    yield* fs.writeFileString(DEFINITIONS_PATH, JSON.stringify(definitions, null, 2));
+    yield* fs.writeFileString(SOLUTIONS_PATH, JSON.stringify(activeSolutions, null, 2));
+
+    if (wordsPruned > 0) {
+      yield* Effect.log(`💾 Batch ${i + 1} saved. Pruned ${wordsPruned} obscure words from solutions list.`);
+    } else {
+      yield* Effect.log(`💾 Batch ${i + 1} saved successfully.`);
+    }
+
+    // Sleep to respect Free Tier Limits
     if (i < batches.length - 1) {
       yield* Effect.sleep(DELAY_BETWEEN_BATCHES);
     }
   }
 
-  yield* Effect.log("🎉 Dictionary Generation Complete!");
+  yield* Effect.log("🎉 English Dictionary Generation & Clean up Complete!");
 }).pipe(Effect.provide(MainLayer));
 
 NodeRuntime.runMain(main);
