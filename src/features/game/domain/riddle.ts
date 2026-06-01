@@ -7,10 +7,37 @@ import { GoogleLanguageModel } from "@effect/ai-google";
 import type { SolutionsLanguage } from "./models";
 
 // constants
-const RIDDLE_PROMPT_EN = (theSecretWord: string) =>
-  `You are an enigmatic and witty puzzle master for an arcade word game. Your task is to write a clever, one-sentence riddle for the secret word provided below. Secret Word: ${theSecretWord}`;
-const RIDDLE_PROMPT_PL = (theSecretWord: string) =>
-  `Jesteś tajemniczym i błyskotliwym mistrzem zagadek w zręcznościowej grze słownej. Twoim zadaniem jest napisanie sprytnej, jednozdaniowej zagadki dla podanego poniżej tajnego słowa. Tajne Słowo: ${theSecretWord}`;
+const RIDDLE_PROMPT_EN = (theSecretWord: string) => `
+You are a witty puzzle master for an arcade word game.
+Write a short, clever riddle for the secret word below.
+
+Rules:
+- Return only the riddle text.
+- Plain text only.
+- No Markdown or special formatting.
+- No headings, lists, labels, quotations, emojis, or explanations.
+- Do not reveal, spell, or directly reference the secret word.
+- Keep the riddle concise and suitable for a fast-paced arcade game.
+- The riddle will be displayed as plain text and read aloud by a text-to-speech engine.
+
+Secret Word: ${theSecretWord}
+`;
+
+const RIDDLE_PROMPT_PL = (theSecretWord: string) => `
+Jesteś błyskotliwym mistrzem łamigłówek w zręcznościowej grze słownej.
+Napisz krótką, sprytną zagadkę do poniższego sekretnego słowa.
+
+Zasady:
+- Zwróć tylko tekst zagadki.
+- Tylko zwykły tekst.
+- Bez znaczników Markdown ani specjalnego formatowania.
+- Bez nagłówków, list, etykiet, cytatów, emotikonów i wyjaśnień.
+- Nie ujawniaj, nie literuj ani nie powołuj się bezpośrednio na sekretne słowo.
+- Zagadka powinna być zwięzła i odpowiednia do dynamicznej gry zręcznościowej.
+- Zagadka zostanie wyświetlona jako zwykły tekst i odczytana na głos przez moduł przetwarzania tekstu na mowę.
+
+Sekretne Słowo: ${theSecretWord}
+`;
 
 const RiddlePlan = ExecutionPlan.make(
   { provide: GoogleLanguageModel.model("gemini-flash-latest"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },

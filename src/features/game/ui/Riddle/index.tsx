@@ -1,5 +1,9 @@
+// react
+import { useMemo } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Option } from "effect";
 import { Result, useAtomValue } from "@effect-atom/atom-react";
 import { riddleAtom, solutionsLanguageAtom } from "@/features/game/state";
 
@@ -14,16 +18,57 @@ export function Riddle() {
   const riddle = useAtomValue(riddleAtom);
   const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
 
-  const speakRiddle = (riddle: string) => {
+  const riddleOutput = Result.value(riddle).pipe(Option.getOrNull);
+
+  const sanitizedRiddle = useMemo(() => {
+    if (!riddleOutput) return null;
+
+    return (
+      riddleOutput
+        // Remove Markdown emphasis (bold/italic/underscore variants)
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .replace(/\*(.*?)\*/g, "$1")
+        .replace(/__(.*?)__/g, "$1")
+        .replace(/_(.*?)_/g, "$1")
+
+        // Inline code
+        .replace(/`(.*?)`/g, "$1")
+
+        // Headings
+        .replace(/^#{1,6}\s*/gm, "")
+
+        // Blockquotes
+        .replace(/^>\s*/gm, "")
+
+        // Remove common Markdown list markers (often sneaks in from models)
+        .replace(/^[-*+]\s+/gm, "")
+
+        // Fix spacing before punctuation (TTS improvement)
+        .replace(/\s+([?.!,;:])/g, "$1")
+
+        // Collapse all whitespace (including newlines/tabs)
+        .replace(/\s+/g, " ")
+
+        // Remove space before punctuation (edge cleanup after collapse)
+        .replace(/\s+([?.!,;:])/g, "$1")
+
+        .trim()
+    );
+  }, [riddleOutput]);
+
+  const speakRiddle = () => {
     // Guard for SSR in Next.js
     if (typeof window === "undefined" || !window.speechSynthesis) {
       console.warn("Speech Synthesis is not supported in this environment.");
       return;
     }
 
+    // Guard empty TTS input
+    if (!sanitizedRiddle) return;
+
     // Cancel any ongoing speech so they do not overlap if clicked twice
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(riddle);
+    const utterance = new SpeechSynthesisUtterance(sanitizedRiddle);
 
     // Set the language appropriately
     utterance.lang = solutionsLanguage === "En" ? "en-US" : "pl-PL";
@@ -53,14 +98,14 @@ export function Riddle() {
             {Result.builder(riddle)
               .onInitialOrWaiting(() => <p className="animate-pulse">Thinking...</p>)
               .onFailure(() => <p>Riddle unavailable. You are on your own!</p>)
-              .onSuccess((riddle) => (
-                <p>
-                  {riddle}
-                  <Button className="button mx-auto mt-4" onClick={() => speakRiddle(riddle)}>
+              .onSuccess(() => (
+                <div>
+                  <p>{sanitizedRiddle}</p>
+                  <Button className="button mx-auto mt-4" onClick={() => speakRiddle()}>
                     <SpeakerWaveIcon className="size-11" />
                     Speak Riddle
                   </Button>
-                </p>
+                </div>
               ))
               .render()}
           </Popover.Popup>
