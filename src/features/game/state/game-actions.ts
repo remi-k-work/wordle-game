@@ -43,7 +43,6 @@ const refreshActiveChallenge = (get: Atom.FnContext) => {
 export const nextWordAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(closeModalAction, void 0);
-
     refreshActiveChallenge(get);
   })
 );
@@ -52,10 +51,7 @@ export const nextWordAction = Atom.fn(
 export const startNewRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(closeModalAction, void 0);
-
-    const runSession = get(runSessionAtom);
-    get.set(runSessionAtom, resetCurrentRunSession(runSession));
-
+    get.set(runSessionAtom, resetCurrentRunSession(get(runSessionAtom)));
     refreshActiveChallenge(get);
   })
 );
@@ -64,7 +60,6 @@ export const startNewRunAction = Atom.fn(
 export const forfeitRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(runSessionAtom, finishRunSession(get(runSessionAtom)));
-
     refreshActiveChallenge(get);
   })
 );

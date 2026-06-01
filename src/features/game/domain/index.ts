@@ -2,6 +2,7 @@ export * from "./constants";
 export * from "./events";
 export * from "./formatters";
 export * from "./game-logic";
+export * from "./game-settings";
 export * from "./helpers";
 export * from "./models";
 export * from "./riddle";

@@ -75,7 +75,7 @@
   }
 
   .input {
-    @apply rounded-md border bg-surface-3 px-2 py-1 font-normal placeholder:text-surface-1 any-pointer-coarse:text-base;
+    @apply rounded-md border bg-surface-3 px-2 py-1 font-normal placeholder:text-text-2/50 any-pointer-coarse:text-base;
   }
 }
 

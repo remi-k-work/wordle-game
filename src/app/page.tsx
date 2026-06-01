@@ -14,10 +14,12 @@ import pillar1 from "@/assets/pillar1.webp";
 import pillar2 from "@/assets/pillar2.webp";
 import pillar3 from "@/assets/pillar3.webp";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
+import { Settings } from "@/features/game/ui/Settings";
 
 export default function Page() {
   return (
     <article className="mx-auto w-full max-w-384">
+      <Settings />
       <PageHeader
         title="Wordle, Unlocked. Welcome to Wordle Overdrive. Welcome to the Loop."
         description="The classic word game transformed into a continuous, high-stakes survival run. No daily limits. No safety nets. Decipher AI riddles and stack your streak. How long can you survive the wipeout risk?"

@@ -67,7 +67,7 @@ export function Riddle() {
     if (!sanitizedRiddle) return;
 
     // Cancel any ongoing speech so they do not overlap if clicked twice
-    window.speechSynthesis.cancel();
+    speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(sanitizedRiddle);
 
     // Set the language appropriately
@@ -77,7 +77,7 @@ export function Riddle() {
     utterance.rate = 0.6;
     utterance.pitch = 0.3;
 
-    window.speechSynthesis.speak(utterance);
+    speechSynthesis.speak(utterance);
   };
 
   return (

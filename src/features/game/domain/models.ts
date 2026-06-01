@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Data, DateTime, Option, Schema } from "effect";
-import { RunSessionSchema, SolutionsLanguageSchema } from ".";
+import { GameSettingsSchema, RunSessionSchema, SolutionsLanguageSchema } from ".";
 
 // types
 // Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)
@@ -13,6 +13,9 @@ export type WordScore = Readonly<{
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
 export type RunSession = Schema.Schema.Type<typeof RunSessionSchema>;
+
+// Persistent storage for game settings
+export type GameSettings = Schema.Schema.Type<typeof GameSettingsSchema>;
 
 export type GameState = Readonly<{
   theSecretWord: string;

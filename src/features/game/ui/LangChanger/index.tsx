@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtom, useAtomSet } from "@effect-atom/atom-react";
-import { forfeitRunAction, solutionsLanguageAtom } from "@/features/game/state";
+import { forfeitRunAction, gameSettingsAtom } from "@/features/game/state";
+import { changeSolutionsLanguage } from "@/features/game/domain";
 
 // components
 import { Button } from "@base-ui/react";
@@ -9,11 +10,13 @@ import { Button } from "@base-ui/react";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 export function LangChanger() {
-  const [solutionsLanguage, setSolutionsLanguage] = useAtom(solutionsLanguageAtom);
+  const [gameSettings, setGameSettings] = useAtom(gameSettingsAtom);
   const forfeitRun = useAtomSet(forfeitRunAction);
 
+  const { solutionsLanguage } = gameSettings;
+
   function handleLangToggled() {
-    setSolutionsLanguage(solutionsLanguage === "En" ? { solutionsLanguage: "Pl" } : { solutionsLanguage: "En" });
+    setGameSettings(changeSolutionsLanguage(gameSettings));
     forfeitRun();
   }
 

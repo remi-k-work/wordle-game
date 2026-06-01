@@ -10,8 +10,12 @@ export const gameSettingsAtom = Atom.kvs({
   runtime: RuntimeAtom as any,
   key: "@wordle/gameSettings",
   schema: GameSettingsSchema,
-  defaultValue: () => ({ solutionsLanguage: "En" }) as const,
+  defaultValue: () => ({ solutionsLanguage: "En", voiceVoice: null, voiceVolume: 1, voiceRate: 1, voicePitch: 1 }) as const,
 });
 
 // Specialized selectors for granular state access and optimized re-renders
 export const solutionsLanguageAtom = gameSettingsAtom.pipe(Atom.map((state) => state.solutionsLanguage));
+export const voiceVoiceAtom = gameSettingsAtom.pipe(Atom.map((state) => state.voiceVoice));
+export const voiceVolumeAtom = gameSettingsAtom.pipe(Atom.map((state) => state.voiceVolume));
+export const voiceRateAtom = gameSettingsAtom.pipe(Atom.map((state) => state.voiceRate));
+export const voicePitchAtom = gameSettingsAtom.pipe(Atom.map((state) => state.voicePitch));
