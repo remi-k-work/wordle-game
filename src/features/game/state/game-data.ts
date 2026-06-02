@@ -3,7 +3,8 @@ import { Effect, HashSet, Random } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { gameStateAtom, solutionsLanguageAtom, theSecretWordAtom } from ".";
+import { solutionsLanguageAtom } from "@/features/settings/state";
+import { gameStateAtom, theSecretWordAtom } from ".";
 
 // constants
 import { INITIAL_GAME_STATE } from "@/features/game/domain";

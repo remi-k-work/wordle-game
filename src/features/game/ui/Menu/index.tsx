@@ -5,11 +5,11 @@ import { openModalAction } from "@/features/game/state";
 
 // components
 import { Button, Popover } from "@base-ui/react";
-import { LangChanger } from "@/features/game/ui/LangChanger";
+import { LangChanger } from "@/features/settings/ui/LangChanger";
 import { GameFlowButton } from "@/features/game/ui/FlowButton";
 
 // assets
-import { Bars3Icon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
 
 export function GameMenu() {
   const openModal = useAtomSet(openModalAction);
@@ -31,6 +31,10 @@ export function GameMenu() {
           >
             <LangChanger />
             <GameFlowButton />
+            <Button className="button" onClick={() => openModal("voice-settings")}>
+              <SpeakerWaveIcon className="size-11" />
+              Voice Settings
+            </Button>
             <Button className="button" onClick={() => openModal("help")}>
               <QuestionMarkCircleIcon className="size-11" />
               Help

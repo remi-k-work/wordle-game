@@ -1,5 +1,5 @@
 // types
-import type { HighScore } from "./models";
+import type { HighScore } from ".";
 
 // Determine if the current run qualifies for the high score
 export const qualifiesForHighScore = (top10HighScores: ReadonlyArray<HighScore>, lastRunScore: number, lastStreak: number) => {

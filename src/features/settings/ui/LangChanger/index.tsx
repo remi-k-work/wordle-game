@@ -1,7 +1,7 @@
 // services, features, and other libraries
-import { useAtom, useAtomSet } from "@effect-atom/atom-react";
-import { forfeitRunAction, gameSettingsAtom } from "@/features/game/state";
-import { changeSolutionsLanguage } from "@/features/game/domain";
+import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { changeSolutionsLanguageAction, solutionsLanguageAtom } from "@/features/settings/state";
+import { forfeitRunAction } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -10,13 +10,12 @@ import { Button } from "@base-ui/react";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 export function LangChanger() {
-  const [gameSettings, setGameSettings] = useAtom(gameSettingsAtom);
+  const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
+  const changeSolutionsLanguage = useAtomSet(changeSolutionsLanguageAction);
   const forfeitRun = useAtomSet(forfeitRunAction);
 
-  const { solutionsLanguage } = gameSettings;
-
   function handleLangToggled() {
-    setGameSettings(changeSolutionsLanguage(gameSettings));
+    changeSolutionsLanguage();
     forfeitRun();
   }
 

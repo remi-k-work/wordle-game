@@ -3,7 +3,7 @@
 // services, features, and other libraries
 import { Atom } from "@effect-atom/atom-react";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { GameSettingsSchema } from "@/features/game/domain";
+import { GameSettingsSchema } from "@/features/settings/domain";
 
 // Persistent storage for game settings
 export const gameSettingsAtom = Atom.kvs({

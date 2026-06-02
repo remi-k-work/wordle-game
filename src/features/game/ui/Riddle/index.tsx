@@ -5,7 +5,9 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { Result, useAtomValue } from "@effect-atom/atom-react";
-import { riddleAtom, solutionsLanguageAtom } from "@/features/game/state";
+import { riddleAtom } from "@/features/game/state";
+import { solutionsLanguageAtom, voicePitchAtom, voiceRateAtom, voiceVoiceAtom, voiceVolumeAtom } from "@/features/settings/state";
+import { useSpeechVoices } from "@/hooks/use-speech-voices";
 
 // components
 import { Button, Popover } from "@base-ui/react";
@@ -14,9 +16,22 @@ import { Button, Popover } from "@base-ui/react";
 import { SpinnerIcon } from "@/assets/icons";
 import { SparklesIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
 
-export function Riddle() {
+// types
+interface RiddleProps {
+  isVoiceTest?: boolean;
+}
+
+export function Riddle({ isVoiceTest = false }: RiddleProps) {
   const riddle = useAtomValue(riddleAtom);
   const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
+
+  // Fetch the available voices
+  const voices = useSpeechVoices();
+
+  const voiceVoice = useAtomValue(voiceVoiceAtom);
+  const voiceVolume = useAtomValue(voiceVolumeAtom);
+  const voiceRate = useAtomValue(voiceRateAtom);
+  const voicePitch = useAtomValue(voicePitchAtom);
 
   const riddleOutput = Result.value(riddle).pipe(Option.getOrNull);
 
@@ -73,12 +88,30 @@ export function Riddle() {
     // Set the language appropriately
     utterance.lang = solutionsLanguage === "En" ? "en-US" : "pl-PL";
 
-    // Tweak these for a more "Mysterious Puzzle Master" vibe
-    utterance.rate = 0.6;
-    utterance.pitch = 0.3;
+    // Set voice, volume, rate, and pitch according to our voice settings
+    utterance.voice = voices.find((voice) => voice.name === voiceVoice) ?? voices.find((voice) => voice.default) ?? null;
+    utterance.volume = voiceVolume;
+    utterance.rate = voiceRate;
+    utterance.pitch = voicePitch;
 
     speechSynthesis.speak(utterance);
   };
+
+  if (isVoiceTest) {
+    return Result.builder(riddle)
+      .onInitialOrWaiting(() => <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>)
+      .onFailure(() => <p className="mx-auto text-center text-xl">Riddle unavailable. You are on your own!</p>)
+      .onSuccess(() => (
+        <div>
+          <p className="mx-auto text-center text-xl">{sanitizedRiddle}</p>
+          <Button className="button mx-auto mt-4 text-base" onClick={() => speakRiddle()}>
+            <SpeakerWaveIcon className="size-11" />
+            Speak Riddle
+          </Button>
+        </div>
+      ))
+      .render();
+  }
 
   return (
     <Popover.Root>
@@ -101,7 +134,7 @@ export function Riddle() {
               .onSuccess(() => (
                 <div>
                   <p>{sanitizedRiddle}</p>
-                  <Button className="button mx-auto mt-4" onClick={() => speakRiddle()}>
+                  <Button className="button mx-auto mt-4 text-base" onClick={() => speakRiddle()}>
                     <SpeakerWaveIcon className="size-11" />
                     Speak Riddle
                   </Button>

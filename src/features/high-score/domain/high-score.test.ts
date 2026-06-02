@@ -2,7 +2,7 @@ import { describe, expect, it } from "@effect/vitest";
 import { DateTime } from "effect";
 import { qualifiesForHighScore } from ".";
 
-import type { HighScore } from "./models";
+import type { HighScore } from ".";
 
 const highScore = (score: number, streak: number): HighScore => ({
   playerName: "AAA",

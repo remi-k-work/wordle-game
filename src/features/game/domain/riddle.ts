@@ -4,7 +4,7 @@ import { LanguageModel } from "@effect/ai";
 import { GoogleLanguageModel } from "@effect/ai-google";
 
 // types
-import type { SolutionsLanguage } from "./models";
+import type { SolutionsLanguage } from ".";
 
 // constants
 const RIDDLE_PROMPT_EN = (theSecretWord: string) => `

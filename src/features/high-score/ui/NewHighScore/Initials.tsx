@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect-atom/atom-react";
-import { lastRunScoreAtom, lastStreakAtom, solutionsLanguageAtom } from "@/features/game/state";
+import { lastRunScoreAtom, lastStreakAtom } from "@/features/game/state";
+import { solutionsLanguageAtom } from "@/features/settings/state";
 
 // components
 import { Button, Input } from "@base-ui/react";

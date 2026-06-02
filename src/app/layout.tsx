@@ -11,7 +11,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "next-themes";
 import { RegistryProvider } from "@effect-atom/atom-react";
 import { Header } from "@/ui/Header";
-import { HelpModal, WinOrLoseModal } from "@/ui/Modals";
+import { HelpModal, VoiceSettingsModal, WinOrLoseModal } from "@/ui/Modals";
 
 // assets
 import { fontSans, fontMono } from "@/assets/fonts";
@@ -55,6 +55,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
               <main className="grid p-1">{children}</main>
             </div>
             <HelpModal />
+            <VoiceSettingsModal />
             <WinOrLoseModal />
           </RegistryProvider>
         </ThemeProvider>

@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "@effect-atom/atom-react";
 
 // types
-type ModalType = "help" | "status" | null;
+type ModalType = "help" | "status" | "voice-settings" | null;
 
 // Single source of truth for the modal state
 export const activeModalAtom = Atom.make<ModalType>(null);
