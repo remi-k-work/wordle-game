@@ -11,8 +11,8 @@ import { GoogleClient, GoogleLanguageModel } from "@effect/ai-google";
 const SOLUTIONS_PATH = "./src/seed/solutions-pl.json";
 const DEFINITIONS_PATH = "./src/seed/definitions-pl.json";
 
-const BATCH_SIZE = 50;
-const DELAY_BETWEEN_BATCHES = "5 seconds";
+const BATCH_SIZE = 20;
+const DELAY_BETWEEN_BATCHES = "10 seconds";
 
 // Identical to our Riddle implementation, gracefully degrading if rate-limited OR on parsing failure
 const DictionaryPlan = ExecutionPlan.make(
@@ -22,12 +22,24 @@ const DictionaryPlan = ExecutionPlan.make(
   { provide: GoogleLanguageModel.model("gemini-2.5-flash-lite"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
 );
 
-// Strictly commanding the model to output raw JSON mapping words to one-sentence definitions
+// HYBRID PROMPT (LLM handles Lemma validation + definitions)
 const DICTIONARY_PROMPT = (words: string[]) => `
-Jesteś precyzyjnym asystentem języka polskiego i moderatorem gry słownej typu Wordle.
-Dla każdego z poniższych 5-literowych słów przygotuj jasną, krótką, jednozdaniową definicję.
-Jeśli słowo nie istnieje w języku polskim, jest archaizmem, błędem, skrótem lub zbyt rzadkie – przypisz mu wartość null.
-Słowa do zdefiniowania: ${JSON.stringify(words)}
+Jesteś profesjonalnym słownikiem języka polskiego dla gry Wordle. Poddaj selekcji podane słowa.
+
+Zasady selekcji (Wpisz słowo "null" jako definicję, jeśli):
+1. Słowo jest odmienioną formą gramatyczną innego wyrazu.
+   - Odrzucaj liczby mnogie (np. "PTAKI", "ABAKI", "ABAJE").
+   - Odrzucaj przypadki zależne (np. "PTAKIEM", "ABAJĄ", "ABAKĘ").
+   - Odrzucaj odmienione czasowniki (np. "ZJADŁ", "BIEGŁ").
+2. Słowo to wulgaryzm, błąd ortograficzny, skrót lub nazwa własna.
+
+Zasady dla poprawnych definicji:
+1. Akceptuj wyłącznie podstawowe formy wyrazów (mianownik liczby pojedynczej dla rzeczowników, bezokolicznik dla czasowników).
+2. Przygotuj edukacyjną, bogatą i wielozdaniową definicję.
+3. Pisz wyłącznie czystym tekstem. Kategoryczny zakaz używania Markdownu (żadnych gwiazdek, znaków #, pogrubień czy kursywy).
+
+Słowa do przetworzenia:
+${JSON.stringify(words)}
 `;
 
 // We ask for an array of specific results to completely eliminate key confusion
@@ -46,7 +58,9 @@ const main = Effect.gen(function* () {
 
   // Load the words that need definitions
   const solutionsRaw = yield* fs.readFileString(SOLUTIONS_PATH, "utf8");
-  const words: string[] = JSON.parse(solutionsRaw);
+
+  // 🌟 FIX: Force uppercase immediately to prevent key mismatches and infinite reprocessing
+  const words: string[] = JSON.parse(solutionsRaw).map((w: string) => w.toUpperCase());
 
   // Load existing definitions (to resume safely if script was interrupted)
   const existingDefsRaw = yield* fs.readFileString(DEFINITIONS_PATH, "utf8").pipe(
@@ -98,7 +112,14 @@ const main = Effect.gen(function* () {
       const word = item.word.toUpperCase();
       const value = item.definition;
 
-      if (value === null) {
+      // 🌟 GUARDRAIL: If the AI altered the word or hallucinated a new one, ignore it!
+      if (!batch.includes(word)) {
+        yield* Effect.logWarning(`⚠️ AI tried to smuggle or alter a word: ${word}. Ignored.`);
+        continue;
+      }
+
+      // 🌟 FIX: Catch both structural null and the literal string "null"
+      if (value === null || value === "null" || value.trim().toLowerCase() === "null") {
         // AI explicitly evaluated this and said it's invalid
         activeSolutions = activeSolutions.filter((w) => w !== word);
         wordsPruned++;

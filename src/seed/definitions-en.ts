@@ -11,8 +11,8 @@ import { GoogleClient, GoogleLanguageModel } from "@effect/ai-google";
 const SOLUTIONS_PATH = "./src/seed/solutions-en.json";
 const DEFINITIONS_PATH = "./src/seed/definitions-en.json";
 
-const BATCH_SIZE = 50;
-const DELAY_BETWEEN_BATCHES = "5 seconds";
+const BATCH_SIZE = 20;
+const DELAY_BETWEEN_BATCHES = "10 seconds";
 
 // Identical to our Riddle implementation, gracefully degrading if rate-limited OR on parsing failure
 const DictionaryPlan = ExecutionPlan.make(
@@ -22,13 +22,23 @@ const DictionaryPlan = ExecutionPlan.make(
   { provide: GoogleLanguageModel.model("gemini-2.5-flash-lite"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
 );
 
-// Strictly commanding the model to output raw JSON mapping words to one-sentence definitions
+// HYBRID PROMPT (LLM handles Lemma validation + definitions)
 const DICTIONARY_PROMPT = (words: string[]) => `
- You are a precise English language assistant and a moderator for a Wordle-style word game.
- For each of the following 5-letter words, provide a clear, concise, one-sentence definition.
- If a word does not exist in English, is an archaism, a misspelling, an abbreviation, or is so rare that an average player would not understand it, assign it a value of null.
- Words to define: ${JSON.stringify(words)}
- `;
+You are an expert English lexicographer and a moderator for a Wordle-style game. Review the provided list of words and create their definitions.
+
+### Selection Rules (Return the text string "null" if):
+1. The word is an abbreviation, acronym, proper noun (capitalized names/places), or a blatant misspelling.
+2. The word is highly obscure, archaic, or a technical jargon term that an average player would find unfair.
+3. The word is an inflected form that does not belong as a primary dictionary entry (e.g., if it is just a plural ending in S or a past tense ending in ED that sneaked into the list).
+
+### Definition Rules:
+1. For valid words, provide a rich, educational, and multi-sentence definition. 
+2. Do not restrict yourself to a single short sentence—explain the meaning thoroughly so players can expand their vocabulary.
+3. USE PLAIN TEXT ONLY. You are strictly forbidden from using any Markdown formatting. Do not use asterisks (*), hashtags (#), bolding, or italics.
+
+Words to process:
+${JSON.stringify(words)}
+`;
 
 // We ask for an array of specific results to completely eliminate key confusion
 const DictionarySchema = Schema.Struct({ results: Schema.Array(Schema.Struct({ word: Schema.String, definition: Schema.NullOr(Schema.String) })) });
@@ -46,7 +56,9 @@ const main = Effect.gen(function* () {
 
   // Load the words that need definitions
   const solutionsRaw = yield* fs.readFileString(SOLUTIONS_PATH, "utf8");
-  const words: string[] = JSON.parse(solutionsRaw);
+
+  // 🌟 FIX: Force uppercase immediately to prevent key mismatches and infinite reprocessing
+  const words: string[] = JSON.parse(solutionsRaw).map((w: string) => w.toUpperCase());
 
   // Load existing definitions (to resume safely if script was interrupted)
   const existingDefsRaw = yield* fs.readFileString(DEFINITIONS_PATH, "utf8").pipe(
@@ -98,7 +110,14 @@ const main = Effect.gen(function* () {
       const word = item.word.toUpperCase();
       const value = item.definition;
 
-      if (value === null) {
+      // 🌟 GUARDRAIL: If the AI altered the word or hallucinated a new one, ignore it!
+      if (!batch.includes(word)) {
+        yield* Effect.logWarning(`⚠️ AI tried to smuggle or alter a word: ${word}. Ignored.`);
+        continue;
+      }
+
+      // 🌟 FIX: Catch both structural null and the literal string "null"
+      if (value === null || value === "null" || value.trim().toLowerCase() === "null") {
         // AI explicitly evaluated this and said it's invalid
         activeSolutions = activeSolutions.filter((w) => w !== word);
         wordsPruned++;
