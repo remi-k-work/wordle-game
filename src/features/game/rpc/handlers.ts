@@ -14,6 +14,8 @@ import keypadEnJson from "@/assets/data/keypad-en.json";
 import keypadPlJson from "@/assets/data/keypad-pl.json";
 import definitionsEnJson from "@/assets/data/definitions-en.json";
 import definitionsPlJson from "@/assets/data/definitions-pl.json";
+import dictionaryEnJson from "@/assets/data/dictionary-en.json";
+import dictionaryPlJson from "@/assets/data/dictionary-pl.json";
 
 // constants
 const DEFINITIONS_EN = definitionsEnJson as Record<string, string | null>;
@@ -21,6 +23,7 @@ const DEFINITIONS_PL = definitionsPlJson as Record<string, string | null>;
 
 const RpcGameLayer = RpcGame.toLayer({
   fetchSolutions: ({ solutionsLanguage }) => Effect.succeed(solutionsLanguage === "En" ? solutionsEnJson : solutionsPlJson),
+  fetchDictionary: ({ solutionsLanguage }) => Effect.succeed(solutionsLanguage === "En" ? dictionaryEnJson : dictionaryPlJson),
   fetchKeypad: ({ solutionsLanguage }) => Effect.succeed(solutionsLanguage === "En" ? keypadEnJson : keypadPlJson),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>

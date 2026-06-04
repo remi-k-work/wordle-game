@@ -14,7 +14,9 @@
     "seed-def-en": "tsx ./src/seed/definitions-en.ts",
     "seed-def-pl": "tsx ./src/seed/definitions-pl.ts",
     "sync-en": "tsx ./src/seed/sync-en.ts",
-    "sync-pl": "tsx ./src/seed/sync-pl.ts"
+    "sync-pl": "tsx ./src/seed/sync-pl.ts",
+    "seed-dic-en": "tsx ./src/seed/dictionary-en.ts",
+    "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

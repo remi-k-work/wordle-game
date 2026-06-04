@@ -14,7 +14,7 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
   Effect.gen(function* () {
     const solutionsLanguage = get(solutionsLanguageAtom);
 
-    const { fetchSolutions } = yield* RpcGameClient;
+    const { fetchSolutions, fetchDictionary } = yield* RpcGameClient;
     const solutions = yield* fetchSolutions({ solutionsLanguage });
 
     // Pick a new secret word and reset the game state
@@ -31,8 +31,11 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
 
     yield* Atom.set(gameStateAtom, { ...INITIAL_GAME_STATE, theSecretWord });
 
+    // This is the more forgiving dictionary of valid words we can enter (no lemmas only)
+    const dictionary = yield* fetchDictionary({ solutionsLanguage });
+
     // Return as a HashSet for O(1) lookups
-    return HashSet.fromIterable(solutions.map((solution) => solution.toUpperCase()));
+    return HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()));
   }).pipe(Effect.delay("3 seconds"))
 ).pipe(Atom.keepAlive);
 

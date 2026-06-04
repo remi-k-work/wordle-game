@@ -9,6 +9,11 @@ export class RpcGame extends RpcGroup.make(
     success: Schema.Array(TheSecretWordSchema),
   }),
 
+  Rpc.make("fetchDictionary", {
+    payload: { solutionsLanguage: SolutionsLanguageSchema },
+    success: Schema.Array(TheSecretWordSchema),
+  }),
+
   Rpc.make("fetchKeypad", {
     payload: { solutionsLanguage: SolutionsLanguageSchema },
     success: Schema.Array(Schema.Trim.pipe(Schema.nonEmptyString(), Schema.maxLength(1))),

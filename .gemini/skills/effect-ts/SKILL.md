@@ -155,4 +155,3 @@ When providing solutions, explain the Effect concepts being used and why they fi
 - `./references/guide-schema.md`
 - `./references/guide-sql.md`
 - `./references/guide-testing.md`
-- `./references/setup.md`
