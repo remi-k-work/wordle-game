@@ -12,7 +12,7 @@ export const HighScoreSchema = Schema.Struct({
   score: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   solutionsLang: SolutionsLanguageSchema,
-  createdAt: Schema.DateTimeUtc,
+  createdAt: Schema.DateTimeUtcFromDate,
 });
 
 // The schema for adding a new high score entry (the required fields only)

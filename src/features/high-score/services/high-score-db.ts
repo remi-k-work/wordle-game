@@ -6,7 +6,6 @@ import { PgLive } from "@/lib/pg-live";
 
 // types
 import type { AddHighScore } from "@/features/high-score/domain";
-
 export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;

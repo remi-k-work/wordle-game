@@ -18,12 +18,11 @@ export const top10HighScoresAtom = RuntimeAtom.atom(
 );
 
 // Action atom for adding a new high score
-export const addHighScoreAction = RuntimeAtom.fn(
-  (newHighScore: AddHighScore) =>
-    Effect.gen(function* () {
-      const { addHighScore } = yield* RpcHighScoreClient;
-      yield* addHighScore(newHighScore);
-    })
+export const addHighScoreAction = RuntimeAtom.fn((newHighScore: AddHighScore) =>
+  Effect.gen(function* () {
+    const { addHighScore } = yield* RpcHighScoreClient;
+    yield* addHighScore(newHighScore);
+  })
 );
 
 // Derived atom to determine if the current run qualifies for the high score
