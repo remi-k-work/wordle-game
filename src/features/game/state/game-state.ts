@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 
 // types
 import type { GameState } from "@/features/game/domain";

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomSet } from "@effect-atom/atom-react";
+import { useAtomSet } from "@effect/atom-react";
 import { openModalAction } from "@/features/game/state";
 
 // components

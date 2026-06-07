@@ -1,10 +1,12 @@
 // services, features, and other libraries
-import { Effect, ExecutionPlan, Schedule } from "effect";
-import { LanguageModel } from "@effect/ai";
-import { GoogleLanguageModel } from "@effect/ai-google";
+import { Context, Effect, ExecutionPlan, Layer, Schedule } from "effect";
+import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
+import { AiSdkError } from "@/lib/errors";
 
 // types
 import type { SolutionsLanguage } from ".";
+import type { LanguageModel } from "ai";
 
 // constants
 const RIDDLE_PROMPT_EN = (theSecretWord: string) => `
@@ -39,15 +41,25 @@ Zasady:
 Sekretne Słowo: ${theSecretWord}
 `;
 
+// Riddle model as a typed dependency (a service)
+const RiddleModel = Context.Service<LanguageModel>("RiddleModel");
+
+// Attempt to generate a riddle using the provided model
+const attemptRiddleWithModel = Effect.fn("riddle.attemptRiddleWithModel")(function* (theSecretWord: string, solutionsLanguage: SolutionsLanguage) {
+  const model = yield* RiddleModel;
+
+  return yield* Effect.tryPromise({
+    try: () => generateText({ model, prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord) }),
+    catch: (cause) => new AiSdkError({ message: `The attempt to generate a riddle using the "${model}" model was unsuccessful.`, cause }),
+  }).pipe(Effect.map(({ text }) => text));
+});
+
 const RiddlePlan = ExecutionPlan.make(
-  { provide: GoogleLanguageModel.model("gemini-flash-latest"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
-  { provide: GoogleLanguageModel.model("gemini-2.5-flash"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
-  { provide: GoogleLanguageModel.model("gemini-flash-lite-latest"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
-  { provide: GoogleLanguageModel.model("gemini-2.5-flash-lite"), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
+  { provide: Layer.succeed(RiddleModel, google("gemini-flash-latest")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
+  { provide: Layer.succeed(RiddleModel, google("gemini-2.5-flash")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
+  { provide: Layer.succeed(RiddleModel, google("gemini-flash-lite-latest")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
+  { provide: Layer.succeed(RiddleModel, google("gemini-2.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
 );
 
 export const generateRiddle = (theSecretWord: string, solutionsLanguage: SolutionsLanguage) =>
-  LanguageModel.generateText({ prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord) }).pipe(
-    Effect.withExecutionPlan(RiddlePlan),
-    Effect.map(({ text }) => text)
-  );
+  attemptRiddleWithModel(theSecretWord, solutionsLanguage).pipe(Effect.withExecutionPlan(RiddlePlan));

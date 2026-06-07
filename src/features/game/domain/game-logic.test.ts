@@ -1,5 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, DateTime, Duration, TestClock, HashSet, Option } from "effect";
+import { Effect, DateTime, Duration, HashSet, Option } from "effect";
+import { TestClock } from "effect/testing";
 import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction, calculatePotentialScore, deriveGameEvent } from ".";
 import { GameActionEnum, INITIAL_GAME_STATE } from ".";
 
@@ -104,7 +105,7 @@ describe("gameLogic", () => {
 
   describe("applyGameAction", () => {
     const dictionary = HashSet.fromIterable(["APPLE"]);
-    const now = DateTime.unsafeMake(0);
+    const now = DateTime.makeUnsafe(0);
 
     it("handles AddLetter", () => {
       const state = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
@@ -115,7 +116,7 @@ describe("gameLogic", () => {
       const firstLetterState = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
       expect(Option.isSome(firstLetterState.startTime)).toBe(true);
 
-      const later = DateTime.unsafeMake(10_000);
+      const later = DateTime.makeUnsafe(10_000);
       const secondLetterState = applyGameAction(firstLetterState, GameActionEnum.AddLetter({ letter: "P" }), dictionary, later);
       expect(secondLetterState.startTime).toBe(firstLetterState.startTime);
     });
@@ -156,7 +157,7 @@ describe("gameLogic", () => {
   });
 
   describe("deriveGameEvent", () => {
-    const now = DateTime.unsafeMake(0);
+    const now = DateTime.makeUnsafe(0);
 
     it("emits WordWon when a playing state transitions to won", () => {
       const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentGuessWord: "APPLE" };
@@ -190,7 +191,7 @@ describe("gameLogic", () => {
         yield* TestClock.adjust(Duration.sum(Duration.minutes(2), Duration.seconds(45)));
         const end = yield* DateTime.now;
 
-        expect(formatDuration(DateTime.distanceDuration(start, end))).toBe("02:45");
+        expect(formatDuration(DateTime.distance(start, end))).toBe("02:45");
       })
     );
 
@@ -201,7 +202,7 @@ describe("gameLogic", () => {
         yield* TestClock.adjust(oneHourFiveMinsTenSecs);
         const end = yield* DateTime.now;
 
-        expect(formatDuration(DateTime.distanceDuration(start, end))).toBe("01:05:10");
+        expect(formatDuration(DateTime.distance(start, end))).toBe("01:05:10");
       })
     );
 
@@ -211,7 +212,7 @@ describe("gameLogic", () => {
         yield* TestClock.adjust(Duration.seconds(5));
         const end = yield* DateTime.now;
 
-        expect(formatDuration(DateTime.distanceDuration(start, end))).toBe("00:05");
+        expect(formatDuration(DateTime.distance(start, end))).toBe("00:05");
       })
     );
   });

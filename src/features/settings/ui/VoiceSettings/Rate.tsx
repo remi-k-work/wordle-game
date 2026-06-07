@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { changeVoiceRateAction, voiceRateAtom } from "@/features/settings/state";
 
 // components

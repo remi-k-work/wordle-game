@@ -1,18 +1,18 @@
 // services, features, and other libraries
-import { Result } from "@effect-atom/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
 
 // assets
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { RpcClientError } from "@effect/rpc/RpcClientError";
+import type { RpcClientError } from "effect/unstable/rpc/RpcClientError";
 
 interface FailureProps {
-  addHighScoreResult: Result.Result<void, RpcClientError>;
+  addHighScoreResult: AsyncResult.AsyncResult<void, RpcClientError>;
 }
 
 export function Failure({ addHighScoreResult }: FailureProps) {
-  return Result.match(addHighScoreResult, {
+  return AsyncResult.match(addHighScoreResult, {
     onInitial: () => null,
     onSuccess: () => null,
     onFailure: (failure) => (

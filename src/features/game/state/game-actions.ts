@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime, Effect, Option, PubSub } from "effect";
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 import { applyGameAction, deriveGameEvent, finishRunSession, parseKey, resetCurrentRunSession } from "@/features/game/domain";
 import { closeModalAction, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
 

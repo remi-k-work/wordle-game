@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect } from "effect";
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 
 // types
 type ModalType = "help" | "status" | "voice-settings" | null;

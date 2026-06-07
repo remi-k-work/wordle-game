@@ -30,7 +30,7 @@ export const getBasePointsPerTurn = (currentTurn: number) => BASE_POINTS_PER_TUR
 export const getElapsedSeconds = (startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) =>
   Option.match(startTime, {
     onNone: () => 0,
-    onSome: (startTime) => DateTime.distanceDuration(startTime, endTime).pipe(Duration.toSeconds),
+    onSome: (startTime) => DateTime.distance(startTime, endTime).pipe(Duration.toSeconds),
   });
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)

@@ -1,5 +1,6 @@
 // services, features, and other libraries
-import { useAtom, useAtomValue, Result } from "@effect-atom/atom-react";
+import { useAtom, useAtomValue } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { addHighScoreAction, qualifiesForHighScoreAtom } from "@/features/high-score/state";
 
 // components
@@ -18,7 +19,7 @@ export function NewHighScore() {
   if (!qualifiesForHighScore) return null;
 
   // Success replaces the form entirely
-  if (Result.isSuccess(addHighScoreResult)) return <Success />;
+  if (AsyncResult.isSuccess(addHighScoreResult)) return <Success />;
 
   return (
     <section className="grid place-items-center gap-4 rounded-md border-2 border-accent p-4">

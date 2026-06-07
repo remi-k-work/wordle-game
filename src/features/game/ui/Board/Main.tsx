@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useAtomValue } from "@effect-atom/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { currentTurnAtom, wordleGridAtom } from "@/features/game/state";
 
 // components

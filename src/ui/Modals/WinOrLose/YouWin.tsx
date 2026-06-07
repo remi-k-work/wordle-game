@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Option } from "effect";
-import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
+import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import {
   currentTurnAtom,
   theSecretWordAtom,

@@ -68,7 +68,7 @@ async function PageContent() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {top10HighScores.map(({ playerName, score, streak, solutionsLang }, index) => (
+          {top10HighScores.map(({ playerName, score, streak, solutionsLang }, index: number) => (
             <TableRow key={index} className="odd:bg-surface-2">
               <TableCell>{index + 1}</TableCell>
               <TableCell>{playerName}</TableCell>

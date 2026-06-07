@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { motion, AnimatePresence } from "motion/react";
-import { useAtomValue, useAtomSet, Result } from "@effect-atom/atom-react";
+import { useAtomValue, useAtomSet } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { handleKeyAction, gameDataKeypadAtom, keypadColorsAtom } from "@/features/game/state";
 
 // components
@@ -30,7 +31,7 @@ export function Footer() {
   const keypadColors = useAtomValue(keypadColorsAtom);
   const handleKey = useAtomSet(handleKeyAction);
 
-  return Result.builder(gameDataKeypad)
+  return AsyncResult.builder(gameDataKeypad)
     .onInitialOrWaiting(() => <FooterSkeleton />)
     .onFailure(() => <FooterSkeleton />)
     .onSuccess((keys) => {

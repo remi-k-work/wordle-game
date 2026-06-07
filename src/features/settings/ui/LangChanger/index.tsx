@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { changeSolutionsLanguageAction, solutionsLanguageAtom } from "@/features/settings/state";
 import { forfeitRunAction } from "@/features/game/state";
 

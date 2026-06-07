@@ -12,8 +12,8 @@ export type VoicePitch = Schema.Schema.Type<typeof GameSettingsSchema>["voicePit
 // Persistent storage for game settings
 export const GameSettingsSchema = Schema.Struct({
   solutionsLanguage: SolutionsLanguageSchema,
-  voiceVoice: Schema.NullOr(Schema.Trim.pipe(Schema.nonEmptyString())),
-  voiceVolume: Schema.Number.pipe(Schema.between(0, 1)),
-  voiceRate: Schema.Number.pipe(Schema.between(0.5, 2)),
-  voicePitch: Schema.Number.pipe(Schema.between(0.5, 1.5)),
+  voiceVoice: Schema.NullOr(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
+  voiceVolume: Schema.Number.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 1 }))),
+  voiceRate: Schema.Number.pipe(Schema.check(Schema.isBetween({ minimum: 0.5, maximum: 2 }))),
+  voicePitch: Schema.Number.pipe(Schema.check(Schema.isBetween({ minimum: 0.5, maximum: 1.5 }))),
 });

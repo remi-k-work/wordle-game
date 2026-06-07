@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomSet, useAtomValue } from "@effect-atom/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { changeVoiceVoiceAction, voiceVoiceAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks/use-speech-voices";
 

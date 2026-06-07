@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useAtomSet } from "@effect-atom/atom-react";
+import { useAtomSet } from "@effect/atom-react";
 import { closeModalAction } from "@/features/game/state";
 
 // components

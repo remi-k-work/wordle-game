@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime } from "effect";
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 import { calculatePotentialScore, computeKeypadState, deriveWordleGrid, getGameStatus } from "@/features/game/domain";
 import { currentTurnAtom, startTimeAtom, theSecretWordAtom, wordleGuessesAtom } from ".";
 
@@ -8,7 +8,7 @@ import { currentTurnAtom, startTimeAtom, theSecretWordAtom, wordleGuessesAtom } 
 export const potentialScoreAtom = Atom.make((get) => {
   const currentTurn = get(currentTurnAtom);
   const startTime = get(startTimeAtom);
-  const now = DateTime.unsafeNow();
+  const now = DateTime.makeUnsafe(Date.now());
   return calculatePotentialScore(currentTurn, startTime, now);
 });
 

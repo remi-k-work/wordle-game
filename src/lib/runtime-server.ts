@@ -2,6 +2,6 @@
 import { Layer, Logger, ManagedRuntime } from "effect";
 import { HighScoreDB } from "@/features/high-score/services/high-score-db";
 
-const MainLayer = Layer.mergeAll(Logger.pretty, HighScoreDB.Default);
+const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), HighScoreDB.layer);
 
 export const RuntimeServer = ManagedRuntime.make(MainLayer);

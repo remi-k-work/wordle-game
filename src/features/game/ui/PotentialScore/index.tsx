@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useAtomValue } from "@effect-atom/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { potentialScoreAtom } from "@/features/game/state";
 import { potentialScoreAsPercentage } from "@/features/game/domain";
 

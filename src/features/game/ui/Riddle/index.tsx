@@ -4,7 +4,8 @@ import { useMemo } from "react";
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
-import { Result, useAtomValue } from "@effect-atom/atom-react";
+import { useAtomValue } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { riddleAtom } from "@/features/game/state";
 import { solutionsLanguageAtom, voicePitchAtom, voiceRateAtom, voiceVoiceAtom, voiceVolumeAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks/use-speech-voices";
@@ -33,7 +34,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   const voiceRate = useAtomValue(voiceRateAtom);
   const voicePitch = useAtomValue(voicePitchAtom);
 
-  const riddleOutput = Result.value(riddle).pipe(Option.getOrNull);
+  const riddleOutput = AsyncResult.value(riddle).pipe(Option.getOrNull);
 
   const sanitizedRiddle = useMemo(() => {
     if (!riddleOutput) return null;
@@ -98,7 +99,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   };
 
   if (isVoiceTest) {
-    return Result.builder(riddle)
+    return AsyncResult.builder(riddle)
       .onInitialOrWaiting(() => <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>)
       .onFailure(() => <p className="mx-auto text-center text-xl">Riddle unavailable. You are on your own!</p>)
       .onSuccess(() => (
@@ -128,7 +129,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            {Result.builder(riddle)
+            {AsyncResult.builder(riddle)
               .onInitialOrWaiting(() => <p className="animate-pulse">Thinking...</p>)
               .onFailure(() => <p>Riddle unavailable. You are on your own!</p>)
               .onSuccess(() => (

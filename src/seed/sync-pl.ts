@@ -1,13 +1,12 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger } from "effect";
-import { FileSystem } from "@effect/platform";
-import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { Effect, Layer, Logger, FileSystem } from "effect";
+import { NodeServices, NodeRuntime } from "@effect/platform-node";
 
 // constants
 const SOLUTIONS_PATH = "./src/seed/solutions-pl.json";
 const DEFINITIONS_PATH = "./src/seed/definitions-pl.json";
 
-const MainLayer = Layer.mergeAll(Logger.pretty, NodeContext.layer);
+const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer);
 
 const main = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem;

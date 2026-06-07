@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 
 // services, features, and other libraries
-import { useAtomValue } from "@effect-atom/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { lastRunScoreAtom, lastStreakAtom } from "@/features/game/state";
 import { solutionsLanguageAtom } from "@/features/settings/state";
 
@@ -14,12 +14,12 @@ import { SpinnerIcon } from "@/assets/icons";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { Result } from "@effect-atom/atom-react";
-import type { RpcClientError } from "@effect/rpc/RpcClientError";
+import type { AsyncResult } from "effect/unstable/reactivity";
+import type { RpcClientError } from "effect/unstable/rpc/RpcClientError";
 import type { AddHighScore } from "@/features/high-score/domain";
 
 interface InitialsProps {
-  addHighScoreResult: Result.Result<void, RpcClientError>;
+  addHighScoreResult: AsyncResult.AsyncResult<void, RpcClientError>;
   addHighScore: (input: AddHighScore) => void;
 }
 

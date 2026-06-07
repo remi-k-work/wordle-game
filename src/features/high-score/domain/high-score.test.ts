@@ -9,7 +9,7 @@ const highScore = (score: number, streak: number): HighScore => ({
   score,
   streak,
   solutionsLang: "En",
-  createdAt: DateTime.unsafeMake(0),
+  createdAt: DateTime.makeUnsafe(0),
 });
 
 describe("highScore", () => {

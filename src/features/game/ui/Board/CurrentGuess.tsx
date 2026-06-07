@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
+import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { currentGuessWordAtom, handleKeyAction, isInvalidGuessAtom } from "@/features/game/state";
 
 // components

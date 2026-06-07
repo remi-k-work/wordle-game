@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomValue } from "@effect-atom/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { currentTurnAtom } from "@/features/game/state";
 
 // components

@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
-import { RpcSerialization, RpcServer } from "@effect/rpc";
-import { HttpServer } from "@effect/platform";
+import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
+import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcHighScore } from "./requests";
 import { HighScoreDB } from "@/features/high-score/services/high-score-db";
 
@@ -17,9 +17,13 @@ const RpcHighScoreLayer = RpcHighScore.toLayer({
       const highScoreDB = yield* HighScoreDB;
       yield* highScoreDB.addHighScore(payload);
     }),
-}).pipe(Layer.provide(HighScoreDB.Default));
+}).pipe(Layer.provide(HighScoreDB.layer));
 
-export const { dispose, handler } = RpcServer.toWebHandler(RpcHighScore, {
-  layer: Layer.mergeAll(RpcHighScoreLayer, RpcSerialization.layerJson, HttpServer.layerContext),
+const RpcLayer = RpcServer.layerHttp({
+  group: RpcHighScore,
+  path: "/api/rpc/high-score",
+  protocol: "http",
   disableFatalDefects: true,
-});
+}).pipe(Layer.provide(Layer.mergeAll(RpcHighScoreLayer, RpcSerialization.layerJson, HttpServer.layerServices)));
+
+export const handler = HttpRouter.toWebHandler(RpcLayer);

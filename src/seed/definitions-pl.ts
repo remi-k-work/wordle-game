@@ -1,3 +1,4 @@
+/*
 import "dotenv/config";
 
 // services, features, and other libraries
@@ -158,3 +159,4 @@ const main = Effect.gen(function* () {
 }).pipe(Effect.provide(MainLayer));
 
 NodeRuntime.runMain(main);
+*/

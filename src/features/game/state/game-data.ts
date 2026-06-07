@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, HashSet, Random } from "effect";
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { solutionsLanguageAtom } from "@/features/settings/state";
@@ -10,9 +10,9 @@ import { gameStateAtom, theSecretWordAtom } from ".";
 import { INITIAL_GAME_STATE } from "@/features/game/domain";
 
 // Effectful atom that fetches the solution dictionary and initializes a new word challenge
-export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
+export const gameDataSolutionsAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
-    const solutionsLanguage = get(solutionsLanguageAtom);
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 
     const { fetchSolutions, fetchDictionary } = yield* RpcGameClient;
     const solutions = yield* fetchSolutions({ solutionsLanguage });
@@ -40,9 +40,9 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that fetches the valid keypad layout for the selected language
-export const gameDataKeypadAtom = RuntimeAtom.atom((get) =>
+export const gameDataKeypadAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
-    const solutionsLanguage = get(solutionsLanguageAtom);
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 
     const { fetchKeypad } = yield* RpcGameClient;
     return yield* fetchKeypad({ solutionsLanguage });
@@ -50,10 +50,10 @@ export const gameDataKeypadAtom = RuntimeAtom.atom((get) =>
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that reactively fetches a riddle whenever the secret word or language changes
-export const riddleAtom = RuntimeAtom.atom((get) =>
+export const riddleAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
-    const theSecretWord = get(theSecretWordAtom);
-    const solutionsLanguage = get(solutionsLanguageAtom);
+    const theSecretWord = yield* Atom.get(theSecretWordAtom);
+    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 
     const { fetchRiddle } = yield* RpcGameClient;
     return yield* fetchRiddle({ theSecretWord, solutionsLanguage });

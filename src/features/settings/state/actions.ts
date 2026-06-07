@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect } from "effect";
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 import { changeSolutionsLanguage, changeVoicePitch, changeVoiceRate, changeVoiceVoice, changeVoiceVolume } from "@/features/settings/domain";
 import { gameSettingsAtom } from ".";
 

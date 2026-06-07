@@ -18,9 +18,9 @@ export const pgConfig: PgClient.PgClientConfig = {
   types,
 };
 
-export const PgLive = Layer.unwrapEffect(
+export const PgLive = Layer.unwrap(
   Effect.gen(function* () {
-    const env = yield* Config.literal("local")("ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
+    const env = yield* Config.literal("local", "ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
     const ssl = env !== "local" ? { rejectUnauthorized: false } : false;
     const databaseUrl = yield* Config.redacted("DATABASE_URL");
 

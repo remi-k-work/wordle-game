@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useAtomValue, useAtomSet } from "@effect-atom/atom-react";
+import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { theSecretWordAtom, startNewRunAction, lastRunScoreAtom, lastStreakAtom, bestRunScoreAtom, bestStreakAtom } from "@/features/game/state";
 
 // components

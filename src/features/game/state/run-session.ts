@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // services, features, and other libraries
-import { Atom } from "@effect-atom/atom-react";
+import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSessionSchema } from "@/features/game/domain";
 

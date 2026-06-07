@@ -5,7 +5,7 @@ import { connection } from "next/server";
 import { notFound, unauthorized } from "next/navigation";
 
 // services, features, and other libraries
-import { Effect, Either, Schema } from "effect";
+import { Effect, Result, Schema } from "effect";
 import { RuntimeServer } from "./runtime-server";
 import { InvalidPageInputsError } from "./errors";
 
@@ -16,10 +16,10 @@ interface PageInputPromises {
 }
 
 // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
-export const validatePageInputs = <A, I>(schema: Schema.Schema<A, I>, { params, searchParams }: PageInputPromises) =>
+export const validatePageInputs = <A>(schema: Schema.Schema<A>, { params, searchParams }: PageInputPromises) =>
   Effect.gen(function* () {
     const [p, sp] = yield* Effect.all([Effect.promise(() => params), Effect.promise(() => searchParams)], { concurrency: 2 });
-    return yield* Schema.decodeUnknown(schema)({ params: p, searchParams: sp }).pipe(
+    return yield* Schema.decodeUnknownEffect(schema)({ params: p, searchParams: sp }).pipe(
       Effect.mapError((cause) => new InvalidPageInputsError({ message: "Invalid page inputs", cause }))
     );
   });
@@ -29,17 +29,17 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
   // Explicitly defer to request time (Effect uses Date.now() internally)
   await connection();
 
-  // We wrap in Effect.either to catch failures gracefully
+  // We wrap in Effect.result to catch failures gracefully
   const pageMainResult = await RuntimeServer.runPromise(
     pageMain.pipe(
       Effect.tapError((error) => Effect.log(`[PAGE MAIN ERROR]: ${error}`)),
-      Effect.either
+      Effect.result
     )
   );
 
   // Standardized error handling
-  if (Either.isLeft(pageMainResult)) {
-    const error = pageMainResult.left;
+  if (Result.isFailure(pageMainResult)) {
+    const error = pageMainResult.failure;
 
     if (error._tag === "InvalidPageInputsError") notFound();
     if (error._tag === "ItemNotFoundError") notFound();
@@ -50,7 +50,7 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
     throw error;
   } else {
     // Return success result
-    return pageMainResult.right;
+    return pageMainResult.success;
   }
 };
 
@@ -59,22 +59,22 @@ export const runComponentMain = async <A, E extends { _tag: string }>(componentM
   // Explicitly defer to request time (Effect uses Date.now() internally)
   await connection();
 
-  // We wrap in Effect.either to catch failures gracefully
+  // We wrap in Effect.result to catch failures gracefully
   const componentMainResult = await RuntimeServer.runPromise(
     componentMain.pipe(
       Effect.tapError((error) => Effect.log(`[COMPONENT MAIN ERROR]: ${error}`)),
-      Effect.either
+      Effect.result
     )
   );
 
   // Standardized error handling
-  if (Either.isLeft(componentMainResult)) {
-    const error = componentMainResult.left;
+  if (Result.isFailure(componentMainResult)) {
+    const error = componentMainResult.failure;
 
     // Allow the next.js error boundary to catch any unexpected errors
     throw error;
   } else {
     // Return success result
-    return componentMainResult.right;
+    return componentMainResult.success;
   }
 };
