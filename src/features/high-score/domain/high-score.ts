@@ -2,7 +2,7 @@
 import type { HighScore } from ".";
 
 // Determine if the current run qualifies for the high score
-export const qualifiesForHighScore = (top10HighScores: ReadonlyArray<HighScore>, lastRunScore: number, lastStreak: number) => {
+export const qualifiesForHighScore = (top10HighScores: ReadonlyArray<HighScore>, lastRunScore: HighScore["score"], lastStreak: HighScore["streak"]) => {
   // If there are fewer than 10 entries, any score qualifies
   if (top10HighScores.length < 10) return true;
 

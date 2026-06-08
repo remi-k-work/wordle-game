@@ -1,8 +1,6 @@
 /.repos
 /_scratchpad
-secrets.txt
 .env
-src/docs/
 src/seed/dictionary-pl.txt
 
 # dependencies
