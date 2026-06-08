@@ -4,7 +4,7 @@ import { closeModalAction } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
-import { VoiceSettings } from "@/features/settings/ui/VoiceSettings";
+import { VoiceSettings } from "@/features/settings/ui/voice-settings";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";

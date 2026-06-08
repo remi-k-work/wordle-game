@@ -7,7 +7,7 @@ import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { currentGuessWordAtom, handleKeyAction, isInvalidGuessAtom } from "@/features/game/state";
 
 // components
-import { GuessTile } from "./GuessTile";
+import { GuessTile } from "./guess-tile";
 
 // types
 import type { Color, Tile } from "@/features/game/domain";

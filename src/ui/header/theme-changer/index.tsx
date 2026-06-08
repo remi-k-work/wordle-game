@@ -9,7 +9,7 @@ import { Button } from "@base-ui/react";
 // assets
 import { SunIcon } from "@heroicons/react/24/outline";
 
-export const ThemeChanger = dynamic(() => import("./ThemeChanger"), { ssr: false, loading: () => <ThemeChangerSkeleton /> });
+export const ThemeChanger = dynamic(() => import("./theme-changer"), { ssr: false, loading: () => <ThemeChangerSkeleton /> });
 
 export function ThemeChangerSkeleton() {
   return (

@@ -4,9 +4,9 @@ import Link from "next/link";
 
 // components
 import { Button } from "@base-ui/react";
-import { PageHeader } from "@/ui/PageHeader";
-import { SectionHeader } from "@/ui/SectionHeader";
-import { ScoringSimulator } from "@/features/high-score/ui/ScoringSimulator";
+import { PageHeader } from "@/ui/page-header";
+import { SectionHeader } from "@/ui/section-header";
+import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
 
 // assets
 import hero from "@/assets/hero.webp";

@@ -3,8 +3,8 @@ import { useAtomValue } from "@effect/atom-react";
 import { currentTurnAtom, wordleGridAtom } from "@/features/game/state";
 
 // components
-import { CurrentGuess } from "./CurrentGuess";
-import { GuessRow, GuessRowSkeleton } from "./GuessRow";
+import { CurrentGuess } from "./current-guess";
+import { GuessRow, GuessRowSkeleton } from "./guess-row";
 
 export function Main() {
   const currentTurn = useAtomValue(currentTurnAtom);

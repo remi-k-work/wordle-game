@@ -1,2 +1,2 @@
 export * from "./high-score";
-export * from "./schemas";
+export * from "./models";

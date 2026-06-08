@@ -4,7 +4,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { currentTurnAtom } from "@/features/game/state";
 
 // components
-import { GuessTile, GuessTileSkeleton } from "./GuessTile";
+import { GuessTile, GuessTileSkeleton } from "./guess-tile";
 
 // types
 import type { WordleGrid } from "@/features/game/domain";

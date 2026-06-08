@@ -6,11 +6,11 @@ import { activeModalAtom } from "@/features/game/state";
 import { Modal } from "@/ui/modals";
 import { Content } from "./content";
 
-export function HelpModal() {
+export function VoiceSettingsModal() {
   const activeModal = useAtomValue(activeModalAtom);
 
   return (
-    <Modal isOpen={activeModal === "help"} title="Help">
+    <Modal isOpen={activeModal === "voice-settings"} title="Voice Settings">
       <Content />
     </Modal>
   );

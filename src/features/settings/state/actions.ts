@@ -1,11 +1,8 @@
 // services, features, and other libraries
 import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { changeSolutionsLanguage, changeVoicePitch, changeVoiceRate, changeVoiceVoice, changeVoiceVolume } from "@/features/settings/domain";
+import { changeSolutionsLanguage, changeVoicePitch, changeVoiceRate, changeVoiceVoice, changeVoiceVolume, GameSettings } from "@/features/settings/domain";
 import { gameSettingsAtom } from ".";
-
-// types
-import type { VoicePitch, VoiceRate, VoiceVoice, VoiceVolume } from "@/features/settings/domain";
 
 // To change and manage game settings
 export const changeSolutionsLanguageAction = Atom.fn(
@@ -16,22 +13,22 @@ export const changeSolutionsLanguageAction = Atom.fn(
 
 // The voice related settings
 export const changeVoiceVoiceAction = Atom.fn(
-  Effect.fnUntraced(function* (newVoiceVoice: VoiceVoice, get: Atom.FnContext) {
+  Effect.fnUntraced(function* (newVoiceVoice: GameSettings["voiceVoice"], get: Atom.FnContext) {
     get.set(gameSettingsAtom, changeVoiceVoice(get(gameSettingsAtom), newVoiceVoice));
   })
 );
 export const changeVoiceVolumeAction = Atom.fn(
-  Effect.fnUntraced(function* (newVoiceVolume: VoiceVolume, get: Atom.FnContext) {
+  Effect.fnUntraced(function* (newVoiceVolume: GameSettings["voiceVolume"], get: Atom.FnContext) {
     get.set(gameSettingsAtom, changeVoiceVolume(get(gameSettingsAtom), newVoiceVolume));
   })
 );
 export const changeVoiceRateAction = Atom.fn(
-  Effect.fnUntraced(function* (newVoiceRate: VoiceRate, get: Atom.FnContext) {
+  Effect.fnUntraced(function* (newVoiceRate: GameSettings["voiceRate"], get: Atom.FnContext) {
     get.set(gameSettingsAtom, changeVoiceRate(get(gameSettingsAtom), newVoiceRate));
   })
 );
 export const changeVoicePitchAction = Atom.fn(
-  Effect.fnUntraced(function* (newVoicePitch: VoicePitch, get: Atom.FnContext) {
+  Effect.fnUntraced(function* (newVoicePitch: GameSettings["voicePitch"], get: Atom.FnContext) {
     get.set(gameSettingsAtom, changeVoicePitch(get(gameSettingsAtom), newVoicePitch));
   })
 );

@@ -3,14 +3,14 @@ import { useAtomValue } from "@effect/atom-react";
 import { activeModalAtom } from "@/features/game/state";
 
 // components
-import { Modal } from "@/ui/Modals";
-import { Content } from "./Content";
+import { Modal } from "@/ui/modals";
+import { Content } from "./content";
 
-export function VoiceSettingsModal() {
+export function HelpModal() {
   const activeModal = useAtomValue(activeModalAtom);
 
   return (
-    <Modal isOpen={activeModal === "voice-settings"} title="Voice Settings">
+    <Modal isOpen={activeModal === "help"} title="Help">
       <Content />
     </Modal>
   );

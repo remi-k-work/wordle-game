@@ -2,11 +2,7 @@
 import { Config, Effect, Layer, String as Str } from "effect";
 import { PgClient } from "@effect/sql-pg";
 
-export const pgConfig: PgClient.PgClientConfig = {
-  transformQueryNames: Str.camelToSnake, // JS camelCase -> SQL snake_case
-  transformResultNames: Str.snakeToCamel, // SQL snake_case -> JS camelCase
-  transformJson: true,
-};
+export const pgConfig: PgClient.PgClientConfig = { transformQueryNames: Str.camelToSnake, transformResultNames: Str.snakeToCamel, transformJson: true };
 
 export const PgLive = Layer.unwrap(
   Effect.gen(function* () {

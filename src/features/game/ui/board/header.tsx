@@ -1,8 +1,8 @@
 // components
-import { Run, RunSkeleton } from "@/features/game/ui/Run";
-import { PotentialScore, PotentialScoreSkeleton } from "@/features/game/ui/PotentialScore";
-import { Riddle, RiddleSkeleton } from "@/features/game/ui/Riddle";
-import { GameMenu, GameMenuSkeleton } from "@/features/game/ui/Menu";
+import { Run, RunSkeleton } from "@/features/game/ui/run";
+import { PotentialScore, PotentialScoreSkeleton } from "@/features/game/ui/potential-score";
+import { Riddle, RiddleSkeleton } from "@/features/game/ui/riddle";
+import { GameMenu, GameMenuSkeleton } from "@/features/game/ui/menu";
 
 export function Header() {
   return (

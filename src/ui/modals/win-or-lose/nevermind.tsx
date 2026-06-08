@@ -4,9 +4,9 @@ import { theSecretWordAtom, startNewRunAction, lastRunScoreAtom, lastStreakAtom,
 
 // components
 import { Button } from "@base-ui/react";
-import { Definition } from "./Definition";
-import { RunScore } from "./RunScore";
-import { NewHighScore } from "@/features/high-score/ui/NewHighScore";
+import { Definition } from "./definition";
+import { RunScore } from "./run-score";
+import { NewHighScore } from "@/features/high-score/ui/new-high-score";
 
 // assets
 import { ArrowPathIcon } from "@heroicons/react/24/outline";

@@ -14,9 +14,9 @@ import {
 
 // components
 import { Button } from "@base-ui/react";
-import { Definition } from "./Definition";
-import { ScoringSimulator } from "@/features/high-score/ui/ScoringSimulator";
-import { RunScore } from "./RunScore";
+import { Definition } from "./definition";
+import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
+import { RunScore } from "./run-score";
 
 // assets
 import { ForwardIcon } from "@heroicons/react/24/outline";

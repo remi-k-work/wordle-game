@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { GameSettingsSchema } from "@/features/settings/domain";
+import { GameSettings } from "@/features/settings/domain";
 
 // Persistent storage for game settings
 export const gameSettingsAtom = Atom.kvs({
-  runtime: RuntimeAtom as any,
+  runtime: RuntimeAtom,
   key: "@wordle/gameSettings",
-  schema: GameSettingsSchema,
+  schema: GameSettings,
   defaultValue: () => ({ solutionsLanguage: "En", voiceVoice: null, voiceVolume: 1, voiceRate: 1, voicePitch: 1 }) as const,
 });
 

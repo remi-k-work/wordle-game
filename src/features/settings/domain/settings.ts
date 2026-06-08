@@ -1,5 +1,5 @@
-// types
-import type { GameSettings, VoicePitch, VoiceRate, VoiceVoice, VoiceVolume } from ".";
+// services, features, and other libraries
+import { GameSettings } from "@/features/settings/domain";
 
 // To change and manage game settings
 export const changeSolutionsLanguage = ({ solutionsLanguage, ...gameSettings }: GameSettings) =>
@@ -9,7 +9,10 @@ export const changeSolutionsLanguage = ({ solutionsLanguage, ...gameSettings }: 
   }) as const;
 
 // The voice related settings
-export const changeVoiceVoice = (gameSettings: GameSettings, newVoiceVoice: VoiceVoice) => ({ ...gameSettings, voiceVoice: newVoiceVoice }) as const;
-export const changeVoiceVolume = (gameSettings: GameSettings, newVoiceVolume: VoiceVolume) => ({ ...gameSettings, voiceVolume: newVoiceVolume }) as const;
-export const changeVoiceRate = (gameSettings: GameSettings, newVoiceRate: VoiceRate) => ({ ...gameSettings, voiceRate: newVoiceRate }) as const;
-export const changeVoicePitch = (gameSettings: GameSettings, newVoicePitch: VoicePitch) => ({ ...gameSettings, voicePitch: newVoicePitch }) as const;
+export const changeVoiceVoice = (gameSettings: GameSettings, newVoiceVoice: GameSettings["voiceVoice"]) =>
+  ({ ...gameSettings, voiceVoice: newVoiceVoice }) as const;
+export const changeVoiceVolume = (gameSettings: GameSettings, newVoiceVolume: GameSettings["voiceVolume"]) =>
+  ({ ...gameSettings, voiceVolume: newVoiceVolume }) as const;
+export const changeVoiceRate = (gameSettings: GameSettings, newVoiceRate: GameSettings["voiceRate"]) => ({ ...gameSettings, voiceRate: newVoiceRate }) as const;
+export const changeVoicePitch = (gameSettings: GameSettings, newVoicePitch: GameSettings["voicePitch"]) =>
+  ({ ...gameSettings, voicePitch: newVoicePitch }) as const;

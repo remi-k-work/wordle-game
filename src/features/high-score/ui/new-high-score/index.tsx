@@ -4,9 +4,9 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { addHighScoreAction, qualifiesForHighScoreAtom } from "@/features/high-score/state";
 
 // components
-import { Success } from "./Success";
-import { Failure } from "./Failure";
-import { Initials } from "./Initials";
+import { Success } from "./success";
+import { Failure } from "./failure";
+import { Initials } from "./initials";
 
 // assets
 import { TrophyIcon } from "@heroicons/react/24/outline";

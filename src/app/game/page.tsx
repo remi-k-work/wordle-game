@@ -6,7 +6,7 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { gameDataSolutionsAtom, gameLifecycleAtom } from "@/features/game/state";
 
 // components
-import { Footer, FooterSkeleton, Header, HeaderSkeleton, Main, MainSkeleton } from "@/features/game/ui/Board";
+import { Footer, FooterSkeleton, Header, HeaderSkeleton, Main, MainSkeleton } from "@/features/game/ui/board";
 
 export default function Page() {
   useAtomMount(gameLifecycleAtom);

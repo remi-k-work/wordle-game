@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { RunSessionSchema } from "@/features/game/domain";
+import { RunSession } from "@/features/game/domain";
 
 // Persistent storage for tracking the current arcade run progress and high water marks
 export const runSessionAtom = Atom.kvs({
-  runtime: RuntimeAtom as any,
+  runtime: RuntimeAtom,
   key: "@wordle/runSession",
-  schema: RunSessionSchema,
+  schema: RunSession,
   defaultValue: () => ({ runScore: 0, streak: 0, lastRunScore: 0, lastStreak: 0, bestRunScore: 0, bestStreak: 0 }) as const,
 });
 

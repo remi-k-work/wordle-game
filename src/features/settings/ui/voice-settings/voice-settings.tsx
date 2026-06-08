@@ -1,9 +1,9 @@
 // components
-import { Voice } from "./Voice";
-import { Volume } from "./Volume";
-import { Rate } from "./Rate";
-import { Pitch } from "./Pitch";
-import { Riddle } from "@/features/game/ui/Riddle";
+import { Voice } from "./voice";
+import { Volume } from "./volume";
+import { Rate } from "./rate";
+import { Pitch } from "./pitch";
+import { Riddle } from "@/features/game/ui/riddle";
 
 export default function VoiceSettings() {
   return (

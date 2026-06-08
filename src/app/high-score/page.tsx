@@ -7,9 +7,9 @@ import { HighScoreDB } from "@/features/high-score/services/high-score-db";
 import { runPageMainOrNavigate } from "@/lib/helpers-effect";
 
 // components
-import { PageHeader } from "@/ui/PageHeader";
-import { InfoLine } from "@/ui/Shared/InfoLine";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/Shared/Table";
+import { PageHeader } from "@/ui/page-header";
+import { InfoLine } from "@/ui/shared/info-line";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/shared/table";
 
 // assets
 import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";

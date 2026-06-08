@@ -4,9 +4,9 @@ import { activeModalAtom, closeModalAction, gameStatusAtom } from "@/features/ga
 
 // components
 import { Button } from "@base-ui/react";
-import { Modal } from "@/ui/Modals";
-import { YouWin } from "./YouWin";
-import { Nevermind } from "./Nevermind";
+import { Modal } from "@/ui/modals";
+import { YouWin } from "./you-win";
+import { Nevermind } from "./nevermind";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";
