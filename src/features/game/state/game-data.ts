@@ -10,9 +10,9 @@ import { gameStateAtom, theSecretWordAtom } from ".";
 import { INITIAL_GAME_STATE } from "@/features/game/domain";
 
 // Effectful atom that fetches the solution dictionary and initializes a new word challenge
-export const gameDataSolutionsAtom = RuntimeAtom.atom(
+export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
   Effect.gen(function* () {
-    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+    const solutionsLanguage = get(solutionsLanguageAtom);
 
     const { fetchSolutions, fetchDictionary } = yield* RpcGameClient;
     const solutions = yield* fetchSolutions({ solutionsLanguage });
@@ -36,13 +36,13 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom(
 
     // Return as a HashSet for O(1) lookups
     return HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()));
-  }).pipe(Effect.delay("3 seconds"))
+  })
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that fetches the valid keypad layout for the selected language
-export const gameDataKeypadAtom = RuntimeAtom.atom(
+export const gameDataKeypadAtom = RuntimeAtom.atom((get) =>
   Effect.gen(function* () {
-    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+    const solutionsLanguage = get(solutionsLanguageAtom);
 
     const { fetchKeypad } = yield* RpcGameClient;
     return yield* fetchKeypad({ solutionsLanguage });
@@ -50,14 +50,14 @@ export const gameDataKeypadAtom = RuntimeAtom.atom(
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that reactively fetches a riddle whenever the secret word or language changes
-export const riddleAtom = RuntimeAtom.atom(
+export const riddleAtom = RuntimeAtom.atom((get) =>
   Effect.gen(function* () {
-    const theSecretWord = yield* Atom.get(theSecretWordAtom);
-    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+    const theSecretWord = get(theSecretWordAtom);
+    const solutionsLanguage = get(solutionsLanguageAtom);
 
     const { fetchRiddle } = yield* RpcGameClient;
     return yield* fetchRiddle({ theSecretWord, solutionsLanguage });
-  }).pipe(Effect.delay("3 seconds"))
+  })
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that reactively fetches the secret word definition
