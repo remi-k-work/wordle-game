@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { GameSettings } from "@/features/settings/domain";
@@ -7,8 +8,8 @@ import { GameSettings } from "@/features/settings/domain";
 export const gameSettingsAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/gameSettings",
-  schema: GameSettings,
-  defaultValue: () => ({ solutionsLanguage: "En", voiceVoice: null, voiceVolume: 1, voiceRate: 1, voicePitch: 1 }) as const,
+  schema: GameSettings.mapFields(Struct.pick(["solutionsLanguage", "voiceVoice", "voiceVolume", "voiceRate", "voicePitch"])),
+  defaultValue: () => ({ solutionsLanguage: "En", voiceVoice: null, voiceVolume: 1, voiceRate: 1, voicePitch: 1 }) as const satisfies GameSettings,
 });
 
 // Specialized selectors for granular state access and optimized re-renders

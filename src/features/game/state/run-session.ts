@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
@@ -7,8 +8,8 @@ import { RunSession } from "@/features/game/domain";
 export const runSessionAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/runSession",
-  schema: RunSession,
-  defaultValue: () => ({ runScore: 0, streak: 0, lastRunScore: 0, lastStreak: 0, bestRunScore: 0, bestStreak: 0 }) as const,
+  schema: RunSession.mapFields(Struct.pick(["runScore", "streak", "lastRunScore", "lastStreak", "bestRunScore", "bestStreak"])),
+  defaultValue: () => ({ runScore: 0, streak: 0, lastRunScore: 0, lastStreak: 0, bestRunScore: 0, bestStreak: 0 }) as const satisfies RunSession,
 });
 
 // Specialized selectors for granular state access and optimized re-renders
