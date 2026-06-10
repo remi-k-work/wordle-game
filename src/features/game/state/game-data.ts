@@ -10,8 +10,10 @@ import { gameStateAtom, theSecretWordAtom } from ".";
 import { INITIAL_GAME_STATE } from "@/features/game/domain";
 
 // Effectful atom that fetches the solution dictionary and initializes a new word challenge
-export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
-  Effect.gen(function* () {
+export const gameDataSolutionsAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
+    yield* Effect.sleep("1 seconds");
+
     const solutionsLanguage = get(solutionsLanguageAtom);
 
     const { fetchSolutions, fetchDictionary } = yield* RpcGameClient;
@@ -40,8 +42,8 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom((get) =>
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that fetches the valid keypad layout for the selected language
-export const gameDataKeypadAtom = RuntimeAtom.atom((get) =>
-  Effect.gen(function* () {
+export const gameDataKeypadAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const solutionsLanguage = get(solutionsLanguageAtom);
 
     const { fetchKeypad } = yield* RpcGameClient;
@@ -50,8 +52,10 @@ export const gameDataKeypadAtom = RuntimeAtom.atom((get) =>
 ).pipe(Atom.keepAlive);
 
 // Effectful atom that reactively fetches a riddle whenever the secret word or language changes
-export const riddleAtom = RuntimeAtom.atom((get) =>
-  Effect.gen(function* () {
+export const riddleAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
+    yield* Effect.sleep("3 seconds");
+
     const theSecretWord = get(theSecretWordAtom);
     const solutionsLanguage = get(solutionsLanguageAtom);
 
@@ -62,7 +66,7 @@ export const riddleAtom = RuntimeAtom.atom((get) =>
 
 // Effectful atom that reactively fetches the secret word definition
 export const wordDefinitionAtom = RuntimeAtom.atom(
-  Effect.gen(function* () {
+  Effect.fnUntraced(function* () {
     const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
     const theSecretWord = yield* Atom.get(theSecretWordAtom);
 

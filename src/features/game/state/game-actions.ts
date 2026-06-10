@@ -1,12 +1,14 @@
 // services, features, and other libraries
-import { DateTime, Effect, Option, PubSub } from "effect";
+import { DateTime, Effect, Metric, Option, PubSub } from "effect";
 import { Atom } from "effect/unstable/reactivity";
+import { RuntimeAtom } from "@/lib/runtime-client";
 import { applyGameAction, deriveGameEvent, finishRunSession, parseKey, resetCurrentRunSession } from "@/features/game/domain";
 import { closeModalAction, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
+import { gameInvalidGuesses, gameValidGuesses } from "@/features/telemetry/domain";
 
 // Central action handler for processing user input and managing state transitions
-export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
-  Effect.gen(function* () {
+export const handleKeyAction = RuntimeAtom.fn(
+  Effect.fn("handleKeyAction")(function* (pressedKey: string, get: Atom.FnContext) {
     const currGameState = get(gameStateAtom);
     const keypadColors = get(keypadColorsAtom);
 
@@ -23,6 +25,24 @@ export const handleKeyAction = Atom.fn((pressedKey: string, get) =>
 
     // Referential equality check (anything has changed?)
     if (currGameState === nextGameState) return;
+
+    // Track both invalid and valid guesses
+    // if (action._tag === "SubmitGuess") {
+    //   if (nextGameState.isInvalidGuess) {
+    //     // Invalid guess has been made
+    //     yield* Metric.update(gameInvalidGuesses, 1);
+    //     const { count } = yield* Metric.value(gameInvalidGuesses);
+    //     yield* Effect.log(`Invalid guesses: ${count}`);
+
+    //     // yield* Effect.annotateCurrentSpan("game.guess_rejected", true);
+    //     // yield* Effect.annotateCurrentSpan("game.attempted_word", nextGameState.currentGuessWord);
+    //   } else {
+    //     // Must have been a valid guess otherwise
+    //     yield* Metric.update(gameValidGuesses, 1);
+    //     const { count } = yield* Metric.value(gameValidGuesses);
+    //     yield* Effect.log(`Valid guesses: ${count}`);
+    //   }
+    // }
 
     // Update the game state atom
     get.set(gameStateAtom, nextGameState);
@@ -57,8 +77,8 @@ export const startNewRunAction = Atom.fn(
 );
 
 // Manually abandon the current arcade run and record its final progress
-export const forfeitRunAction = Atom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const forfeitRunAction = RuntimeAtom.fn(
+  Effect.fn("forfeitRunAction")(function* (_: void, get: Atom.FnContext) {
     get.set(runSessionAtom, finishRunSession(get(runSessionAtom)));
     refreshActiveChallenge(get);
   })

@@ -44,6 +44,7 @@ const RpcLayer = RpcServer.layerHttp({
   path: "/api/rpc/game",
   protocol: "http",
   disableFatalDefects: true,
+  disableTracing: true,
 }).pipe(Layer.provide(Layer.mergeAll(RpcGameLayer, RpcSerialization.layerJson, HttpServer.layerServices)));
 
-export const handler = HttpRouter.toWebHandler(RpcLayer);
+export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });

@@ -49,7 +49,7 @@ const attemptRiddleWithModel = Effect.fn("riddle.attemptRiddleWithModel")(functi
   const model = yield* RiddleModel;
 
   return yield* Effect.tryPromise({
-    try: () => generateText({ model, prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord) }),
+    try: () => generateText({ model, prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord), maxRetries: 0 }),
     catch: (cause) => new AiSdkError({ message: `The attempt to generate a riddle using the "${model}" model was unsuccessful.`, cause }),
   }).pipe(Effect.map(({ text }) => text));
 });

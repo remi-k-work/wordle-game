@@ -7,7 +7,7 @@ import { RpcGame } from "./requests";
 const ProtocolLive = RpcClient.layerProtocolHttp({ url: "/api/rpc/game" }).pipe(Layer.provide([FetchHttpClient.layer, RpcSerialization.layerJson]));
 
 export class RpcGameClient extends Context.Service<RpcGameClient>()("RpcGameClient", {
-  make: RpcClient.make(RpcGame),
+  make: RpcClient.make(RpcGame, { disableTracing: true }),
 }) {
   static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(ProtocolLive));
 }

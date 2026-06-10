@@ -27,6 +27,7 @@
     "@effect/platform-node": "^4.0.0-beta.78",
     "@effect/sql-pg": "^4.0.0-beta.78",
     "@heroicons/react": "^2.2.0",
+    "@opentelemetry/sdk-logs": "^0.218.0",
     "@opentelemetry/sdk-metrics": "^2.7.1",
     "@opentelemetry/sdk-trace-base": "^2.7.1",
     "@opentelemetry/sdk-trace-node": "^2.7.1",
