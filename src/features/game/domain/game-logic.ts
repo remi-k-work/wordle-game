@@ -102,7 +102,7 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
 };
 
 // A pure reducer that handles the state transition logic for each game action
-export const applyGameAction = (state: GameState, action: GameAction, dictionary: HashSet.HashSet<string>, now: DateTime.Utc): GameState => {
+export const applyGameAction = (state: GameState, action: GameAction, dictionary: HashSet.HashSet<string>, now: DateTime.Utc) => {
   // If game is over, freeze state and return exact reference
   const { currentGuessWord, wordleGuesses, currentTurn } = state;
   if (!isGamePlaying(state)) return state;

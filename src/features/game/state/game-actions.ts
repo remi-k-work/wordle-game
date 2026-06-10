@@ -2,9 +2,9 @@
 import { DateTime, Effect, Metric, Option, PubSub } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { applyGameAction, deriveGameEvent, finishRunSession, parseKey, resetCurrentRunSession } from "@/features/game/domain";
+import { applyGameAction, deriveGameEvent, finishRunSession, parseKey, resetCurrentRunSession, startRunSession } from "@/features/game/domain";
 import { closeModalAction, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
-import { gameInvalidGuesses, gameValidGuesses } from "@/features/telemetry/domain";
+import { arcadeRunLength, invalidGuesses, validGuesses, openingGuesses, runDeathReason, runsStarted } from "@/features/telemetry/domain";
 
 // Central action handler for processing user input and managing state transitions
 export const handleKeyAction = RuntimeAtom.fn(
@@ -27,22 +27,31 @@ export const handleKeyAction = RuntimeAtom.fn(
     if (currGameState === nextGameState) return;
 
     // Track both invalid and valid guesses
-    // if (action._tag === "SubmitGuess") {
-    //   if (nextGameState.isInvalidGuess) {
-    //     // Invalid guess has been made
-    //     yield* Metric.update(gameInvalidGuesses, 1);
-    //     const { count } = yield* Metric.value(gameInvalidGuesses);
-    //     yield* Effect.log(`Invalid guesses: ${count}`);
+    if (action._tag === "SubmitGuess") {
+      // The new run session officially starts when the first guess is submitted
+      const currRunSession = get(runSessionAtom);
+      const nextRunSession = startRunSession(currRunSession, now);
+      get.set(runSessionAtom, nextRunSession);
 
-    //     // yield* Effect.annotateCurrentSpan("game.guess_rejected", true);
-    //     // yield* Effect.annotateCurrentSpan("game.attempted_word", nextGameState.currentGuessWord);
-    //   } else {
-    //     // Must have been a valid guess otherwise
-    //     yield* Metric.update(gameValidGuesses, 1);
-    //     const { count } = yield* Metric.value(gameValidGuesses);
-    //     yield* Effect.log(`Valid guesses: ${count}`);
-    //   }
-    // }
+      // Extract the current run id
+      const runId = Option.getOrElse(nextRunSession.runId, () => "unknown");
+
+      if (nextGameState.isInvalidGuess) {
+        // Invalid guess has been made
+        yield* Metric.update(invalidGuesses.pipe(Metric.withAttributes({ runId })), 1);
+      } else {
+        // Must have been a valid guess otherwise
+        yield* Metric.update(validGuesses.pipe(Metric.withAttributes({ runId })), 1);
+
+        // Track the opening guess for the very first valid submission of the game
+        if (currGameState.currentTurn === 1) yield* Metric.update(openingGuesses.pipe(Metric.withAttributes({ runId })), currGameState.currentGuessWord);
+      }
+
+      // *** TEST CODE ***
+      const snapshots = yield* Metric.snapshot;
+      yield* Effect.log("snapshots", snapshots);
+      // *** TEST CODE ***
+    }
 
     // Update the game state atom
     get.set(gameStateAtom, nextGameState);
@@ -70,8 +79,18 @@ export const nextWordAction = Atom.fn(
 // Wipe the current session and start a completely new arcade run from scratch
 export const startNewRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const runSession = get(runSessionAtom);
+
+    // Track metrics before starting a new run
+    yield* Metric.update(runsStarted, 1);
+
+    // *** TEST CODE ***
+    const runsStartedValue = yield* Metric.value(runsStarted);
+    yield* Effect.log("runsStarted", runsStartedValue);
+    // *** TEST CODE ***
+
     get.set(closeModalAction, void 0);
-    get.set(runSessionAtom, resetCurrentRunSession(get(runSessionAtom)));
+    get.set(runSessionAtom, resetCurrentRunSession(runSession));
     refreshActiveChallenge(get);
   })
 );
@@ -79,7 +98,20 @@ export const startNewRunAction = Atom.fn(
 // Manually abandon the current arcade run and record its final progress
 export const forfeitRunAction = RuntimeAtom.fn(
   Effect.fn("forfeitRunAction")(function* (_: void, get: Atom.FnContext) {
-    get.set(runSessionAtom, finishRunSession(get(runSessionAtom)));
+    const runSession = get(runSessionAtom);
+
+    // Track metrics before finishing the run session
+    yield* Metric.update(arcadeRunLength, runSession.streak);
+    yield* Metric.update(runDeathReason, "Forfeit");
+
+    // *** TEST CODE ***
+    const arcadeRunLengthValue = yield* Metric.value(arcadeRunLength);
+    yield* Effect.log("arcadeRunLength", arcadeRunLengthValue);
+    const runDeathReasonValue = yield* Metric.value(runDeathReason);
+    yield* Effect.log("runDeathReason", Object.fromEntries(runDeathReasonValue.occurrences));
+    // *** TEST CODE ***
+
+    get.set(runSessionAtom, finishRunSession(runSession));
     refreshActiveChallenge(get);
   })
 );

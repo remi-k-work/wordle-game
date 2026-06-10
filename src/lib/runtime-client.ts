@@ -29,16 +29,16 @@ class FilteredConsoleExporter extends ConsoleSpanExporter {
 
 const TelemetryLayer = WebSdk.layer(() => ({
   resource: { serviceName: "wordle-overdrive-telemetry" },
-  spanProcessor: new SimpleSpanProcessor(new FilteredConsoleExporter()),
-  //   metricReader: new PeriodicExportingMetricReader({ exporter: new ConsoleMetricExporter(), exportIntervalMillis: 1000 }),
+  // spanProcessor: new SimpleSpanProcessor(new FilteredConsoleExporter()),
+  // metricReader: new PeriodicExportingMetricReader({ exporter: new ConsoleMetricExporter(), exportIntervalMillis: 100000 }),
 }));
 
 const MainLayer = Layer.mergeAll(
   Logger.layer([Logger.consolePretty()]),
   BrowserKeyValueStore.layerLocalStorage,
   RpcGameClient.layer,
-  RpcHighScoreClient.layer
-  // TelemetryLayer
+  RpcHighScoreClient.layer,
+  TelemetryLayer
 );
 
 export const RuntimeAtom = Atom.runtime(MainLayer);

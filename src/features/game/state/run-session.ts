@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Struct } from "effect";
+import { Option, Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
@@ -8,11 +8,23 @@ import { RunSession } from "@/features/game/domain";
 export const runSessionAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/runSession",
-  schema: RunSession.mapFields(Struct.pick(["runScore", "streak", "lastRunScore", "lastStreak", "bestRunScore", "bestStreak"])),
-  defaultValue: () => ({ runScore: 0, streak: 0, lastRunScore: 0, lastStreak: 0, bestRunScore: 0, bestStreak: 0 }) as const satisfies RunSession,
+  schema: RunSession.mapFields(Struct.pick(["runId", "createdAt", "runScore", "streak", "lastRunScore", "lastStreak", "bestRunScore", "bestStreak"])),
+  defaultValue: () =>
+    ({
+      runId: Option.none(),
+      createdAt: Option.none(),
+      runScore: 0,
+      streak: 0,
+      lastRunScore: 0,
+      lastStreak: 0,
+      bestRunScore: 0,
+      bestStreak: 0,
+    }) as const satisfies RunSession,
 });
 
 // Specialized selectors for granular state access and optimized re-renders
+export const runIdAtom = runSessionAtom.pipe(Atom.map((state) => state.runId));
+export const createdAtAtom = runSessionAtom.pipe(Atom.map((state) => state.createdAt));
 export const runScoreAtom = runSessionAtom.pipe(Atom.map((state) => state.runScore));
 export const streakAtom = runSessionAtom.pipe(Atom.map((state) => state.streak));
 export const lastRunScoreAtom = runSessionAtom.pipe(Atom.map((state) => state.lastRunScore));

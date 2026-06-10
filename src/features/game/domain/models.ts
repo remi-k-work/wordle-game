@@ -27,6 +27,8 @@ export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLeng
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
 export class RunSession extends Schema.Class<RunSession>("RunSession")({
+  runId: Schema.Option(Schema.String.check(Schema.isUUID())),
+  createdAt: Schema.Option(Schema.DateTimeUtc),
   runScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   lastRunScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
