@@ -13,10 +13,11 @@ import {
   isGamePlaying,
   isGuessKeyValid,
   pickStrongerColor,
+  startRunSession,
 } from ".";
 
 // types
-import type { Color, GameAction, GameEvent, GameState, WordScore } from ".";
+import type { Color, GameAction, GameEvent, GameState, RunSession, WordScore } from ".";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -58,12 +59,17 @@ export const getGameStatus = (currentTurn: number, theSecretWord: string, wordle
 };
 
 // Derive the lifecycle event caused by a state transition, if the transition ended the word
-export const deriveGameEvent = (prevState: GameState, nextGameState: GameState, endTime: DateTime.Utc): Option.Option<GameEvent> => {
-  if (!isGamePlaying(prevState)) return Option.none();
+export const deriveGameEvent = (
+  prevGameState: GameState,
+  nextGameState: GameState,
+  nextRunSession: RunSession,
+  endTime: DateTime.Utc
+): Option.Option<GameEvent> => {
+  if (!isGamePlaying(prevGameState)) return Option.none();
 
   const nextStatus = getGameStateStatus(nextGameState);
   if (nextStatus._tag === "Won") return Option.some(GameEventEnum.WordWon({ nextGameState, endTime }));
-  if (nextStatus._tag === "Lost") return Option.some(GameEventEnum.WordLost());
+  if (nextStatus._tag === "Lost") return Option.some(GameEventEnum.WordLost({ nextRunSession }));
   return Option.none();
 };
 
@@ -102,41 +108,59 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
 };
 
 // A pure reducer that handles the state transition logic for each game action
-export const applyGameAction = (state: GameState, action: GameAction, dictionary: HashSet.HashSet<string>, now: DateTime.Utc) => {
+export const applyGameAction = (
+  gameState: GameState,
+  runSession: RunSession,
+  gameAction: GameAction,
+  dictionary: HashSet.HashSet<string>,
+  now: DateTime.Utc
+) => {
   // If game is over, freeze state and return exact reference
-  const { currentGuessWord, wordleGuesses, currentTurn } = state;
-  if (!isGamePlaying(state)) return state;
+  const { currentGuessWord, wordleGuesses, currentTurn } = gameState;
+  if (!isGamePlaying(gameState)) return [gameState, runSession] as const;
 
-  return Match.value(action).pipe(
-    Match.tag("Ignore", () => state),
+  return Match.value(gameAction).pipe(
+    Match.tag("Ignore", () => [gameState, runSession] as const),
 
     // Remove the last letter from the current guess word
     Match.tag("RemoveLetter", () =>
-      currentGuessWord.length > 0 ? { ...state, currentGuessWord: currentGuessWord.slice(0, -1), isInvalidGuess: false } : state
+      currentGuessWord.length > 0
+        ? ([{ ...gameState, currentGuessWord: currentGuessWord.slice(0, -1), isInvalidGuess: false }, runSession] as const)
+        : ([gameState, runSession] as const)
     ),
 
     // Lazily assign startTime on the very first letter typed
     Match.tag("AddLetter", ({ letter }) =>
       currentGuessWord.length < WORD_LENGTH
-        ? {
-            ...state,
-            currentGuessWord: currentGuessWord + letter,
-            isInvalidGuess: false,
-            startTime: Option.isNone(state.startTime) ? Option.some(now) : state.startTime,
-          }
-        : state
+        ? ([
+            {
+              ...gameState,
+              currentGuessWord: currentGuessWord + letter,
+              isInvalidGuess: false,
+              startTime: Option.isNone(gameState.startTime) ? Option.some(now) : gameState.startTime,
+            },
+            runSession,
+          ] as const)
+        : ([gameState, runSession] as const)
     ),
 
     Match.tag("SubmitGuess", () => {
-      // If it is a full 5-letter guess word but not in the dictionary, make sure to flag it as invalid
       const canSubmit = canSubmitGuess(currentGuessWord, currentTurn, wordleGuesses, dictionary);
-      if (currentGuessWord.length === WORD_LENGTH && !canSubmit) return { ...state, isInvalidGuess: true };
+
+      // The new run session officially starts when the first guess is submitted
+      const nextRunSession = startRunSession(runSession, now);
+
+      // If it is a full 5-letter guess word but not in the dictionary, make sure to flag it as invalid
+      if (currentGuessWord.length === WORD_LENGTH && !canSubmit) return [{ ...gameState, isInvalidGuess: true }, nextRunSession] as const;
 
       // If the guess word is invalid, exit early (no game state change)
-      if (!canSubmit) return state;
+      if (!canSubmit) return [gameState, runSession] as const;
 
       // If the guess word is valid, update the game state by adding it to the list of wordle guesses and incrementing the current turn
-      return { ...state, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, isInvalidGuess: false };
+      return [
+        { ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, isInvalidGuess: false },
+        nextRunSession,
+      ] as const;
     }),
     Match.exhaustive
   );

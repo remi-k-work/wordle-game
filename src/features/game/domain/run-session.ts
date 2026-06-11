@@ -27,16 +27,18 @@ export const resetCurrentRunSession = (runSession: RunSession) =>
   }) as const satisfies RunSession;
 
 // Start a new arcade run while preserving historical session stats
-export const startRunSession = ({ runId, createdAt, ...runSession }: RunSession, now: DateTime.Utc) =>
-  ({
-    ...runSession,
-    runId: Option.isNone(runId) ? Option.some(crypto.randomUUID()) : runId,
-    createdAt: Option.isNone(createdAt) ? Option.some(now) : createdAt,
-    runScore: 0,
-    streak: 0,
-    lastRunScore: 0,
-    lastStreak: 0,
-  }) as const satisfies RunSession;
+export const startRunSession = (runSession: RunSession, now: DateTime.Utc) =>
+  Option.isNone(runSession.runId)
+    ? ({
+        ...runSession,
+        runId: Option.some(crypto.randomUUID()),
+        createdAt: Option.some(now),
+        runScore: 0,
+        streak: 0,
+        lastRunScore: 0,
+        lastStreak: 0,
+      } as const satisfies RunSession)
+    : runSession;
 
 // Close out the active run and record it as the latest completed run
 export const finishRunSession = ({ runScore, streak, ...runSession }: RunSession) =>

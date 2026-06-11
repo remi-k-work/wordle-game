@@ -1,10 +1,29 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, HashSet, Option } from "effect";
 import { TestClock } from "effect/testing";
-import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction, calculatePotentialScore, deriveGameEvent } from ".";
+import {
+  calculateScore,
+  formatDuration,
+  getGameStatus,
+  computeKeypadState,
+  applyGameAction,
+  calculatePotentialScore,
+  deriveGameEvent,
+} from ".";
 import { GameActionEnum, INITIAL_GAME_STATE } from ".";
 
 describe("gameLogic", () => {
+  const INITIAL_RUN_SESSION = {
+    runId: Option.none(),
+    createdAt: Option.none(),
+    runScore: 0,
+    streak: 0,
+    lastRunScore: 0,
+    lastStreak: 0,
+    bestRunScore: 0,
+    bestStreak: 0,
+  } as const;
+
   describe("calculateScore", () => {
     it.effect("calculates base points correctly for different turns", () =>
       Effect.gen(function* () {
@@ -108,28 +127,40 @@ describe("gameLogic", () => {
     const now = DateTime.makeUnsafe(0);
 
     it("handles AddLetter", () => {
-      const state = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
+      const [state] = applyGameAction(INITIAL_GAME_STATE, INITIAL_RUN_SESSION, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
       expect(state.currentGuessWord).toBe("A");
     });
 
     it("sets startTime on first letter and preserves it afterward", () => {
-      const firstLetterState = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
+      const [firstLetterState] = applyGameAction(
+        INITIAL_GAME_STATE,
+        INITIAL_RUN_SESSION,
+        GameActionEnum.AddLetter({ letter: "A" }),
+        dictionary,
+        now
+      );
       expect(Option.isSome(firstLetterState.startTime)).toBe(true);
 
       const later = DateTime.makeUnsafe(10_000);
-      const secondLetterState = applyGameAction(firstLetterState, GameActionEnum.AddLetter({ letter: "P" }), dictionary, later);
+      const [secondLetterState] = applyGameAction(
+        firstLetterState,
+        INITIAL_RUN_SESSION,
+        GameActionEnum.AddLetter({ letter: "P" }),
+        dictionary,
+        later
+      );
       expect(secondLetterState.startTime).toBe(firstLetterState.startTime);
     });
 
     it("handles RemoveLetter", () => {
       const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "AB" };
-      const state2 = applyGameAction(state1, GameActionEnum.RemoveLetter(), dictionary, now);
+      const [state2] = applyGameAction(state1, INITIAL_RUN_SESSION, GameActionEnum.RemoveLetter(), dictionary, now);
       expect(state2.currentGuessWord).toBe("A");
     });
 
     it("handles SubmitGuess (valid)", () => {
       const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APPLE", theSecretWord: "APPLE" };
-      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionary, now);
+      const [state2] = applyGameAction(state1, INITIAL_RUN_SESSION, GameActionEnum.SubmitGuess(), dictionary, now);
       expect(state2.wordleGuesses).toContain("APPLE");
       expect(state2.currentTurn).toBe(2);
       expect(state2.currentGuessWord).toBe("");
@@ -138,20 +169,20 @@ describe("gameLogic", () => {
     it("handles SubmitGuess (invalid word)", () => {
       const dictionaryEmpty = HashSet.empty<string>();
       const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APPLE" };
-      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionaryEmpty, now);
+      const [state2] = applyGameAction(state1, INITIAL_RUN_SESSION, GameActionEnum.SubmitGuess(), dictionaryEmpty, now);
       expect(state2.isInvalidGuess).toBe(true);
       expect(state2.wordleGuesses).toHaveLength(0);
     });
 
     it("does not mutate state when submitting an incomplete guess", () => {
       const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APP" };
-      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), dictionary, now);
+      const [state2] = applyGameAction(state1, INITIAL_RUN_SESSION, GameActionEnum.SubmitGuess(), dictionary, now);
       expect(state2).toBe(state1);
     });
 
     it("returns the same state reference after a terminal status", () => {
       const wonState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", wordleGuesses: ["APPLE"], currentTurn: 2 };
-      const nextState = applyGameAction(wonState, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
+      const [nextState] = applyGameAction(wonState, INITIAL_RUN_SESSION, GameActionEnum.AddLetter({ letter: "A" }), dictionary, now);
       expect(nextState).toBe(wonState);
     });
   });
@@ -162,7 +193,7 @@ describe("gameLogic", () => {
     it("emits WordWon when a playing state transitions to won", () => {
       const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentGuessWord: "APPLE" };
       const nextState = { ...prevState, currentGuessWord: "", wordleGuesses: ["APPLE"], currentTurn: 2 };
-      const event = deriveGameEvent(prevState, nextState, now);
+      const event = deriveGameEvent(prevState, nextState, INITIAL_RUN_SESSION, now);
 
       expect(Option.isSome(event)).toBe(true);
       if (Option.isSome(event)) expect(event.value._tag).toBe("WordWon");
@@ -171,7 +202,7 @@ describe("gameLogic", () => {
     it("emits WordLost when a playing state transitions past the final turn", () => {
       const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentTurn: 6 };
       const nextState = { ...prevState, wordleGuesses: ["BIRDS", "CARDS", "TABLE", "CHAIR", "HOUSE", "PIANO"], currentTurn: 7 };
-      const event = deriveGameEvent(prevState, nextState, now);
+      const event = deriveGameEvent(prevState, nextState, INITIAL_RUN_SESSION, now);
 
       expect(Option.isSome(event)).toBe(true);
       if (Option.isSome(event)) expect(event.value._tag).toBe("WordLost");
@@ -180,7 +211,7 @@ describe("gameLogic", () => {
     it("does not emit an event while play continues", () => {
       const prevState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", currentGuessWord: "BIRDS" };
       const nextState = { ...prevState, currentGuessWord: "", wordleGuesses: ["BIRDS"], currentTurn: 2 };
-      expect(Option.isNone(deriveGameEvent(prevState, nextState, now))).toBe(true);
+      expect(Option.isNone(deriveGameEvent(prevState, nextState, INITIAL_RUN_SESSION, now))).toBe(true);
     });
   });
 
