@@ -8,7 +8,7 @@ import { trackForfeitRunAction, trackStartNewRunAction, trackSubmitGuessAction }
 
 // Central action handler for processing user input and managing state transitions
 export const handleKeyAction = RuntimeAtom.fn(
-  Effect.fn("handleKeyAction")(function* (pressedKey: string, get: Atom.FnContext) {
+  Effect.fnUntraced(function* (pressedKey: string, get: Atom.FnContext) {
     const currGameState = get(gameStateAtom);
     const currRunSession = get(runSessionAtom);
     const keypadColors = get(keypadColorsAtom);
@@ -29,7 +29,7 @@ export const handleKeyAction = RuntimeAtom.fn(
 
     if (gameAction._tag === "SubmitGuess") {
       // Track metrics related to the action of submitting a new guess
-      yield* trackSubmitGuessAction(currGameState, nextGameState, nextRunSession, get);
+      yield* trackSubmitGuessAction(currGameState, nextGameState, get);
     }
 
     // Update both game state and run session atoms
@@ -70,7 +70,7 @@ export const startNewRunAction = Atom.fn(
 
 // Manually abandon the current arcade run and record its final progress
 export const forfeitRunAction = RuntimeAtom.fn(
-  Effect.fn("forfeitRunAction")(function* (_: void, get: Atom.FnContext) {
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     // Track metrics related to the action of forfeiting a run
     yield* trackForfeitRunAction(get);
 
