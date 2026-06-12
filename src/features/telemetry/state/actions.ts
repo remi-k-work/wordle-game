@@ -91,14 +91,18 @@ export const trackStartNewRunAction = Effect.fnUntraced(function* () {
 // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
 export const trackForfeitRunAction = Effect.fnUntraced(function* () {
   // Extract all the necessary attributes that will offer additional context for our metrics
+  const runSession = yield* Atom.get(runSessionAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const streak = yield* Atom.get(streakAtom);
+
+  // If the run has not started yet, there is nothing to track
+  if (Option.isNone(runSession.runId)) return;
 
   yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ solutionsLanguage })), streak);
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ solutionsLanguage })), "Forfeit");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_runs_summary)
-  yield* logRunCompletedEvent(yield* Atom.get(runSessionAtom), "Forfeit");
+  yield* logRunCompletedEvent(runSession, "Forfeit");
 
   // *** TEST CODE ***
   const snapshots = yield* Metric.snapshot;
@@ -107,7 +111,7 @@ export const trackForfeitRunAction = Effect.fnUntraced(function* () {
 });
 
 // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
-export const trackWordWonEvent = Effect.fn("wordSolved")(function* (gameState: GameState, wordScore: WordScore) {
+export const trackWordWonEvent = Effect.fnUntraced(function* (gameState: GameState, wordScore: WordScore) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const guessedTurn = gameState.currentTurn - 1;

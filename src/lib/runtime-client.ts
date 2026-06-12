@@ -30,7 +30,7 @@ class FilteredConsoleExporter extends ConsoleSpanExporter {
 const TelemetryLayer = WebSdk.layer(() => ({
   resource: { serviceName: "wordle-overdrive-telemetry" },
   spanProcessor: new SimpleSpanProcessor(new FilteredConsoleExporter()),
-  // metricReader: new PeriodicExportingMetricReader({ exporter: new ConsoleMetricExporter(), exportIntervalMillis: 100000 }),
+  metricReader: new PeriodicExportingMetricReader({ exporter: new ConsoleMetricExporter(), exportIntervalMillis: 100000 }),
 }));
 
 const MainLayer = Layer.mergeAll(
