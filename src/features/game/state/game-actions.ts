@@ -29,7 +29,7 @@ export const handleKeyAction = RuntimeAtom.fn(
 
     if (gameAction._tag === "SubmitGuess") {
       // Track metrics related to the action of submitting a new guess
-      yield* trackSubmitGuessAction(currGameState, nextGameState, get);
+      yield* trackSubmitGuessAction(currGameState, nextGameState);
     }
 
     // Update both game state and run session atoms
@@ -60,7 +60,7 @@ export const nextWordAction = Atom.fn(
 export const startNewRunAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     // Track metrics related to the action of starting a new run
-    yield* trackStartNewRunAction(get);
+    yield* trackStartNewRunAction();
 
     get.set(closeModalAction, void 0);
     get.set(runSessionAtom, resetCurrentRunSession(get(runSessionAtom)));
@@ -72,7 +72,7 @@ export const startNewRunAction = Atom.fn(
 export const forfeitRunAction = RuntimeAtom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     // Track metrics related to the action of forfeiting a run
-    yield* trackForfeitRunAction(get);
+    yield* trackForfeitRunAction();
 
     get.set(runSessionAtom, finishRunSession(get(runSessionAtom)));
     refreshActiveChallenge(get);
