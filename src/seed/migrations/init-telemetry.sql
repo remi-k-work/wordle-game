@@ -24,7 +24,7 @@ VALUES
   ('validGuesses', 12, 'En'),
   ('invalidGuesses', 2, 'Pl'),
   ('openingGuesses', 1, 'En'),
-  ('timeToSolve', 14.5, 'En');
+  ('timeToSolve', 14, 'En');
 
 
 DROP TABLE IF EXISTS arcade_runs_summary;
