@@ -1,6 +1,6 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Layer, Logger, Effect } from "effect";
+import { Atom, AtomRegistry, Reactivity } from "effect/unstable/reactivity";
 import { BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
@@ -8,28 +8,33 @@ import { WebSdk } from "@effect/opentelemetry";
 import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { TelemetryHub } from "@/features/telemetry/services/telemetry-hub";
+import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
 import { HubMetricExporter, HubSpanExporter } from "@/features/telemetry/services/otel-exporters";
 
-const TelemetryLayer = Layer.unwrap(
+// The TelemetryLayer bridges the OTel SDK into our Effect-native TelemetryHub
+const TelemetryLayer = WebSdk.layer(
   Effect.gen(function* () {
-    const { spanPubSub, metricPubSub, runWorkers } = yield* TelemetryHub;
+    const { spanPubSub, metricPubSub } = yield* TelemetryHub;
 
-    yield* Effect.forkDetach(runWorkers);
-
-    return WebSdk.layer(() => ({
+    return {
       resource: { serviceName: "wordle-overdrive-telemetry" },
       spanProcessor: new SimpleSpanProcessor(new HubSpanExporter(spanPubSub)),
       metricReader: new PeriodicExportingMetricReader({ exporter: new HubMetricExporter(metricPubSub), exportIntervalMillis: 10000 }),
-    }));
+    };
   })
-).pipe(Layer.provide(TelemetryHub.layer));
+);
+
+// Combined telemetry logic provided with the Hub
+const TelemetryReady = Layer.mergeAll(TelemetryLayer, TelemetryWorkerLayer).pipe(Layer.provide(TelemetryHub.layer));
 
 const MainLayer = Layer.mergeAll(
   Logger.layer([Logger.consolePretty()]),
+  AtomRegistry.layer,
+  Reactivity.layer,
   BrowserKeyValueStore.layerLocalStorage,
   RpcGameClient.layer,
   RpcHighScoreClient.layer,
-  TelemetryLayer
+  TelemetryReady
 );
 
 export const RuntimeAtom = Atom.runtime(MainLayer);
