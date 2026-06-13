@@ -23,7 +23,7 @@ import type { GameState, RunSession, WordScore } from "@/features/game/domain";
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_events)
 export const logWordWonEvent = Effect.fn("logWordWonEvent")(function* ({ currentTurn, theSecretWord }: GameState, { timeSeconds }: WordScore) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrElse(yield* Atom.get(runIdAtom), () => "unknown");
+  const runId = Option.getOrThrow(yield* Atom.get(runIdAtom));
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const guessedTurn = currentTurn - 1;
 
@@ -37,7 +37,7 @@ export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* 
   deathReason: "Forfeit" | "Guesses"
 ) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrElse(runIdOption, () => "unknown");
+  const runId = Option.getOrThrow(runIdOption);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const theSecretWord = yield* Atom.get(theSecretWordAtom);
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
