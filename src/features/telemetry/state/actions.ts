@@ -28,7 +28,7 @@ export const logWordWonEvent = Effect.fn("logWordWonEvent")(function* ({ current
   const guessedTurn = currentTurn - 1;
 
   // Enrich the span itself with searchable attributes (stream 1 -> run_word_events)
-  yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds });
+  yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: Math.floor(timeSeconds) });
 });
 
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_runs_summary)
@@ -117,7 +117,7 @@ export const trackWordWonEvent = Effect.fnUntraced(function* (gameState: GameSta
   const guessedTurn = gameState.currentTurn - 1;
 
   yield* Metric.update(guessesToWin.pipe(Metric.withAttributes({ solutionsLanguage })), guessedTurn);
-  yield* Metric.update(timeToSolve.pipe(Metric.withAttributes({ solutionsLanguage })), wordScore.timeSeconds);
+  yield* Metric.update(timeToSolve.pipe(Metric.withAttributes({ solutionsLanguage })), Math.floor(wordScore.timeSeconds));
   yield* Metric.update(gamesPlayed.pipe(Metric.withAttributes({ solutionsLanguage })), 1);
   if (guessedTurn === 1) yield* Metric.update(perfectGames.pipe(Metric.withAttributes({ solutionsLanguage })), 1);
 
