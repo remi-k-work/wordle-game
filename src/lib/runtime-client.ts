@@ -19,7 +19,7 @@ const TelemetryLayer = WebSdk.layer(
     return {
       resource: { serviceName: "wordle-overdrive-telemetry" },
       spanProcessor: new SimpleSpanProcessor(new HubSpanExporter(spanPubSub)),
-      metricReader: new PeriodicExportingMetricReader({ exporter: new HubMetricExporter(metricPubSub), exportIntervalMillis: 10000 }),
+      // metricReader: new PeriodicExportingMetricReader({ exporter: new HubMetricExporter(metricPubSub), exportIntervalMillis: 10000 }),
     };
   })
 );

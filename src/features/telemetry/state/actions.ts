@@ -45,7 +45,7 @@ export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* 
   // We calculate the total real-world time the run was alive
   const now = yield* DateTime.now;
   const createdAt = Option.getOrElse(createdAtOption, () => now);
-  const durationSeconds = DateTime.distance(createdAt, now).pipe(Duration.toSeconds);
+  const durationSeconds = DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor);
 
   // Enrich the span itself with searchable attributes (stream 1 -> arcade_runs_summary)
   yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, streak, runScore, deathReason, failedOnWord, durationSeconds });
