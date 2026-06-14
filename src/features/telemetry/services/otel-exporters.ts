@@ -41,7 +41,7 @@ export class HubMetricExporter implements PushMetricExporter {
   }
 
   selectAggregationTemporality() {
-    return AggregationTemporality.CUMULATIVE;
+    return AggregationTemporality.DELTA;
   }
 
   shutdown() {

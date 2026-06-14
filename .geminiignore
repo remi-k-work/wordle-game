@@ -1,0 +1,5 @@
+# Force Gemini CLI to see a specific hidden folder
+!.repos/
+
+# Ignore standard files
+.env
