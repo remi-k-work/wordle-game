@@ -1,20 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 // services, features, and other libraries
-import { Effect, Layer, Stream, Duration, Option, Equal } from "effect";
+import { Effect, Layer, Stream, Duration, Equal, Metric, Schedule } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 
 // types
 import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
-import type { ResourceMetrics, MetricData, ScopeMetrics } from "@opentelemetry/sdk-metrics";
 
 // TelemetryWorkerLayer is a background service that consumes telemetry data from the Hub
 export const TelemetryWorkerLayer = Layer.effectDiscard(
   Effect.gen(function* () {
-    const { spanPubSub, metricPubSub } = yield* TelemetryHub;
+    const { spanPubSub } = yield* TelemetryHub;
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
-    const processSpanBatch = (readableSpanBatch: readonly ReadableSpan[]) =>
+    const processSpanBatch = (readableSpanBatch: ReadonlyArray<ReadableSpan>) =>
       Effect.gen(function* () {
         if (readableSpanBatch.length === 0) return;
 
@@ -25,52 +22,12 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         }
       });
 
-    // This function filters out any data point that has not changed since the last snapshot (CUMULATIVE mode)
-    const diffMetrics = (currResourceMetrics: ResourceMetrics, prevResourceMetricsOption: Option.Option<ResourceMetrics>) => {
-      const prevResourceMetrics = Option.getOrUndefined(prevResourceMetricsOption);
-
-      // Map to track previous values for ALL metrics: "metricName|attributes" -> value
-      const prevResourceMetricsMap = new Map<string, unknown>();
-      if (prevResourceMetrics) {
-        for (const { metrics } of prevResourceMetrics.scopeMetrics)
-          for (const {
-            descriptor: { name },
-            dataPoints,
-          } of metrics)
-            for (const { attributes, value } of dataPoints) prevResourceMetricsMap.set(`${name}|${JSON.stringify(attributes)}`, value);
-      }
-
-      const filteredScopeMetrics: ScopeMetrics[] = [];
-      for (const currScopeMetrics of currResourceMetrics.scopeMetrics) {
-        const filteredMetrics: MetricData[] = [];
-
-        for (const metric of currScopeMetrics.metrics) {
-          const filteredDataPoints = metric.dataPoints.filter(({ attributes, value }) => {
-            // Content must actually be different (structural equality via v4 Equal.equals)
-            if (Equal.equals(value, prevResourceMetricsMap.get(`${metric.descriptor.name}|${JSON.stringify(attributes)}`))) return false;
-            return true;
-          });
-          if (filteredDataPoints.length > 0) filteredMetrics.push({ ...metric, dataPoints: filteredDataPoints as any });
-        }
-        if (filteredMetrics.length > 0) filteredScopeMetrics.push({ ...currScopeMetrics, metrics: filteredMetrics });
-      }
-      if (filteredScopeMetrics.length === 0) return undefined;
-
-      return { ...currResourceMetrics, scopeMetrics: filteredScopeMetrics };
-    };
-
-    const processMetrics = ({ scopeMetrics }: ResourceMetrics) =>
+    const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>
       Effect.gen(function* () {
         yield* Effect.logInfo("[TelemetryWorker] Received high-signal metric pulse.");
 
-        for (const { metrics } of scopeMetrics) {
-          for (const {
-            descriptor: { name, description },
-            dataPoints,
-          } of metrics) {
-            yield* Effect.log(`  -> Metric: "${name}"`, { description, dataPoints: dataPoints.map(({ value, attributes }) => ({ value, attributes })) });
-          }
-        }
+        for (const { id, type, description, attributes, state } of snapshots)
+          yield* Effect.log(`  -> Metric: "${id}"`, { type, description, attributes, state });
       });
 
     // --- Stream 1: Spans ---
@@ -80,13 +37,25 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
       Stream.runForEach(processSpanBatch)
     );
 
-    // --- Stream 2: Metrics ---
-    const metricProcessor = Stream.fromPubSub(metricPubSub).pipe(
-      Stream.zipWithPrevious,
-      Stream.map(([prevResourceMetrics, currResourceMetrics]) => diffMetrics(currResourceMetrics, prevResourceMetrics)),
-      Stream.filter((diffResourceMetrics): diffResourceMetrics is ResourceMetrics => diffResourceMetrics !== undefined),
-      Stream.runForEach(processMetrics)
-    );
+    // --- Stream 2: Metrics (Native Snapshot Loop) ---
+    // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
+    const metricProcessor = Effect.gen(function* () {
+      let prevSnapshots: ReadonlyArray<Metric.Metric.Snapshot> = [];
+
+      yield* Effect.repeat(
+        Effect.gen(function* () {
+          // Take a snapshot of all metrics
+          const currSnapshots = yield* Metric.snapshot;
+
+          // Effect v4 handles structural equality for snapshots (including Maps in Frequencies)
+          if (!Equal.equals(currSnapshots, prevSnapshots)) {
+            yield* processMetrics(currSnapshots);
+            prevSnapshots = currSnapshots;
+          }
+        }),
+        Schedule.spaced(Duration.seconds(10))
+      );
+    });
 
     // Run both processors in the background (Detach from parent scope)
     yield* Effect.forkDetach(spanProcessor);

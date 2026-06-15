@@ -6,24 +6,16 @@ import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { WebSdk } from "@effect/opentelemetry";
 import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { TelemetryHub } from "@/features/telemetry/services/telemetry-hub";
 import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
-import { HubMetricExporter, HubSpanExporter } from "@/features/telemetry/services/otel-exporters";
+import { HubSpanExporter } from "@/features/telemetry/services/otel-exporters";
 
-// The TelemetryLayer bridges the OTel SDK into our Effect-native TelemetryHub
+// The TelemetryLayer bridges the OTel SDK into our Effect-native TelemetryHub (Spans only)
 const TelemetryLayer = WebSdk.layer(
   Effect.gen(function* () {
-    const { spanPubSub, metricPubSub } = yield* TelemetryHub;
+    const { spanPubSub } = yield* TelemetryHub;
 
-    return {
-      resource: { serviceName: "wordle-overdrive-telemetry" },
-      spanProcessor: new SimpleSpanProcessor(new HubSpanExporter(spanPubSub)),
-      metricReader: new PeriodicExportingMetricReader({
-        exporter: new HubMetricExporter(metricPubSub),
-        exportIntervalMillis: 10000,
-      }),
-    };
+    return { resource: { serviceName: "wordle-overdrive-telemetry" }, spanProcessor: new SimpleSpanProcessor(new HubSpanExporter(spanPubSub)) };
   })
 );
 
