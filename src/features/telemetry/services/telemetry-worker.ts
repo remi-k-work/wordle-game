@@ -3,7 +3,6 @@
 // services, features, and other libraries
 import { Effect, Layer, Stream, Duration, Option, Equal } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
-import { DataPointType } from "@opentelemetry/sdk-metrics";
 
 // types
 import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
@@ -26,7 +25,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         }
       });
 
-    // This function filters out any data point that has not changed since the last snapshot
+    // This function filters out any data point that has not changed since the last snapshot (CUMULATIVE mode)
     const diffMetrics = (currResourceMetrics: ResourceMetrics, prevResourceMetricsOption: Option.Option<ResourceMetrics>) => {
       const prevResourceMetrics = Option.getOrUndefined(prevResourceMetricsOption);
 
@@ -47,15 +46,10 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
         for (const metric of currScopeMetrics.metrics) {
           const filteredDataPoints = metric.dataPoints.filter(({ attributes, value }) => {
-            // Rule 1: Content must actually be different (structural equality via v4 Equal.equals)
+            // Content must actually be different (structural equality via v4 Equal.equals)
             if (Equal.equals(value, prevResourceMetricsMap.get(`${metric.descriptor.name}|${JSON.stringify(attributes)}`))) return false;
-
-            // Rule 2: Optimization for SUM in DELTA mode - drop explicit zero increments
-            if (metric.dataPointType === DataPointType.SUM && value === 0) return false;
-
             return true;
           });
-
           if (filteredDataPoints.length > 0) filteredMetrics.push({ ...metric, dataPoints: filteredDataPoints as any });
         }
         if (filteredMetrics.length > 0) filteredScopeMetrics.push({ ...currScopeMetrics, metrics: filteredMetrics });
