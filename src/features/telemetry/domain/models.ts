@@ -27,3 +27,14 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent>("AddRunWordEv
   guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
+
+export class GuessDistributionArgs extends Schema.Class<GuessDistributionArgs>("GuessDistributionArgs")({
+  sessionId: Schema.Trim.check(Schema.isUUID()),
+  solutionsLanguage: SolutionsLanguage,
+}) {}
+
+export class GuessDistributionData extends Schema.Class<GuessDistributionData>("GuessDistributionData")({
+  turn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
+  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}
