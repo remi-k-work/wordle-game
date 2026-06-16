@@ -18,7 +18,7 @@ export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
 
 // A single tile in the game board
 export class Tile extends Schema.Class<Tile>("Tile")({
-  tileKey: Schema.String.check(Schema.isNonEmpty(), Schema.isMaxLength(1)),
+  tileKey: Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(1)),
   color: Color,
 }) {}
 
@@ -27,7 +27,7 @@ export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLeng
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
 export class RunSession extends Schema.Class<RunSession>("RunSession")({
-  runId: Schema.Option(Schema.String.check(Schema.isUUID())),
+  runId: Schema.Option(Schema.Trim.check(Schema.isUUID())),
   createdAt: Schema.Option(Schema.DateTimeUtc),
   runScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
@@ -48,7 +48,7 @@ export class WordScore extends Schema.Class<WordScore>("WordScore")({
 // Represents the state of the current game challenge being in progress
 export class GameState extends Schema.Class<GameState>("GameState")({
   theSecretWord: TheSecretWord,
-  currentGuessWord: Schema.String.check(Schema.isNonEmpty()),
+  currentGuessWord: Schema.Trim.check(Schema.isNonEmpty()),
   wordleGuesses: Schema.Array(TheSecretWord),
   currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   isInvalidGuess: Schema.Boolean,

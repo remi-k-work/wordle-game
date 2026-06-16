@@ -20,20 +20,20 @@ import { solutionsLanguageAtom } from "@/features/settings/state";
 // types
 import type { GameState, RunSession, WordScore } from "@/features/game/domain";
 
-// This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_events)
+// This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 export const logWordWonEvent = Effect.fn("logWordWonEvent")(function* ({ currentTurn, theSecretWord }: GameState, { timeSeconds }: WordScore) {
   // Extract all the necessary attributes that will offer additional context for our span
   const runId = Option.getOrThrow(yield* Atom.get(runIdAtom));
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const guessedTurn = currentTurn - 1;
 
-  // Enrich the span itself with searchable attributes (stream 1 -> run_word_events)
+  // Enrich the span itself with searchable attributes (stream 1 -> run_word_event)
   yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: Math.floor(timeSeconds) });
 });
 
-// A function to log the exact details of a completed arcade run session (stream 1 -> arcade_runs_summary)
+// A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
 export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* (
-  { runId: runIdOption, createdAt: createdAtOption, runScore, streak }: RunSession,
+  { runId: runIdOption, createdAt: createdAtOption, runScore: finalScore, streak: finalStreak }: RunSession,
   deathReason: "Forfeit" | "Guesses"
 ) {
   // Extract all the necessary attributes that will offer additional context for our span
@@ -47,8 +47,8 @@ export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* 
   const createdAt = Option.getOrElse(createdAtOption, () => now);
   const durationSeconds = DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor);
 
-  // Enrich the span itself with searchable attributes (stream 1 -> arcade_runs_summary)
-  yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, streak, runScore, deathReason, failedOnWord, durationSeconds });
+  // Enrich the span itself with searchable attributes (stream 1 -> arcade_run_summary)
+  yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, deathReason, failedOnWord, finalScore, finalStreak, durationSeconds });
 });
 
 // Track metrics related to the action of submitting a new guess (stream 2 -> global_pulse)
@@ -101,7 +101,7 @@ export const trackForfeitRunAction = Effect.fnUntraced(function* () {
   yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ solutionsLanguage })), streak);
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ solutionsLanguage })), "Forfeit");
 
-  // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_runs_summary)
+  // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
   yield* logRunCompletedEvent(runSession, "Forfeit");
 
   // *** TEST CODE ***
@@ -121,7 +121,7 @@ export const trackWordWonEvent = Effect.fnUntraced(function* (gameState: GameSta
   yield* Metric.update(gamesPlayed.pipe(Metric.withAttributes({ solutionsLanguage })), 1);
   if (guessedTurn === 1) yield* Metric.update(perfectGames.pipe(Metric.withAttributes({ solutionsLanguage })), 1);
 
-  // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_events)
+  // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
   yield* logWordWonEvent(gameState, wordScore);
 
   // *** TEST CODE ***
@@ -141,7 +141,7 @@ export const trackWordLostEvent = Effect.fnUntraced(function* (runSession: RunSe
   yield* Metric.update(failedWords.pipe(Metric.withAttributes({ solutionsLanguage })), theSecretWord);
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ solutionsLanguage })), "Guesses");
 
-  // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_runs_summary)
+  // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
   yield* logRunCompletedEvent(runSession, "Guesses");
 
   // *** TEST CODE ***
