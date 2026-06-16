@@ -1,22 +1,24 @@
 DROP TABLE IF EXISTS global_pulse;
 
 CREATE TABLE global_pulse (
-  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
-  metric_name VARCHAR(50) NOT NULL,
-  
-  metric_payload JSONB NOT NULL,
-
+  session_id UUID NOT NULL,
   solutions_language VARCHAR(2) NOT NULL
     CONSTRAINT global_pulse_solutions_language_check
     CHECK (solutions_language IN ('En', 'Pl')),
+  metric_name VARCHAR(50) NOT NULL,
 
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  metric_payload JSONB NOT NULL,
+
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- The Composite Primary Key naturally enforces uniqueness for Upserts
+  PRIMARY KEY (session_id, solutions_language, metric_name)
 );
 
--- Optimized for Time-Series graphing on the landing page
-CREATE INDEX global_pulse_time_series_idx 
-  ON global_pulse (metric_name, solutions_language, created_at DESC);
+-- We still keep this index! The Primary Key index prioritizes 'session_id', 
+-- so this secondary index is essential for lightning-fast global aggregations.
+CREATE INDEX global_pulse_metrics_lookup_idx 
+  ON global_pulse (solutions_language, metric_name, created_at DESC);
 
 --
 --
@@ -26,6 +28,9 @@ DROP TABLE IF EXISTS arcade_run_summary;
 
 CREATE TABLE arcade_run_summary (
   run_id UUID PRIMARY KEY,
+  
+  -- Links this specific run to the cumulative session metrics in global_pulse
+  session_id UUID NOT NULL,
 
   solutions_language VARCHAR(2) NOT NULL
     CONSTRAINT arcade_run_summary_solutions_language_check
@@ -52,9 +57,9 @@ CREATE TABLE arcade_run_summary (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Optimized for Leaderboards and "Highest Streaks of the Day"
+-- Note: We now add session_id to this index so you can quickly fetch all runs for a specific session!
 CREATE INDEX arcade_run_summary_leaderboard_idx 
-  ON arcade_run_summary (solutions_language, final_score DESC, final_streak DESC);
+  ON arcade_run_summary (session_id, solutions_language, final_score DESC, final_streak DESC);
 
 --
 --

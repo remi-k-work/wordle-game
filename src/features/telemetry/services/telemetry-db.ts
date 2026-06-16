@@ -10,7 +10,8 @@ export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
 
     const addGlobalPulse = SqlSchema.void({
       Request: Schema.Array(AddGlobalPulse),
-      execute: (request) => sql`INSERT INTO global_pulse ${sql.insert(request)}`,
+      execute: (request) =>
+        sql`INSERT INTO global_pulse ${sql.insert(request)} ON CONFLICT (session_id, solutions_language, metric_name) DO UPDATE SET metric_payload = EXCLUDED.metric_payload, created_at = NOW()`,
     });
 
     const addArcadeRunSummary = SqlSchema.void({

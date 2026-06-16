@@ -40,8 +40,9 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
         const globalPulseRecords: AddGlobalPulse[] = [];
         for (const { id: metricName, attributes, state: metricPayload } of snapshots) {
+          const sessionId = Schema.decodeUnknownSync(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]);
           const solutionsLanguage = Schema.decodeUnknownSync(SolutionsLanguage)(attributes?.["solutionsLanguage"]);
-          globalPulseRecords.push({ metricName, metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)), solutionsLanguage });
+          globalPulseRecords.push({ sessionId, solutionsLanguage, metricName, metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)) });
         }
         if (globalPulseRecords.length > 0) yield* addGlobalPulse(globalPulseRecords);
       });

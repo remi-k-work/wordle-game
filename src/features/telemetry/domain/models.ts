@@ -3,13 +3,15 @@ import { Schema } from "effect";
 import { SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
 export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse")({
+  sessionId: Schema.Trim.check(Schema.isUUID()),
+  solutionsLanguage: SolutionsLanguage,
   metricName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(50))),
   metricPayload: Schema.Unknown,
-  solutionsLanguage: SolutionsLanguage,
 }) {}
 
 export class AddArcadeRunSummary extends Schema.Class<AddArcadeRunSummary>("AddArcadeRunSummary")({
   runId: Schema.Trim.check(Schema.isUUID()),
+  sessionId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
   deathReason: Schema.Literals(["Forfeit", "Guesses"]),
   failedOnWord: Schema.Union([TheSecretWord, Schema.Literal("N/A")]),
