@@ -8,11 +8,11 @@ import { runPageMainOrNavigate } from "@/lib/helpers-effect";
 
 // components
 import { PageHeader } from "@/ui/page-header";
-import { InfoLine } from "@/ui/shared/info-line";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/shared/table";
+import { SectionHeader } from "@/ui/section-header";
+import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";
+import { GuessDistributionChart } from "@/features/telemetry/ui/charts/guess-distribution";
 
 // assets
-import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
@@ -42,43 +42,34 @@ async function PageContent() {
   // Execute the main effect for the page, map known errors to the subsequent navigation helpers, and return the payload
   const top10HighScores = await runPageMainOrNavigate(main);
 
-  if (top10HighScores.length === 0)
-    return (
-      <article className="mx-auto w-full max-w-384">
-        <PageHeader title="High Score" description="Top 10 scores, sorted by score and streak." />
-        <InfoLine message="No High Scores yet!" />
-      </article>
-    );
-
   return (
     <article className="mx-auto w-full max-w-384">
-      <PageHeader title="High Score" description="Top 10 scores, sorted by score and streak." />
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>#</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead className="bg-accent/30 text-accent">
-              <TrophyIcon className="mx-auto size-9 sm:size-11" />
-            </TableHead>
-            <TableHead className="bg-destructive/30 text-destructive">
-              <FireIcon className="mx-auto size-9 sm:size-11" />
-            </TableHead>
-            <TableHead>&nbsp;</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {top10HighScores.map(({ playerName, score, streak, solutionsLang }, index: number) => (
-            <TableRow key={index} className="odd:bg-surface-2">
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{playerName}</TableCell>
-              <TableCell className="bg-accent/30">{score}</TableCell>
-              <TableCell className="bg-destructive/30">{streak}</TableCell>
-              <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
+      <Top10HighScores top10HighScores={top10HighScores} />
+      <section className="grid gap-3 xl:grid-cols-2">
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Guess Distribution
+                <UsFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          <GuessDistributionChart solutionsLanguage="En" />
+        </div>
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Guess Distribution
+                <PlFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          <GuessDistributionChart solutionsLanguage="Pl" />
+        </div>
+      </section>
     </article>
   );
 }
@@ -86,7 +77,31 @@ async function PageContent() {
 function PageSkeleton() {
   return (
     <article className="mx-auto w-full max-w-384">
-      <PageHeader title="High Score" description="Top 10 scores, sorted by score and streak." />
+      <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
+      <section className="grid gap-3 xl:grid-cols-2">
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Guess Distribution
+                <UsFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          &nbsp;
+        </div>
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Guess Distribution
+                <PlFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          &nbsp;
+        </div>
+      </section>
     </article>
   );
 }

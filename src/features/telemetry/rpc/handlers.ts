@@ -4,6 +4,7 @@ import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcTelemetry } from "./requests";
 import { TelemetryDB } from "@/features/telemetry/services/telemetry-db";
+import { ChartsDB } from "@/features/telemetry/services/charts-db";
 
 const RpcTelemetryLayer = RpcTelemetry.toLayer({
   addGlobalPulse: (payload) =>
@@ -23,7 +24,13 @@ const RpcTelemetryLayer = RpcTelemetry.toLayer({
       const telemetryDB = yield* TelemetryDB;
       yield* telemetryDB.addRunWordEvent(payload);
     }),
-}).pipe(Layer.provide(TelemetryDB.layer));
+
+  getGuessDistribution: (payload) =>
+    Effect.gen(function* () {
+      const chartsDB = yield* ChartsDB;
+      return yield* chartsDB.getGuessDistribution(payload);
+    }),
+}).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer)));
 
 const RpcLayer = RpcServer.layerHttp({
   group: RpcTelemetry,

@@ -4,6 +4,7 @@ import { Atom, AtomRegistry, Reactivity } from "effect/unstable/reactivity";
 import { BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
+import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { WebSdk } from "@effect/opentelemetry";
 import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { TelemetryHub } from "@/features/telemetry/services/telemetry-hub";
@@ -29,6 +30,7 @@ const MainLayer = Layer.mergeAll(
   BrowserKeyValueStore.layerLocalStorage,
   RpcGameClient.layer,
   RpcHighScoreClient.layer,
+  RpcTelemetryClient.layer,
   TelemetryReady
 );
 

@@ -33,8 +33,13 @@ export class GuessDistributionArgs extends Schema.Class<GuessDistributionArgs>("
   solutionsLanguage: SolutionsLanguage,
 }) {}
 
-export class GuessDistributionData extends Schema.Class<GuessDistributionData>("GuessDistributionData")({
+const GuessDistributionSchema = Schema.Struct({
   turn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
   personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-}) {}
+  personalPct: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))),
+  globalPct: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))),
+});
+
+export const GuessDistributionData = Schema.Array(GuessDistributionSchema);
+export type GuessDistributionData = typeof GuessDistributionData.Type;
