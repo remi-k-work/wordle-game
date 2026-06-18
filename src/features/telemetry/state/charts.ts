@@ -15,3 +15,17 @@ export const getGuessDistributionsAction = RuntimeAtom.fn(
     });
   })
 );
+
+export const getTimeToSolveDistributionsAction = RuntimeAtom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const sessionId = get(sessionIdAtom);
+
+    const { getTimeToSolveDistribution } = yield* RpcTelemetryClient;
+    return yield* Effect.all(
+      [getTimeToSolveDistribution({ sessionId, solutionsLanguage: "En" }), getTimeToSolveDistribution({ sessionId, solutionsLanguage: "Pl" })],
+      {
+        concurrency: 2,
+      }
+    );
+  })
+);
