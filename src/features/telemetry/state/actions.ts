@@ -71,11 +71,6 @@ export const trackSubmitGuessAction = Effect.fnUntraced(function* (currGameState
     if (currGameState.currentTurn === 1)
       yield* Metric.update(openingGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), currGameState.currentGuessWord);
   }
-
-  // *** TEST CODE ***
-  // const snapshots = yield* Metric.snapshot;
-  // yield* Effect.log("snapshots", snapshots);
-  // *** TEST CODE ***
 });
 
 // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
@@ -85,11 +80,6 @@ export const trackStartNewRunAction = Effect.fnUntraced(function* () {
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 
   yield* Metric.update(runsStarted.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
-
-  // *** TEST CODE ***
-  // const snapshots = yield* Metric.snapshot;
-  // yield* Effect.log("snapshots", snapshots);
-  // *** TEST CODE ***
 });
 
 // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
@@ -108,11 +98,6 @@ export const trackForfeitRunAction = Effect.fnUntraced(function* () {
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
   yield* logRunCompletedEvent(runSession, "Forfeit");
-
-  // *** TEST CODE ***
-  // const snapshots = yield* Metric.snapshot;
-  // yield* Effect.log("snapshots", snapshots);
-  // *** TEST CODE ***
 });
 
 // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
@@ -129,11 +114,6 @@ export const trackWordWonEvent = Effect.fnUntraced(function* (gameState: GameSta
 
   // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
   yield* logWordWonEvent(gameState, wordScore);
-
-  // *** TEST CODE ***
-  // const snapshots = yield* Metric.snapshot;
-  // yield* Effect.log("snapshots", snapshots);
-  // *** TEST CODE ***
 });
 
 // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
@@ -150,9 +130,4 @@ export const trackWordLostEvent = Effect.fnUntraced(function* (runSession: RunSe
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
   yield* logRunCompletedEvent(runSession, "Guesses");
-
-  // *** TEST CODE ***
-  // const snapshots = yield* Metric.snapshot;
-  // yield* Effect.log("snapshots", snapshots);
-  // *** TEST CODE ***
 });

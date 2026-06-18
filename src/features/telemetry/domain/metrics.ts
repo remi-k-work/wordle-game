@@ -4,17 +4,17 @@ import { Metric } from "effect";
 // --- Histograms (Distributions) ---
 
 export const guessesToWin = Metric.histogram("guessesToWin", {
-  boundaries: Metric.linearBoundaries({ start: 1, width: 1, count: 6 }),
+  boundaries: Metric.linearBoundaries({ start: 0, width: 1, count: 7 }), // 1, 2, 3, 4, 5, 6, null
   description: "Distribution of guesses needed to win a game.",
 });
 
 export const timeToSolve = Metric.histogram("timeToSolve", {
-  boundaries: Metric.exponentialBoundaries({ start: 5, factor: 2, count: 8 }), // 5, 10, 20, 40, 80, 160, 320, 640
+  boundaries: Metric.exponentialBoundaries({ start: 5, factor: 2, count: 9 }), // 5, 10, 20, 40, 80, 160, 320, 640, null
   description: "Distribution of time taken to solve a word in seconds.",
 });
 
 export const arcadeRunLength = Metric.histogram("arcadeRunLength", {
-  boundaries: Metric.linearBoundaries({ start: 0, width: 2, count: 10 }), // 0, 2, 4, 6, 8, 10, 12, 14, 16, 18
+  boundaries: Metric.linearBoundaries({ start: -1, width: 1, count: 15 }), // 0, 1, 2, 3, 4, 5, ..., 13, null
   description: "Distribution of run lengths (streak) before a loss.",
 });
 
