@@ -9,7 +9,7 @@ export const guessesToWin = Metric.histogram("guessesToWin", {
 });
 
 export const timeToSolve = Metric.histogram("timeToSolve", {
-  boundaries: Metric.exponentialBoundaries({ start: 5, factor: 2, count: 9 }), // 5, 10, 20, 40, 80, 160, 320, 640, null
+  boundaries: Metric.boundariesFromIterable([30, 60, 180]), // <=30, <=60, <=180, and >180
   description: "Distribution of time taken to solve a word in seconds.",
 });
 

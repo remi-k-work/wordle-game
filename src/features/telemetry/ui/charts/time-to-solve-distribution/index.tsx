@@ -19,18 +19,13 @@ interface TimeToSolveDistributionChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-// Maps exponential boundaries to friendly display ranges
-const formatSecondsTick = (maxSeconds: number | null) => {
-  if (maxSeconds === 5) return "0-5s";
-  if (maxSeconds === 10) return "6-10s";
-  if (maxSeconds === 20) return "11-20s";
-  if (maxSeconds === 40) return "21-40s";
-  if (maxSeconds === 80) return "41-80s";
-  if (maxSeconds === 160) return "81-160s";
-  if (maxSeconds === 320) return "161-320s";
-  if (maxSeconds === 640) return "321-640s";
-  if (maxSeconds === null) return "640+s";
-  return "";
+// A quick helper to map our boundaries to game speed labels
+const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) => {
+  if (maxSeconds === 30) return emojiOnly ? "🚀" : "🚀 Speed Demon";
+  if (maxSeconds === 60) return emojiOnly ? "⚡" : "⚡ Quick Thinker";
+  if (maxSeconds === 180) return emojiOnly ? "⏱️" : "⏱️ Average Pacer";
+  if (maxSeconds === Infinity) return emojiOnly ? "🐌" : "🐌 Slow Learner";
+  return "Unknown";
 };
 
 export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistributionChartProps) {
@@ -44,19 +39,22 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((timeToSolveDistributionsData) => {
-      const timeToSolveDistributionData = timeToSolveDistributionsData[solutionsLanguage === "En" ? 0 : 1];
+      const timeToSolveDistributionData = timeToSolveDistributionsData[solutionsLanguage === "En" ? 0 : 1].map((row) => ({
+        ...row,
+        maxSeconds: row.maxSeconds === null ? Infinity : row.maxSeconds,
+      }));
 
       return timeToSolveDistributionData.length === 0 ? (
-        <InfoLine message="No Guesses yet!" />
+        <InfoLine message="No speed data tracked yet!" />
       ) : (
         <ComposedChart data={timeToSolveDistributionData} responsive className="h-96 w-full **:outline-none **:select-none">
           <CartesianGrid stroke="var(--color-surface-3)" />
 
-          <XAxis dataKey="maxSeconds" tickFormatter={formatSecondsTick} stroke="var(--color-text-1)" />
+          <XAxis dataKey="maxSeconds" tickFormatter={(value) => formatSpeedCategory(value, true)} stroke="var(--color-text-1)" fontSize={32} />
 
           <Tooltip
             formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Speed" : "Global Average"]}
-            labelFormatter={(label) => `Time: ${formatSecondsTick(label as number | null)}`}
+            labelFormatter={(label) => formatSpeedCategory(label as number | null)}
             cursor={{ fill: "var(--color-surface-2)" }}
             contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
             labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
