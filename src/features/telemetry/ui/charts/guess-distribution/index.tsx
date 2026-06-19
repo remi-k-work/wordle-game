@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { useAtom } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { getGuessDistributionsAction } from "@/features/telemetry/state";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
@@ -35,15 +35,14 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
       return guessDistributionData.length === 0 ? (
         <InfoLine message="No Guesses yet!" />
       ) : (
-        <BarChart data={guessDistributionData} responsive className="h-96 w-full">
+        <ComposedChart data={guessDistributionData} responsive className="h-96 w-full **:outline-none **:select-none">
           <CartesianGrid stroke="var(--color-surface-3)" />
 
           <XAxis dataKey="turn" tickFormatter={(tick) => `Turn ${tick}`} stroke="var(--color-text-1)" />
-          <YAxis tickFormatter={(tick) => `${tick}%`} stroke="var(--color-text-1)" />
 
           <Tooltip
             formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Guesses" : "Global Average"]}
-            labelFormatter={(label) => `Turn ${label}`}
+            labelFormatter={(label) => `Turn: ${label}`}
             cursor={{ fill: "var(--color-surface-2)" }}
             contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
             labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
@@ -54,9 +53,9 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
             labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
           />
 
-          <Bar dataKey="globalPct" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[4, 4, 0, 0]} />
-        </BarChart>
+          <Line type="monotone" dataKey="globalPct" stroke="var(--color-accent)" strokeWidth={4} />
+          <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[9, 9, 0, 0]} />
+        </ComposedChart>
       );
     })
     .render();

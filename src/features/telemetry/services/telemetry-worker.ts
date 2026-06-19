@@ -26,8 +26,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const processSpanBatch = (readableSpanBatch: ReadonlyArray<ReadableSpan>) =>
       Effect.gen(function* () {
         if (readableSpanBatch.length === 0) return;
-
-        yield* Effect.logInfo(`[TelemetryWorker] Processing batch of ${readableSpanBatch.length} spans.`);
+        yield* Effect.log(`[TelemetryWorker] Processing batch of ${readableSpanBatch.length} spans.`);
 
         for (const { name, attributes } of readableSpanBatch)
           if (name === "logWordWonEvent") yield* addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributes));
@@ -36,7 +35,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>
       Effect.gen(function* () {
-        yield* Effect.logInfo("[TelemetryWorker] Received high-signal metric pulse.");
+        if (snapshots.length === 0) return;
+        yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
         const globalPulseRecords: AddGlobalPulse[] = [];
         for (const { id: metricName, attributes, state: metricPayload } of snapshots) {
@@ -78,6 +78,6 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     yield* Effect.forkDetach(spanProcessor);
     yield* Effect.forkDetach(metricProcessor);
 
-    yield* Effect.logInfo("[TelemetryWorker] Background telemetry processors started.");
+    yield* Effect.log("[TelemetryWorker] Background telemetry processors started.");
   })
 ).pipe(Layer.provide(RpcTelemetryClient.layer));
