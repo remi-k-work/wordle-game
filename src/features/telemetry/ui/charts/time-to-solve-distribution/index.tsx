@@ -1,5 +1,3 @@
-"use client";
-
 // react
 import { useEffect } from "react";
 
@@ -25,7 +23,7 @@ const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = fal
   if (maxSeconds === 60) return emojiOnly ? "⚡" : "⚡ Quick Thinker";
   if (maxSeconds === 180) return emojiOnly ? "⏱️" : "⏱️ Average Pacer";
   if (maxSeconds === Infinity) return emojiOnly ? "🐌" : "🐌 Slow Learner";
-  return "Unknown";
+  return emojiOnly ? "?" : "Unknown";
 };
 
 export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistributionChartProps) {
@@ -50,7 +48,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
         <ComposedChart data={timeToSolveDistributionData} responsive className="h-96 w-full **:outline-none **:select-none">
           <CartesianGrid stroke="var(--color-surface-3)" />
 
-          <XAxis dataKey="maxSeconds" tickFormatter={(value) => formatSpeedCategory(value, true)} stroke="var(--color-text-1)" fontSize={32} />
+          <XAxis dataKey="maxSeconds" tickFormatter={(tick) => formatSpeedCategory(tick, true)} stroke="var(--color-text-1)" fontSize={32} />
 
           <Tooltip
             formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Speed" : "Global Average"]}

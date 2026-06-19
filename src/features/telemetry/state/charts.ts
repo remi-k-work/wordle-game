@@ -29,3 +29,17 @@ export const getTimeToSolveDistributionsAction = RuntimeAtom.fn(
     );
   })
 );
+
+export const getArcadeStreakDistributionsAction = RuntimeAtom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const sessionId = get(sessionIdAtom);
+
+    const { getArcadeStreakDistribution } = yield* RpcTelemetryClient;
+    return yield* Effect.all(
+      [getArcadeStreakDistribution({ sessionId, solutionsLanguage: "En" }), getArcadeStreakDistribution({ sessionId, solutionsLanguage: "Pl" })],
+      {
+        concurrency: 2,
+      }
+    );
+  })
+);

@@ -27,35 +27,3 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent>("AddRunWordEv
   guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
-
-export class GuessDistributionArgs extends Schema.Class<GuessDistributionArgs>("GuessDistributionArgs")({
-  sessionId: Schema.Trim.check(Schema.isUUID()),
-  solutionsLanguage: SolutionsLanguage,
-}) {}
-
-class GuessDistributionSchema extends Schema.Class<GuessDistributionSchema>("GuessDistributionSchema")({
-  turn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  personalPct: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))),
-  globalPct: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))),
-}) {}
-
-export const GuessDistributionData = Schema.Array(GuessDistributionSchema);
-export type GuessDistributionData = typeof GuessDistributionData.Type;
-
-export class TimeToSolveDistributionArgs extends Schema.Class<TimeToSolveDistributionArgs>("TimeToSolveDistributionArgs")({
-  sessionId: Schema.Trim.check(Schema.isUUID()),
-  solutionsLanguage: SolutionsLanguage,
-}) {}
-
-class TimeToSolveDistributionSchema extends Schema.Class<TimeToSolveDistributionSchema>("TimeToSolveDistributionSchema")({
-  maxSeconds: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  personalPct: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))),
-  globalPct: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))),
-}) {}
-
-export const TimeToSolveDistributionData = Schema.Array(TimeToSolveDistributionSchema);
-export type TimeToSolveDistributionData = typeof TimeToSolveDistributionData.Type;

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient } from "effect/unstable/sql";
-import { GuessDistributionArgs } from "@/features/telemetry/domain";
+import { GuessDistributionArgs } from "@/features/telemetry/services/charts-db";
 
 export const guessDistributionQuery = (sql: SqlClient.SqlClient, { sessionId, solutionsLanguage }: GuessDistributionArgs) =>
   sql<{ turn: number; personal: string | number; global: string | number }>`

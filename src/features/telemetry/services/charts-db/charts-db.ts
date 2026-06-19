@@ -1,10 +1,19 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import { GuessDistributionArgs, GuessDistributionData, TimeToSolveDistributionArgs, TimeToSolveDistributionData } from "@/features/telemetry/domain";
+import {
+  ArcadeStreakDistributionArgs,
+  ArcadeStreakDistributionData,
+  arcadeStreakDistributionQuery,
+  cumulativeToDistribution,
+  GuessDistributionArgs,
+  GuessDistributionData,
+  guessDistributionQuery,
+  TimeToSolveDistributionArgs,
+  TimeToSolveDistributionData,
+  timeToSolveDistributionQuery,
+} from ".";
 import { PgLive } from "@/lib/pg-live";
-import { guessDistributionQuery, timeToSolveDistributionQuery } from "./queries";
-import { cumulativeToDistribution } from ".";
 
 export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   make: Effect.gen(function* () {
@@ -52,7 +61,30 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         return yield* Schema.decodeUnknownEffect(TimeToSolveDistributionData)(chartData);
       }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
 
-    return { getGuessDistribution, getTimeToSolveDistribution } as const;
+    const getArcadeStreakDistribution = ({ sessionId, solutionsLanguage }: ArcadeStreakDistributionArgs) =>
+      Effect.gen(function* () {
+        const rows = yield* arcadeStreakDistributionQuery(sql, { sessionId, solutionsLanguage });
+
+        // Coerce strings from DB into numbers
+        const safeRows = rows.map((row) => ({
+          streak: row.streak !== null ? Number(row.streak) : null,
+          personal: Number(row.personal),
+          global: Number(row.global),
+        }));
+
+        const chartData = cumulativeToDistribution(safeRows, (row, personal, global, personalPct, globalPct) => ({
+          streak: row.streak,
+          personal,
+          global,
+          personalPct,
+          globalPct,
+        }));
+
+        // Decode against the strict schema, as recommended for final domain mapping
+        return yield* Schema.decodeUnknownEffect(ArcadeStreakDistributionData)(chartData);
+      }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+
+    return { getGuessDistribution, getTimeToSolveDistribution, getArcadeStreakDistribution } as const;
   }),
 }) {
   static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(PgLive));

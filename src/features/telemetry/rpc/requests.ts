@@ -1,15 +1,15 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
+import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
 import {
-  AddGlobalPulse,
-  AddArcadeRunSummary,
-  AddRunWordEvent,
+  ArcadeStreakDistributionArgs,
+  ArcadeStreakDistributionData,
   GuessDistributionArgs,
   GuessDistributionData,
   TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
-} from "@/features/telemetry/domain";
+} from "@/features/telemetry/services/charts-db/models";
 
 export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("addGlobalPulse", {
@@ -32,5 +32,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getTimeToSolveDistribution", {
     payload: TimeToSolveDistributionArgs,
     success: TimeToSolveDistributionData,
+  }),
+
+  Rpc.make("getArcadeStreakDistribution", {
+    payload: ArcadeStreakDistributionArgs,
+    success: ArcadeStreakDistributionData,
   })
 ) {}
