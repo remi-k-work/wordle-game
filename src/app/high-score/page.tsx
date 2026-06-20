@@ -15,6 +15,7 @@ import {
   FailedWordsFrequencyChart,
   GuessDistributionChart,
   OpeningGuessesFrequencyChart,
+  RunDeathReasonFrequencyChart,
   TimeToSolveDistributionChart,
 } from "@/features/telemetry/ui/charts";
 
@@ -176,6 +177,31 @@ async function PageContent() {
           <FailedWordsFrequencyChart solutionsLanguage="Pl" />
         </div>
       </section>
+
+      <section className="grid gap-3 xl:grid-cols-2">
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Run Death Reason Frequency
+                <UsFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          <RunDeathReasonFrequencyChart solutionsLanguage="En" />
+        </div>
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Run Death Reason Frequency
+                <PlFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          <RunDeathReasonFrequencyChart solutionsLanguage="Pl" />
+        </div>
+      </section>
     </article>
   );
 }
@@ -301,6 +327,31 @@ function PageSkeleton() {
             title={
               <span className="flex items-center justify-between gap-3">
                 Failed Words Frequency
+                <PlFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          &nbsp;
+        </div>
+      </section>
+
+      <section className="grid gap-3 xl:grid-cols-2">
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Run Death Reason Frequency
+                <UsFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          &nbsp;
+        </div>
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Run Death Reason Frequency
                 <PlFlagIcon className="size-11 shrink-0" />
               </span>
             }

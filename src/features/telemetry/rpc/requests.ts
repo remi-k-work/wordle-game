@@ -11,6 +11,8 @@ import {
   GuessDistributionData,
   OpeningGuessesFrequencyArgs,
   OpeningGuessesFrequencyData,
+  RunDeathReasonFrequencyArgs,
+  RunDeathReasonFrequencyData,
   TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
 } from "@/features/telemetry/services/charts-db/models";
@@ -51,5 +53,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getFailedWordsFrequency", {
     payload: FailedWordsFrequencyArgs,
     success: Schema.Array(FailedWordsFrequencyData),
+  }),
+
+  Rpc.make("getRunDeathReasonFrequency", {
+    payload: RunDeathReasonFrequencyArgs,
+    success: Schema.Array(RunDeathReasonFrequencyData),
   })
 ) {}

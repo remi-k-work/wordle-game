@@ -13,6 +13,8 @@ import {
   guessDistributionQuery,
   OpeningGuessesFrequencyArgs,
   openingGuessesFrequencyQuery,
+  RunDeathReasonFrequencyArgs,
+  runDeathReasonFrequencyQuery,
   TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
   timeToSolveDistributionQuery,
@@ -90,6 +92,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
 
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
     const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);
+    const getRunDeathReasonFrequency = runDeathReasonFrequencyQuery(sql);
 
     return {
       getGuessDistribution,
@@ -97,6 +100,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       getArcadeStreakDistribution,
       getOpeningGuessesFrequency: (request: OpeningGuessesFrequencyArgs) => getOpeningGuessesFrequency(request),
       getFailedWordsFrequency: (request: FailedWordsFrequencyArgs) => getFailedWordsFrequency(request),
+      getRunDeathReasonFrequency: (request: RunDeathReasonFrequencyArgs) => getRunDeathReasonFrequency(request),
     } as const;
   }),
 }) {

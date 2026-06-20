@@ -71,3 +71,14 @@ export class FailedWordsFrequencyData extends Schema.Class<FailedWordsFrequencyD
   personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
+
+export class RunDeathReasonFrequencyArgs extends Schema.Class<RunDeathReasonFrequencyArgs>("RunDeathReasonFrequencyArgs")({
+  sessionId: Schema.Trim.check(Schema.isUUID()),
+  solutionsLanguage: SolutionsLanguage,
+}) {}
+
+export class RunDeathReasonFrequencyData extends Schema.Class<RunDeathReasonFrequencyData>("RunDeathReasonFrequencyData")({
+  reason: Schema.Literals(["Forfeit", "Guesses"]),
+  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}

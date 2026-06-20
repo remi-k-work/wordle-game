@@ -71,3 +71,17 @@ export const getFailedWordsFrequenciesAction = RuntimeAtom.fn(
     );
   })
 );
+
+export const getRunDeathReasonFrequenciesAction = RuntimeAtom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const sessionId = get(sessionIdAtom);
+
+    const { getRunDeathReasonFrequency } = yield* RpcTelemetryClient;
+    return yield* Effect.all(
+      [getRunDeathReasonFrequency({ sessionId, solutionsLanguage: "En" }), getRunDeathReasonFrequency({ sessionId, solutionsLanguage: "Pl" })],
+      {
+        concurrency: 2,
+      }
+    );
+  })
+);

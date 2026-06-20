@@ -1,0 +1,75 @@
+// react
+import { useEffect } from "react";
+
+// services, features, and other libraries
+import { useAtom } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
+import { getRunDeathReasonFrequenciesAction } from "@/features/telemetry/state";
+import { Tooltip, Legend, PieChart, Pie } from "recharts";
+
+// components
+import { InfoLine } from "@/ui/shared/info-line";
+
+// types
+import type { SolutionsLanguage } from "@/features/game/domain";
+
+interface RunDeathReasonFrequencyChartProps {
+  solutionsLanguage: SolutionsLanguage;
+}
+
+const CustomLegend = () => (
+  <div className="flex flex-col items-center font-sans text-text-2">
+    <div className="flex items-center gap-2">
+      <div className="size-4 bg-(--color-primary)" />
+      Global Base (Inner)
+    </div>
+    <div className="flex items-center gap-2">
+      <div className="size-4 bg-(--color-secondary)" />
+      Your Runs (Outer)
+    </div>
+  </div>
+);
+
+export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
+  const [getRunDeathReasonFrequenciesResult, getRunDeathReasonFrequencies] = useAtom(getRunDeathReasonFrequenciesAction);
+
+  useEffect(() => {
+    getRunDeathReasonFrequencies();
+  }, [getRunDeathReasonFrequencies]);
+
+  return AsyncResult.builder(getRunDeathReasonFrequenciesResult)
+    .onInitialOrWaiting(() => null)
+    .onFailure(() => null)
+    .onSuccess((runDeathReasonFrequenciesData) => {
+      const runDeathReasonFrequencyData = runDeathReasonFrequenciesData[solutionsLanguage === "En" ? 0 : 1];
+
+      return runDeathReasonFrequencyData.length === 0 ? (
+        <InfoLine message="No frequency data tracked yet!" />
+      ) : (
+        <PieChart data={runDeathReasonFrequencyData} responsive className="mx-auto size-96 **:outline-none **:select-none">
+          <Tooltip
+            formatter={(value, name) => [`${value} times`, name]}
+            cursor={{ fill: "var(--color-surface-2)" }}
+            contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
+            labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
+            itemStyle={{ color: "var(--color-text-2)" }}
+          />
+          <Legend content={<CustomLegend />} />
+
+          <Pie dataKey="global" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" fill="var(--color-primary)" label />
+          <Pie
+            dataKey="personal"
+            nameKey="reason"
+            cx="50%"
+            cy="50%"
+            innerRadius="60%"
+            outerRadius="80%"
+            stroke="var(--color-accent)"
+            fill="var(--color-secondary)"
+            label
+          />
+        </PieChart>
+      );
+    })
+    .render();
+}
