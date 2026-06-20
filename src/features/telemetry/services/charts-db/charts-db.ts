@@ -9,6 +9,8 @@ import {
   GuessDistributionArgs,
   GuessDistributionData,
   guessDistributionQuery,
+  OpeningGuessesFrequencyArgs,
+  openingGuessesFrequencyQuery,
   TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
   timeToSolveDistributionQuery,
@@ -84,7 +86,14 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         return yield* Schema.decodeUnknownEffect(ArcadeStreakDistributionData)(chartData);
       }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
 
-    return { getGuessDistribution, getTimeToSolveDistribution, getArcadeStreakDistribution } as const;
+    const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
+
+    return {
+      getGuessDistribution,
+      getTimeToSolveDistribution,
+      getArcadeStreakDistribution,
+      getOpeningGuessesFrequency: (request: OpeningGuessesFrequencyArgs) => getOpeningGuessesFrequency(request),
+    } as const;
   }),
 }) {
   static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(PgLive));

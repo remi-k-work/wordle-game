@@ -7,6 +7,8 @@ import {
   ArcadeStreakDistributionData,
   GuessDistributionArgs,
   GuessDistributionData,
+  OpeningGuessesFrequencyArgs,
+  OpeningGuessesFrequencyData,
   TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
 } from "@/features/telemetry/services/charts-db/models";
@@ -37,5 +39,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getArcadeStreakDistribution", {
     payload: ArcadeStreakDistributionArgs,
     success: ArcadeStreakDistributionData,
+  }),
+
+  Rpc.make("getOpeningGuessesFrequency", {
+    payload: OpeningGuessesFrequencyArgs,
+    success: Schema.Array(OpeningGuessesFrequencyData),
   })
 ) {}

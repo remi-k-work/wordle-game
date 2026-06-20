@@ -10,7 +10,12 @@ import { runPageMainOrNavigate } from "@/lib/helpers-effect";
 import { PageHeader } from "@/ui/page-header";
 import { SectionHeader } from "@/ui/section-header";
 import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";
-import { ArcadeStreakDistributionChart, GuessDistributionChart, TimeToSolveDistributionChart } from "@/features/telemetry/ui/charts";
+import {
+  ArcadeStreakDistributionChart,
+  GuessDistributionChart,
+  OpeningGuessesFrequencyChart,
+  TimeToSolveDistributionChart,
+} from "@/features/telemetry/ui/charts";
 
 // assets
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
@@ -120,6 +125,31 @@ async function PageContent() {
           <ArcadeStreakDistributionChart solutionsLanguage="Pl" />
         </div>
       </section>
+
+      <section className="grid gap-3 xl:grid-cols-2">
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Opening Guesses Frequency
+                <UsFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          <OpeningGuessesFrequencyChart solutionsLanguage="En" />
+        </div>
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Opening Guesses Frequency
+                <PlFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          <OpeningGuessesFrequencyChart solutionsLanguage="Pl" />
+        </div>
+      </section>
     </article>
   );
 }
@@ -195,6 +225,31 @@ function PageSkeleton() {
             title={
               <span className="flex items-center justify-between gap-3">
                 Arcade Streak Distribution
+                <PlFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          &nbsp;
+        </div>
+      </section>
+
+      <section className="grid gap-3 xl:grid-cols-2">
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Opening Guesses Frequency
+                <UsFlagIcon className="size-11 shrink-0" />
+              </span>
+            }
+          />
+          &nbsp;
+        </div>
+        <div>
+          <SectionHeader
+            title={
+              <span className="flex items-center justify-between gap-3">
+                Opening Guesses Frequency
                 <PlFlagIcon className="size-11 shrink-0" />
               </span>
             }

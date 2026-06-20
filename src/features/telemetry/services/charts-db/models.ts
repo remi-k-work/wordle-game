@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { SolutionsLanguage } from "@/features/game/domain";
+import { SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
 export class GuessDistributionArgs extends Schema.Class<GuessDistributionArgs>("GuessDistributionArgs")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
@@ -49,3 +49,14 @@ class ArcadeStreakDistributionSchema extends Schema.Class<ArcadeStreakDistributi
 
 export const ArcadeStreakDistributionData = Schema.Array(ArcadeStreakDistributionSchema);
 export type ArcadeStreakDistributionData = typeof ArcadeStreakDistributionData.Type;
+
+export class OpeningGuessesFrequencyArgs extends Schema.Class<OpeningGuessesFrequencyArgs>("OpeningGuessesFrequencyArgs")({
+  sessionId: Schema.Trim.check(Schema.isUUID()),
+  solutionsLanguage: SolutionsLanguage,
+}) {}
+
+export class OpeningGuessesFrequencyData extends Schema.Class<OpeningGuessesFrequencyData>("OpeningGuessesFrequencyData")({
+  word: TheSecretWord,
+  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}

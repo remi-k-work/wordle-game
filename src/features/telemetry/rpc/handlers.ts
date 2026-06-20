@@ -42,6 +42,12 @@ const RpcTelemetryLayer = RpcTelemetry.toLayer({
       const chartsDB = yield* ChartsDB;
       return yield* chartsDB.getArcadeStreakDistribution(payload);
     }),
+
+  getOpeningGuessesFrequency: (payload) =>
+    Effect.gen(function* () {
+      const chartsDB = yield* ChartsDB;
+      return yield* chartsDB.getOpeningGuessesFrequency(payload);
+    }),
 }).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer)));
 
 const RpcLayer = RpcServer.layerHttp({

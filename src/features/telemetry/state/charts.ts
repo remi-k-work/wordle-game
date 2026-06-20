@@ -43,3 +43,17 @@ export const getArcadeStreakDistributionsAction = RuntimeAtom.fn(
     );
   })
 );
+
+export const getOpeningGuessesFrequenciesAction = RuntimeAtom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const sessionId = get(sessionIdAtom);
+
+    const { getOpeningGuessesFrequency } = yield* RpcTelemetryClient;
+    return yield* Effect.all(
+      [getOpeningGuessesFrequency({ sessionId, solutionsLanguage: "En" }), getOpeningGuessesFrequency({ sessionId, solutionsLanguage: "Pl" })],
+      {
+        concurrency: 2,
+      }
+    );
+  })
+);
