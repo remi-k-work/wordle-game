@@ -5,6 +5,8 @@ import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features
 import {
   ArcadeStreakDistributionArgs,
   ArcadeStreakDistributionData,
+  FailedWordsFrequencyArgs,
+  FailedWordsFrequencyData,
   GuessDistributionArgs,
   GuessDistributionData,
   OpeningGuessesFrequencyArgs,
@@ -44,5 +46,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getOpeningGuessesFrequency", {
     payload: OpeningGuessesFrequencyArgs,
     success: Schema.Array(OpeningGuessesFrequencyData),
+  }),
+
+  Rpc.make("getFailedWordsFrequency", {
+    payload: FailedWordsFrequencyArgs,
+    success: Schema.Array(FailedWordsFrequencyData),
   })
 ) {}

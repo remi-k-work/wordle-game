@@ -57,3 +57,17 @@ export const getOpeningGuessesFrequenciesAction = RuntimeAtom.fn(
     );
   })
 );
+
+export const getFailedWordsFrequenciesAction = RuntimeAtom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const sessionId = get(sessionIdAtom);
+
+    const { getFailedWordsFrequency } = yield* RpcTelemetryClient;
+    return yield* Effect.all(
+      [getFailedWordsFrequency({ sessionId, solutionsLanguage: "En" }), getFailedWordsFrequency({ sessionId, solutionsLanguage: "Pl" })],
+      {
+        concurrency: 2,
+      }
+    );
+  })
+);

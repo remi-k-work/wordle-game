@@ -60,3 +60,14 @@ export class OpeningGuessesFrequencyData extends Schema.Class<OpeningGuessesFreq
   personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
+
+export class FailedWordsFrequencyArgs extends Schema.Class<FailedWordsFrequencyArgs>("FailedWordsFrequencyArgs")({
+  sessionId: Schema.Trim.check(Schema.isUUID()),
+  solutionsLanguage: SolutionsLanguage,
+}) {}
+
+export class FailedWordsFrequencyData extends Schema.Class<FailedWordsFrequencyData>("FailedWordsFrequencyData")({
+  word: TheSecretWord,
+  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}

@@ -6,6 +6,8 @@ import {
   ArcadeStreakDistributionData,
   arcadeStreakDistributionQuery,
   cumulativeToDistribution,
+  FailedWordsFrequencyArgs,
+  failedWordsFrequencyQuery,
   GuessDistributionArgs,
   GuessDistributionData,
   guessDistributionQuery,
@@ -87,12 +89,14 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
 
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
+    const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);
 
     return {
       getGuessDistribution,
       getTimeToSolveDistribution,
       getArcadeStreakDistribution,
       getOpeningGuessesFrequency: (request: OpeningGuessesFrequencyArgs) => getOpeningGuessesFrequency(request),
+      getFailedWordsFrequency: (request: FailedWordsFrequencyArgs) => getFailedWordsFrequency(request),
     } as const;
   }),
 }) {
