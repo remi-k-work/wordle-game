@@ -22,6 +22,10 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const { spanPubSub } = yield* TelemetryHub;
     const { addGlobalPulse, addArcadeRunSummary, addRunWordEvent } = yield* RpcTelemetryClient;
 
+    // Generate the unique identifier for this specific browser session/tab load
+    // This lives in the closure of the worker and remains constant until the page reloads
+    const instanceId = crypto.randomUUID();
+
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
     const processSpanBatch = (readableSpanBatch: ReadonlyArray<ReadableSpan>) =>
       Effect.gen(function* () {
@@ -42,7 +46,13 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         for (const { id: metricName, attributes, state: metricPayload } of snapshots) {
           const sessionId = Schema.decodeUnknownSync(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]);
           const solutionsLanguage = Schema.decodeUnknownSync(SolutionsLanguage)(attributes?.["solutionsLanguage"]);
-          globalPulseRecords.push({ sessionId, solutionsLanguage, metricName, metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)) });
+          globalPulseRecords.push({
+            sessionId,
+            instanceId,
+            solutionsLanguage,
+            metricName,
+            metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
+          });
         }
         if (globalPulseRecords.length > 0) yield* addGlobalPulse(globalPulseRecords);
       });

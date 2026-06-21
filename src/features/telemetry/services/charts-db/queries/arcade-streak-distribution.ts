@@ -17,12 +17,13 @@ export const arcadeStreakDistributionQuery = (sql: SqlClient.SqlClient, { sessio
       personal_histogram AS (
         SELECT 
           COALESCE((bucket->>0)::int, -1) AS join_boundary,
-          (bucket->>1)::int AS personal_count
+          SUM((bucket->>1)::int)::int AS personal_count
         FROM global_pulse,
         LATERAL jsonb_array_elements(metric_payload->'buckets') AS bucket
         WHERE metric_name = 'arcadeRunLength' 
           AND solutions_language = ${solutionsLanguage}
           AND session_id = ${sessionId}
+        GROUP BY bucket->>0
       )
       SELECT 
         NULLIF(COALESCE(g.join_boundary, p.join_boundary), -1) AS streak,

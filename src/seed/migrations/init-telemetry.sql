@@ -2,17 +2,17 @@ DROP TABLE IF EXISTS global_pulse;
 
 CREATE TABLE global_pulse (
   session_id UUID NOT NULL,
+  instance_id UUID NOT NULL,
   solutions_language VARCHAR(2) NOT NULL
     CONSTRAINT global_pulse_solutions_language_check
     CHECK (solutions_language IN ('En', 'Pl')),
   metric_name VARCHAR(50) NOT NULL,
 
   metric_payload JSONB NOT NULL,
-
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- The Composite Primary Key naturally enforces uniqueness for Upserts
-  PRIMARY KEY (session_id, solutions_language, metric_name)
+  PRIMARY KEY (session_id, instance_id, solutions_language, metric_name)
 );
 
 -- We still keep this index! The Primary Key index prioritizes 'session_id', 

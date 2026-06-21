@@ -4,6 +4,7 @@ import { SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
 export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
+  instanceId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
   metricName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(50))),
   metricPayload: Schema.Unknown,

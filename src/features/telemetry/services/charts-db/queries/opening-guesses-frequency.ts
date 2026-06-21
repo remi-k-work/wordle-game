@@ -16,7 +16,7 @@ export const openingGuessesFrequencyQuery = (sql: SqlClient.SqlClient) => {
       LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
       WHERE metric_name = 'openingGuesses' 
         AND solutions_language = ${solutionsLanguage}
-      GROUP BY kv.key
+      GROUP BY UPPER(kv.key)
     ),
     personal_freq AS (
       SELECT 
@@ -27,7 +27,7 @@ export const openingGuessesFrequencyQuery = (sql: SqlClient.SqlClient) => {
       WHERE metric_name = 'openingGuesses' 
         AND solutions_language = ${solutionsLanguage}
         AND session_id = ${sessionId}
-      GROUP BY kv.key
+      GROUP BY UPPER(kv.key)
     )
     SELECT 
       COALESCE(g.word, p.word) AS word,

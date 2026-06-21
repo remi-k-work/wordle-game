@@ -17,12 +17,13 @@ export const guessDistributionQuery = (sql: SqlClient.SqlClient, { sessionId, so
             personal_histogram AS (
               SELECT 
                 (bucket->>0)::int AS turn_boundary,
-                (bucket->>1)::int AS personal_count
+                SUM((bucket->>1)::int)::int AS personal_count
               FROM global_pulse,
               LATERAL jsonb_array_elements(metric_payload->'buckets') AS bucket
               WHERE metric_name = 'guessesToWin' 
                 AND solutions_language = ${solutionsLanguage}
                 AND session_id = ${sessionId}
+              GROUP BY bucket->>0
             )
             SELECT 
               COALESCE(g.turn_boundary, p.turn_boundary) AS turn,
