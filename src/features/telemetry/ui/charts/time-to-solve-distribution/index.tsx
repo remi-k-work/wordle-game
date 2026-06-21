@@ -67,8 +67,8 @@ function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistribu
             labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
           />
 
-          <Line type="monotone" dataKey="globalPct" stroke="var(--color-accent)" strokeWidth={4} />
-          <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[9, 9, 0, 0]} />
+          <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[9, 9, 0, 0]} />
+          <Line type="monotone" dataKey="globalPct" stroke="var(--color-secondary)" strokeWidth={4} />
         </ComposedChart>
       );
     })

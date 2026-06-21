@@ -66,8 +66,8 @@ function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyCh
             labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
           />
 
-          <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
-          <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
+          <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
+          <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
         </BarChart>
       );
     })

@@ -25,11 +25,11 @@ const CustomLegend = () => (
   <div className="flex flex-col items-center font-sans text-text-2">
     <div className="flex items-center gap-2">
       <div className="size-4 bg-(--color-primary)" />
-      Global Base (Inner)
+      Your Runs (Inner)
     </div>
     <div className="flex items-center gap-2">
       <div className="size-4 bg-(--color-secondary)" />
-      Your Runs (Outer)
+      Global Base (Outer)
     </div>
   </div>
 );
@@ -60,9 +60,9 @@ function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequ
           />
           <Legend content={<CustomLegend />} />
 
-          <Pie dataKey="global" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" fill="var(--color-primary)" label />
+          <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" fill="var(--color-primary)" label />
           <Pie
-            dataKey="personal"
+            dataKey="global"
             nameKey="reason"
             cx="50%"
             cy="50%"

@@ -38,13 +38,13 @@ function GamesPlayedCounterChart({ solutionsLanguage }: GamesPlayedCounterChartP
       ) : (
         <article className="mx-auto flex w-full max-w-md gap-4 *:flex-1">
           <header className="flex flex-col items-center justify-center rounded-xl bg-(--color-surface-2) p-6 shadow-sm ring-1 ring-(--color-accent)">
-            <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
-            <span className="mt-2 text-4xl font-semibold text-(--color-primary)">{gamesPlayedCounterData[0].global.toLocaleString()}</span>
+            <h3 className="font-sans tracking-widest text-(--color-text-2)">Your Games</h3>
+            <span className="mt-2 text-4xl font-semibold text-(--color-primary)">{gamesPlayedCounterData[0].personal.toLocaleString()}</span>
           </header>
 
           <footer className="flex flex-col items-center justify-center rounded-xl bg-(--color-surface-2) p-6 shadow-sm ring-1 ring-(--color-accent)">
-            <h3 className="font-sans tracking-widest text-(--color-text-2)">Your Games</h3>
-            <span className="mt-2 text-4xl font-semibold text-(--color-secondary)">{gamesPlayedCounterData[0].personal.toLocaleString()}</span>
+            <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
+            <span className="mt-2 text-4xl font-semibold text-(--color-secondary)">{gamesPlayedCounterData[0].global.toLocaleString()}</span>
           </footer>
         </article>
       );
