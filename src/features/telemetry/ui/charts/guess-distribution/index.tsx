@@ -9,6 +9,10 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
+import { SectionHeader } from "@/ui/section-header";
+
+// assets
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -17,7 +21,7 @@ interface GuessDistributionChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartProps) {
+function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartProps) {
   const [getGuessDistributionsResult, getGuessDistributions] = useAtom(getGuessDistributionsAction);
 
   useEffect(() => {
@@ -57,4 +61,62 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
       );
     })
     .render();
+}
+
+export function GuessDistributionCharts() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Guess Distribution
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <GuessDistributionChart solutionsLanguage="En" />
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Guess Distribution
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <GuessDistributionChart solutionsLanguage="Pl" />
+      </div>
+    </section>
+  );
+}
+
+export function GuessDistributionChartsSkeleton() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Guess Distribution
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Guess Distribution
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+    </section>
+  );
 }

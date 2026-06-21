@@ -82,3 +82,13 @@ export class RunDeathReasonFrequencyData extends Schema.Class<RunDeathReasonFreq
   personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
+
+export class GamesPlayedCounterArgs extends Schema.Class<GamesPlayedCounterArgs>("GamesPlayedCounterArgs")({
+  sessionId: Schema.Trim.check(Schema.isUUID()),
+  solutionsLanguage: SolutionsLanguage,
+}) {}
+
+export class GamesPlayedCounterData extends Schema.Class<GamesPlayedCounterData>("GamesPlayedCounterData")({
+  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}

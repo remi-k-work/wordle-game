@@ -8,19 +8,23 @@ import { runPageMainOrNavigate } from "@/lib/helpers-effect";
 
 // components
 import { PageHeader } from "@/ui/page-header";
-import { SectionHeader } from "@/ui/section-header";
 import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";
 import {
-  ArcadeStreakDistributionChart,
-  FailedWordsFrequencyChart,
-  GuessDistributionChart,
-  OpeningGuessesFrequencyChart,
-  RunDeathReasonFrequencyChart,
-  TimeToSolveDistributionChart,
+  ArcadeStreakDistributionCharts,
+  ArcadeStreakDistributionChartsSkeleton,
+  FailedWordsFrequencyCharts,
+  FailedWordsFrequencyChartsSkeleton,
+  GamesPlayedCounterCharts,
+  GamesPlayedCounterChartsSkeleton,
+  GuessDistributionCharts,
+  GuessDistributionChartsSkeleton,
+  OpeningGuessesFrequencyCharts,
+  OpeningGuessesFrequencyChartsSkeleton,
+  RunDeathReasonFrequencyCharts,
+  RunDeathReasonFrequencyChartsSkeleton,
+  TimeToSolveDistributionCharts,
+  TimeToSolveDistributionChartsSkeleton,
 } from "@/features/telemetry/ui/charts";
-
-// assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { Metadata } from "next";
@@ -53,155 +57,13 @@ async function PageContent() {
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScores top10HighScores={top10HighScores} />
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Guess Distribution
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <GuessDistributionChart solutionsLanguage="En" />
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Guess Distribution
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <GuessDistributionChart solutionsLanguage="Pl" />
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Time to Solve Distribution
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <TimeToSolveDistributionChart solutionsLanguage="En" />
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Time to Solve Distribution
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <TimeToSolveDistributionChart solutionsLanguage="Pl" />
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Arcade Streak Distribution
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <ArcadeStreakDistributionChart solutionsLanguage="En" />
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Arcade Streak Distribution
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <ArcadeStreakDistributionChart solutionsLanguage="Pl" />
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Opening Guesses Frequency
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <OpeningGuessesFrequencyChart solutionsLanguage="En" />
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Opening Guesses Frequency
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <OpeningGuessesFrequencyChart solutionsLanguage="Pl" />
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Failed Words Frequency
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <FailedWordsFrequencyChart solutionsLanguage="En" />
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Failed Words Frequency
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <FailedWordsFrequencyChart solutionsLanguage="Pl" />
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Run Death Reason Frequency
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <RunDeathReasonFrequencyChart solutionsLanguage="En" />
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Run Death Reason Frequency
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          <RunDeathReasonFrequencyChart solutionsLanguage="Pl" />
-        </div>
-      </section>
+      <GuessDistributionCharts />
+      <TimeToSolveDistributionCharts />
+      <ArcadeStreakDistributionCharts />
+      <OpeningGuessesFrequencyCharts />
+      <FailedWordsFrequencyCharts />
+      <RunDeathReasonFrequencyCharts />
+      <GamesPlayedCounterCharts />
     </article>
   );
 }
@@ -210,155 +72,13 @@ function PageSkeleton() {
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Guess Distribution
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Guess Distribution
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Time to Solve Distribution
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Time to Solve Distribution
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Arcade Streak Distribution
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Arcade Streak Distribution
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Opening Guesses Frequency
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Opening Guesses Frequency
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Failed Words Frequency
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Failed Words Frequency
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-      </section>
-
-      <section className="grid gap-3 xl:grid-cols-2">
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Run Death Reason Frequency
-                <UsFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-        <div>
-          <SectionHeader
-            title={
-              <span className="flex items-center justify-between gap-3">
-                Run Death Reason Frequency
-                <PlFlagIcon className="size-11 shrink-0" />
-              </span>
-            }
-          />
-          &nbsp;
-        </div>
-      </section>
+      <GuessDistributionChartsSkeleton />
+      <TimeToSolveDistributionChartsSkeleton />
+      <ArcadeStreakDistributionChartsSkeleton />
+      <OpeningGuessesFrequencyChartsSkeleton />
+      <FailedWordsFrequencyChartsSkeleton />
+      <RunDeathReasonFrequencyChartsSkeleton />
+      <GamesPlayedCounterChartsSkeleton />
     </article>
   );
 }

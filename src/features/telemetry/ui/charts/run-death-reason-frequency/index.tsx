@@ -9,6 +9,10 @@ import { Tooltip, Legend, PieChart, Pie } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
+import { SectionHeader } from "@/ui/section-header";
+
+// assets
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -30,7 +34,7 @@ const CustomLegend = () => (
   </div>
 );
 
-export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
+function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
   const [getRunDeathReasonFrequenciesResult, getRunDeathReasonFrequencies] = useAtom(getRunDeathReasonFrequenciesAction);
 
   useEffect(() => {
@@ -72,4 +76,62 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
       );
     })
     .render();
+}
+
+export function RunDeathReasonFrequencyCharts() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Run Death Reason Frequency
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <RunDeathReasonFrequencyChart solutionsLanguage="En" />
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Run Death Reason Frequency
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <RunDeathReasonFrequencyChart solutionsLanguage="Pl" />
+      </div>
+    </section>
+  );
+}
+
+export function RunDeathReasonFrequencyChartsSkeleton() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Run Death Reason Frequency
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Run Death Reason Frequency
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+    </section>
+  );
 }

@@ -9,6 +9,10 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
+import { SectionHeader } from "@/ui/section-header";
+
+// assets
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -17,7 +21,7 @@ interface ArcadeStreakDistributionChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStreakDistributionChartProps) {
+function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStreakDistributionChartProps) {
   const [getArcadeStreakDistributionsResult, getArcadeStreakDistributions] = useAtom(getArcadeStreakDistributionsAction);
 
   useEffect(() => {
@@ -60,4 +64,62 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
       );
     })
     .render();
+}
+
+export function ArcadeStreakDistributionCharts() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Arcade Streak Distribution
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <ArcadeStreakDistributionChart solutionsLanguage="En" />
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Arcade Streak Distribution
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <ArcadeStreakDistributionChart solutionsLanguage="Pl" />
+      </div>
+    </section>
+  );
+}
+
+export function ArcadeStreakDistributionChartsSkeleton() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Arcade Streak Distribution
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Arcade Streak Distribution
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+    </section>
+  );
 }

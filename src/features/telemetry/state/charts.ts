@@ -85,3 +85,14 @@ export const getRunDeathReasonFrequenciesAction = RuntimeAtom.fn(
     );
   })
 );
+
+export const getGamesPlayedCountersAction = RuntimeAtom.fn(
+  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+    const sessionId = get(sessionIdAtom);
+
+    const { getGamesPlayedCounter } = yield* RpcTelemetryClient;
+    return yield* Effect.all([getGamesPlayedCounter({ sessionId, solutionsLanguage: "En" }), getGamesPlayedCounter({ sessionId, solutionsLanguage: "Pl" })], {
+      concurrency: 2,
+    });
+  })
+);

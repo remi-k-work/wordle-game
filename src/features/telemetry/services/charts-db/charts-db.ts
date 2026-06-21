@@ -8,6 +8,8 @@ import {
   cumulativeToDistribution,
   FailedWordsFrequencyArgs,
   failedWordsFrequencyQuery,
+  GamesPlayedCounterArgs,
+  gamesPlayedCounterQuery,
   GuessDistributionArgs,
   GuessDistributionData,
   guessDistributionQuery,
@@ -93,6 +95,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
     const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);
     const getRunDeathReasonFrequency = runDeathReasonFrequencyQuery(sql);
+    const getGamesPlayedCounter = gamesPlayedCounterQuery(sql);
 
     return {
       getGuessDistribution,
@@ -101,6 +104,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       getOpeningGuessesFrequency: (request: OpeningGuessesFrequencyArgs) => getOpeningGuessesFrequency(request),
       getFailedWordsFrequency: (request: FailedWordsFrequencyArgs) => getFailedWordsFrequency(request),
       getRunDeathReasonFrequency: (request: RunDeathReasonFrequencyArgs) => getRunDeathReasonFrequency(request),
+      getGamesPlayedCounter: (request: GamesPlayedCounterArgs) => getGamesPlayedCounter(request),
     } as const;
   }),
 }) {

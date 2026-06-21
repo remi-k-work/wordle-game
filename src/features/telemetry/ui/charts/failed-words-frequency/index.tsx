@@ -9,6 +9,10 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "rec
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
+import { SectionHeader } from "@/ui/section-header";
+
+// assets
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -21,7 +25,7 @@ interface FailedWordsFrequencyChartProps {
 const CHART_PADDING_PX = 96;
 const BAR_HEIGHT_PX = 48;
 
-export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyChartProps) {
+function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyChartProps) {
   const [getFailedWordsFrequenciesResult, getFailedWordsFrequencies] = useAtom(getFailedWordsFrequenciesAction);
 
   useEffect(() => {
@@ -68,4 +72,62 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
       );
     })
     .render();
+}
+
+export function FailedWordsFrequencyCharts() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Failed Words Frequency
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <FailedWordsFrequencyChart solutionsLanguage="En" />
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Failed Words Frequency
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <FailedWordsFrequencyChart solutionsLanguage="Pl" />
+      </div>
+    </section>
+  );
+}
+
+export function FailedWordsFrequencyChartsSkeleton() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Failed Words Frequency
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Failed Words Frequency
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+    </section>
+  );
 }

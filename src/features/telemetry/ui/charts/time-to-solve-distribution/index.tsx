@@ -9,6 +9,10 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
+import { SectionHeader } from "@/ui/section-header";
+
+// assets
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -26,7 +30,7 @@ const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = fal
   return emojiOnly ? "?" : "Unknown";
 };
 
-export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistributionChartProps) {
+function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistributionChartProps) {
   const [getTimeToSolveDistributionsResult, getTimeToSolveDistributions] = useAtom(getTimeToSolveDistributionsAction);
 
   useEffect(() => {
@@ -69,4 +73,62 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
       );
     })
     .render();
+}
+
+export function TimeToSolveDistributionCharts() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Time to Solve Distribution
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <TimeToSolveDistributionChart solutionsLanguage="En" />
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Time to Solve Distribution
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        <TimeToSolveDistributionChart solutionsLanguage="Pl" />
+      </div>
+    </section>
+  );
+}
+
+export function TimeToSolveDistributionChartsSkeleton() {
+  return (
+    <section className="grid gap-3 xl:grid-cols-2">
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Time to Solve Distribution
+              <UsFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+      <div>
+        <SectionHeader
+          title={
+            <span className="flex items-center justify-between gap-3">
+              Time to Solve Distribution
+              <PlFlagIcon className="size-11 shrink-0" />
+            </span>
+          }
+        />
+        &nbsp;
+      </div>
+    </section>
+  );
 }

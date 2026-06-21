@@ -60,6 +60,12 @@ const RpcTelemetryLayer = RpcTelemetry.toLayer({
       const chartsDB = yield* ChartsDB;
       return yield* chartsDB.getRunDeathReasonFrequency(payload);
     }),
+
+  getGamesPlayedCounter: (payload) =>
+    Effect.gen(function* () {
+      const chartsDB = yield* ChartsDB;
+      return yield* chartsDB.getGamesPlayedCounter(payload);
+    }),
 }).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer)));
 
 const RpcLayer = RpcServer.layerHttp({

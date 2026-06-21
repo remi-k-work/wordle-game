@@ -7,6 +7,8 @@ import {
   ArcadeStreakDistributionData,
   FailedWordsFrequencyArgs,
   FailedWordsFrequencyData,
+  GamesPlayedCounterArgs,
+  GamesPlayedCounterData,
   GuessDistributionArgs,
   GuessDistributionData,
   OpeningGuessesFrequencyArgs,
@@ -58,5 +60,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getRunDeathReasonFrequency", {
     payload: RunDeathReasonFrequencyArgs,
     success: Schema.Array(RunDeathReasonFrequencyData),
+  }),
+
+  Rpc.make("getGamesPlayedCounter", {
+    payload: GamesPlayedCounterArgs,
+    success: Schema.Array(GamesPlayedCounterData),
   })
 ) {}
