@@ -85,9 +85,11 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     });
 
     // Run both processors in the background (Detach from parent scope)
-    yield* Effect.forkDetach(spanProcessor);
-    yield* Effect.forkDetach(metricProcessor);
+    yield* Effect.forkScoped(spanProcessor);
+    yield* Effect.forkScoped(metricProcessor);
 
     yield* Effect.log("[TelemetryWorker] Background telemetry processors started.");
+
+    yield* Effect.addFinalizer(() => Effect.log("[TelemetryWorker] Background telemetry processors stopped."));
   })
-).pipe(Layer.provide(RpcTelemetryClient.layer));
+);

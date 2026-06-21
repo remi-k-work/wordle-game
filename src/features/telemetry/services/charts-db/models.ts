@@ -83,12 +83,13 @@ export class RunDeathReasonFrequencyData extends Schema.Class<RunDeathReasonFreq
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-export class GamesPlayedCounterArgs extends Schema.Class<GamesPlayedCounterArgs>("GamesPlayedCounterArgs")({
+export class AnyCounterArgs extends Schema.Class<AnyCounterArgs>("AnyCounterArgs")({
+  counterName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(50))),
   sessionId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
 }) {}
 
-export class GamesPlayedCounterData extends Schema.Class<GamesPlayedCounterData>("GamesPlayedCounterData")({
+export class AnyCounterData extends Schema.Class<AnyCounterData>("AnyCounterData")({
   personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}

@@ -1,25 +1,25 @@
 // services, features, and other libraries
 import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { GamesPlayedCounterArgs, GamesPlayedCounterData } from "@/features/telemetry/services/charts-db";
+import { AnyCounterArgs, AnyCounterData } from "@/features/telemetry/services/charts-db";
 
-export const gamesPlayedCounterQuery = (sql: SqlClient.SqlClient) => {
+export const anyCounterQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findAll({
-    Request: GamesPlayedCounterArgs,
-    Result: GamesPlayedCounterData,
-    execute: ({ sessionId, solutionsLanguage }) => sql`
+    Request: AnyCounterArgs,
+    Result: AnyCounterData,
+    execute: ({ counterName, sessionId, solutionsLanguage }) => sql`
       WITH global_counter AS (
         SELECT 
           SUM((metric_payload->>'count')::numeric)::int AS global_total
         FROM global_pulse
-        WHERE metric_name = 'gamesPlayed' 
+        WHERE metric_name = ${counterName}
           AND solutions_language = ${solutionsLanguage}
       ),
       personal_counter AS (
         SELECT 
           SUM((metric_payload->>'count')::numeric)::int AS personal_total
         FROM global_pulse
-        WHERE metric_name = 'gamesPlayed' 
+        WHERE metric_name = ${counterName}
           AND solutions_language = ${solutionsLanguage}
           AND session_id = ${sessionId}
       )
@@ -30,6 +30,6 @@ export const gamesPlayedCounterQuery = (sql: SqlClient.SqlClient) => {
       CROSS JOIN personal_counter p`,
   });
 
-  return (request: GamesPlayedCounterArgs) =>
+  return (request: AnyCounterArgs) =>
     query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
 };

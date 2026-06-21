@@ -3,12 +3,12 @@ import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
 import {
+  AnyCounterArgs,
+  AnyCounterData,
   ArcadeStreakDistributionArgs,
   ArcadeStreakDistributionData,
   FailedWordsFrequencyArgs,
   FailedWordsFrequencyData,
-  GamesPlayedCounterArgs,
-  GamesPlayedCounterData,
   GuessDistributionArgs,
   GuessDistributionData,
   OpeningGuessesFrequencyArgs,
@@ -62,8 +62,8 @@ export class RpcTelemetry extends RpcGroup.make(
     success: Schema.Array(RunDeathReasonFrequencyData),
   }),
 
-  Rpc.make("getGamesPlayedCounter", {
-    payload: GamesPlayedCounterArgs,
-    success: Schema.Array(GamesPlayedCounterData),
+  Rpc.make("getAnyCounter", {
+    payload: AnyCounterArgs,
+    success: Schema.Array(AnyCounterData),
   })
 ) {}

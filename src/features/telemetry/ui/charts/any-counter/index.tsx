@@ -4,7 +4,7 @@ import { useEffect } from "react";
 // services, features, and other libraries
 import { useAtom } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getGamesPlayedCountersAction } from "@/features/telemetry/state";
+import { getAnyCountersAction } from "@/features/telemetry/state";
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
@@ -16,35 +16,43 @@ import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
 
-interface GamesPlayedCounterChartProps {
+interface AnyCounterChartProps {
+  counterName: string;
   solutionsLanguage: SolutionsLanguage;
+  personalHeader: string;
 }
 
-function GamesPlayedCounterChart({ solutionsLanguage }: GamesPlayedCounterChartProps) {
-  const [getGamesPlayedCountersResult, getGamesPlayedCounters] = useAtom(getGamesPlayedCountersAction);
+interface AnyCounterChartsProps {
+  title: string;
+  counterName: string;
+  personalHeader: string;
+}
+
+function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: AnyCounterChartProps) {
+  const [getAnyCountersResult, getAnyCounters] = useAtom(getAnyCountersAction);
 
   useEffect(() => {
-    getGamesPlayedCounters();
-  }, [getGamesPlayedCounters]);
+    getAnyCounters(counterName);
+  }, [counterName, getAnyCounters]);
 
-  return AsyncResult.builder(getGamesPlayedCountersResult)
+  return AsyncResult.builder(getAnyCountersResult)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
-    .onSuccess((gamesPlayedCountersData) => {
-      const gamesPlayedCounterData = gamesPlayedCountersData[solutionsLanguage === "En" ? 0 : 1];
+    .onSuccess((anyCountersData) => {
+      const anyCounterData = anyCountersData[solutionsLanguage === "En" ? 0 : 1];
 
-      return gamesPlayedCounterData.length === 0 ? (
+      return anyCounterData.length === 0 ? (
         <InfoLine message="No counter data tracked yet!" />
       ) : (
         <article className="mx-auto flex w-full max-w-md gap-4 *:flex-1">
           <header className="flex flex-col items-center justify-center rounded-xl bg-(--color-surface-2) p-6 shadow-sm ring-1 ring-(--color-accent)">
-            <h3 className="font-sans tracking-widest text-(--color-text-2)">Your Games</h3>
-            <span className="mt-2 text-4xl font-semibold text-(--color-primary)">{gamesPlayedCounterData[0].personal.toLocaleString()}</span>
+            <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
+            <span className="mt-2 text-4xl font-semibold text-(--color-primary)">{anyCounterData[0].personal.toLocaleString()}</span>
           </header>
 
           <footer className="flex flex-col items-center justify-center rounded-xl bg-(--color-surface-2) p-6 shadow-sm ring-1 ring-(--color-accent)">
             <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
-            <span className="mt-2 text-4xl font-semibold text-(--color-secondary)">{gamesPlayedCounterData[0].global.toLocaleString()}</span>
+            <span className="mt-2 text-4xl font-semibold text-(--color-secondary)">{anyCounterData[0].global.toLocaleString()}</span>
           </footer>
         </article>
       );
@@ -52,43 +60,43 @@ function GamesPlayedCounterChart({ solutionsLanguage }: GamesPlayedCounterChartP
     .render();
 }
 
-export function GamesPlayedCounterCharts() {
+export function AnyCounterCharts({ title, counterName, personalHeader }: AnyCounterChartsProps) {
   return (
     <section className="grid gap-3 xl:grid-cols-2">
       <div>
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Games Played Counter
+              {title}
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
         />
-        <GamesPlayedCounterChart solutionsLanguage="En" />
+        <AnyCounterChart counterName={counterName} solutionsLanguage="En" personalHeader={personalHeader} />
       </div>
       <div>
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Games Played Counter
+              {title}
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
         />
-        <GamesPlayedCounterChart solutionsLanguage="Pl" />
+        <AnyCounterChart counterName={counterName} solutionsLanguage="Pl" personalHeader={personalHeader} />
       </div>
     </section>
   );
 }
 
-export function GamesPlayedCounterChartsSkeleton() {
+export function AnyCounterChartsSkeleton({ title }: Pick<AnyCounterChartsProps, "title">) {
   return (
     <section className="grid gap-3 xl:grid-cols-2">
       <div>
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Games Played Counter
+              {title}
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -99,7 +107,7 @@ export function GamesPlayedCounterChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Games Played Counter
+              {title}
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

@@ -10,12 +10,12 @@ import { runPageMainOrNavigate } from "@/lib/helpers-effect";
 import { PageHeader } from "@/ui/page-header";
 import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";
 import {
+  AnyCounterCharts,
+  AnyCounterChartsSkeleton,
   ArcadeStreakDistributionCharts,
   ArcadeStreakDistributionChartsSkeleton,
   FailedWordsFrequencyCharts,
   FailedWordsFrequencyChartsSkeleton,
-  GamesPlayedCounterCharts,
-  GamesPlayedCounterChartsSkeleton,
   GuessDistributionCharts,
   GuessDistributionChartsSkeleton,
   OpeningGuessesFrequencyCharts,
@@ -63,7 +63,11 @@ async function PageContent() {
       <OpeningGuessesFrequencyCharts />
       <FailedWordsFrequencyCharts />
       <RunDeathReasonFrequencyCharts />
-      <GamesPlayedCounterCharts />
+      <AnyCounterCharts title="Total number of games played (both won and lost)" counterName="gamesPlayed" personalHeader="Your Games" />
+      <AnyCounterCharts title="Total number of arcade runs started" counterName="runsStarted" personalHeader="Your Runs" />
+      <AnyCounterCharts title="Total number of games won on the first try" counterName="perfectGames" personalHeader="Your Perfect Games" />
+      <AnyCounterCharts title="Total number of invalid guesses (not in dictionary)" counterName="invalidGuesses" personalHeader="Your Invalid Guesses" />
+      <AnyCounterCharts title="Total number of valid guesses submitted" counterName="validGuesses" personalHeader="Your Valid Guesses" />
     </article>
   );
 }
@@ -78,7 +82,11 @@ function PageSkeleton() {
       <OpeningGuessesFrequencyChartsSkeleton />
       <FailedWordsFrequencyChartsSkeleton />
       <RunDeathReasonFrequencyChartsSkeleton />
-      <GamesPlayedCounterChartsSkeleton />
+      <AnyCounterChartsSkeleton title="Total number of games played (both won and lost)" />
+      <AnyCounterChartsSkeleton title="Total number of arcade runs started" />
+      <AnyCounterChartsSkeleton title="Total number of games won on the first try" />
+      <AnyCounterChartsSkeleton title="Total number of invalid guesses (not in dictionary)" />
+      <AnyCounterChartsSkeleton title="Total number of valid guesses submitted" />
     </article>
   );
 }

@@ -20,9 +20,6 @@ const TelemetryLayer = WebSdk.layer(
   })
 );
 
-// Combined telemetry logic provided with the Hub
-const TelemetryReady = Layer.mergeAll(TelemetryLayer, TelemetryWorkerLayer).pipe(Layer.provide(TelemetryHub.layer));
-
 const MainLayer = Layer.mergeAll(
   Logger.layer([Logger.consolePretty()]),
   AtomRegistry.layer,
@@ -30,8 +27,8 @@ const MainLayer = Layer.mergeAll(
   BrowserKeyValueStore.layerLocalStorage,
   RpcGameClient.layer,
   RpcHighScoreClient.layer,
-  RpcTelemetryClient.layer,
-  TelemetryReady
-);
+  TelemetryLayer,
+  TelemetryWorkerLayer
+).pipe(Layer.provideMerge(RpcTelemetryClient.layer), Layer.provideMerge(TelemetryHub.layer));
 
 export const RuntimeAtom = Atom.runtime(MainLayer);
