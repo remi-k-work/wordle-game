@@ -1,11 +1,11 @@
 // services, features, and other libraries
 import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { FailedWordsFrequencyArgs, FailedWordsFrequencyData } from "@/features/telemetry/services/charts-db";
+import { AnyChartArgs, FailedWordsFrequencyData } from "@/features/telemetry/services/charts-db";
 
 export const failedWordsFrequencyQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findAll({
-    Request: FailedWordsFrequencyArgs,
+    Request: AnyChartArgs,
     Result: FailedWordsFrequencyData,
     execute: ({ sessionId, solutionsLanguage }) => sql`
     WITH global_freq AS (
@@ -40,6 +40,5 @@ export const failedWordsFrequencyQuery = (sql: SqlClient.SqlClient) => {
     LIMIT 15`,
   });
 
-  return (request: FailedWordsFrequencyArgs) =>
-    query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
 };

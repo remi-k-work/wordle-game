@@ -70,7 +70,7 @@ export function GuessDistributionCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Guess Distribution
+              Distribution of guesses needed to win a game
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -81,7 +81,7 @@ export function GuessDistributionCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Guess Distribution
+              Distribution of guesses needed to win a game
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -99,7 +99,7 @@ export function GuessDistributionChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Guess Distribution
+              Distribution of guesses needed to win a game
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -110,7 +110,7 @@ export function GuessDistributionChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Guess Distribution
+              Distribution of guesses needed to win a game
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

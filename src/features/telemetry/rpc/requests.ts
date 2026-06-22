@@ -3,19 +3,14 @@ import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
 import {
+  AnyChartArgs,
   AnyCounterArgs,
   AnyCounterData,
-  ArcadeStreakDistributionArgs,
   ArcadeStreakDistributionData,
-  FailedWordsFrequencyArgs,
   FailedWordsFrequencyData,
-  GuessDistributionArgs,
   GuessDistributionData,
-  OpeningGuessesFrequencyArgs,
   OpeningGuessesFrequencyData,
-  RunDeathReasonFrequencyArgs,
   RunDeathReasonFrequencyData,
-  TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
 } from "@/features/telemetry/services/charts-db/models";
 
@@ -33,32 +28,32 @@ export class RpcTelemetry extends RpcGroup.make(
   }),
 
   Rpc.make("getGuessDistribution", {
-    payload: GuessDistributionArgs,
-    success: GuessDistributionData,
+    payload: AnyChartArgs,
+    success: Schema.Array(GuessDistributionData),
   }),
 
   Rpc.make("getTimeToSolveDistribution", {
-    payload: TimeToSolveDistributionArgs,
-    success: TimeToSolveDistributionData,
+    payload: AnyChartArgs,
+    success: Schema.Array(TimeToSolveDistributionData),
   }),
 
   Rpc.make("getArcadeStreakDistribution", {
-    payload: ArcadeStreakDistributionArgs,
-    success: ArcadeStreakDistributionData,
+    payload: AnyChartArgs,
+    success: Schema.Array(ArcadeStreakDistributionData),
   }),
 
   Rpc.make("getOpeningGuessesFrequency", {
-    payload: OpeningGuessesFrequencyArgs,
+    payload: AnyChartArgs,
     success: Schema.Array(OpeningGuessesFrequencyData),
   }),
 
   Rpc.make("getFailedWordsFrequency", {
-    payload: FailedWordsFrequencyArgs,
+    payload: AnyChartArgs,
     success: Schema.Array(FailedWordsFrequencyData),
   }),
 
   Rpc.make("getRunDeathReasonFrequency", {
-    payload: RunDeathReasonFrequencyArgs,
+    payload: AnyChartArgs,
     success: Schema.Array(RunDeathReasonFrequencyData),
   }),
 

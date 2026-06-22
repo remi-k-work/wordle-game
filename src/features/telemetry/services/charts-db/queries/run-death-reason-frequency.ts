@@ -1,11 +1,11 @@
 // services, features, and other libraries
 import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { RunDeathReasonFrequencyArgs, RunDeathReasonFrequencyData } from "@/features/telemetry/services/charts-db";
+import { AnyChartArgs, RunDeathReasonFrequencyData } from "@/features/telemetry/services/charts-db";
 
 export const runDeathReasonFrequencyQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findAll({
-    Request: RunDeathReasonFrequencyArgs,
+    Request: AnyChartArgs,
     Result: RunDeathReasonFrequencyData,
     execute: ({ sessionId, solutionsLanguage }) => sql`
     WITH global_freq AS (
@@ -39,6 +39,5 @@ export const runDeathReasonFrequencyQuery = (sql: SqlClient.SqlClient) => {
     ORDER BY reason ASC`,
   });
 
-  return (request: RunDeathReasonFrequencyArgs) =>
-    query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
 };

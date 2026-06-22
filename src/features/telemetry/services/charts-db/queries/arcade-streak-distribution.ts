@@ -1,9 +1,13 @@
 // services, features, and other libraries
-import { SqlClient } from "effect/unstable/sql";
-import { ArcadeStreakDistributionArgs } from "@/features/telemetry/services/charts-db";
+import { Effect } from "effect";
+import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { AnyChartArgs, ArcadeStreakDistributionData } from "@/features/telemetry/services/charts-db";
 
-export const arcadeStreakDistributionQuery = (sql: SqlClient.SqlClient, { sessionId, solutionsLanguage }: ArcadeStreakDistributionArgs) =>
-  sql<{ streak: number | null; personal: string | number; global: string | number }>`
+export const arcadeStreakDistributionQuery = (sql: SqlClient.SqlClient) => {
+  const query = SqlSchema.findAll({
+    Request: AnyChartArgs,
+    Result: ArcadeStreakDistributionData,
+    execute: ({ sessionId, solutionsLanguage }) => sql`
       WITH global_histogram AS (
         SELECT 
           COALESCE((bucket->>0)::int, -1) AS join_boundary,
@@ -32,4 +36,8 @@ export const arcadeStreakDistributionQuery = (sql: SqlClient.SqlClient, { sessio
       FROM global_histogram g
       FULL OUTER JOIN personal_histogram p 
         ON g.join_boundary = p.join_boundary
-      ORDER BY streak ASC NULLS LAST`;
+      ORDER BY streak ASC NULLS LAST`,
+  });
+
+  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+};

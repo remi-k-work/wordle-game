@@ -85,7 +85,7 @@ export function RunDeathReasonFrequencyCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Run Death Reason Frequency
+              Reasons why an arcade run ended
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -96,7 +96,7 @@ export function RunDeathReasonFrequencyCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Run Death Reason Frequency
+              Reasons why an arcade run ended
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -114,7 +114,7 @@ export function RunDeathReasonFrequencyChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Run Death Reason Frequency
+              Reasons why an arcade run ended
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -125,7 +125,7 @@ export function RunDeathReasonFrequencyChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Run Death Reason Frequency
+              Reasons why an arcade run ended
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

@@ -73,7 +73,7 @@ export function ArcadeStreakDistributionCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Arcade Streak Distribution
+              Distribution of run lengths (streak) before a loss
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -84,7 +84,7 @@ export function ArcadeStreakDistributionCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Arcade Streak Distribution
+              Distribution of run lengths (streak) before a loss
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -102,7 +102,7 @@ export function ArcadeStreakDistributionChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Arcade Streak Distribution
+              Distribution of run lengths (streak) before a loss
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -113,7 +113,7 @@ export function ArcadeStreakDistributionChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Arcade Streak Distribution
+              Distribution of run lengths (streak) before a loss
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

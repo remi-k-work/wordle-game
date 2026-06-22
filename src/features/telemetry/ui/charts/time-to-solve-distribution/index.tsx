@@ -82,7 +82,7 @@ export function TimeToSolveDistributionCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Time to Solve Distribution
+              Distribution of time taken to solve a word
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -93,7 +93,7 @@ export function TimeToSolveDistributionCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Time to Solve Distribution
+              Distribution of time taken to solve a word
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -111,7 +111,7 @@ export function TimeToSolveDistributionChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Time to Solve Distribution
+              Distribution of time taken to solve a word
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -122,7 +122,7 @@ export function TimeToSolveDistributionChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Time to Solve Distribution
+              Distribution of time taken to solve a word
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

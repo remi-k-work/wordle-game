@@ -81,7 +81,7 @@ export function OpeningGuessesFrequencyCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Opening Guesses Frequency
+              Frequency of the first word guessed in a game
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -92,7 +92,7 @@ export function OpeningGuessesFrequencyCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Opening Guesses Frequency
+              Frequency of the first word guessed in a game
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -110,7 +110,7 @@ export function OpeningGuessesFrequencyChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Opening Guesses Frequency
+              Frequency of the first word guessed in a game
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -121,7 +121,7 @@ export function OpeningGuessesFrequencyChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Opening Guesses Frequency
+              Frequency of the first word guessed in a game
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

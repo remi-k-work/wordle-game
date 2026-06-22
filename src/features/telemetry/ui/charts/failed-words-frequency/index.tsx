@@ -81,7 +81,7 @@ export function FailedWordsFrequencyCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Failed Words Frequency
+              Frequency of words that players failed to guess
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -92,7 +92,7 @@ export function FailedWordsFrequencyCharts() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Failed Words Frequency
+              Frequency of words that players failed to guess
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -110,7 +110,7 @@ export function FailedWordsFrequencyChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Failed Words Frequency
+              Frequency of words that players failed to guess
               <UsFlagIcon className="size-11 shrink-0" />
             </span>
           }
@@ -121,7 +121,7 @@ export function FailedWordsFrequencyChartsSkeleton() {
         <SectionHeader
           title={
             <span className="flex items-center justify-between gap-3">
-              Failed Words Frequency
+              Frequency of words that players failed to guess
               <PlFlagIcon className="size-11 shrink-0" />
             </span>
           }

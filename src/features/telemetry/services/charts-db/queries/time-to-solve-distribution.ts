@@ -1,9 +1,13 @@
 // services, features, and other libraries
-import { SqlClient } from "effect/unstable/sql";
-import { TimeToSolveDistributionArgs } from "@/features/telemetry/services/charts-db";
+import { Effect } from "effect";
+import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { AnyChartArgs, TimeToSolveDistributionData } from "@/features/telemetry/services/charts-db";
 
-export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient, { sessionId, solutionsLanguage }: TimeToSolveDistributionArgs) =>
-  sql<{ maxSeconds: number | null; personal: string | number; global: string | number }>`
+export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient) => {
+  const query = SqlSchema.findAll({
+    Request: AnyChartArgs,
+    Result: TimeToSolveDistributionData,
+    execute: ({ sessionId, solutionsLanguage }) => sql`
       WITH global_histogram AS (
         SELECT 
           COALESCE((bucket->>0)::int, -1) AS join_boundary,
@@ -32,4 +36,8 @@ export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient, { session
       FROM global_histogram g
       FULL OUTER JOIN personal_histogram p 
         ON g.join_boundary = p.join_boundary
-      ORDER BY max_seconds ASC NULLS LAST`;
+      ORDER BY max_seconds ASC NULLS LAST`,
+  });
+
+  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+};

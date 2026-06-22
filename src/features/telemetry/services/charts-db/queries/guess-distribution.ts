@@ -1,9 +1,13 @@
 // services, features, and other libraries
-import { SqlClient } from "effect/unstable/sql";
-import { GuessDistributionArgs } from "@/features/telemetry/services/charts-db";
+import { Effect } from "effect";
+import { SqlClient, SqlSchema } from "effect/unstable/sql";
+import { AnyChartArgs, GuessDistributionData } from "@/features/telemetry/services/charts-db";
 
-export const guessDistributionQuery = (sql: SqlClient.SqlClient, { sessionId, solutionsLanguage }: GuessDistributionArgs) =>
-  sql<{ turn: number; personal: string | number; global: string | number }>`
+export const guessDistributionQuery = (sql: SqlClient.SqlClient) => {
+  const query = SqlSchema.findAll({
+    Request: AnyChartArgs,
+    Result: GuessDistributionData,
+    execute: ({ sessionId, solutionsLanguage }) => sql`
             WITH global_histogram AS (
               SELECT 
                 (bucket->>0)::int AS turn_boundary,
@@ -33,4 +37,8 @@ export const guessDistributionQuery = (sql: SqlClient.SqlClient, { sessionId, so
             FULL OUTER JOIN personal_histogram p 
               ON g.turn_boundary = p.turn_boundary
             WHERE COALESCE(g.turn_boundary, p.turn_boundary) IS NOT NULL
-            ORDER BY turn ASC`;
+            ORDER BY turn ASC`,
+  });
+
+  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+};

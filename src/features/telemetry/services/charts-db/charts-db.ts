@@ -2,22 +2,17 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import {
+  AnyChartArgs,
   AnyCounterArgs,
   anyCounterQuery,
-  ArcadeStreakDistributionArgs,
   ArcadeStreakDistributionData,
   arcadeStreakDistributionQuery,
   cumulativeToDistribution,
-  FailedWordsFrequencyArgs,
   failedWordsFrequencyQuery,
-  GuessDistributionArgs,
   GuessDistributionData,
   guessDistributionQuery,
-  OpeningGuessesFrequencyArgs,
   openingGuessesFrequencyQuery,
-  RunDeathReasonFrequencyArgs,
   runDeathReasonFrequencyQuery,
-  TimeToSolveDistributionArgs,
   TimeToSolveDistributionData,
   timeToSolveDistributionQuery,
 } from ".";
@@ -27,14 +22,11 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
 
-    const getGuessDistribution = ({ sessionId, solutionsLanguage }: GuessDistributionArgs) =>
+    const getGuessDistribution = (request: AnyChartArgs) =>
       Effect.gen(function* () {
-        const rows = yield* guessDistributionQuery(sql, { sessionId, solutionsLanguage });
+        const rows = yield* guessDistributionQuery(sql)(request);
 
-        // Coerce strings from DB into numbers
-        const safeRows = rows.map((row) => ({ turn: Number(row.turn), personal: Number(row.personal), global: Number(row.global) }));
-
-        const chartData = cumulativeToDistribution(safeRows, (row, personal, global, personalPct, globalPct) => ({
+        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
           turn: row.turn,
           personal,
           global,
@@ -43,21 +35,14 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         }));
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeUnknownEffect(GuessDistributionData)(chartData);
-      }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+        return yield* Schema.decodeUnknownEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
+      });
 
-    const getTimeToSolveDistribution = ({ sessionId, solutionsLanguage }: TimeToSolveDistributionArgs) =>
+    const getTimeToSolveDistribution = (request: AnyChartArgs) =>
       Effect.gen(function* () {
-        const rows = yield* timeToSolveDistributionQuery(sql, { sessionId, solutionsLanguage });
+        const rows = yield* timeToSolveDistributionQuery(sql)(request);
 
-        // Coerce strings from DB into numbers
-        const safeRows = rows.map((row) => ({
-          maxSeconds: row.maxSeconds !== null ? Number(row.maxSeconds) : null,
-          personal: Number(row.personal),
-          global: Number(row.global),
-        }));
-
-        const chartData = cumulativeToDistribution(safeRows, (row, personal, global, personalPct, globalPct) => ({
+        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
           maxSeconds: row.maxSeconds,
           personal,
           global,
@@ -66,21 +51,14 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         }));
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeUnknownEffect(TimeToSolveDistributionData)(chartData);
-      }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+        return yield* Schema.decodeUnknownEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(Effect.orDie);
+      });
 
-    const getArcadeStreakDistribution = ({ sessionId, solutionsLanguage }: ArcadeStreakDistributionArgs) =>
+    const getArcadeStreakDistribution = (request: AnyChartArgs) =>
       Effect.gen(function* () {
-        const rows = yield* arcadeStreakDistributionQuery(sql, { sessionId, solutionsLanguage });
+        const rows = yield* arcadeStreakDistributionQuery(sql)(request);
 
-        // Coerce strings from DB into numbers
-        const safeRows = rows.map((row) => ({
-          streak: row.streak !== null ? Number(row.streak) : null,
-          personal: Number(row.personal),
-          global: Number(row.global),
-        }));
-
-        const chartData = cumulativeToDistribution(safeRows, (row, personal, global, personalPct, globalPct) => ({
+        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
           streak: row.streak,
           personal,
           global,
@@ -89,8 +67,8 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         }));
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeUnknownEffect(ArcadeStreakDistributionData)(chartData);
-      }).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+        return yield* Schema.decodeUnknownEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(Effect.orDie);
+      });
 
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
     const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);
@@ -98,12 +76,12 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const getAnyCounter = anyCounterQuery(sql);
 
     return {
-      getGuessDistribution,
-      getTimeToSolveDistribution,
-      getArcadeStreakDistribution,
-      getOpeningGuessesFrequency: (request: OpeningGuessesFrequencyArgs) => getOpeningGuessesFrequency(request),
-      getFailedWordsFrequency: (request: FailedWordsFrequencyArgs) => getFailedWordsFrequency(request),
-      getRunDeathReasonFrequency: (request: RunDeathReasonFrequencyArgs) => getRunDeathReasonFrequency(request),
+      getGuessDistribution: (request: AnyChartArgs) => getGuessDistribution(request),
+      getTimeToSolveDistribution: (request: AnyChartArgs) => getTimeToSolveDistribution(request),
+      getArcadeStreakDistribution: (request: AnyChartArgs) => getArcadeStreakDistribution(request),
+      getOpeningGuessesFrequency: (request: AnyChartArgs) => getOpeningGuessesFrequency(request),
+      getFailedWordsFrequency: (request: AnyChartArgs) => getFailedWordsFrequency(request),
+      getRunDeathReasonFrequency: (request: AnyChartArgs) => getRunDeathReasonFrequency(request),
       getAnyCounter: (request: AnyCounterArgs) => getAnyCounter(request),
     } as const;
   }),
