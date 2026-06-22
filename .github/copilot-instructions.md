@@ -4,4 +4,4 @@ This project is heavily centered around the Effect ecosystem and functional Type
 
 Before writing or modifying code:
 
-Check the available project skills in: `.gemini/skills`
+Check the available project skills in: `.github/skills`
