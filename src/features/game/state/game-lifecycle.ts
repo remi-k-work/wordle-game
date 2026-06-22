@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Stream, Match, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeAtom } from "@/lib/runtime-client";
+import { RuntimeTelemetryStarter } from "@/lib/runtime-client";
 import { bankWordScore, calculateScore, finishRunSession } from "@/features/game/domain";
 import { gameEventsPubSub, activeModalAtom, runSessionAtom, gameStateAtom } from ".";
 import { trackWordLostEvent, trackWordWonEvent } from "@/features/telemetry/state";
@@ -9,7 +9,7 @@ import { trackWordLostEvent, trackWordWonEvent } from "@/features/telemetry/stat
 // Show the win/loss modal after tile animations have had time to finish
 const showStatusModalAfterDelay = Effect.sleep("1.5 seconds").pipe(Effect.andThen(Atom.set(activeModalAtom, "status")), Effect.forkDetach);
 
-export const gameLifecycleAtom = RuntimeAtom.atom(
+export const gameLifecycleAtom = RuntimeTelemetryStarter.atom(
   Stream.fromPubSub(gameEventsPubSub).pipe(
     Stream.runForEach((event) =>
       Match.value(event).pipe(
@@ -50,4 +50,4 @@ export const gameLifecycleAtom = RuntimeAtom.atom(
       )
     )
   )
-);
+).pipe(Atom.keepAlive);

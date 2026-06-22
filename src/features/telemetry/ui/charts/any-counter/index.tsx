@@ -29,11 +29,11 @@ interface AnyCounterChartsProps {
 }
 
 function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: AnyCounterChartProps) {
-  const [getAnyCountersResult, getAnyCounters] = useAtom(getAnyCountersAction);
+  const [getAnyCountersResult, getAnyCounters] = useAtom(getAnyCountersAction(counterName));
 
   useEffect(() => {
-    getAnyCounters(counterName);
-  }, [counterName, getAnyCounters]);
+    getAnyCounters();
+  }, [getAnyCounters]);
 
   return AsyncResult.builder(getAnyCountersResult)
     .onInitialOrWaiting(() => null)
@@ -44,15 +44,15 @@ function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: Any
       return anyCounterData.length === 0 ? (
         <InfoLine message="No counter data tracked yet!" />
       ) : (
-        <article className="mx-auto flex w-full max-w-md gap-4 *:flex-1">
-          <header className="flex flex-col items-center justify-center rounded-xl bg-(--color-surface-2) p-6 shadow-sm ring-1 ring-(--color-accent)">
+        <article className="grid grid-cols-2 gap-6">
+          <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
             <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
-            <span className="mt-2 text-4xl font-semibold text-(--color-primary)">{anyCounterData[0].personal.toLocaleString()}</span>
+            <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary)">{anyCounterData[0].personal.toLocaleString()}</span>
           </header>
 
-          <footer className="flex flex-col items-center justify-center rounded-xl bg-(--color-surface-2) p-6 shadow-sm ring-1 ring-(--color-accent)">
+          <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
             <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
-            <span className="mt-2 text-4xl font-semibold text-(--color-secondary)">{anyCounterData[0].global.toLocaleString()}</span>
+            <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary)">{anyCounterData[0].global.toLocaleString()}</span>
           </footer>
         </article>
       );
