@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { closeModalAction } from "@/features/game/state";
+import { modalMachineAtom } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -10,13 +10,13 @@ import { VoiceSettings } from "@/features/settings/ui/voice-settings";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
 export function Content() {
-  const closeModal = useAtomSet(closeModalAction);
+  const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
     <article className="mx-auto max-w-prose space-y-9">
       <VoiceSettings />
 
-      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => closeModal()}>
+      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "modal.closed" })}>
         <XCircleIcon className="size-11" />
         Close
       </Button>

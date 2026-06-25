@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
-import { closeModalAction } from "@/features/game/state";
+import { modalMachineAtom } from "@/features/game/state";
 
 // components
 import { Dialog } from "@base-ui/react";
@@ -16,10 +16,10 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen = false, title, children }: ModalProps) {
-  const closeModal = useAtomSet(closeModalAction);
+  const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && modalMachineEvent({ type: "modal.closed" })}>
       <Dialog.Portal>
         <Dialog.Backdrop
           className={cn(

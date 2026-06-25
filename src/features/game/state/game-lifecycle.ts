@@ -3,11 +3,14 @@ import { Effect, Stream, Match, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeTelemetryStarter } from "@/lib/runtime-client";
 import { bankWordScore, calculateScore, finishRunSession } from "@/features/game/domain";
-import { gameEventsPubSub, activeModalAtom, runSessionAtom, gameStateAtom } from ".";
+import { gameEventsPubSub, runSessionAtom, gameStateAtom, modalMachineAtom } from ".";
 import { trackWordLostEvent, trackWordWonEvent } from "@/features/telemetry/state";
 
 // Show the win/loss modal after tile animations have had time to finish
-const showStatusModalAfterDelay = Effect.sleep("1.5 seconds").pipe(Effect.andThen(Atom.set(activeModalAtom, "status")), Effect.forkDetach);
+const showStatusModalAfterDelay = Effect.sleep("1.5 seconds").pipe(
+  Effect.andThen(Atom.set(modalMachineAtom, { type: "modal.opened", modalType: "status" })),
+  Effect.forkDetach
+);
 
 export const gameLifecycleAtom = RuntimeTelemetryStarter.atom(
   Stream.fromPubSub(gameEventsPubSub).pipe(

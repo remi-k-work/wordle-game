@@ -3,7 +3,7 @@ import Image from "next/image";
 
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { closeModalAction } from "@/features/game/state";
+import { modalMachineAtom } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -13,7 +13,7 @@ import hero from "@/assets/hero.webp";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
 export function Content() {
-  const closeModal = useAtomSet(closeModalAction);
+  const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
     <article className="mx-auto max-w-prose space-y-9">
@@ -46,7 +46,7 @@ export function Content() {
 
       <footer className="mx-auto mt-4 font-sans text-sm font-semibold">*Tip: When using a PC, you can type your guesses right on the keyboard.</footer>
 
-      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => closeModal()}>
+      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "modal.closed" })}>
         <XCircleIcon className="size-11" />
         Close
       </Button>

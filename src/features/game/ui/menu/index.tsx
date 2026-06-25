@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
-import { openModalAction } from "@/features/game/state";
+import { modalMachineAtom } from "@/features/game/state";
 
 // components
 import { Button, Popover } from "@base-ui/react";
@@ -12,7 +12,7 @@ import { GameFlowButton } from "@/features/game/ui/flow-button";
 import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
 
 export function GameMenu() {
-  const openModal = useAtomSet(openModalAction);
+  const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
     <Popover.Root>
@@ -31,11 +31,11 @@ export function GameMenu() {
           >
             <LangChanger />
             <GameFlowButton />
-            <Button className="button" onClick={() => openModal("voice-settings")}>
+            <Button className="button" onClick={() => modalMachineEvent({ type: "modal.opened", modalType: "voice-settings" })}>
               <SpeakerWaveIcon className="size-11" />
               Voice Settings
             </Button>
-            <Button className="button" onClick={() => openModal("help")}>
+            <Button className="button" onClick={() => modalMachineEvent({ type: "modal.opened", modalType: "help" })}>
               <QuestionMarkCircleIcon className="size-11" />
               Help
             </Button>

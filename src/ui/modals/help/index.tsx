@@ -1,16 +1,16 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { activeModalAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/features/game/state";
 
 // components
 import { Modal } from "@/ui/modals";
 import { Content } from "./content";
 
 export function HelpModal() {
-  const activeModal = useAtomValue(activeModalAtom);
+  const modalMachineSnapshot = useAtomValue(modalMachineAtom);
 
   return (
-    <Modal isOpen={activeModal === "help"} title="Help">
+    <Modal isOpen={modalMachineSnapshot.matches("help")} title="Help">
       <Content />
     </Modal>
   );

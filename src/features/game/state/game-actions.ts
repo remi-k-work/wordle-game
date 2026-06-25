@@ -3,7 +3,7 @@ import { DateTime, Effect, Option, PubSub } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { applyGameAction, deriveGameEvent, finishRunSession, parseKey, resetCurrentRunSession } from "@/features/game/domain";
-import { closeModalAction, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
+import { modalMachineAtom, gameDataSolutionsAtom, gameEventsPubSub, gameStateAtom, keypadColorsAtom, runSessionAtom } from ".";
 import { trackForfeitRunAction, trackStartNewRunAction, trackSubmitGuessAction } from "@/features/telemetry/state";
 
 // Central action handler for processing user input and managing state transitions
@@ -51,7 +51,7 @@ const refreshActiveChallenge = (get: Atom.FnContext) => {
 // Transition to the next word challenge while maintaining the current run streak
 export const nextWordAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
-    get.set(closeModalAction, void 0);
+    get.set(modalMachineAtom, { type: "modal.closed" });
     refreshActiveChallenge(get);
   })
 );
@@ -62,7 +62,7 @@ export const startNewRunAction = Atom.fn(
     // Track metrics related to the action of starting a new run
     yield* trackStartNewRunAction();
 
-    get.set(closeModalAction, void 0);
+    get.set(modalMachineAtom, { type: "modal.closed" });
     get.set(runSessionAtom, resetCurrentRunSession(get(runSessionAtom)));
     refreshActiveChallenge(get);
   })
