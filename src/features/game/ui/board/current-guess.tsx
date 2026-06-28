@@ -4,7 +4,7 @@ import { useEffect } from "react";
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
-import { currentGuessWordAtom, handleKeyAction, isInvalidGuessAtom } from "@/features/game/state";
+import { currentGuessWordAtom, handleKeyAction, turnMachineAtom } from "@/features/game/state";
 
 // components
 import { GuessTile } from "./guess-tile";
@@ -13,9 +13,11 @@ import { GuessTile } from "./guess-tile";
 import type { Color, Tile } from "@/features/game/domain";
 
 export function CurrentGuess() {
+  const turnMachineSnapshot = useAtomValue(turnMachineAtom);
   const currentGuessWord = useAtomValue(currentGuessWordAtom);
-  const isInvalidGuess = useAtomValue(isInvalidGuessAtom);
   const handleKey = useAtomSet(handleKeyAction);
+
+  const isInvalidGuess = turnMachineSnapshot.matches("rejected");
 
   useEffect(() => {
     // Handle the keyboard input one key at a time

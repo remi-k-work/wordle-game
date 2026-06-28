@@ -15,7 +15,7 @@ import {
   validGuesses,
 } from "@/features/telemetry/domain";
 import { sessionIdAtom } from "@/features/player/state";
-import { runSessionAtom, runIdAtom, streakAtom, theSecretWordAtom } from "@/features/game/state";
+import { runSessionAtom, runIdAtom, streakAtom, theSecretWordAtom, turnMachineAtom } from "@/features/game/state";
 import { solutionsLanguageAtom } from "@/features/settings/state";
 
 // types
@@ -54,13 +54,14 @@ export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* 
 });
 
 // Track metrics related to the action of submitting a new guess (stream 2 -> global_pulse)
-export const trackSubmitGuessAction = Effect.fnUntraced(function* (currGameState: GameState, nextGameState: GameState) {
+export const trackSubmitGuessAction = Effect.fnUntraced(function* ({ currentGuessWord, currentTurn }: GameState) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const turnMachineSnapshot = yield* Atom.get(turnMachineAtom);
 
   // Track both invalid and valid guesses
-  if (nextGameState.isInvalidGuess) {
+  if (turnMachineSnapshot.matches("rejected")) {
     // Invalid guess has been made
     yield* Metric.update(invalidGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
   } else {
@@ -68,8 +69,7 @@ export const trackSubmitGuessAction = Effect.fnUntraced(function* (currGameState
     yield* Metric.update(validGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
 
     // Track the opening guess for the very first valid submission of the game
-    if (currGameState.currentTurn === 1)
-      yield* Metric.update(openingGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), currGameState.currentGuessWord);
+    if (currentTurn === 1) yield* Metric.update(openingGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), currentGuessWord);
   }
 });
 

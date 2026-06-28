@@ -1,56 +1,48 @@
 // services, features, and other libraries
-import { Effect, Stream, Match, Option } from "effect";
+import { Effect, Option, DateTime } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeTelemetryStarter } from "@/lib/runtime-client";
-import { bankWordScore, calculateScore, finishRunSession } from "@/features/game/domain";
-import { gameEventsPubSub, runSessionAtom, gameStateAtom, modalMachineAtom } from ".";
+import { bankWordScore, calculateScore, finishRunSession, getGameStatus } from "@/features/game/domain";
+import { runSessionAtom, gameStateAtom, modalMachineAtom, turnMachineAtom } from ".";
 import { trackWordLostEvent, trackWordWonEvent } from "@/features/telemetry/state";
 
-// Show the win/loss modal after tile animations have had time to finish
-const showStatusModalAfterDelay = Effect.sleep("1.5 seconds").pipe(
-  Effect.andThen(Atom.set(modalMachineAtom, { type: "modal.opened", modalType: "status" })),
-  Effect.forkDetach
-);
-
 export const gameLifecycleAtom = RuntimeTelemetryStarter.atom(
-  Stream.fromPubSub(gameEventsPubSub).pipe(
-    Stream.runForEach((event) =>
-      Match.value(event).pipe(
-        // Resolve the challenge: bank volatile points on win
-        Match.tag("WordWon", ({ nextGameState, endTime }) =>
-          Effect.gen(function* () {
-            // Calculate the final score for the word
-            const wordScore = calculateScore(nextGameState.currentTurn - 1, nextGameState.startTime, endTime);
+  Effect.fnUntraced(function* (get) {
+    // This is our only reactive subscription; it triggers when the turn machine changes states
+    const turnMachineSnapshot = get(turnMachineAtom);
 
-            // Update the game state with the calculated score (so the UI can display it)
-            yield* Atom.set(gameStateAtom, { ...nextGameState, wordScore: Option.some(wordScore) });
+    // This process layer only wakes up the exact frame the turn machine hits gameOver
+    if (!turnMachineSnapshot.matches("gameOver")) return;
 
-            // Bank volatile points into the persistent run session
-            yield* Atom.update(runSessionAtom, (runSession) => bankWordScore(runSession, wordScore));
+    // Read current states imperatively without subscribing; this prevents the infinite loop!
+    const currentGameState = yield* Atom.get(gameStateAtom);
+    const currentRunSession = yield* Atom.get(runSessionAtom);
 
-            // Track metrics related to the event of winning the game
-            yield* trackWordWonEvent(nextGameState, wordScore);
+    const gameStatus = getGameStatus(currentGameState.currentTurn, currentGameState.theSecretWord, currentGameState.wordleGuesses);
+    const endTime = yield* DateTime.now;
 
-            // Trigger modal visibility after a delay (fork the UI delay so the stream consumer is not blocked)
-            yield* showStatusModalAfterDelay;
-          })
-        ),
+    // Resolve the challenge: bank volatile points on win
+    if (gameStatus._tag === "Won") {
+      // Calculate the final score for the word
+      const wordScore = calculateScore(currentGameState.currentTurn - 1, currentGameState.startTime, endTime);
 
-        // End the entire arcade run: record results and reset progress to zero
-        Match.tag("WordLost", ({ nextRunSession }) =>
-          Effect.gen(function* () {
-            // Track metrics related to the event of losing the game
-            yield* trackWordLostEvent(nextRunSession);
+      // Update the game state with the calculated score (so the UI can display it)
+      yield* Atom.set(gameStateAtom, { ...currentGameState, wordScore: Option.some(wordScore) });
 
-            // Close out the active run and record it as the latest completed run
-            yield* Atom.update(runSessionAtom, finishRunSession);
+      // Bank volatile points into the persistent run session
+      yield* Atom.update(runSessionAtom, (runSession) => bankWordScore(runSession, wordScore));
 
-            // Trigger modal visibility after a delay (fork the UI delay so the stream consumer is not blocked)
-            yield* showStatusModalAfterDelay;
-          })
-        ),
-        Match.exhaustive
-      )
-    )
-  )
+      // Track metrics related to the event of winning the game
+      yield* trackWordWonEvent(currentGameState, wordScore);
+    } else if (gameStatus._tag === "Lost") {
+      // Track metrics related to the event of losing the game
+      yield* trackWordLostEvent(currentRunSession);
+
+      // Close out the active run and record it as the latest completed run
+      yield* Atom.update(runSessionAtom, finishRunSession);
+    }
+
+    // Open the modal instantly because the 1.5s delay safely occurred inside the turn machine
+    yield* Atom.set(modalMachineAtom, { type: "modal.opened", modalType: "status" });
+  })
 ).pipe(Atom.keepAlive);

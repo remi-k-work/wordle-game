@@ -51,7 +51,6 @@ export class GameState extends Schema.Class<GameState>("GameState")({
   currentGuessWord: Schema.Trim.check(Schema.isNonEmpty()),
   wordleGuesses: Schema.Array(TheSecretWord),
   currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-  isInvalidGuess: Schema.Boolean,
   startTime: Schema.Option(Schema.DateTimeUtc),
   wordScore: Schema.Option(WordScore),
 }) {}
@@ -68,7 +67,6 @@ export const INITIAL_GAME_STATE = {
   currentGuessWord: "",
   wordleGuesses: [],
   currentTurn: 1,
-  isInvalidGuess: false,
   startTime: Option.none(),
   wordScore: Option.none(),
 } as const satisfies GameState;

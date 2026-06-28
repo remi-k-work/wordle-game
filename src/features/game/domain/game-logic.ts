@@ -1,14 +1,11 @@
 // services, features, and other libraries
-import { Array, HashSet, DateTime, Match, pipe, Option } from "effect";
+import { Array, DateTime, Match, pipe, Option } from "effect";
 import {
-  canSubmitGuess,
   formatGuess,
   GameActionEnum,
-  GameEventEnum,
   GameStatusEnum,
   getBasePointsPerTurn,
   getElapsedSeconds,
-  getGameStateStatus,
   getSpeedMultiplier,
   isGamePlaying,
   isGuessKeyValid,
@@ -17,7 +14,7 @@ import {
 } from ".";
 
 // types
-import type { Color, GameAction, GameEvent, GameState, RunSession, WordScore } from ".";
+import type { Color, GameAction, GameState, RunSession, WordScore } from ".";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -58,21 +55,6 @@ export const getGameStatus = (currentTurn: number, theSecretWord: string, wordle
   return GameStatusEnum.Playing();
 };
 
-// Derive the lifecycle event caused by a state transition, if the transition ended the word
-export const deriveGameEvent = (
-  prevGameState: GameState,
-  nextGameState: GameState,
-  nextRunSession: RunSession,
-  endTime: DateTime.Utc
-): Option.Option<GameEvent> => {
-  if (!isGamePlaying(prevGameState)) return Option.none();
-
-  const nextStatus = getGameStateStatus(nextGameState);
-  if (nextStatus._tag === "Won") return Option.some(GameEventEnum.WordWon({ nextGameState, endTime }));
-  if (nextStatus._tag === "Lost") return Option.some(GameEventEnum.WordLost({ nextRunSession }));
-  return Option.none();
-};
-
 // Compute the final keypad state by reducing all guesses and picking the strongest colors
 export const computeKeypadState = (theSecretWord: string, wordleGuesses: readonly string[]) =>
   pipe(
@@ -108,13 +90,7 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
 };
 
 // A pure reducer that handles the state transition logic for each game action
-export const applyGameAction = (
-  gameState: GameState,
-  runSession: RunSession,
-  gameAction: GameAction,
-  dictionary: HashSet.HashSet<string>,
-  now: DateTime.Utc
-) => {
+export const applyGameAction = (gameState: GameState, runSession: RunSession, gameAction: GameAction, now: DateTime.Utc) => {
   // If game is over, freeze state and return exact reference
   const { currentGuessWord, wordleGuesses, currentTurn } = gameState;
   if (!isGamePlaying(gameState)) return [gameState, runSession] as const;
@@ -125,7 +101,7 @@ export const applyGameAction = (
     // Remove the last letter from the current guess word
     Match.tag("RemoveLetter", () =>
       currentGuessWord.length > 0
-        ? ([{ ...gameState, currentGuessWord: currentGuessWord.slice(0, -1), isInvalidGuess: false }, runSession] as const)
+        ? ([{ ...gameState, currentGuessWord: currentGuessWord.slice(0, -1) }, runSession] as const)
         : ([gameState, runSession] as const)
     ),
 
@@ -136,7 +112,6 @@ export const applyGameAction = (
             {
               ...gameState,
               currentGuessWord: currentGuessWord + letter,
-              isInvalidGuess: false,
               startTime: Option.isNone(gameState.startTime) ? Option.some(now) : gameState.startTime,
             },
             runSession,
@@ -145,20 +120,12 @@ export const applyGameAction = (
     ),
 
     Match.tag("SubmitGuess", () => {
-      const canSubmit = canSubmitGuess(currentGuessWord, currentTurn, wordleGuesses, dictionary);
-
       // The new run session officially starts when the first guess is submitted
       const nextRunSession = startRunSession(runSession, now);
 
-      // If it is a full 5-letter guess word but not in the dictionary, make sure to flag it as invalid
-      if (currentGuessWord.length === WORD_LENGTH && !canSubmit) return [{ ...gameState, isInvalidGuess: true }, nextRunSession] as const;
-
-      // If the guess word is invalid, exit early (no game state change)
-      if (!canSubmit) return [gameState, runSession] as const;
-
-      // If the guess word is valid, update the game state by adding it to the list of wordle guesses and incrementing the current turn
+      // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
       return [
-        { ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1, isInvalidGuess: false },
+        { ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1 },
         nextRunSession,
       ] as const;
     }),
