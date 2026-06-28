@@ -5,11 +5,11 @@ import {
   currentTurnAtom,
   theSecretWordAtom,
   wordScoreAtom,
-  runScoreAtom,
-  streakAtom,
   nextWordAction,
-  bestRunScoreAtom,
-  bestStreakAtom,
+  runSessionRunScoreAtom,
+  runSessionStreakAtom,
+  runSessionBestRunScoreAtom,
+  runSessionBestStreakAtom,
 } from "@/features/game/state";
 
 // components
@@ -24,10 +24,10 @@ import { ForwardIcon } from "@heroicons/react/24/outline";
 export function YouWin() {
   const theSecretWord = useAtomValue(theSecretWordAtom);
   const currentTurn = useAtomValue(currentTurnAtom);
-  const runScore = useAtomValue(runScoreAtom);
-  const streak = useAtomValue(streakAtom);
-  const bestRunScore = useAtomValue(bestRunScoreAtom);
-  const bestStreak = useAtomValue(bestStreakAtom);
+  const runScore = useAtomValue(runSessionRunScoreAtom);
+  const streak = useAtomValue(runSessionStreakAtom);
+  const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);
+  const bestStreak = useAtomValue(runSessionBestStreakAtom);
   const wordScoreOption = useAtomValue(wordScoreAtom);
   const nextWord = useAtomSet(nextWordAction);
 

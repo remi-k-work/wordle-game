@@ -10,11 +10,10 @@ import {
   isGamePlaying,
   isGuessKeyValid,
   pickStrongerColor,
-  startRunSession,
 } from ".";
 
 // types
-import type { Color, GameAction, GameState, RunSession, WordScore } from ".";
+import type { Color, GameAction, GameState, WordScore } from ".";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -90,45 +89,33 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
 };
 
 // A pure reducer that handles the state transition logic for each game action
-export const applyGameAction = (gameState: GameState, runSession: RunSession, gameAction: GameAction, now: DateTime.Utc) => {
+export const applyGameAction = (gameState: GameState, gameAction: GameAction, now: DateTime.Utc) => {
   // If game is over, freeze state and return exact reference
   const { currentGuessWord, wordleGuesses, currentTurn } = gameState;
-  if (!isGamePlaying(gameState)) return [gameState, runSession] as const;
+  if (!isGamePlaying(gameState)) return gameState;
 
   return Match.value(gameAction).pipe(
-    Match.tag("Ignore", () => [gameState, runSession] as const),
+    Match.tag("Ignore", () => gameState),
 
     // Remove the last letter from the current guess word
-    Match.tag("RemoveLetter", () =>
-      currentGuessWord.length > 0
-        ? ([{ ...gameState, currentGuessWord: currentGuessWord.slice(0, -1) }, runSession] as const)
-        : ([gameState, runSession] as const)
-    ),
+    Match.tag("RemoveLetter", () => (currentGuessWord.length > 0 ? ({ ...gameState, currentGuessWord: currentGuessWord.slice(0, -1) } as const) : gameState)),
 
     // Lazily assign startTime on the very first letter typed
     Match.tag("AddLetter", ({ letter }) =>
       currentGuessWord.length < WORD_LENGTH
-        ? ([
-            {
-              ...gameState,
-              currentGuessWord: currentGuessWord + letter,
-              startTime: Option.isNone(gameState.startTime) ? Option.some(now) : gameState.startTime,
-            },
-            runSession,
-          ] as const)
-        : ([gameState, runSession] as const)
+        ? ({
+            ...gameState,
+            currentGuessWord: currentGuessWord + letter,
+            startTime: Option.isNone(gameState.startTime) ? Option.some(now) : gameState.startTime,
+          } as const)
+        : gameState
     ),
 
-    Match.tag("SubmitGuess", () => {
-      // The new run session officially starts when the first guess is submitted
-      const nextRunSession = startRunSession(runSession, now);
-
-      // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
-      return [
-        { ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1 },
-        nextRunSession,
-      ] as const;
-    }),
+    // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
+    Match.tag(
+      "SubmitGuess",
+      () => ({ ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1 }) as const
+    ),
     Match.exhaustive
   );
 };

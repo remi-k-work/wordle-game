@@ -2,8 +2,8 @@
 import { DateTime, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { applyGameAction, canSubmitGuess, finishRunSession, getGameStatus, parseKey, resetCurrentRunSession } from "@/features/game/domain";
-import { modalMachineAtom, gameDataSolutionsAtom, gameStateAtom, keypadColorsAtom, runSessionAtom, turnMachineAtom } from ".";
+import { applyGameAction, canSubmitGuess, getGameStatus, parseKey } from "@/features/game/domain";
+import { modalMachineAtom, gameDataSolutionsAtom, gameStateAtom, keypadColorsAtom, turnMachineAtom, runSessionMachineAtom } from ".";
 import { trackForfeitRunAction, trackStartNewRunAction, trackSubmitGuessAction } from "@/features/telemetry/state";
 
 // constants
@@ -47,6 +47,9 @@ export const handleKeyAction = RuntimeAtom.fn(
       // Instantly pass the payload to the machine to let it route itself
       get.set(turnMachineAtom, { type: "turn.submitted", isValid, status: predictedStatus });
 
+      // The new run session officially starts when the first guess is submitted
+      get.set(runSessionMachineAtom, { type: "runSession.started", now });
+
       // Track metrics (this works now because the machine is already in "rejected" if invalid!)
       yield* trackSubmitGuessAction(currGameState);
 
@@ -55,11 +58,7 @@ export const handleKeyAction = RuntimeAtom.fn(
     }
 
     // --- STATE UPDATE ---
-    const currRunSession = get(runSessionAtom);
-    const [nextGameState, nextRunSession] = applyGameAction(currGameState, currRunSession, gameAction, now);
-
-    get.set(gameStateAtom, nextGameState);
-    get.set(runSessionAtom, nextRunSession);
+    get.set(gameStateAtom, applyGameAction(currGameState, gameAction, now));
   })
 );
 
@@ -86,7 +85,7 @@ export const startNewRunAction = Atom.fn(
     yield* trackStartNewRunAction();
 
     get.set(modalMachineAtom, { type: "modal.closed" });
-    get.set(runSessionAtom, resetCurrentRunSession(get(runSessionAtom)));
+    get.set(runSessionMachineAtom, { type: "runSession.reset" });
     refreshActiveChallenge(get);
   })
 );
@@ -97,7 +96,7 @@ export const forfeitRunAction = RuntimeAtom.fn(
     // Track metrics related to the action of forfeiting a run
     yield* trackForfeitRunAction();
 
-    get.set(runSessionAtom, finishRunSession(get(runSessionAtom)));
+    get.set(runSessionMachineAtom, { type: "runSession.finished" });
     refreshActiveChallenge(get);
   })
 );

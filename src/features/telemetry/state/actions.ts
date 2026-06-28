@@ -15,16 +15,23 @@ import {
   validGuesses,
 } from "@/features/telemetry/domain";
 import { sessionIdAtom } from "@/features/player/state";
-import { runSessionAtom, runIdAtom, streakAtom, theSecretWordAtom, turnMachineAtom } from "@/features/game/state";
+import {
+  runSessionCreatedAtAtom,
+  runSessionRunIdAtom,
+  runSessionRunScoreAtom,
+  runSessionStreakAtom,
+  theSecretWordAtom,
+  turnMachineAtom,
+} from "@/features/game/state";
 import { solutionsLanguageAtom } from "@/features/settings/state";
 
 // types
-import type { GameState, RunSession, WordScore } from "@/features/game/domain";
+import type { GameState, WordScore } from "@/features/game/domain";
 
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 export const logWordWonEvent = Effect.fn("logWordWonEvent")(function* ({ currentTurn, theSecretWord }: GameState, { timeSeconds }: WordScore) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrThrow(yield* Atom.get(runIdAtom));
+  const runId = Option.getOrThrow(yield* Atom.get(runSessionRunIdAtom));
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const guessedTurn = currentTurn - 1;
 
@@ -33,20 +40,19 @@ export const logWordWonEvent = Effect.fn("logWordWonEvent")(function* ({ current
 });
 
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* (
-  { runId: runIdOption, createdAt: createdAtOption, runScore: finalScore, streak: finalStreak }: RunSession,
-  deathReason: "Forfeit" | "Guesses"
-) {
+export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* (deathReason: "Forfeit" | "Guesses") {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrThrow(runIdOption);
+  const runId = Option.getOrThrow(yield* Atom.get(runSessionRunIdAtom));
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const theSecretWord = yield* Atom.get(theSecretWordAtom);
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
+  const finalScore = yield* Atom.get(runSessionRunScoreAtom);
+  const finalStreak = yield* Atom.get(runSessionStreakAtom);
 
   // We calculate the total real-world time the run was alive
   const now = yield* DateTime.now;
-  const createdAt = Option.getOrElse(createdAtOption, () => now);
+  const createdAt = Option.getOrElse(yield* Atom.get(runSessionCreatedAtAtom), () => now);
   const durationSeconds = DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor);
 
   // Enrich the span itself with searchable attributes (stream 1 -> arcade_run_summary)
@@ -86,18 +92,18 @@ export const trackStartNewRunAction = Effect.fnUntraced(function* () {
 export const trackForfeitRunAction = Effect.fnUntraced(function* () {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const runSession = yield* Atom.get(runSessionAtom);
+  const runId = yield* Atom.get(runSessionRunIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const streak = yield* Atom.get(streakAtom);
+  const streak = yield* Atom.get(runSessionStreakAtom);
 
   // If the run has not started yet, there is nothing to track
-  if (Option.isNone(runSession.runId)) return;
+  if (Option.isNone(runId)) return;
 
   yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), "Forfeit");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-  yield* logRunCompletedEvent(runSession, "Forfeit");
+  yield* logRunCompletedEvent("Forfeit");
 });
 
 // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
@@ -117,17 +123,18 @@ export const trackWordWonEvent = Effect.fnUntraced(function* (gameState: GameSta
 });
 
 // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
-export const trackWordLostEvent = Effect.fnUntraced(function* (runSession: RunSession) {
+export const trackWordLostEvent = Effect.fnUntraced(function* () {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const streak = yield* Atom.get(runSessionStreakAtom);
   const theSecretWord = yield* Atom.get(theSecretWordAtom);
 
   yield* Metric.update(gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
-  yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), runSession.streak);
+  yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);
   yield* Metric.update(failedWords.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), theSecretWord);
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), "Guesses");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-  yield* logRunCompletedEvent(runSession, "Guesses");
+  yield* logRunCompletedEvent("Guesses");
 });

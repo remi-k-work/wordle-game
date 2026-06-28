@@ -2,8 +2,8 @@
 import { Effect, Option, DateTime } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeTelemetryStarter } from "@/lib/runtime-client";
-import { bankWordScore, calculateScore, finishRunSession, getGameStatus } from "@/features/game/domain";
-import { runSessionAtom, gameStateAtom, modalMachineAtom, turnMachineAtom } from ".";
+import { calculateScore, getGameStatus } from "@/features/game/domain";
+import { gameStateAtom, modalMachineAtom, runSessionMachineAtom, turnMachineAtom } from ".";
 import { trackWordLostEvent, trackWordWonEvent } from "@/features/telemetry/state";
 
 export const gameLifecycleAtom = RuntimeTelemetryStarter.atom(
@@ -16,7 +16,6 @@ export const gameLifecycleAtom = RuntimeTelemetryStarter.atom(
 
     // Read current states imperatively without subscribing; this prevents the infinite loop!
     const currentGameState = yield* Atom.get(gameStateAtom);
-    const currentRunSession = yield* Atom.get(runSessionAtom);
 
     const gameStatus = getGameStatus(currentGameState.currentTurn, currentGameState.theSecretWord, currentGameState.wordleGuesses);
     const endTime = yield* DateTime.now;
@@ -30,16 +29,16 @@ export const gameLifecycleAtom = RuntimeTelemetryStarter.atom(
       yield* Atom.set(gameStateAtom, { ...currentGameState, wordScore: Option.some(wordScore) });
 
       // Bank volatile points into the persistent run session
-      yield* Atom.update(runSessionAtom, (runSession) => bankWordScore(runSession, wordScore));
+      yield* Atom.set(runSessionMachineAtom, { type: "runSession.wordBanked", wordScore });
 
       // Track metrics related to the event of winning the game
       yield* trackWordWonEvent(currentGameState, wordScore);
     } else if (gameStatus._tag === "Lost") {
       // Track metrics related to the event of losing the game
-      yield* trackWordLostEvent(currentRunSession);
+      yield* trackWordLostEvent();
 
       // Close out the active run and record it as the latest completed run
-      yield* Atom.update(runSessionAtom, finishRunSession);
+      yield* Atom.set(runSessionMachineAtom, { type: "runSession.finished" });
     }
 
     // Open the modal instantly because the 1.5s delay safely occurred inside the turn machine

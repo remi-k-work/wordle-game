@@ -1,13 +1,13 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { streakAtom, runScoreAtom } from "@/features/game/state";
+import { runSessionRunScoreAtom, runSessionStreakAtom } from "@/features/game/state";
 
 // assets
 import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 export function Run() {
-  const runScore = useAtomValue(runScoreAtom);
-  const streak = useAtomValue(streakAtom);
+  const runScore = useAtomValue(runSessionRunScoreAtom);
+  const streak = useAtomValue(runSessionStreakAtom);
 
   return (
     <section className="grid flex-2 place-items-center rounded-md border bg-secondary px-2 py-1">
