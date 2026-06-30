@@ -19,7 +19,7 @@ export function Modal({ isOpen = false, title, children }: ModalProps) {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && modalMachineEvent({ type: "modal.closed" })}>
+    <Dialog.Root open={isOpen} onOpenChange={(open) => !open && modalMachineEvent({ type: "closed" })}>
       <Dialog.Portal>
         <Dialog.Backdrop
           className={cn(

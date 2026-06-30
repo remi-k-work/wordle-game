@@ -22,7 +22,7 @@ export function WinOrLoseModal() {
     <Modal isOpen={modalMachineSnapshot.matches("status")} title={isWinner ? "You Win" : "Run Over"}>
       {isWinner ? <YouWin /> : <Nevermind />}
 
-      <Button tabIndex={-1} className="button mx-auto mt-4 bg-secondary" onClick={() => modalMachineEvent({ type: "modal.closed" })}>
+      <Button tabIndex={-1} className="button mx-auto mt-4 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
         <XCircleIcon className="size-11" />
         Maybe Later
       </Button>

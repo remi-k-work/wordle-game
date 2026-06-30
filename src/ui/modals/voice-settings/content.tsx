@@ -16,7 +16,7 @@ export function Content() {
     <article className="mx-auto max-w-prose space-y-9">
       <VoiceSettings />
 
-      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "modal.closed" })}>
+      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "closed" })}>
         <XCircleIcon className="size-11" />
         Close
       </Button>

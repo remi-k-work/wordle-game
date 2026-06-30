@@ -46,7 +46,7 @@ export function Content() {
 
       <footer className="mx-auto mt-4 font-sans text-sm font-semibold">*Tip: When using a PC, you can type your guesses right on the keyboard.</footer>
 
-      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "modal.closed" })}>
+      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "closed" })}>
         <XCircleIcon className="size-11" />
         Close
       </Button>

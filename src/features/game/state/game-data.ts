@@ -19,7 +19,7 @@ export const gameDataSolutionsAtom = RuntimeAtom.atom(
 
     // Notify the word challenge machine that the solutions have been loaded
     yield* Atom.set(wordChallengeMachineAtom, {
-      type: "wordChallenge.solutionsLoaded",
+      type: "solutionsLoaded",
       solutions: Option.some(solutions),
       dictionary: Option.some(dictionary),
     });

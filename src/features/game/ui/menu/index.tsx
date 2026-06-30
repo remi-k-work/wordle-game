@@ -31,11 +31,11 @@ export function GameMenu() {
           >
             <LangChanger />
             <GameFlowButton />
-            <Button className="button" onClick={() => modalMachineEvent({ type: "modal.opened", modalType: "voice-settings" })}>
+            <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "voice-settings" })}>
               <SpeakerWaveIcon className="size-11" />
               Voice Settings
             </Button>
-            <Button className="button" onClick={() => modalMachineEvent({ type: "modal.opened", modalType: "help" })}>
+            <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "help" })}>
               <QuestionMarkCircleIcon className="size-11" />
               Help
             </Button>

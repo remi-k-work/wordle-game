@@ -58,7 +58,7 @@ export function Footer() {
                     // Map raw input to domain action and exit early if it is junk
                     const gameAction = parseKey(key, keypadColors);
 
-                    if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "wordChallenge.letterPressed", letter: gameAction.letter });
+                    if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "letterPressed", letter: gameAction.letter });
                   }}
                 >
                   {key}
@@ -72,7 +72,7 @@ export function Footer() {
               layout
               transition={SPRING_TRANSITION}
               className="button basis-12 bg-secondary p-0"
-              onClick={() => wordChallengeMachineEvent({ type: "wordChallenge.backspacePressed" })}
+              onClick={() => wordChallengeMachineEvent({ type: "backspacePressed" })}
             >
               <BackspaceIcon className="size-7" />
             </MotionButton>
@@ -82,7 +82,7 @@ export function Footer() {
               layout
               transition={SPRING_TRANSITION}
               className="button basis-12 bg-secondary p-0"
-              onClick={() => wordChallengeMachineEvent({ type: "wordChallenge.enterPressed" })}
+              onClick={() => wordChallengeMachineEvent({ type: "enterPressed" })}
             >
               <PaperAirplaneIcon className="size-7" />
             </MotionButton>

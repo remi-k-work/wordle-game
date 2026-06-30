@@ -26,9 +26,9 @@ export function CurrentGuess() {
       // Map raw input to domain action and exit early if it is junk
       const gameAction = parseKey(ev.key, keypadColors);
 
-      if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "wordChallenge.letterPressed", letter: gameAction.letter });
-      else if (gameAction._tag === "RemoveLetter") wordChallengeMachineEvent({ type: "wordChallenge.backspacePressed" });
-      else if (gameAction._tag === "SubmitGuess") wordChallengeMachineEvent({ type: "wordChallenge.enterPressed" });
+      if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "letterPressed", letter: gameAction.letter });
+      else if (gameAction._tag === "RemoveLetter") wordChallengeMachineEvent({ type: "backspacePressed" });
+      else if (gameAction._tag === "SubmitGuess") wordChallengeMachineEvent({ type: "enterPressed" });
     }
 
     window.addEventListener("keyup", handleKeyUp);

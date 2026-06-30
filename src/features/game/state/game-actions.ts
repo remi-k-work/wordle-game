@@ -7,8 +7,8 @@ import { trackForfeitRunAction, trackStartNewRunAction } from "@/features/teleme
 // Transition to the next word challenge while maintaining the current run streak
 export const nextWordAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
-    get.set(modalMachineAtom, { type: "modal.closed" });
-    get.set(wordChallengeMachineAtom, { type: "wordChallenge.nextWordRequested" });
+    get.set(modalMachineAtom, { type: "closed" });
+    get.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
   })
 );
 
@@ -18,9 +18,9 @@ export const startNewRunAction = Atom.fn(
     // Track metrics related to the action of starting a new run
     yield* trackStartNewRunAction();
 
-    get.set(modalMachineAtom, { type: "modal.closed" });
-    get.set(runSessionMachineAtom, { type: "runSession.reset" });
-    get.set(wordChallengeMachineAtom, { type: "wordChallenge.nextWordRequested" });
+    get.set(modalMachineAtom, { type: "closed" });
+    get.set(runSessionMachineAtom, { type: "reset" });
+    get.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
   })
 );
 
@@ -30,6 +30,6 @@ export const forfeitRunAction = Atom.fn(
     // Track metrics related to the action of forfeiting a run
     yield* trackForfeitRunAction();
 
-    get.set(runSessionMachineAtom, { type: "runSession.finished" });
+    get.set(runSessionMachineAtom, { type: "finished" });
   })
 );

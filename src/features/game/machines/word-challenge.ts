@@ -18,7 +18,7 @@ const onGuessRevealedActor = fromPromise(async ({ signal }: { signal: AbortSigna
     Effect.gen(function* () {
       // The new run session officially starts when the first guess is revealed
       const now = yield* DateTime.now;
-      yield* Atom.set(runSessionMachineAtom, { type: "runSession.started", now });
+      yield* Atom.set(runSessionMachineAtom, { type: "started", now });
     }),
     { signal }
   )
@@ -29,13 +29,13 @@ const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { inpu
     Effect.gen(function* () {
       // Bank volatile points into the persistent run session
       const wordScore = Option.getOrThrow(context.wordScore);
-      yield* Atom.set(runSessionMachineAtom, { type: "runSession.wordBanked", wordScore });
+      yield* Atom.set(runSessionMachineAtom, { type: "wordBanked", wordScore });
 
       // Track metrics related to the event of winning the game
       yield* trackWordWonEvent(context, wordScore);
 
       // Command the modal machine actor to open up the status modal
-      yield* Atom.set(modalMachineAtom, { type: "modal.opened", modalType: "status" });
+      yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
     }),
     { signal }
   )
@@ -48,10 +48,10 @@ const onWordLostActor = fromPromise(async ({ signal }: { signal: AbortSignal }) 
       yield* trackWordLostEvent();
 
       // Close out the active run and record it as the latest completed run
-      yield* Atom.set(runSessionMachineAtom, { type: "runSession.finished" });
+      yield* Atom.set(runSessionMachineAtom, { type: "finished" });
 
       // Command the modal machine actor to open up the status modal
-      yield* Atom.set(modalMachineAtom, { type: "modal.opened", modalType: "status" });
+      yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
     }),
     { signal }
   )
@@ -60,11 +60,11 @@ const onWordLostActor = fromPromise(async ({ signal }: { signal: AbortSignal }) 
 export const wordChallengeMachine = setup({
   types: {} as {
     events:
-      | { readonly type: "wordChallenge.solutionsLoaded"; solutions: GameState["solutions"]; dictionary: GameState["solutions"] }
-      | { readonly type: "wordChallenge.letterPressed"; readonly letter: string }
-      | { readonly type: "wordChallenge.backspacePressed" }
-      | { readonly type: "wordChallenge.enterPressed" }
-      | { readonly type: "wordChallenge.nextWordRequested" };
+      | { readonly type: "solutionsLoaded"; solutions: GameState["solutions"]; dictionary: GameState["solutions"] }
+      | { readonly type: "letterPressed"; readonly letter: string }
+      | { readonly type: "backspacePressed" }
+      | { readonly type: "enterPressed" }
+      | { readonly type: "nextWordRequested" };
     context: GameState;
   },
   guards: {
@@ -75,7 +75,7 @@ export const wordChallengeMachine = setup({
   actions: {
     // Initialize by creating the dictionary of valid words and randomly selecting the secret word
     initialize: assign(({ event }) => {
-      assertEvent(event, "wordChallenge.solutionsLoaded");
+      assertEvent(event, "solutionsLoaded");
       const solutions = Option.getOrThrow(event.solutions);
       const dictionary = Option.getOrThrow(event.dictionary);
       const theSecretWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
@@ -101,7 +101,7 @@ export const wordChallengeMachine = setup({
 
     addLetter: assign({
       currentGuessWord: ({ context, event }) => {
-        assertEvent(event, "wordChallenge.letterPressed");
+        assertEvent(event, "letterPressed");
         return context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + event.letter : context.currentGuessWord;
       },
 
@@ -137,50 +137,74 @@ export const wordChallengeMachine = setup({
   id: "wordChallenge",
   context: { ...INITIAL_GAME_STATE },
   initial: "idle",
+
   states: {
+    // Waiting for solutions + dictionary to be loaded
     idle: {
       on: {
-        "wordChallenge.solutionsLoaded": { target: "typing", actions: "initialize" },
+        solutionsLoaded: { target: "typing", actions: "initialize" },
       },
     },
+
+    // User is actively building their current guess
     typing: {
       on: {
-        "wordChallenge.letterPressed": { actions: "addLetter" },
-        "wordChallenge.backspacePressed": { actions: "removeLetter" },
-        "wordChallenge.enterPressed": { target: "validating" },
+        letterPressed: { actions: "addLetter" },
+        backspacePressed: { actions: "removeLetter" },
+        enterPressed: { target: "validating" },
       },
     },
+
+    // Immediately decide whether the submitted guess is valid
     validating: {
-      // "always" means evaluate instantly without waiting for an event
       always: [{ guard: "isValidWord", target: "revealing", actions: "submitGuess" }, { target: "rejected" }],
     },
+
+    // Invalid word entered; recover as soon as the user edits it
     rejected: {
-      // Auto-recovery: typing immediately clears the error state!
       on: {
-        "wordChallenge.letterPressed": { target: "typing", actions: "addLetter" },
-        "wordChallenge.backspacePressed": { target: "typing", actions: "removeLetter" },
+        letterPressed: { target: "typing", actions: "addLetter" },
+        backspacePressed: { target: "typing", actions: "removeLetter" },
       },
     },
+
+    // Inputs are locked while tile flip animations play
     revealing: {
       // The new run session officially starts when the first guess is revealed
       invoke: { src: "onGuessRevealedActor" },
 
-      // Inputs are entirely locked up during the 1.5s flip animations
       after: {
-        1500: [{ guard: "isGameWon", target: "gameOver.won" }, { guard: "isGameLost", target: "gameOver.lost" }, { target: "typing" }],
+        1500: [{ guard: "isGameWon", target: "won" }, { guard: "isGameLost", target: "lost" }, { target: "typing" }],
       },
     },
-    gameOver: {
-      on: {
-        "wordChallenge.nextWordRequested": { target: "typing", actions: "nextChallenge" },
+
+    // Challenge completed successfully; waiting for next word
+    won: {
+      entry: "calculateScore",
+
+      invoke: {
+        src: "onWordWonActor",
+        input: ({ context }) => ({ context }),
       },
-      states: {
-        won: {
-          entry: "calculateScore",
-          invoke: { src: "onWordWonActor", input: ({ context }) => ({ context }), onDone: { target: "typing" } },
+
+      on: {
+        nextWordRequested: {
+          target: "typing",
+          actions: "nextChallenge",
         },
-        lost: {
-          invoke: { src: "onWordLostActor", onDone: { target: "typing" } },
+      },
+    },
+
+    // Challenge failed; waiting for next word
+    lost: {
+      invoke: {
+        src: "onWordLostActor",
+      },
+
+      on: {
+        nextWordRequested: {
+          target: "typing",
+          actions: "nextChallenge",
         },
       },
     },

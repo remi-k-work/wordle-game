@@ -11,10 +11,10 @@ import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 export const runSessionMachine = setup({
   types: {} as {
     events:
-      | { readonly type: "runSession.reset" }
-      | { readonly type: "runSession.started"; readonly now: DateTime.Utc }
-      | { readonly type: "runSession.wordBanked"; readonly wordScore: WordScore }
-      | { readonly type: "runSession.finished" };
+      | { readonly type: "reset" }
+      | { readonly type: "started"; readonly now: DateTime.Utc }
+      | { readonly type: "wordBanked"; readonly wordScore: WordScore }
+      | { readonly type: "finished" };
     context: RunSession;
     input: RunSession;
     tags: "activeRun";
@@ -30,7 +30,7 @@ export const runSessionMachine = setup({
 
     // Start a new arcade run while preserving historical session stats
     startRun: assign(({ context, event }) => {
-      assertEvent(event, "runSession.started");
+      assertEvent(event, "started");
       return {
         ...INITIAL_RUN_SESSION,
         runId: Option.some(crypto.randomUUID()),
@@ -42,7 +42,7 @@ export const runSessionMachine = setup({
 
     // Add a solved word score into the ongoing arcade run
     bankWord: assign(({ context, event }) => {
-      assertEvent(event, "runSession.wordBanked");
+      assertEvent(event, "wordBanked");
       return {
         ...context,
         runScore: context.runScore + event.wordScore.wordScore,
@@ -69,39 +69,42 @@ export const runSessionMachine = setup({
   // Hydrate the machine with the input from the KVS Atom
   context: ({ input }) => ({ ...input }),
   initial: "classifying",
+
   states: {
+    // Determine whether we are restoring an active or completed run
     classifying: {
       always: [{ guard: "hasActiveRun", target: "active" }, { target: "inactive" }],
     },
+
     inactive: {
       on: {
-        "runSession.reset": {
-          target: "classifying",
-          actions: "resetRun",
-        },
-        "runSession.started": {
-          target: "classifying",
+        // Start a brand-new arcade run
+        started: {
+          target: "active",
           actions: "startRun",
         },
       },
     },
+
     active: {
+      // Convenient tag for selectors and UI state checks
       tags: ["activeRun"],
+
       on: {
-        "runSession.reset": {
-          target: "classifying",
+        // Abandon the current run while preserving historical stats
+        reset: {
+          target: "inactive",
           actions: "resetRun",
         },
-        "runSession.started": {
-          target: "classifying",
-          actions: "startRun",
-        },
-        "runSession.wordBanked": {
-          target: "classifying",
+
+        // Add a completed word score into the active run
+        wordBanked: {
           actions: "bankWord",
         },
-        "runSession.finished": {
-          target: "classifying",
+
+        // Finalize the run and snapshot its results
+        finished: {
+          target: "inactive",
           actions: "finishRun",
         },
       },
