@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { makeMachineAtom } from "@/lib/machine-atom-factory";
-import { wordChallengeMachine } from "@/features/game/machines";
+import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 
 // The word challenge machine is now a living actor inside the effect atom
 export const wordChallengeMachineAtom = makeMachineAtom(wordChallengeMachine);

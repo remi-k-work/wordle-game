@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
 import { makePersistentMachineAtom } from "@/lib/machine-atom-factory";
-import { runSessionMachine } from "@/features/game/machines";
+import { runSessionMachine } from "@/features/game/machines/run-session";
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
