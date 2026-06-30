@@ -2,34 +2,20 @@
 import { DateTime } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { calculatePotentialScore, computeKeypadState, deriveWordleGrid, getGameStatus } from "@/features/game/domain";
-import { currentTurnAtom, startTimeAtom, theSecretWordAtom, wordleGuessesAtom } from ".";
+import { wordChallengeCurrentTurnAtom, wordChallengeStartTimeAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from ".";
 
 // Reactive selector for the "live" potential word score based on current progress
-export const potentialScoreAtom = Atom.make((get) => {
-  const currentTurn = get(currentTurnAtom);
-  const startTime = get(startTimeAtom);
-  const now = DateTime.makeUnsafe(Date.now());
-  return calculatePotentialScore(currentTurn, startTime, now);
-});
+export const potentialScoreAtom = Atom.make((get) =>
+  calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
+);
 
 // View-ready representation of the 6x5 game grid derived from current guesses
-export const wordleGridAtom = Atom.make((get) => {
-  const theSecretWord = get(theSecretWordAtom);
-  const wordleGuesses = get(wordleGuessesAtom);
-  return deriveWordleGrid(theSecretWord, wordleGuesses);
-});
+export const wordleGridAtom = Atom.make((get) => deriveWordleGrid(get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom)));
 
 // Current coloring state of the keypad keys based on guess history
-export const keypadColorsAtom = Atom.make((get) => {
-  const theSecretWord = get(theSecretWordAtom);
-  const wordleGuesses = get(wordleGuessesAtom);
-  return computeKeypadState(theSecretWord, wordleGuesses);
-});
+export const keypadColorsAtom = Atom.make((get) => computeKeypadState(get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom)));
 
 // High-level progress indicator (Playing, Won, or Lost) for the current word
-export const gameStatusAtom = Atom.make((get) => {
-  const currentTurn = get(currentTurnAtom);
-  const theSecretWord = get(theSecretWordAtom);
-  const wordleGuesses = get(wordleGuessesAtom);
-  return getGameStatus(currentTurn, theSecretWord, wordleGuesses);
-});
+export const gameStatusAtom = Atom.make((get) =>
+  getGameStatus(get(wordChallengeCurrentTurnAtom), get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom))
+);

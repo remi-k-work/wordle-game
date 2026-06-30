@@ -3,8 +3,9 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomValue, useAtomSet } from "@effect/atom-react";
-import { currentGuessWordAtom, handleKeyAction, turnMachineAtom } from "@/features/game/state";
+import { useAtomValue, useAtom } from "@effect/atom-react";
+import { parseKey } from "@/features/game/domain";
+import { keypadColorsAtom, wordChallengeCurrentGuessWordAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
 import { GuessTile } from "./guess-tile";
@@ -13,23 +14,28 @@ import { GuessTile } from "./guess-tile";
 import type { Color, Tile } from "@/features/game/domain";
 
 export function CurrentGuess() {
-  const turnMachineSnapshot = useAtomValue(turnMachineAtom);
-  const currentGuessWord = useAtomValue(currentGuessWordAtom);
-  const handleKey = useAtomSet(handleKeyAction);
+  const [wordChallengeMachineSnapshot, wordChallengeMachineEvent] = useAtom(wordChallengeMachineAtom);
+  const currentGuessWord = useAtomValue(wordChallengeCurrentGuessWordAtom);
+  const keypadColors = useAtomValue(keypadColorsAtom);
 
-  const isInvalidGuess = turnMachineSnapshot.matches("rejected");
+  const isInvalidGuess = wordChallengeMachineSnapshot.matches("rejected");
 
   useEffect(() => {
     // Handle the keyboard input one key at a time
     function handleKeyUp(ev: KeyboardEvent) {
-      handleKey(ev.key);
+      // Map raw input to domain action and exit early if it is junk
+      const gameAction = parseKey(ev.key, keypadColors);
+
+      if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "wordChallenge.letterPressed", letter: gameAction.letter });
+      else if (gameAction._tag === "RemoveLetter") wordChallengeMachineEvent({ type: "wordChallenge.backspacePressed" });
+      else if (gameAction._tag === "SubmitGuess") wordChallengeMachineEvent({ type: "wordChallenge.enterPressed" });
     }
 
     window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [handleKey]);
+  }, [keypadColors, wordChallengeMachineEvent]);
 
   const currentGuessTiles = [...currentGuessWord].map((tileKey) => ({ tileKey, color: (isInvalidGuess ? "red" : "") as Color }));
   const remainingEmptyTiles = Array<Tile>(5 - currentGuessTiles.length).fill({ tileKey: "", color: "" as Color });

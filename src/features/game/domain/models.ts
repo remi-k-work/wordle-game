@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Data, Option, Schema } from "effect";
+import { Data, Schema } from "effect";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -47,6 +47,8 @@ export class WordScore extends Schema.Class<WordScore>("WordScore")({
 
 // Represents the state of the current game challenge being in progress
 export class GameState extends Schema.Class<GameState>("GameState")({
+  solutions: Schema.Option(Schema.Array(TheSecretWord)),
+  dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   theSecretWord: TheSecretWord,
   currentGuessWord: Schema.Trim.check(Schema.isNonEmpty()),
   wordleGuesses: Schema.Array(TheSecretWord),
@@ -57,16 +59,3 @@ export class GameState extends Schema.Class<GameState>("GameState")({
 
 export type GameAction = Data.TaggedEnum<{ AddLetter: { readonly letter: string }; RemoveLetter: object; SubmitGuess: object; Ignore: object }>;
 export type GameStatus = Data.TaggedEnum<{ Playing: object; Won: object; Lost: object }>;
-
-// constants
-export const GameActionEnum = Data.taggedEnum<GameAction>();
-export const GameStatusEnum = Data.taggedEnum<GameStatus>();
-
-export const INITIAL_GAME_STATE = {
-  theSecretWord: "",
-  currentGuessWord: "",
-  wordleGuesses: [],
-  currentTurn: 1,
-  startTime: Option.none(),
-  wordScore: Option.none(),
-} as const satisfies GameState;

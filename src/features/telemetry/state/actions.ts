@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime, Duration, Effect, Metric, Option } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom, AtomRegistry } from "effect/unstable/reactivity";
 import {
   arcadeRunLength,
   failedWords,
@@ -20,8 +20,8 @@ import {
   runSessionRunIdAtom,
   runSessionRunScoreAtom,
   runSessionStreakAtom,
-  theSecretWordAtom,
-  turnMachineAtom,
+  wordChallengeMachineAtom,
+  wordChallengeTheSecretWordAtom,
 } from "@/features/game/state";
 import { solutionsLanguageAtom } from "@/features/settings/state";
 
@@ -45,7 +45,7 @@ export const logRunCompletedEvent = Effect.fn("logRunCompletedEvent")(function* 
   const runId = Option.getOrThrow(yield* Atom.get(runSessionRunIdAtom));
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const theSecretWord = yield* Atom.get(theSecretWordAtom);
+  const theSecretWord = yield* Atom.get(wordChallengeTheSecretWordAtom);
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
   const finalScore = yield* Atom.get(runSessionRunScoreAtom);
   const finalStreak = yield* Atom.get(runSessionStreakAtom);
@@ -64,10 +64,10 @@ export const trackSubmitGuessAction = Effect.fnUntraced(function* ({ currentGues
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const turnMachineSnapshot = yield* Atom.get(turnMachineAtom);
+  const wordChallengeMachineSnapshot = yield* Atom.get(wordChallengeMachineAtom);
 
   // Track both invalid and valid guesses
-  if (turnMachineSnapshot.matches("rejected")) {
+  if (wordChallengeMachineSnapshot.matches("rejected")) {
     // Invalid guess has been made
     yield* Metric.update(invalidGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
   } else {
@@ -123,12 +123,12 @@ export const trackWordWonEvent = Effect.fnUntraced(function* (gameState: GameSta
 });
 
 // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
-export const trackWordLostEvent = Effect.fnUntraced(function* () {
+export const trackWordLostEvent = Effect.fnUntraced(function* (): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const streak = yield* Atom.get(runSessionStreakAtom);
-  const theSecretWord = yield* Atom.get(theSecretWordAtom);
+  const theSecretWord = yield* Atom.get(wordChallengeTheSecretWordAtom);
 
   yield* Metric.update(gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
   yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);

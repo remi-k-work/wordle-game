@@ -2,9 +2,9 @@
 import { Option } from "effect";
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import {
-  currentTurnAtom,
-  theSecretWordAtom,
-  wordScoreAtom,
+  wordChallengeCurrentTurnAtom,
+  wordChallengeTheSecretWordAtom,
+  wordChallengeWordScoreAtom,
   nextWordAction,
   runSessionRunScoreAtom,
   runSessionStreakAtom,
@@ -22,13 +22,13 @@ import { RunScore } from "./run-score";
 import { ForwardIcon } from "@heroicons/react/24/outline";
 
 export function YouWin() {
-  const theSecretWord = useAtomValue(theSecretWordAtom);
-  const currentTurn = useAtomValue(currentTurnAtom);
+  const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
+  const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const runScore = useAtomValue(runSessionRunScoreAtom);
   const streak = useAtomValue(runSessionStreakAtom);
   const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);
   const bestStreak = useAtomValue(runSessionBestStreakAtom);
-  const wordScoreOption = useAtomValue(wordScoreAtom);
+  const wordScoreOption = useAtomValue(wordChallengeWordScoreAtom);
   const nextWord = useAtomSet(nextWordAction);
 
   if (Option.isNone(wordScoreOption)) return null;

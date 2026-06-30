@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
-import { currentTurnAtom } from "@/features/game/state";
+import { wordChallengeCurrentTurnAtom } from "@/features/game/state";
 
 // components
 import { GuessTile, GuessTileSkeleton } from "./guess-tile";
@@ -15,7 +15,7 @@ interface GuessRowProps {
 }
 
 export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
-  const currentTurn = useAtomValue(currentTurnAtom);
+  const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const isCurrentTurn = rowIndex === currentTurn - 2;
 
   return (

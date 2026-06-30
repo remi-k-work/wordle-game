@@ -1,5 +1,8 @@
+// services, features, and other libraries
+import { Data, Option } from "effect";
+
 // types
-import type { Color } from ".";
+import type { Color, GameAction, GameState, GameStatus, RunSession } from ".";
 
 // constants
 export const WORD_LENGTH = 5;
@@ -26,3 +29,28 @@ export const SPEED_MULTIPLIER_CATEGORY_MAP = {
   1.0: "⏱️ Average Pacer",
   0.8: "🐌 Slow Learner",
 } as const as Readonly<Record<number, string>>;
+
+export const GameActionEnum = Data.taggedEnum<GameAction>();
+export const GameStatusEnum = Data.taggedEnum<GameStatus>();
+
+export const INITIAL_GAME_STATE = {
+  solutions: Option.none(),
+  dictionary: Option.none(),
+  theSecretWord: "",
+  currentGuessWord: "",
+  wordleGuesses: [],
+  currentTurn: 1,
+  startTime: Option.none(),
+  wordScore: Option.none(),
+} as const satisfies GameState;
+
+export const INITIAL_RUN_SESSION = {
+  runId: Option.none(),
+  createdAt: Option.none(),
+  runScore: 0,
+  streak: 0,
+  lastRunScore: 0,
+  lastStreak: 0,
+  bestRunScore: 0,
+  bestStreak: 0,
+} as const satisfies RunSession;

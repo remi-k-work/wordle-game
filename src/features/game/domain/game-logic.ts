@@ -7,16 +7,15 @@ import {
   getBasePointsPerTurn,
   getElapsedSeconds,
   getSpeedMultiplier,
-  isGamePlaying,
   isGuessKeyValid,
   pickStrongerColor,
 } from ".";
 
 // types
-import type { Color, GameAction, GameState, WordScore } from ".";
+import type { Color, WordScore } from ".";
 
 // constants
-import { MAX_TURNS, WORD_LENGTH } from ".";
+import { MAX_TURNS } from ".";
 
 // Calculates the player's word score based on the turn they won on and how long it took them
 // This denotes the volatile points earned for the current word before they are banked into the run
@@ -85,37 +84,5 @@ export const parseKey = (pressedKey: string, keypadColors: Record<string, Color>
 
     // Letter -> AddLetter
     Match.orElse((normalizedKey) => GameActionEnum.AddLetter({ letter: normalizedKey }))
-  );
-};
-
-// A pure reducer that handles the state transition logic for each game action
-export const applyGameAction = (gameState: GameState, gameAction: GameAction, now: DateTime.Utc) => {
-  // If game is over, freeze state and return exact reference
-  const { currentGuessWord, wordleGuesses, currentTurn } = gameState;
-  if (!isGamePlaying(gameState)) return gameState;
-
-  return Match.value(gameAction).pipe(
-    Match.tag("Ignore", () => gameState),
-
-    // Remove the last letter from the current guess word
-    Match.tag("RemoveLetter", () => (currentGuessWord.length > 0 ? ({ ...gameState, currentGuessWord: currentGuessWord.slice(0, -1) } as const) : gameState)),
-
-    // Lazily assign startTime on the very first letter typed
-    Match.tag("AddLetter", ({ letter }) =>
-      currentGuessWord.length < WORD_LENGTH
-        ? ({
-            ...gameState,
-            currentGuessWord: currentGuessWord + letter,
-            startTime: Option.isNone(gameState.startTime) ? Option.some(now) : gameState.startTime,
-          } as const)
-        : gameState
-    ),
-
-    // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
-    Match.tag(
-      "SubmitGuess",
-      () => ({ ...gameState, currentGuessWord: "", wordleGuesses: [...wordleGuesses, currentGuessWord], currentTurn: currentTurn + 1 }) as const
-    ),
-    Match.exhaustive
   );
 };

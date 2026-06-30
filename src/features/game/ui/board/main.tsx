@@ -1,13 +1,13 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { currentTurnAtom, wordleGridAtom } from "@/features/game/state";
+import { wordChallengeCurrentTurnAtom, wordleGridAtom } from "@/features/game/state";
 
 // components
 import { CurrentGuess } from "./current-guess";
 import { GuessRow, GuessRowSkeleton } from "./guess-row";
 
 export function Main() {
-  const currentTurn = useAtomValue(currentTurnAtom);
+  const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const wordleGrid = useAtomValue(wordleGridAtom);
 
   return (

@@ -1,9 +1,8 @@
 // services, features, and other libraries
 import { Array, DateTime, Duration, Option, pipe } from "effect";
-import { getGameStatus } from ".";
 
 // types
-import type { Color, GameState } from ".";
+import type { Color } from ".";
 
 // constants
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from ".";
@@ -35,9 +34,3 @@ export const getElapsedSeconds = (startTime: Option.Option<DateTime.Utc>, endTim
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
 export const potentialScoreAsPercentage = (potentialScore: number) => Math.max(0, Math.min(100, Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100));
-
-// Get the status for a full game state without threading individual state fields around
-export const getGameStateStatus = ({ currentTurn, theSecretWord, wordleGuesses }: GameState) => getGameStatus(currentTurn, theSecretWord, wordleGuesses);
-
-// Check if the current game state is still actively accepting player input
-export const isGamePlaying = (gameState: GameState) => getGameStateStatus(gameState)._tag === "Playing";

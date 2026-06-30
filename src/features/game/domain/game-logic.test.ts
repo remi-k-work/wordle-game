@@ -1,8 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, Option } from "effect";
 import { TestClock } from "effect/testing";
-import { calculateScore, formatDuration, getGameStatus, computeKeypadState, applyGameAction, calculatePotentialScore } from ".";
-import { GameActionEnum, INITIAL_GAME_STATE } from ".";
+import { calculateScore, formatDuration, getGameStatus, computeKeypadState, calculatePotentialScore } from ".";
 
 describe("gameLogic", () => {
   describe("calculateScore", () => {
@@ -100,50 +99,6 @@ describe("gameLogic", () => {
       expect(keypad["M"]).toBe("grey");
       expect(keypad["P"]).toBe("green");
       expect(keypad["R"]).toBe("grey");
-    });
-  });
-
-  describe("applyGameAction", () => {
-    const now = DateTime.makeUnsafe(0);
-
-    it("handles AddLetter", () => {
-      const state = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), now);
-      expect(state.currentGuessWord).toBe("A");
-    });
-
-    it("sets startTime on first letter and preserves it afterward", () => {
-      const firstLetterState = applyGameAction(INITIAL_GAME_STATE, GameActionEnum.AddLetter({ letter: "A" }), now);
-      expect(Option.isSome(firstLetterState.startTime)).toBe(true);
-
-      const later = DateTime.makeUnsafe(10_000);
-      const secondLetterState = applyGameAction(firstLetterState, GameActionEnum.AddLetter({ letter: "P" }), later);
-      expect(secondLetterState.startTime).toBe(firstLetterState.startTime);
-    });
-
-    it("handles RemoveLetter", () => {
-      const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "AB" };
-      const state2 = applyGameAction(state1, GameActionEnum.RemoveLetter(), now);
-      expect(state2.currentGuessWord).toBe("A");
-    });
-
-    it("handles SubmitGuess (valid)", () => {
-      const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APPLE", theSecretWord: "APPLE" };
-      const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), now);
-      expect(state2.wordleGuesses).toContain("APPLE");
-      expect(state2.currentTurn).toBe(2);
-      expect(state2.currentGuessWord).toBe("");
-    });
-
-    // it("does not mutate state when submitting an incomplete guess", () => {
-    //   const state1 = { ...INITIAL_GAME_STATE, currentGuessWord: "APP" };
-    //   const state2 = applyGameAction(state1, GameActionEnum.SubmitGuess(), now);
-    //   expect(state2).toBe(state1);
-    // });
-
-    it("returns the same state reference after a terminal status", () => {
-      const wonState = { ...INITIAL_GAME_STATE, theSecretWord: "APPLE", wordleGuesses: ["APPLE"], currentTurn: 2 };
-      const nextState = applyGameAction(wonState, GameActionEnum.AddLetter({ letter: "A" }), now);
-      expect(nextState).toBe(wonState);
     });
   });
 

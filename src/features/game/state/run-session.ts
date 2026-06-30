@@ -1,27 +1,20 @@
 // services, features, and other libraries
-import { Option, Struct } from "effect";
+import { Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
 import { makePersistentMachineAtom } from "@/lib/machine-atom-factory";
 import { runSessionMachine } from "@/features/game/machines";
 
+// constants
+import { INITIAL_RUN_SESSION } from "@/features/game/domain";
+
 // Persistent storage for tracking the current arcade run progress and high water marks
 const runSessionAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/runSession",
   schema: RunSession.mapFields(Struct.pick(["runId", "createdAt", "runScore", "streak", "lastRunScore", "lastStreak", "bestRunScore", "bestStreak"])),
-  defaultValue: () =>
-    ({
-      runId: Option.none(),
-      createdAt: Option.none(),
-      runScore: 0,
-      streak: 0,
-      lastRunScore: 0,
-      lastStreak: 0,
-      bestRunScore: 0,
-      bestStreak: 0,
-    }) as const satisfies RunSession,
+  defaultValue: () => INITIAL_RUN_SESSION,
 });
 
 // The run session machine is now a living actor inside the effect atom

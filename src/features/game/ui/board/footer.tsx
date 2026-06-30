@@ -1,8 +1,9 @@
 // services, features, and other libraries
 import { motion, AnimatePresence } from "motion/react";
-import { useAtomValue, useAtomSet } from "@effect/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { handleKeyAction, gameDataKeypadAtom, keypadColorsAtom } from "@/features/game/state";
+import { parseKey } from "@/features/game/domain";
+import { gameDataKeypadAtom, keypadColorsAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -29,7 +30,7 @@ const MotionButton = motion.create(Button);
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
   const keypadColors = useAtomValue(keypadColorsAtom);
-  const handleKey = useAtomSet(handleKeyAction);
+  const wordChallengeMachineEvent = useAtomSet(wordChallengeMachineAtom);
 
   return AsyncResult.builder(gameDataKeypad)
     .onInitialOrWaiting(() => <FooterSkeleton />)
@@ -53,7 +54,12 @@ export function Footer() {
                   transition={SPRING_TRANSITION}
                   className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
-                  onClick={() => handleKey(key)}
+                  onClick={() => {
+                    // Map raw input to domain action and exit early if it is junk
+                    const gameAction = parseKey(key, keypadColors);
+
+                    if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "wordChallenge.letterPressed", letter: gameAction.letter });
+                  }}
                 >
                   {key}
                 </MotionButton>
@@ -66,12 +72,18 @@ export function Footer() {
               layout
               transition={SPRING_TRANSITION}
               className="button basis-12 bg-secondary p-0"
-              onClick={() => handleKey("Backspace")}
+              onClick={() => wordChallengeMachineEvent({ type: "wordChallenge.backspacePressed" })}
             >
               <BackspaceIcon className="size-7" />
             </MotionButton>
 
-            <MotionButton key="Enter" layout transition={SPRING_TRANSITION} className="button basis-12 bg-secondary p-0" onClick={() => handleKey("Enter")}>
+            <MotionButton
+              key="Enter"
+              layout
+              transition={SPRING_TRANSITION}
+              className="button basis-12 bg-secondary p-0"
+              onClick={() => wordChallengeMachineEvent({ type: "wordChallenge.enterPressed" })}
+            >
               <PaperAirplaneIcon className="size-7" />
             </MotionButton>
           </AnimatePresence>

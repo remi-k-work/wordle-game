@@ -1,10 +1,12 @@
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
 import { assign, assertEvent, setup } from "xstate";
-import { bankWordScore, finishRunSession, resetCurrentRunSession, startRunSession } from "@/features/game/domain";
 
 // types
 import type { RunSession, WordScore } from "@/features/game/domain";
+
+// constants
+import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 
 export const runSessionMachine = setup({
   types: {} as {
@@ -21,16 +23,46 @@ export const runSessionMachine = setup({
     hasActiveRun: ({ context }) => Option.isSome(context.runId),
   },
   actions: {
-    resetRun: assign(({ context }) => resetCurrentRunSession(context)),
+    // Reset only the active run progress while preserving historical session stats
+    resetRun: assign(
+      ({ context }) => ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession
+    ),
+
+    // Start a new arcade run while preserving historical session stats
     startRun: assign(({ context, event }) => {
       assertEvent(event, "runSession.started");
-      return startRunSession(context, event.now);
+      return {
+        ...INITIAL_RUN_SESSION,
+        runId: Option.some(crypto.randomUUID()),
+        createdAt: Option.some(event.now),
+        bestRunScore: context.bestRunScore,
+        bestStreak: context.bestStreak,
+      } as const satisfies RunSession;
     }),
+
+    // Add a solved word score into the ongoing arcade run
     bankWord: assign(({ context, event }) => {
       assertEvent(event, "runSession.wordBanked");
-      return bankWordScore(context, event.wordScore);
+      return {
+        ...context,
+        runScore: context.runScore + event.wordScore.wordScore,
+        streak: context.streak + 1,
+        bestRunScore: Math.max(context.bestRunScore, context.runScore + event.wordScore.wordScore),
+        bestStreak: Math.max(context.bestStreak, context.streak + 1),
+      } as const satisfies RunSession;
     }),
-    finishRun: assign(({ context }) => finishRunSession(context)),
+
+    // Close out the active run and record it as the latest completed run while preserving historical session stats
+    finishRun: assign(
+      ({ context }) =>
+        ({
+          ...INITIAL_RUN_SESSION,
+          lastRunScore: context.runScore,
+          lastStreak: context.streak,
+          bestRunScore: context.bestRunScore,
+          bestStreak: context.bestStreak,
+        }) as const satisfies RunSession
+    ),
   },
 }).createMachine({
   id: "runSession",
@@ -39,17 +71,17 @@ export const runSessionMachine = setup({
   initial: "classifying",
   states: {
     classifying: {
-      always: [{ guard: { type: "hasActiveRun" }, target: "active" }, { target: "inactive" }],
+      always: [{ guard: "hasActiveRun", target: "active" }, { target: "inactive" }],
     },
     inactive: {
       on: {
         "runSession.reset": {
           target: "classifying",
-          actions: [{ type: "resetRun" }],
+          actions: "resetRun",
         },
         "runSession.started": {
           target: "classifying",
-          actions: [{ type: "startRun" }],
+          actions: "startRun",
         },
       },
     },
@@ -58,19 +90,19 @@ export const runSessionMachine = setup({
       on: {
         "runSession.reset": {
           target: "classifying",
-          actions: [{ type: "resetRun" }],
+          actions: "resetRun",
         },
         "runSession.started": {
           target: "classifying",
-          actions: [{ type: "startRun" }],
+          actions: "startRun",
         },
         "runSession.wordBanked": {
           target: "classifying",
-          actions: [{ type: "bankWord" }],
+          actions: "bankWord",
         },
         "runSession.finished": {
           target: "classifying",
-          actions: [{ type: "finishRun" }],
+          actions: "finishRun",
         },
       },
     },

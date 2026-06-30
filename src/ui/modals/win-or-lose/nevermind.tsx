@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import {
-  theSecretWordAtom,
+  wordChallengeTheSecretWordAtom,
   startNewRunAction,
   runSessionLastRunScoreAtom,
   runSessionLastStreakAtom,
@@ -19,7 +19,7 @@ import { NewHighScore } from "@/features/high-score/ui/new-high-score";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export function Nevermind() {
-  const theSecretWord = useAtomValue(theSecretWordAtom);
+  const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
   const lastRunScore = useAtomValue(runSessionLastRunScoreAtom);
   const lastStreak = useAtomValue(runSessionLastStreakAtom);
   const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);

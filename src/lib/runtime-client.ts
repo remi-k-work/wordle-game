@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Layer, Logger, Effect } from "effect";
+import { Layer, Logger, Effect, ManagedRuntime } from "effect";
 import { Atom, AtomRegistry, Reactivity } from "effect/unstable/reactivity";
 import { BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
@@ -38,3 +38,4 @@ const TelemetryStarterLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty(
 
 export const RuntimeAtom = Atom.runtime(MainLayer);
 export const RuntimeTelemetryStarter = Atom.runtime(TelemetryStarterLayer);
+export const RuntimeClient = ManagedRuntime.make(MainLayer);
