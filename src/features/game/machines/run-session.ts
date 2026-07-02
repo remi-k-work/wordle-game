@@ -24,13 +24,14 @@ export const runSessionMachine = setup({
   },
   actions: {
     // Reset only the active run progress while preserving historical session stats
-    resetRun: assign(
+    reset: assign(
       ({ context }) => ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession
     ),
 
     // Start a new arcade run while preserving historical session stats
-    startRun: assign(({ context, event }) => {
+    start: assign(({ context, event }) => {
       assertEvent(event, "started");
+
       return {
         ...INITIAL_RUN_SESSION,
         runId: Option.some(crypto.randomUUID()),
@@ -43,6 +44,7 @@ export const runSessionMachine = setup({
     // Add a solved word score into the ongoing arcade run
     bankWord: assign(({ context, event }) => {
       assertEvent(event, "wordBanked");
+
       return {
         ...context,
         runScore: context.runScore + event.wordScore.wordScore,
@@ -53,7 +55,7 @@ export const runSessionMachine = setup({
     }),
 
     // Close out the active run and record it as the latest completed run while preserving historical session stats
-    finishRun: assign(
+    finish: assign(
       ({ context }) =>
         ({
           ...INITIAL_RUN_SESSION,
@@ -81,7 +83,7 @@ export const runSessionMachine = setup({
         // Start a brand-new arcade run
         started: {
           target: "active",
-          actions: "startRun",
+          actions: "start",
         },
       },
     },
@@ -94,7 +96,7 @@ export const runSessionMachine = setup({
         // Abandon the current run while preserving historical stats
         reset: {
           target: "inactive",
-          actions: "resetRun",
+          actions: "reset",
         },
 
         // Add a completed word score into the active run
@@ -105,7 +107,7 @@ export const runSessionMachine = setup({
         // Finalize the run and snapshot its results
         finished: {
           target: "inactive",
-          actions: "finishRun",
+          actions: "finish",
         },
       },
     },

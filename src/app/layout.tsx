@@ -9,7 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 // components
 import { ThemeProvider } from "next-themes";
-import { RegistryProvider } from "@effect/atom-react";
+import { AtomRegistryProvider } from "@/lib/atom-registry-provider";
 import { Header } from "@/ui/header";
 import { HelpModal, VoiceSettingsModal, WinOrLoseModal } from "@/ui/modals";
 
@@ -49,7 +49,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
     <html lang="en" translate="no" className="antialiased" suppressHydrationWarning>
       <body className={cn(`${fontSans.variable} ${fontMono.variable}`)}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <RegistryProvider>
+          <AtomRegistryProvider>
             <div className="isolate grid min-h-dvh grid-cols-1 grid-rows-[auto_1fr]">
               <Header />
               <main className="grid p-1">{children}</main>
@@ -57,7 +57,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
             <HelpModal />
             <VoiceSettingsModal />
             <WinOrLoseModal />
-          </RegistryProvider>
+          </AtomRegistryProvider>
         </ThemeProvider>
 
         <Analytics debug={false} />

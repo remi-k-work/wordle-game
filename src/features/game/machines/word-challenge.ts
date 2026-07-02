@@ -123,13 +123,17 @@ export const wordChallengeMachine = setup({
     }),
     nextChallenge: assign(({ context }) => {
       const solutions = Option.getOrThrow(context.solutions);
+      const theSecretWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
 
-      return {
-        ...INITIAL_GAME_STATE,
-        solutions: context.solutions,
-        dictionary: context.dictionary,
-        theSecretWord: solutions[Math.floor(Math.random() * solutions.length)].toUpperCase(),
-      } as const satisfies GameState;
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+      console.log(`Secret word: ${theSecretWord}`);
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+
+      return { ...INITIAL_GAME_STATE, solutions: context.solutions, dictionary: context.dictionary, theSecretWord } as const satisfies GameState;
     }),
   },
   actors: { onGuessRevealedActor, onWordWonActor, onWordLostActor },

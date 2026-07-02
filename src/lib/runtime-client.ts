@@ -10,6 +10,7 @@ import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { TelemetryHub } from "@/features/telemetry/services/telemetry-hub";
 import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
 import { HubSpanExporter } from "@/features/telemetry/services/otel-exporters";
+import { sharedAtomRegistry } from "@/lib/atom-registry-provider";
 
 // The TelemetryLayer bridges the OTel SDK into our Effect-native TelemetryHub (Spans only)
 const TelemetryLayer = WebSdk.layer(
@@ -21,21 +22,13 @@ const TelemetryLayer = WebSdk.layer(
 );
 
 const TelemetryReadyLayer = Layer.mergeAll(TelemetryLayer, RpcTelemetryClient.layer).pipe(Layer.provideMerge(TelemetryHub.layer));
+const AtomReadyLayer = Layer.mergeAll(Layer.succeed(AtomRegistry.AtomRegistry, sharedAtomRegistry), Reactivity.layer, BrowserKeyValueStore.layerLocalStorage);
 
-const MainLayer = Layer.mergeAll(
-  Logger.layer([Logger.consolePretty()]),
-  AtomRegistry.layer,
-  Reactivity.layer,
-  BrowserKeyValueStore.layerLocalStorage,
-  RpcGameClient.layer,
-  RpcHighScoreClient.layer,
-  TelemetryReadyLayer
-);
-
-const TelemetryStarterLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), AtomRegistry.layer, Reactivity.layer, TelemetryWorkerLayer).pipe(
+const TelemetryStarterLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), TelemetryWorkerLayer, AtomReadyLayer).pipe(
   Layer.provideMerge(TelemetryReadyLayer)
 );
+const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), RpcGameClient.layer, RpcHighScoreClient.layer, TelemetryReadyLayer, AtomReadyLayer);
 
-export const RuntimeAtom = Atom.runtime(MainLayer);
 export const RuntimeTelemetryStarter = Atom.runtime(TelemetryStarterLayer);
+export const RuntimeAtom = Atom.runtime(MainLayer);
 export const RuntimeClient = ManagedRuntime.make(MainLayer);
