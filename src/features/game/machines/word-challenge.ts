@@ -5,7 +5,7 @@ import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent, fromPromise } from "xstate";
 import { calculateScore, canSubmitGuess, getGameStatus } from "@/features/game/domain";
 import { modalMachineAtom, runSessionMachineAtom } from "@/features/game/state";
-import { trackWordLostEvent, trackWordWonEvent } from "@/features/telemetry/state";
+import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
 // types
 import type { GameState } from "@/features/game/domain";
@@ -13,9 +13,14 @@ import type { GameState } from "@/features/game/domain";
 // constants
 import { INITIAL_GAME_STATE, WORD_LENGTH } from "@/features/game/domain";
 
+const onGuessRejectedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackInvalidGuessSubmitted, { signal }));
+
 const onGuessRevealedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
+      // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
+      yield* trackValidGuessSubmitted;
+
       // The new run session officially starts when the first guess is revealed
       const now = yield* DateTime.now;
       yield* Atom.set(runSessionMachineAtom, { type: "started", now });
@@ -27,12 +32,12 @@ const onGuessRevealedActor = fromPromise(async ({ signal }: { signal: AbortSigna
 const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
+      // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
+      yield* trackWordWon;
+
       // Bank volatile points into the persistent run session
       const wordScore = Option.getOrThrow(context.wordScore);
       yield* Atom.set(runSessionMachineAtom, { type: "wordBanked", wordScore });
-
-      // Track metrics related to the event of winning the game
-      yield* trackWordWonEvent(context, wordScore);
 
       // Command the modal machine actor to open up the status modal
       yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
@@ -44,8 +49,8 @@ const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { inpu
 const onWordLostActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
-      // Track metrics related to the event of losing the game
-      yield* trackWordLostEvent();
+      // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
+      yield* trackWordLost;
 
       // Close out the active run and record it as the latest completed run
       yield* Atom.set(runSessionMachineAtom, { type: "finished" });
@@ -118,9 +123,13 @@ export const wordChallengeMachine = setup({
       currentGuessWord: () => "",
       currentTurn: ({ context }) => context.currentTurn + 1,
     }),
+
+    // Calculates the player's word score based on the turn they won on and how long it took them
     calculateScore: assign({
       wordScore: ({ context }) => Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.makeUnsafe(Date.now()))),
     }),
+
+    // Transition to the next word challenge while maintaining the current run streak
     nextChallenge: assign(({ context }) => {
       const solutions = Option.getOrThrow(context.solutions);
       const theSecretWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
@@ -136,7 +145,7 @@ export const wordChallengeMachine = setup({
       return { ...INITIAL_GAME_STATE, solutions: context.solutions, dictionary: context.dictionary, theSecretWord } as const satisfies GameState;
     }),
   },
-  actors: { onGuessRevealedActor, onWordWonActor, onWordLostActor },
+  actors: { onGuessRejectedActor, onGuessRevealedActor, onWordWonActor, onWordLostActor },
 }).createMachine({
   id: "wordChallenge",
   context: { ...INITIAL_GAME_STATE },
@@ -166,6 +175,8 @@ export const wordChallengeMachine = setup({
 
     // Invalid word entered; recover as soon as the user edits it
     rejected: {
+      invoke: { src: "onGuessRejectedActor" },
+
       on: {
         letterPressed: { target: "typing", actions: "addLetter" },
         backspacePressed: { target: "typing", actions: "removeLetter" },

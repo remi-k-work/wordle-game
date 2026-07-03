@@ -1,12 +1,13 @@
-// types
-interface RunScoreProps {
-  runScore: number;
-  bestRunScore: number;
-  streak: number;
-  bestStreak: number;
-}
+// services, features, and other libraries
+import { useAtomValue } from "@effect/atom-react";
+import { runSessionBestRunScoreAtom, runSessionBestStreakAtom, runSessionRunScoreAtom, runSessionStreakAtom } from "@/features/game/state";
 
-export function RunScore({ runScore, bestRunScore, streak, bestStreak }: RunScoreProps) {
+export function RunScore() {
+  const runScore = useAtomValue(runSessionRunScoreAtom);
+  const streak = useAtomValue(runSessionStreakAtom);
+  const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);
+  const bestStreak = useAtomValue(runSessionBestStreakAtom);
+
   return (
     <section className="grid grid-cols-2 grid-rows-2 border">
       <div className="bg-surface-2 p-3">

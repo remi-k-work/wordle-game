@@ -1,6 +1,10 @@
 // services, features, and other libraries
-import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { forfeitRunAction, gameStatusAtom, nextWordAction, startNewRunAction } from "@/features/game/state";
+import { Effect } from "effect";
+import { Atom } from "effect/unstable/reactivity";
+import { RuntimeClient } from "@/lib/runtime-client";
+import { useAtomValue } from "@effect/atom-react";
+import { modalMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { trackRunForfeited, trackNewRunStarted } from "@/features/telemetry/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -8,39 +12,93 @@ import { Button } from "@base-ui/react";
 // assets
 import { ArrowPathIcon, ForwardIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
-export function GameFlowButton() {
-  const gameStatus = useAtomValue(gameStatusAtom);
-  const forfeitRun = useAtomSet(forfeitRunAction);
-  const nextWord = useAtomSet(nextWordAction);
-  const startNewRun = useAtomSet(startNewRunAction);
+// types
+import type { ComponentPropsWithoutRef } from "react";
+
+type GameFlowButtonProps = ComponentPropsWithoutRef<typeof Button>;
+
+export function GameFlowButton(props: GameFlowButtonProps) {
+  const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
+  if (wordChallengeMachineSnapshot.matches("idle")) return <GameFlowButtonSkeleton {...props} />;
+
+  if (wordChallengeMachineSnapshot.matches("won"))
+    return (
+      <Button
+        className="button"
+        onClick={async () =>
+          await RuntimeClient.runPromise(
+            Effect.gen(function* () {
+              // Command the modal machine actor to close itself if open
+              yield* Atom.set(modalMachineAtom, { type: "closed" });
+
+              // Transition to the next word challenge while maintaining the current run streak
+              yield* Atom.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
+            })
+          )
+        }
+        {...props}
+      >
+        <ForwardIcon className="size-11" />
+        Next Word
+      </Button>
+    );
+
+  if (wordChallengeMachineSnapshot.matches("lost"))
+    return (
+      <Button
+        className="button"
+        onClick={async () =>
+          await RuntimeClient.runPromise(
+            Effect.gen(function* () {
+              // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
+              yield* trackNewRunStarted;
+
+              // Command the modal machine actor to close itself if open
+              yield* Atom.set(modalMachineAtom, { type: "closed" });
+
+              // Abandon the current run while preserving historical stats
+              yield* Atom.set(runSessionMachineAtom, { type: "reset" });
+
+              // Transition to the next word challenge while maintaining the current run streak
+              yield* Atom.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
+            })
+          )
+        }
+        {...props}
+      >
+        <ArrowPathIcon className="size-11" />
+        Start New Run
+      </Button>
+    );
 
   return (
-    <>
-      {gameStatus._tag === "Playing" && (
-        <Button className="button" onClick={() => forfeitRun()}>
-          <XCircleIcon className="size-11" />
-          Forfeit Run
-        </Button>
-      )}
-      {gameStatus._tag === "Won" && (
-        <Button className="button" onClick={() => nextWord()}>
-          <ForwardIcon className="size-11" />
-          Next Word
-        </Button>
-      )}
-      {gameStatus._tag === "Lost" && (
-        <Button className="button" onClick={() => startNewRun()}>
-          <ArrowPathIcon className="size-11" />
-          Start New Run
-        </Button>
-      )}
-    </>
+    <Button
+      className="button"
+      onClick={async () =>
+        await RuntimeClient.runPromise(
+          Effect.gen(function* () {
+            // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
+            yield* trackRunForfeited;
+
+            // Command the modal machine actor to close itself if open
+            yield* Atom.set(modalMachineAtom, { type: "closed" });
+
+            // Manually abandon the current arcade run and record its final progress
+            yield* Atom.set(runSessionMachineAtom, { type: "finished" });
+          })
+        )
+      }
+      {...props}
+    >
+      <XCircleIcon className="size-11" />
+      Forfeit Run
+    </Button>
   );
 }
 
-export function GameFlowButtonSkeleton() {
+export function GameFlowButtonSkeleton(props: GameFlowButtonProps) {
   return (
-    <Button className="button" disabled>
+    <Button className="button" disabled {...props}>
       &bnsp;
     </Button>
   );

@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { DateTime } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { calculatePotentialScore, computeKeypadState, deriveWordleGrid, getGameStatus } from "@/features/game/domain";
+import { calculatePotentialScore, computeKeypadState, deriveWordleGrid } from "@/features/game/domain";
 import { wordChallengeCurrentTurnAtom, wordChallengeStartTimeAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from ".";
 
 // Reactive selector for the "live" potential word score based on current progress
@@ -14,8 +14,3 @@ export const wordleGridAtom = Atom.make((get) => deriveWordleGrid(get(wordChalle
 
 // Current coloring state of the keypad keys based on guess history
 export const keypadColorsAtom = Atom.make((get) => computeKeypadState(get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom)));
-
-// High-level progress indicator (Playing, Won, or Lost) for the current word
-export const gameStatusAtom = Atom.make((get) =>
-  getGameStatus(get(wordChallengeCurrentTurnAtom), get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom))
-);

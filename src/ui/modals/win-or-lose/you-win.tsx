@@ -1,38 +1,19 @@
 // services, features, and other libraries
 import { Option } from "effect";
-import { useAtomValue, useAtomSet } from "@effect/atom-react";
-import {
-  wordChallengeCurrentTurnAtom,
-  wordChallengeTheSecretWordAtom,
-  wordChallengeWordScoreAtom,
-  nextWordAction,
-  runSessionRunScoreAtom,
-  runSessionStreakAtom,
-  runSessionBestRunScoreAtom,
-  runSessionBestStreakAtom,
-} from "@/features/game/state";
+import { useAtomValue } from "@effect/atom-react";
+import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChallengeWordScoreAtom } from "@/features/game/state";
 
 // components
-import { Button } from "@base-ui/react";
 import { Definition } from "./definition";
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
 import { RunScore } from "./run-score";
 
-// assets
-import { ForwardIcon } from "@heroicons/react/24/outline";
-
 export function YouWin() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
-  const runScore = useAtomValue(runSessionRunScoreAtom);
-  const streak = useAtomValue(runSessionStreakAtom);
-  const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);
-  const bestStreak = useAtomValue(runSessionBestStreakAtom);
   const wordScoreOption = useAtomValue(wordChallengeWordScoreAtom);
-  const nextWord = useAtomSet(nextWordAction);
 
   if (Option.isNone(wordScoreOption)) return null;
-
   const { timeSeconds } = wordScoreOption.value;
 
   return (
@@ -45,12 +26,7 @@ export function YouWin() {
       <Definition />
 
       <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={timeSeconds} />
-      <RunScore runScore={runScore} bestRunScore={bestRunScore} streak={streak} bestStreak={bestStreak} />
-
-      <Button tabIndex={-1} className="button mx-auto" onClick={() => nextWord()}>
-        <ForwardIcon className="size-11" />
-        Next Word
-      </Button>
+      <RunScore />
     </article>
   );
 }
