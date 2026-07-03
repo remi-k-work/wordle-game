@@ -4,6 +4,7 @@ import { assign, assertEvent, setup } from "xstate";
 
 // types
 import type { RunSession, WordScore } from "@/features/game/domain";
+export type RunSessionMachineContext = RunSession;
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";

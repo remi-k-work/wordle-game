@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { modalMachineAtom, runSessionMachineAtom } from "@/features/game/state";
+import { modalMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 import { changeSolutionsLanguageAction, solutionsLanguageAtom } from "@/features/settings/state";
 import { trackRunForfeited } from "@/features/telemetry/state";
 
@@ -21,7 +21,9 @@ export function LangChanger() {
     await RuntimeClient.runPromise(
       Effect.gen(function* () {
         // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-        yield* trackRunForfeited;
+        const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+        const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
+        yield* trackRunForfeited(runSessionMachineContext, wordChallengeMachineContext);
 
         // Command the modal machine actor to close itself if open
         yield* Atom.set(modalMachineAtom, { type: "closed" });

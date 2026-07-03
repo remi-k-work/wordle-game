@@ -23,11 +23,13 @@ export function WinOrLoseModal() {
     <Modal isOpen={modalMachineSnapshot.matches("status")} title={hasWon ? "You Win" : "Run Over"}>
       {hasWon ? <YouWin /> : <Nevermind />}
 
-      <GameFlowButton tabIndex={-1} />
-      <Button tabIndex={-1} className="button mx-auto mt-4 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
-        <XCircleIcon className="size-11" />
-        Maybe Later
-      </Button>
+      <section className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
+        <GameFlowButton tabIndex={-1} />
+        <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
+          <XCircleIcon className="size-11" />
+          Maybe Later
+        </Button>
+      </section>
     </Modal>
   );
 }

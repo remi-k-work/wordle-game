@@ -15,46 +15,47 @@ import {
   validGuesses,
 } from "@/features/telemetry/domain";
 import { sessionIdAtom } from "@/features/player/state";
-import {
-  runSessionCreatedAtAtom,
-  runSessionRunIdAtom,
-  runSessionRunScoreAtom,
-  runSessionStreakAtom,
-  wordChallengeCurrentGuessWordAtom,
-  wordChallengeCurrentTurnAtom,
-  wordChallengeTheSecretWordAtom,
-  wordChallengeWordScoreAtom,
-} from "@/features/game/state";
 import { solutionsLanguageAtom } from "@/features/settings/state";
 
+// types
+import type { RunSessionMachineContext } from "@/features/game/machines/run-session";
+import type { WordChallengeMachineContext } from "@/features/game/machines/word-challenge";
+
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
-export const logWordWon = Effect.gen(function* () {
+export const logWordWon = Effect.fn("logWordWon")(function* (
+  runSessionMachineContext: RunSessionMachineContext,
+  wordChallengeMachineContext: WordChallengeMachineContext
+) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrThrow(yield* Atom.get(runSessionRunIdAtom));
+  const runId = Option.getOrThrow(runSessionMachineContext.runId);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const theSecretWord = yield* Atom.get(wordChallengeTheSecretWordAtom);
-  const currentTurn = yield* Atom.get(wordChallengeCurrentTurnAtom);
-  const wordScore = Option.getOrThrow(yield* Atom.get(wordChallengeWordScoreAtom));
+  const theSecretWord = wordChallengeMachineContext.theSecretWord;
+  const currentTurn = wordChallengeMachineContext.currentTurn;
+  const wordScore = Option.getOrThrow(wordChallengeMachineContext.wordScore);
   const guessedTurn = currentTurn - 1;
 
   // Enrich the span itself with searchable attributes (stream 1 -> run_word_event)
   yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: Math.floor(wordScore.timeSeconds) });
-}).pipe(Effect.withSpan("logWordWon"));
+});
 
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-export const logRunCompleted = Effect.fn("logRunCompleted")(function* (deathReason: "Forfeit" | "Guesses") {
+export const logRunCompleted = Effect.fn("logRunCompleted")(function* (
+  runSessionMachineContext: RunSessionMachineContext,
+  wordChallengeMachineContext: WordChallengeMachineContext,
+  deathReason: "Forfeit" | "Guesses"
+) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrThrow(yield* Atom.get(runSessionRunIdAtom));
+  const runId = Option.getOrThrow(runSessionMachineContext.runId);
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const theSecretWord = yield* Atom.get(wordChallengeTheSecretWordAtom);
+  const theSecretWord = wordChallengeMachineContext.theSecretWord;
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
-  const finalScore = yield* Atom.get(runSessionRunScoreAtom);
-  const finalStreak = yield* Atom.get(runSessionStreakAtom);
+  const finalScore = runSessionMachineContext.runScore;
+  const finalStreak = runSessionMachineContext.streak;
 
   // We calculate the total real-world time the run was alive
   const now = yield* DateTime.now;
-  const createdAt = Option.getOrElse(yield* Atom.get(runSessionCreatedAtAtom), () => now);
+  const createdAt = Option.getOrElse(runSessionMachineContext.createdAt, () => now);
   const durationSeconds = DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor);
 
   // Enrich the span itself with searchable attributes (stream 1 -> arcade_run_summary)
@@ -71,12 +72,14 @@ export const trackInvalidGuessSubmitted = Effect.gen(function* () {
 });
 
 // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-export const trackValidGuessSubmitted = Effect.gen(function* (): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
+export const trackValidGuessSubmitted = Effect.fnUntraced(function* (
+  wordChallengeMachineContext: WordChallengeMachineContext
+): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const currentGuessWord = yield* Atom.get(wordChallengeCurrentGuessWordAtom);
-  const currentTurn = yield* Atom.get(wordChallengeCurrentTurnAtom);
+  const currentGuessWord = wordChallengeMachineContext.currentGuessWord;
+  const currentTurn = wordChallengeMachineContext.currentTurn;
 
   yield* Metric.update(validGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
 
@@ -94,12 +97,15 @@ export const trackNewRunStarted = Effect.gen(function* () {
 });
 
 // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-export const trackRunForfeited = Effect.gen(function* () {
+export const trackRunForfeited = Effect.fnUntraced(function* (
+  runSessionMachineContext: RunSessionMachineContext,
+  wordChallengeMachineContext: WordChallengeMachineContext
+) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const runId = yield* Atom.get(runSessionRunIdAtom);
+  const runId = runSessionMachineContext.runId;
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const streak = yield* Atom.get(runSessionStreakAtom);
+  const streak = runSessionMachineContext.streak;
 
   // If the run has not started yet, there is nothing to track
   if (Option.isNone(runId)) return;
@@ -108,16 +114,19 @@ export const trackRunForfeited = Effect.gen(function* () {
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), "Forfeit");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-  yield* logRunCompleted("Forfeit");
+  yield* logRunCompleted(runSessionMachineContext, wordChallengeMachineContext, "Forfeit");
 });
 
 // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
-export const trackWordWon = Effect.gen(function* (): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
+export const trackWordWon = Effect.fnUntraced(function* (
+  runSessionMachineContext: RunSessionMachineContext,
+  wordChallengeMachineContext: WordChallengeMachineContext
+): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const currentTurn = yield* Atom.get(wordChallengeCurrentTurnAtom);
-  const wordScore = Option.getOrThrow(yield* Atom.get(wordChallengeWordScoreAtom));
+  const currentTurn = wordChallengeMachineContext.currentTurn;
+  const wordScore = Option.getOrThrow(wordChallengeMachineContext.wordScore);
   const guessedTurn = currentTurn - 1;
 
   yield* Metric.update(guessesToWin.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), guessedTurn);
@@ -126,16 +135,19 @@ export const trackWordWon = Effect.gen(function* (): Generator<Effect.Effect<voi
   if (guessedTurn === 1) yield* Metric.update(perfectGames.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
 
   // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
-  yield* logWordWon;
+  yield* logWordWon(runSessionMachineContext, wordChallengeMachineContext);
 });
 
 // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
-export const trackWordLost = Effect.gen(function* (): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
+export const trackWordLost = Effect.fnUntraced(function* (
+  runSessionMachineContext: RunSessionMachineContext,
+  wordChallengeMachineContext: WordChallengeMachineContext
+): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const streak = yield* Atom.get(runSessionStreakAtom);
-  const theSecretWord = yield* Atom.get(wordChallengeTheSecretWordAtom);
+  const streak = runSessionMachineContext.streak;
+  const theSecretWord = wordChallengeMachineContext.theSecretWord;
 
   yield* Metric.update(gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
   yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);
@@ -143,5 +155,5 @@ export const trackWordLost = Effect.gen(function* (): Generator<Effect.Effect<vo
   yield* Metric.update(runDeathReason.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), "Guesses");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-  yield* logRunCompleted("Guesses");
+  yield* logRunCompleted(runSessionMachineContext, wordChallengeMachineContext, "Guesses");
 });

@@ -9,17 +9,18 @@ import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, tr
 
 // types
 import type { GameState } from "@/features/game/domain";
+export type WordChallengeMachineContext = GameState;
 
 // constants
 import { INITIAL_GAME_STATE, WORD_LENGTH } from "@/features/game/domain";
 
 const onGuessRejectedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackInvalidGuessSubmitted, { signal }));
 
-const onGuessRevealedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+const onGuessRevealedActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-      yield* trackValidGuessSubmitted;
+      yield* trackValidGuessSubmitted(context);
 
       // The new run session officially starts when the first guess is revealed
       const now = yield* DateTime.now;
@@ -33,7 +34,8 @@ const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { inpu
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
-      yield* trackWordWon;
+      const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+      yield* trackWordWon(runSessionMachineContext, context);
 
       // Bank volatile points into the persistent run session
       const wordScore = Option.getOrThrow(context.wordScore);
@@ -46,11 +48,12 @@ const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { inpu
   )
 );
 
-const onWordLostActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
-      yield* trackWordLost;
+      const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+      yield* trackWordLost(runSessionMachineContext, context);
 
       // Close out the active run and record it as the latest completed run
       yield* Atom.set(runSessionMachineAtom, { type: "finished" });
@@ -186,7 +189,7 @@ export const wordChallengeMachine = setup({
     // Inputs are locked while tile flip animations play
     revealing: {
       // The new run session officially starts when the first guess is revealed
-      invoke: { src: "onGuessRevealedActor" },
+      invoke: { src: "onGuessRevealedActor", input: ({ context }) => ({ context }) },
 
       after: {
         1500: [{ guard: "isGameWon", target: "won" }, { guard: "isGameLost", target: "lost" }, { target: "typing" }],
@@ -196,11 +199,7 @@ export const wordChallengeMachine = setup({
     // Challenge completed successfully; waiting for next word
     won: {
       entry: "calculateScore",
-
-      invoke: {
-        src: "onWordWonActor",
-        input: ({ context }) => ({ context }),
-      },
+      invoke: { src: "onWordWonActor", input: ({ context }) => ({ context }) },
 
       on: {
         nextWordRequested: {
@@ -212,9 +211,7 @@ export const wordChallengeMachine = setup({
 
     // Challenge failed; waiting for next word
     lost: {
-      invoke: {
-        src: "onWordLostActor",
-      },
+      invoke: { src: "onWordLostActor", input: ({ context }) => ({ context }) },
 
       on: {
         nextWordRequested: {

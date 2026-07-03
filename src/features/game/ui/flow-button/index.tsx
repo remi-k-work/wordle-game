@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
@@ -17,14 +18,14 @@ import type { ComponentPropsWithoutRef } from "react";
 
 type GameFlowButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
-export function GameFlowButton(props: GameFlowButtonProps) {
+export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
-  if (wordChallengeMachineSnapshot.matches("idle")) return <GameFlowButtonSkeleton {...props} />;
+  if (wordChallengeMachineSnapshot.matches("idle")) return <GameFlowButtonSkeleton {...rest} />;
 
   if (wordChallengeMachineSnapshot.matches("won"))
     return (
       <Button
-        className="button"
+        className={cn("button", className)}
         onClick={async () =>
           await RuntimeClient.runPromise(
             Effect.gen(function* () {
@@ -36,7 +37,7 @@ export function GameFlowButton(props: GameFlowButtonProps) {
             })
           )
         }
-        {...props}
+        {...rest}
       >
         <ForwardIcon className="size-11" />
         Next Word
@@ -46,7 +47,7 @@ export function GameFlowButton(props: GameFlowButtonProps) {
   if (wordChallengeMachineSnapshot.matches("lost"))
     return (
       <Button
-        className="button"
+        className={cn("button", className)}
         onClick={async () =>
           await RuntimeClient.runPromise(
             Effect.gen(function* () {
@@ -64,7 +65,7 @@ export function GameFlowButton(props: GameFlowButtonProps) {
             })
           )
         }
-        {...props}
+        {...rest}
       >
         <ArrowPathIcon className="size-11" />
         Start New Run
@@ -73,12 +74,14 @@ export function GameFlowButton(props: GameFlowButtonProps) {
 
   return (
     <Button
-      className="button"
+      className={cn("button", className)}
       onClick={async () =>
         await RuntimeClient.runPromise(
           Effect.gen(function* () {
             // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-            yield* trackRunForfeited;
+            const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+            const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
+            yield* trackRunForfeited(runSessionMachineContext, wordChallengeMachineContext);
 
             // Command the modal machine actor to close itself if open
             yield* Atom.set(modalMachineAtom, { type: "closed" });
@@ -88,7 +91,7 @@ export function GameFlowButton(props: GameFlowButtonProps) {
           })
         )
       }
-      {...props}
+      {...rest}
     >
       <XCircleIcon className="size-11" />
       Forfeit Run
@@ -96,9 +99,9 @@ export function GameFlowButton(props: GameFlowButtonProps) {
   );
 }
 
-export function GameFlowButtonSkeleton(props: GameFlowButtonProps) {
+export function GameFlowButtonSkeleton({ className, ...rest }: GameFlowButtonProps) {
   return (
-    <Button className="button" disabled {...props}>
+    <Button className={cn("button", className)} disabled {...rest}>
       &bnsp;
     </Button>
   );
