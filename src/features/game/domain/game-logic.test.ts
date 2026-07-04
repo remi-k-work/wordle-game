@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, Option } from "effect";
 import { TestClock } from "effect/testing";
-import { calculateScore, formatDuration, getGameStatus, computeKeypadState, calculatePotentialScore } from ".";
+import { calculateScore, formatDuration, computeKeypadState, calculatePotentialScore } from ".";
 
 describe("gameLogic", () => {
   describe("calculateScore", () => {
@@ -71,23 +71,6 @@ describe("gameLogic", () => {
         expect(calculatePotentialScore(3, Option.some(start), yield* DateTime.now)).toBe(720);
       })
     );
-  });
-
-  describe("getGameStatus", () => {
-    it("returns Won when last guess matches secret word", () => {
-      const status = getGameStatus(1, "APPLE", ["APPLE"]);
-      expect(status._tag).toBe("Won");
-    });
-
-    it("returns Lost when turn exceeds limit", () => {
-      const status = getGameStatus(7, "APPLE", ["BIRDS", "CARDS", "TABLE", "CHAIR", "HOUSE", "PIANO"]);
-      expect(status._tag).toBe("Lost");
-    });
-
-    it("returns Playing when game is in progress", () => {
-      const status = getGameStatus(1, "APPLE", ["BIRDS"]);
-      expect(status._tag).toBe("Playing");
-    });
   });
 
   describe("computeKeypadState", () => {

@@ -4,7 +4,6 @@ import { useEffect } from "react";
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue, useAtom } from "@effect/atom-react";
-import { parseKey } from "@/features/game/domain";
 import { keypadColorsAtom, wordChallengeCurrentGuessWordAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
@@ -23,12 +22,7 @@ export function CurrentGuess() {
   useEffect(() => {
     // Handle the keyboard input one key at a time
     function handleKeyUp(ev: KeyboardEvent) {
-      // Map raw input to domain action and exit early if it is junk
-      const gameAction = parseKey(ev.key, keypadColors);
-
-      if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "letterPressed", letter: gameAction.letter });
-      else if (gameAction._tag === "RemoveLetter") wordChallengeMachineEvent({ type: "backspacePressed" });
-      else if (gameAction._tag === "SubmitGuess") wordChallengeMachineEvent({ type: "enterPressed" });
+      wordChallengeMachineEvent({ type: "keyPressed", pressedKey: ev.key });
     }
 
     window.addEventListener("keyup", handleKeyUp);

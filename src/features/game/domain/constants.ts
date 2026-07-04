@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { Data, Option } from "effect";
+import { Option } from "effect";
 
 // types
-import type { Color, GameAction, GameState, GameStatus, RunSession } from ".";
+import type { Color, GameState, RunSession } from ".";
 
 // constants
 export const WORD_LENGTH = 5;
@@ -29,9 +29,6 @@ export const SPEED_MULTIPLIER_CATEGORY_MAP = {
   1.0: "⏱️ Average Pacer",
   0.8: "🐌 Slow Learner",
 } as const as Readonly<Record<number, string>>;
-
-export const GameActionEnum = Data.taggedEnum<GameAction>();
-export const GameStatusEnum = Data.taggedEnum<GameStatus>();
 
 export const INITIAL_GAME_STATE = {
   solutions: Option.none(),

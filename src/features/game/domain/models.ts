@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Data, Schema } from "effect";
+import { Schema } from "effect";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -56,6 +56,3 @@ export class GameState extends Schema.Class<GameState>("GameState")({
   startTime: Schema.Option(Schema.DateTimeUtc),
   wordScore: Schema.Option(WordScore),
 }) {}
-
-export type GameAction = Data.TaggedEnum<{ AddLetter: { readonly letter: string }; RemoveLetter: object; SubmitGuess: object; Ignore: object }>;
-export type GameStatus = Data.TaggedEnum<{ Playing: object; Won: object; Lost: object }>;

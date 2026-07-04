@@ -2,7 +2,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { parseKey } from "@/features/game/domain";
 import { gameDataKeypadAtom, keypadColorsAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
@@ -54,25 +53,20 @@ export function Footer() {
                   transition={SPRING_TRANSITION}
                   className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
                   style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
-                  onClick={() => {
-                    // Map raw input to domain action and exit early if it is junk
-                    const gameAction = parseKey(key, keypadColors);
-
-                    if (gameAction._tag === "AddLetter") wordChallengeMachineEvent({ type: "letterPressed", letter: gameAction.letter });
-                  }}
+                  onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: key })}
                 >
                   {key}
                 </MotionButton>
               );
             })}
 
-            {/* Always include Enter and Backspace, and make sure they animate alongside the letters */}
+            {/* Always include BACKSPACE and ENTER, and make sure they animate alongside the letters */}
             <MotionButton
               key="Backspace"
               layout
               transition={SPRING_TRANSITION}
               className="button basis-12 bg-secondary p-0"
-              onClick={() => wordChallengeMachineEvent({ type: "backspacePressed" })}
+              onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: "BACKSPACE" })}
             >
               <BackspaceIcon className="size-7" />
             </MotionButton>
@@ -82,7 +76,7 @@ export function Footer() {
               layout
               transition={SPRING_TRANSITION}
               className="button basis-12 bg-secondary p-0"
-              onClick={() => wordChallengeMachineEvent({ type: "enterPressed" })}
+              onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: "ENTER" })}
             >
               <PaperAirplaneIcon className="size-7" />
             </MotionButton>

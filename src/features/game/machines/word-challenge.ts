@@ -3,7 +3,7 @@ import { DateTime, Option, HashSet, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent, fromPromise } from "xstate";
-import { calculateScore, canSubmitGuess, getGameStatus } from "@/features/game/domain";
+import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
 import { modalMachineAtom, runSessionMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
@@ -12,7 +12,7 @@ import type { GameState } from "@/features/game/domain";
 export type WordChallengeMachineContext = GameState;
 
 // constants
-import { INITIAL_GAME_STATE, WORD_LENGTH } from "@/features/game/domain";
+import { INITIAL_GAME_STATE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
 
 const onGuessRejectedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackInvalidGuessSubmitted, { signal }));
 
@@ -69,16 +69,37 @@ export const wordChallengeMachine = setup({
   types: {} as {
     events:
       | { readonly type: "solutionsLoaded"; solutions: GameState["solutions"]; dictionary: GameState["solutions"] }
-      | { readonly type: "letterPressed"; readonly letter: string }
-      | { readonly type: "backspacePressed" }
-      | { readonly type: "enterPressed" }
+      | { readonly type: "keyPressed"; readonly pressedKey: string }
       | { readonly type: "nextWordRequested" };
     context: GameState;
   },
   guards: {
     isValidWord: ({ context }) => canSubmitGuess(context.currentGuessWord, context.currentTurn, context.wordleGuesses, Option.getOrThrow(context.dictionary)),
-    isGameWon: ({ context }) => getGameStatus(context.currentTurn, context.theSecretWord, context.wordleGuesses)._tag === "Won",
-    isGameLost: ({ context }) => getGameStatus(context.currentTurn, context.theSecretWord, context.wordleGuesses)._tag === "Lost",
+
+    // Do we have a winner? When the player correctly guesses the secret word, we have a winner
+    isGameWon: ({ context }) => context.theSecretWord === context.wordleGuesses.at(-1),
+
+    // Do we have a loser? When the player runs out of turns, we have a loser
+    isGameLost: ({ context }) => context.currentTurn > MAX_TURNS,
+
+    isEnterKey: ({ event }) => {
+      assertEvent(event, "keyPressed");
+      return isGuessKeyValid(event.pressedKey) && event.pressedKey.toUpperCase() === "ENTER";
+    },
+    isBackspaceKey: ({ event }) => {
+      assertEvent(event, "keyPressed");
+      return isGuessKeyValid(event.pressedKey) && event.pressedKey.toUpperCase() === "BACKSPACE";
+    },
+    isValidLetterKey: ({ context, event }) => {
+      assertEvent(event, "keyPressed");
+      if (!isGuessKeyValid(event.pressedKey)) return false;
+      const normalizedKey = event.pressedKey.toUpperCase();
+      if (normalizedKey === "ENTER" || normalizedKey === "BACKSPACE") return false;
+
+      // Prevent typing greyed out keys
+      const keypadColors = computeKeypadState(context.theSecretWord, context.wordleGuesses);
+      return keypadColors[normalizedKey] !== "grey";
+    },
   },
   actions: {
     // Initialize by creating the dictionary of valid words and randomly selecting the secret word
@@ -107,30 +128,39 @@ export const wordChallengeMachine = setup({
       } as const satisfies GameState;
     }),
 
-    addLetter: assign({
-      currentGuessWord: ({ context, event }) => {
-        assertEvent(event, "letterPressed");
-        return context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + event.letter : context.currentGuessWord;
-      },
-
-      // Lazily assign startTime on the very first letter typed
-      startTime: ({ context }) => (Option.isNone(context.startTime) ? Option.some(DateTime.makeUnsafe(Date.now())) : context.startTime),
+    addLetter: assign(({ context, event }) => {
+      assertEvent(event, "keyPressed");
+      const normalizedKey = event.pressedKey.toUpperCase();
+      return {
+        ...context,
+        currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
+        // Lazily assign startTime on the very first letter typed
+        startTime: Option.isNone(context.startTime) ? Option.some(DateTime.makeUnsafe(Date.now())) : context.startTime,
+      } as const satisfies GameState;
     }),
 
     // Remove the last letter from the current guess word
-    removeLetter: assign({ currentGuessWord: ({ context }) => context.currentGuessWord.slice(0, -1) }),
+    removeLetter: assign(({ context }) => ({ ...context, currentGuessWord: context.currentGuessWord.slice(0, -1) }) as const satisfies GameState),
 
     // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
-    submitGuess: assign({
-      wordleGuesses: ({ context }) => [...context.wordleGuesses, context.currentGuessWord],
-      currentGuessWord: () => "",
-      currentTurn: ({ context }) => context.currentTurn + 1,
-    }),
+    submitGuess: assign(
+      ({ context }) =>
+        ({
+          ...context,
+          currentGuessWord: "",
+          wordleGuesses: [...context.wordleGuesses, context.currentGuessWord],
+          currentTurn: context.currentTurn + 1,
+        }) as const satisfies GameState
+    ),
 
     // Calculates the player's word score based on the turn they won on and how long it took them
-    calculateScore: assign({
-      wordScore: ({ context }) => Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.makeUnsafe(Date.now()))),
-    }),
+    calculateScore: assign(
+      ({ context }) =>
+        ({
+          ...context,
+          wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.makeUnsafe(Date.now()))),
+        }) as const satisfies GameState
+    ),
 
     // Transition to the next word challenge while maintaining the current run streak
     nextChallenge: assign(({ context }) => {
@@ -165,9 +195,12 @@ export const wordChallengeMachine = setup({
     // User is actively building their current guess
     typing: {
       on: {
-        letterPressed: { actions: "addLetter" },
-        backspacePressed: { actions: "removeLetter" },
-        enterPressed: { target: "validating" },
+        // The machine now routes the raw keyboard input natively
+        keyPressed: [
+          { guard: "isEnterKey", target: "validating" },
+          { guard: "isBackspaceKey", actions: "removeLetter" },
+          { guard: "isValidLetterKey", actions: "addLetter" },
+        ],
       },
     },
 
@@ -181,8 +214,11 @@ export const wordChallengeMachine = setup({
       invoke: { src: "onGuessRejectedActor" },
 
       on: {
-        letterPressed: { target: "typing", actions: "addLetter" },
-        backspacePressed: { target: "typing", actions: "removeLetter" },
+        // Ensure users can recover from rejected states using the exact same generic event
+        keyPressed: [
+          { guard: "isBackspaceKey", target: "typing", actions: "removeLetter" },
+          { guard: "isValidLetterKey", target: "typing", actions: "addLetter" },
+        ],
       },
     },
 
