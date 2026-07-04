@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { formatGuess, speedMultiplierToCategory } from "./formatters";
+import { formatGuess, speedMultiplierToCategory } from "../formatters";
 
 describe("formatters", () => {
   describe("formatGuess", () => {

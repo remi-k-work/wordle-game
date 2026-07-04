@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { HashSet } from "effect";
-import { isGuessKeyValid, canSubmitGuess } from "./validators";
+import { isGuessKeyValid, canSubmitGuess } from "../validators";
 
 describe("validators", () => {
   describe("isGuessKeyValid", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { pickStrongerColor } from "./helpers";
+import { pickStrongerColor } from "../helpers";
 
 describe("helpers", () => {
   describe("pickStrongerColor", () => {
