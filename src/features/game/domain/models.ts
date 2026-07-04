@@ -31,8 +31,6 @@ export class RunSession extends Schema.Class<RunSession>("RunSession")({
   createdAt: Schema.Option(Schema.DateTimeUtc),
   runScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  lastRunScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  lastStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   bestRunScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   bestStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}

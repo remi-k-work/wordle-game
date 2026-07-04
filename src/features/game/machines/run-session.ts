@@ -11,11 +11,7 @@ import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 
 export const runSessionMachine = setup({
   types: {} as {
-    events:
-      | { readonly type: "reset" }
-      | { readonly type: "started"; readonly now: DateTime.Utc }
-      | { readonly type: "wordBanked"; readonly wordScore: WordScore }
-      | { readonly type: "finished" };
+    events: { readonly type: "started" } | { readonly type: "wordBanked"; readonly wordScore: WordScore } | { readonly type: "finished" };
     context: RunSession;
     input: RunSession;
     tags: "activeRun";
@@ -24,48 +20,36 @@ export const runSessionMachine = setup({
     hasActiveRun: ({ context }) => Option.isSome(context.runId),
   },
   actions: {
-    // Reset only the active run progress while preserving historical session stats
-    reset: assign(
-      ({ context }) => ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession
-    ),
-
-    // Start a new arcade run while preserving historical session stats
-    start: assign(({ context, event }) => {
-      assertEvent(event, "started");
-
-      return {
-        ...INITIAL_RUN_SESSION,
-        runId: Option.some(crypto.randomUUID()),
-        createdAt: Option.some(event.now),
-        bestRunScore: context.bestRunScore,
-        bestStreak: context.bestStreak,
-      } as const satisfies RunSession;
-    }),
-
-    // Add a solved word score into the ongoing arcade run
-    bankWord: assign(({ context, event }) => {
-      assertEvent(event, "wordBanked");
-
-      return {
-        ...context,
-        runScore: context.runScore + event.wordScore.wordScore,
-        streak: context.streak + 1,
-        bestRunScore: Math.max(context.bestRunScore, context.runScore + event.wordScore.wordScore),
-        bestStreak: Math.max(context.bestStreak, context.streak + 1),
-      } as const satisfies RunSession;
-    }),
-
-    // Close out the active run and record it as the latest completed run while preserving historical session stats
-    finish: assign(
+    // Start a new arcade run, wiping previous run stats but preserving historical "best" stats
+    start: assign(
       ({ context }) =>
         ({
           ...INITIAL_RUN_SESSION,
-          lastRunScore: context.runScore,
-          lastStreak: context.streak,
+          runId: Option.some(crypto.randomUUID()),
+          createdAt: Option.some(DateTime.makeUnsafe(Date.now())),
           bestRunScore: context.bestRunScore,
           bestStreak: context.bestStreak,
         }) as const satisfies RunSession
     ),
+
+    // Bank volatile points into the persistent run session
+    bankWord: assign(({ context, event }) => {
+      assertEvent(event, "wordBanked");
+
+      const runScore = context.runScore + event.wordScore.wordScore;
+      const streak = context.streak + 1;
+
+      return {
+        ...context,
+        runScore,
+        streak,
+        bestRunScore: Math.max(context.bestRunScore, runScore),
+        bestStreak: Math.max(context.bestStreak, streak),
+      } as const satisfies RunSession;
+    }),
+
+    // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
+    finish: assign(({ context }) => ({ ...context, runId: Option.none(), createdAt: Option.none() }) as const satisfies RunSession),
   },
 }).createMachine({
   id: "runSession",
@@ -94,18 +78,12 @@ export const runSessionMachine = setup({
       tags: ["activeRun"],
 
       on: {
-        // Abandon the current run while preserving historical stats
-        reset: {
-          target: "inactive",
-          actions: "reset",
-        },
-
-        // Add a completed word score into the active run
+        // Bank volatile points into the persistent run session
         wordBanked: {
           actions: "bankWord",
         },
 
-        // Finalize the run and snapshot its results
+        // Finalize the run
         finished: {
           target: "inactive",
           actions: "finish",

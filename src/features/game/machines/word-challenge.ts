@@ -23,8 +23,7 @@ const onGuessRevealedActor = fromPromise(async ({ input: { context }, signal }: 
       yield* trackValidGuessSubmitted(context);
 
       // The new run session officially starts when the first guess is revealed
-      const now = yield* DateTime.now;
-      yield* Atom.set(runSessionMachineAtom, { type: "started", now });
+      yield* Atom.set(runSessionMachineAtom, { type: "started" });
     }),
     { signal }
   )
@@ -55,7 +54,7 @@ const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { inp
       const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
       yield* trackWordLost(runSessionMachineContext, context);
 
-      // Close out the active run and record it as the latest completed run
+      // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
       yield* Atom.set(runSessionMachineAtom, { type: "finished" });
 
       // Command the modal machine actor to open up the status modal

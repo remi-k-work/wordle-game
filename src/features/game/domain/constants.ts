@@ -46,8 +46,6 @@ export const INITIAL_RUN_SESSION = {
   createdAt: Option.none(),
   runScore: 0,
   streak: 0,
-  lastRunScore: 0,
-  lastStreak: 0,
   bestRunScore: 0,
   bestStreak: 0,
 } as const satisfies RunSession;

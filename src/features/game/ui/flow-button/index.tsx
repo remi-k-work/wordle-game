@@ -57,9 +57,6 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
               // Command the modal machine actor to close itself if open
               yield* Atom.set(modalMachineAtom, { type: "closed" });
 
-              // Abandon the current run while preserving historical stats
-              yield* Atom.set(runSessionMachineAtom, { type: "reset" });
-
               // Transition to the next word challenge while maintaining the current run streak
               yield* Atom.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
             })
@@ -83,11 +80,11 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
             const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
             yield* trackRunForfeited(runSessionMachineContext, wordChallengeMachineContext);
 
-            // Command the modal machine actor to close itself if open
-            yield* Atom.set(modalMachineAtom, { type: "closed" });
-
-            // Manually abandon the current arcade run and record its final progress
+            // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
             yield* Atom.set(runSessionMachineAtom, { type: "finished" });
+
+            // Command the modal machine actor to open up the status modal
+            yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
           })
         )
       }

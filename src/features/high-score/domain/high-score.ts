@@ -2,7 +2,7 @@
 import type { HighScore } from ".";
 
 // Determine if the current run qualifies for the high score
-export const qualifiesForHighScore = (top10HighScores: ReadonlyArray<HighScore>, lastRunScore: HighScore["score"], lastStreak: HighScore["streak"]) => {
+export const qualifiesForHighScore = (top10HighScores: ReadonlyArray<HighScore>, runScore: HighScore["score"], streak: HighScore["streak"]) => {
   // If there are fewer than 10 entries, any score qualifies
   if (top10HighScores.length < 10) return true;
 
@@ -10,5 +10,5 @@ export const qualifiesForHighScore = (top10HighScores: ReadonlyArray<HighScore>,
   const tail = top10HighScores.at(-1)!;
 
   // Qualification rule (score must be higher than the 10th place score, or if tied, streak must be higher than the 10th place streak)
-  return lastRunScore > tail.score || (lastRunScore === tail.score && lastStreak > tail.streak);
+  return runScore > tail.score || (runScore === tail.score && streak > tail.streak);
 };

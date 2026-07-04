@@ -20,7 +20,7 @@ import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 const runSessionAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/runSession",
-  schema: RunSession.mapFields(Struct.pick(["runId", "createdAt", "runScore", "streak", "lastRunScore", "lastStreak", "bestRunScore", "bestStreak"])),
+  schema: RunSession.mapFields(Struct.pick(["runId", "createdAt", "runScore", "streak", "bestRunScore", "bestStreak"])),
   defaultValue: () => INITIAL_RUN_SESSION,
 });
 
@@ -66,7 +66,5 @@ export const runSessionRunIdAtom = runSessionMachineAtom.pipe(Atom.map((snapshot
 export const runSessionCreatedAtAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.createdAt));
 export const runSessionRunScoreAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.runScore));
 export const runSessionStreakAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.streak));
-export const runSessionLastRunScoreAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.lastRunScore));
-export const runSessionLastStreakAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.lastStreak));
 export const runSessionBestRunScoreAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.bestRunScore));
 export const runSessionBestStreakAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.bestStreak));

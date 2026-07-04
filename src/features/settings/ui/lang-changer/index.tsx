@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { modalMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 import { changeSolutionsLanguageAction, solutionsLanguageAtom } from "@/features/settings/state";
 import { trackRunForfeited } from "@/features/telemetry/state";
 
@@ -25,10 +25,7 @@ export function LangChanger() {
         const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
         yield* trackRunForfeited(runSessionMachineContext, wordChallengeMachineContext);
 
-        // Command the modal machine actor to close itself if open
-        yield* Atom.set(modalMachineAtom, { type: "closed" });
-
-        // Manually abandon the current arcade run and record its final progress
+        // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
         yield* Atom.set(runSessionMachineAtom, { type: "finished" });
       })
     );

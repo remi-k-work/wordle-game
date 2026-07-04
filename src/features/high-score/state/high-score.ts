@@ -4,7 +4,7 @@ import { Atom, AsyncResult } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { qualifiesForHighScore } from "@/features/high-score/domain";
-import { runSessionLastRunScoreAtom, runSessionLastStreakAtom } from "@/features/game/state";
+import { runSessionRunScoreAtom, runSessionStreakAtom } from "@/features/game/state";
 
 // types
 import type { AddHighScore } from "@/features/high-score/domain";
@@ -28,12 +28,12 @@ export const addHighScoreAction = RuntimeAtom.fn((newHighScore: AddHighScore) =>
 // Derived atom to determine if the current run qualifies for the high score
 export const qualifiesForHighScoreAtom = Atom.make((get) => {
   const top10HighScores = get(top10HighScoresAtom);
-  const lastRunScore = get(runSessionLastRunScoreAtom);
-  const lastStreak = get(runSessionLastStreakAtom);
+  const runScore = get(runSessionRunScoreAtom);
+  const streak = get(runSessionStreakAtom);
 
   // If we do not have a successful fetch yet, we cannot determine qualification
   return Option.match(AsyncResult.value(top10HighScores), {
     onNone: () => false,
-    onSome: (top10HighScores) => qualifiesForHighScore(top10HighScores, lastRunScore, lastStreak),
+    onSome: (top10HighScores) => qualifiesForHighScore(top10HighScores, runScore, streak),
   });
 });
