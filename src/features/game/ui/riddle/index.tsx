@@ -5,8 +5,7 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
-import { riddleAtom } from "@/features/game/state";
+import { wordMetaMachineAtom, wordMetaTheRiddleAtom } from "@/features/game/state";
 import { solutionsLanguageAtom, voicePitchAtom, voiceRateAtom, voiceVoiceAtom, voiceVolumeAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks/use-speech-voices";
 
@@ -23,8 +22,9 @@ interface RiddleProps {
 }
 
 export function Riddle({ isVoiceTest = false }: RiddleProps) {
-  const riddle = useAtomValue(riddleAtom);
   const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
+  const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
+  const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
 
   // Fetch the available voices
   const voices = useSpeechVoices();
@@ -34,7 +34,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   const voiceRate = useAtomValue(voiceRateAtom);
   const voicePitch = useAtomValue(voicePitchAtom);
 
-  const riddleOutput = AsyncResult.value(riddle).pipe(Option.getOrNull);
+  const riddleOutput = Option.getOrNull(theRiddle);
 
   const sanitizedRiddle = useMemo(() => {
     if (!riddleOutput) return null;
@@ -99,10 +99,10 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   };
 
   if (isVoiceTest) {
-    return AsyncResult.builder(riddle)
-      .onInitialOrWaiting(() => <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>)
-      .onFailure(() => <p className="mx-auto text-center text-xl">Riddle unavailable. You are on your own!</p>)
-      .onSuccess(() => (
+    if (wordMetaMachineSnapshot.matches("idle") || wordMetaMachineSnapshot.matches("loading"))
+      return <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>;
+    else if (wordMetaMachineSnapshot.matches("ready"))
+      return (
         <div>
           <p className="mx-auto text-center text-xl">{sanitizedRiddle}</p>
           <Button className="button mx-auto mt-4 text-base" onClick={() => speakRiddle()}>
@@ -110,14 +110,16 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
             Speak Riddle
           </Button>
         </div>
-      ))
-      .render();
+      );
+    else {
+      return <p className="mx-auto text-center text-xl">Riddle unavailable. You are on your own!</p>;
+    }
   }
 
   return (
     <Popover.Root>
       <Popover.Trigger openOnHover title="Riddle" className="button flex-none p-1 data-popup-open:bg-accent">
-        {riddle.waiting ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
+        {wordMetaMachineSnapshot.matches("loading") ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8}>
@@ -129,19 +131,19 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            {AsyncResult.builder(riddle)
-              .onInitialOrWaiting(() => <p className="animate-pulse">Thinking...</p>)
-              .onFailure(() => <p>Riddle unavailable. You are on your own!</p>)
-              .onSuccess(() => (
-                <div>
-                  <p>{sanitizedRiddle}</p>
-                  <Button className="button mx-auto mt-4 text-base" onClick={() => speakRiddle()}>
-                    <SpeakerWaveIcon className="size-11" />
-                    Speak Riddle
-                  </Button>
-                </div>
-              ))
-              .render()}
+            {wordMetaMachineSnapshot.matches("idle") || wordMetaMachineSnapshot.matches("loading") ? (
+              <p className="animate-pulse">Thinking...</p>
+            ) : wordMetaMachineSnapshot.matches("ready") ? (
+              <div>
+                <p>{sanitizedRiddle}</p>
+                <Button className="button mx-auto mt-4 text-base" onClick={() => speakRiddle()}>
+                  <SpeakerWaveIcon className="size-11" />
+                  Speak Riddle
+                </Button>
+              </div>
+            ) : (
+              <p>Riddle unavailable. You are on your own!</p>
+            )}
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

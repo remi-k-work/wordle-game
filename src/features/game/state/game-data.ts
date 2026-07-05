@@ -1,11 +1,6 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
-import { RuntimeAtom } from "@/lib/runtime-client";
-import { RpcGameClient } from "@/features/game/rpc/client";
-import { solutionsLanguageAtom } from "@/features/settings/state";
-import { wordChallengeTheSecretWordAtom } from ".";
 import { gameDataMachine } from "@/features/game/machines/game-data";
 
 // types
@@ -52,33 +47,3 @@ export const gameDataSolutionsAtom = gameDataMachineAtom.pipe(Atom.map((snapshot
 export const gameDataDictionaryAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.dictionary));
 export const gameDataKeypadAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.keypad));
 export const gameDataTheSecretWordAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theSecretWord));
-
-// This reactive atom purely exists to bridge the language selection to the loader machine
-export const loaderBootstrapperAtom = Atom.make((get) => {
-  const solutionsLanguage = get(solutionsLanguageAtom);
-  get.set(gameDataMachineAtom, { type: "loadRequested", solutionsLanguage });
-}).pipe(Atom.keepAlive);
-
-// Effectful atom that reactively fetches a riddle whenever the secret word or language changes
-export const riddleAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    yield* Effect.sleep("3 seconds");
-
-    const theSecretWord = Option.getOrThrow(get(wordChallengeTheSecretWordAtom));
-    const solutionsLanguage = get(solutionsLanguageAtom);
-
-    const { fetchRiddle } = yield* RpcGameClient;
-    return yield* fetchRiddle({ theSecretWord, solutionsLanguage });
-  })
-).pipe(Atom.keepAlive);
-
-// Effectful atom that reactively fetches the secret word definition
-export const wordDefinitionAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* () {
-    const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-    const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
-
-    const { wordDefinition } = yield* RpcGameClient;
-    return yield* wordDefinition({ solutionsLanguage, theSecretWord });
-  })
-);

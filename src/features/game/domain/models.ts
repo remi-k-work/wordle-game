@@ -7,20 +7,25 @@ import { MAX_TURNS, WORD_LENGTH } from ".";
 // types
 export type TheSecretWord = typeof TheSecretWord.Type;
 export type SolutionsLanguage = typeof SolutionsLanguage.Type;
+export type TheRiddle = typeof TheRiddle.Type;
+export type WordDefinition = typeof WordDefinition.Type;
+
 export type Color = typeof Color.Type;
 export type WordleGrid = typeof WordleGrid.Type;
 export type Keypad = typeof Keypad.Type;
 
 export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(WORD_LENGTH)));
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
+export const TheRiddle = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
+export const WordDefinition = Schema.Union([Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())), Schema.Null]);
 
 // All the available colors for a single tile
 export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
 
-// A single tile in the game board
+// A single tile in the wordle grid
 export class Tile extends Schema.Class<Tile>("Tile")({ tileKey: Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(1)), color: Color }) {}
 
-// The game board
+// The wordle grid and the keypad
 export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLength(WORD_LENGTH))).check(Schema.isMaxLength(MAX_TURNS));
 export const Keypad = Schema.Array(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(1))));
 
@@ -30,6 +35,11 @@ export class GameData extends Schema.Class<GameData>("GameData")({
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   keypad: Schema.Option(Keypad),
   theSecretWord: Schema.Option(TheSecretWord),
+}) {}
+
+export class WordMeta extends Schema.Class<WordMeta>("WordMeta")({
+  theRiddle: Schema.Option(TheRiddle),
+  wordDefinition: Schema.Option(WordDefinition),
 }) {}
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)

@@ -1,14 +1,13 @@
 // services, features, and other libraries
+import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
-import { wordDefinitionAtom } from "@/features/game/state";
+import { wordMetaWordDefinitionAtom } from "@/features/game/state";
 
 export function Definition() {
-  const wordDefinition = useAtomValue(wordDefinitionAtom);
+  const wordDefinition = useAtomValue(wordMetaWordDefinitionAtom);
 
-  return AsyncResult.builder(wordDefinition)
-    .onInitialOrWaiting(() => <p className="animate-pulse">📖 Thinking... 📖</p>)
-    .onFailure(() => <p>📖 The secret word definition is unavailable. 📖</p>)
-    .onSuccess((wordDefinition) => <p>📖 {wordDefinition} 📖</p>)
-    .render();
+  return Option.match(wordDefinition.pipe(Option.fromNullishOr), {
+    onNone: () => <p>📖 The secret word definition is unavailable. 📖</p>,
+    onSome: (wordDefinition) => <p>📖 {wordDefinition} 📖</p>,
+  });
 }

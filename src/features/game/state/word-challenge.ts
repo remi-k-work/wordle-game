@@ -1,7 +1,9 @@
 // services, features, and other libraries
+import { DateTime, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
+import { calculatePotentialScore, computeKeypadState, deriveWordleGrid } from "@/features/game/domain";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -48,3 +50,16 @@ export const wordChallengeWordleGuessesAtom = wordChallengeMachineAtom.pipe(Atom
 export const wordChallengeCurrentTurnAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.currentTurn));
 export const wordChallengeStartTimeAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.startTime));
 export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordScore));
+
+// Reactive selector for the "live" potential word score based on current progress
+export const potentialScoreAtom = Atom.make((get) =>
+  calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
+);
+
+// View-ready representation of the 6x5 game grid derived from current guesses
+export const wordleGridAtom = Atom.make((get) => deriveWordleGrid(Option.getOrThrow(get(wordChallengeTheSecretWordAtom)), get(wordChallengeWordleGuessesAtom)));
+
+// Current coloring state of the keypad keys based on guess history
+export const keypadColorsAtom = Atom.make((get) =>
+  computeKeypadState(Option.getOrThrow(get(wordChallengeTheSecretWordAtom)), get(wordChallengeWordleGuessesAtom))
+);

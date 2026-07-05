@@ -2,7 +2,7 @@
 import { Option } from "effect";
 
 // types
-import type { Color, GameData, GameState, RunSession } from ".";
+import type { Color, GameData, GameState, RunSession, WordMeta } from ".";
 
 // constants
 export const WORD_LENGTH = 5;
@@ -37,6 +37,11 @@ export const INITIAL_GAME_DATA = {
   keypad: Option.none(),
   theSecretWord: Option.none(),
 } as const satisfies GameData;
+
+export const INITIAL_WORD_META = {
+  theRiddle: Option.none(),
+  wordDefinition: Option.none(),
+} as const satisfies WordMeta;
 
 export const INITIAL_GAME_STATE = {
   solutions: Option.none(),

@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
-import { Keypad, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
+import { Keypad, SolutionsLanguage, TheRiddle, TheSecretWord, WordDefinition } from "@/features/game/domain";
 
 export class RpcGame extends RpcGroup.make(
   Rpc.make("fetchSolutions", {
@@ -21,11 +21,11 @@ export class RpcGame extends RpcGroup.make(
 
   Rpc.make("fetchRiddle", {
     payload: { theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage },
-    success: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())),
+    success: TheRiddle,
   }),
 
-  Rpc.make("wordDefinition", {
+  Rpc.make("fetchDefinition", {
     payload: { solutionsLanguage: SolutionsLanguage, theSecretWord: TheSecretWord },
-    success: Schema.Union([Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())), Schema.Null]),
+    success: WordDefinition,
   })
 ) {}

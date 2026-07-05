@@ -35,7 +35,7 @@ const RpcGameLayer = RpcGame.toLayer({
       Effect.orElseSucceed(() => "Riddle unavailable. You are on your own!")
     ),
 
-  wordDefinition: ({ solutionsLanguage, theSecretWord }) =>
+  fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
     Effect.succeed(Option.fromNullishOr(solutionsLanguage === "En" ? DEFINITIONS_EN[theSecretWord] : DEFINITIONS_PL[theSecretWord]).pipe(Option.getOrNull)),
 });
 
