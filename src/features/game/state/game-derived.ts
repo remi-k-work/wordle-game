@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime } from "effect";
+import { DateTime, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { calculatePotentialScore, computeKeypadState, deriveWordleGrid } from "@/features/game/domain";
 import { wordChallengeCurrentTurnAtom, wordChallengeStartTimeAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from ".";
@@ -10,7 +10,9 @@ export const potentialScoreAtom = Atom.make((get) =>
 );
 
 // View-ready representation of the 6x5 game grid derived from current guesses
-export const wordleGridAtom = Atom.make((get) => deriveWordleGrid(get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom)));
+export const wordleGridAtom = Atom.make((get) => deriveWordleGrid(Option.getOrThrow(get(wordChallengeTheSecretWordAtom)), get(wordChallengeWordleGuessesAtom)));
 
 // Current coloring state of the keypad keys based on guess history
-export const keypadColorsAtom = Atom.make((get) => computeKeypadState(get(wordChallengeTheSecretWordAtom), get(wordChallengeWordleGuessesAtom)));
+export const keypadColorsAtom = Atom.make((get) =>
+  computeKeypadState(Option.getOrThrow(get(wordChallengeTheSecretWordAtom)), get(wordChallengeWordleGuessesAtom))
+);

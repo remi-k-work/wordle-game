@@ -41,7 +41,7 @@ export const INITIAL_GAME_DATA = {
 export const INITIAL_GAME_STATE = {
   solutions: Option.none(),
   dictionary: Option.none(),
-  theSecretWord: "",
+  theSecretWord: Option.none(),
   currentGuessWord: "",
   wordleGuesses: [],
   currentTurn: 1,

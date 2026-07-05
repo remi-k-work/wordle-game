@@ -29,7 +29,7 @@ export const logWordWon = Effect.fn("logWordWon")(function* (
   // Extract all the necessary attributes that will offer additional context for our span
   const runId = Option.getOrThrow(runSessionMachineContext.runId);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const theSecretWord = wordChallengeMachineContext.theSecretWord;
+  const theSecretWord = Option.getOrThrow(wordChallengeMachineContext.theSecretWord);
   const currentTurn = wordChallengeMachineContext.currentTurn;
   const wordScore = Option.getOrThrow(wordChallengeMachineContext.wordScore);
   const guessedTurn = currentTurn - 1;
@@ -48,7 +48,7 @@ export const logRunCompleted = Effect.fn("logRunCompleted")(function* (
   const runId = Option.getOrThrow(runSessionMachineContext.runId);
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-  const theSecretWord = wordChallengeMachineContext.theSecretWord;
+  const theSecretWord = Option.getOrThrow(wordChallengeMachineContext.theSecretWord);
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
   const finalScore = runSessionMachineContext.runScore;
   const finalStreak = runSessionMachineContext.streak;
@@ -147,7 +147,7 @@ export const trackWordLost = Effect.fnUntraced(function* (
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
   const streak = runSessionMachineContext.streak;
-  const theSecretWord = wordChallengeMachineContext.theSecretWord;
+  const theSecretWord = Option.getOrThrow(wordChallengeMachineContext.theSecretWord);
 
   yield* Metric.update(gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
   yield* Metric.update(arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);

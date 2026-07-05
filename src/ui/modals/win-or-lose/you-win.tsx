@@ -13,7 +13,7 @@ export function YouWin() {
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const wordScore = useAtomValue(wordChallengeWordScoreAtom);
 
-  if (Option.isNone(wordScore)) return null;
+  if (Option.isNone(theSecretWord) || Option.isNone(wordScore)) return null;
   const { timeSeconds } = wordScore.value;
 
   return (
@@ -22,7 +22,7 @@ export function YouWin() {
         You found the solution in <b>{currentTurn - 1}</b> guesses 😄
       </p>
 
-      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord}</h2>
+      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord.value}</h2>
       <Definition />
 
       <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={timeSeconds} />

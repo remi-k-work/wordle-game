@@ -57,7 +57,7 @@ const onDataLoadedActor = fromPromise(async ({ input: { context }, signal }: { i
       type: "gameDataLoaded",
       solutions: context.solutions,
       dictionary: context.dictionary,
-      theSecretWord: Option.getOrThrow(context.theSecretWord),
+      theSecretWord: context.theSecretWord,
     }),
     {
       signal,

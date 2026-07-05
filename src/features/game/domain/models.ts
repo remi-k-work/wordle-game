@@ -54,7 +54,7 @@ export class WordScore extends Schema.Class<WordScore>("WordScore")({
 export class GameState extends Schema.Class<GameState>("GameState")({
   solutions: Schema.Option(Schema.Array(TheSecretWord)),
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
-  theSecretWord: TheSecretWord,
+  theSecretWord: Schema.Option(TheSecretWord),
   currentGuessWord: Schema.Trim.check(Schema.isNonEmpty()),
   wordleGuesses: Schema.Array(TheSecretWord),
   currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),

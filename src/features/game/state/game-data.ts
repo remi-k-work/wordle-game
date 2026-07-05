@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { RuntimeAtom } from "@/lib/runtime-client";
@@ -64,7 +64,7 @@ export const riddleAtom = RuntimeAtom.atom(
   Effect.fnUntraced(function* (get) {
     yield* Effect.sleep("3 seconds");
 
-    const theSecretWord = get(wordChallengeTheSecretWordAtom);
+    const theSecretWord = Option.getOrThrow(get(wordChallengeTheSecretWordAtom));
     const solutionsLanguage = get(solutionsLanguageAtom);
 
     const { fetchRiddle } = yield* RpcGameClient;
@@ -76,7 +76,7 @@ export const riddleAtom = RuntimeAtom.atom(
 export const wordDefinitionAtom = RuntimeAtom.atom(
   Effect.fnUntraced(function* () {
     const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
-    const theSecretWord = yield* Atom.get(wordChallengeTheSecretWordAtom);
+    const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
 
     const { wordDefinition } = yield* RpcGameClient;
     return yield* wordDefinition({ solutionsLanguage, theSecretWord });

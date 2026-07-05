@@ -76,7 +76,7 @@ export const wordChallengeMachine = setup({
     isValidWord: ({ context }) => canSubmitGuess(context.currentGuessWord, context.currentTurn, context.wordleGuesses, Option.getOrThrow(context.dictionary)),
 
     // Do we have a winner? When the player correctly guesses the secret word, we have a winner
-    isGameWon: ({ context }) => context.theSecretWord === context.wordleGuesses.at(-1),
+    isGameWon: ({ context }) => Option.getOrThrow(context.theSecretWord) === context.wordleGuesses.at(-1),
 
     // Do we have a loser? When the player runs out of turns, we have a loser
     isGameLost: ({ context }) => context.currentTurn > MAX_TURNS,
@@ -96,7 +96,7 @@ export const wordChallengeMachine = setup({
       if (normalizedKey === "ENTER" || normalizedKey === "BACKSPACE") return false;
 
       // Prevent typing greyed out keys
-      const keypadColors = computeKeypadState(context.theSecretWord, context.wordleGuesses);
+      const keypadColors = computeKeypadState(Option.getOrThrow(context.theSecretWord), context.wordleGuesses);
       return keypadColors[normalizedKey] !== "grey";
     },
   },
@@ -146,12 +146,12 @@ export const wordChallengeMachine = setup({
     // Transition to the next word challenge while maintaining the current run streak
     nextChallenge: assign(({ context }) => {
       const solutions = Option.getOrThrow(context.solutions);
-      const theSecretWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
+      const theSecretWord = Option.some(solutions[Math.floor(Math.random() * solutions.length)].toUpperCase());
 
       // *** TEST CODE ***
       // *** TEST CODE ***
       // *** TEST CODE ***
-      console.log(`Secret word: ${theSecretWord}`);
+      console.log(`Secret word: ${theSecretWord.valueOrUndefined}`);
       // *** TEST CODE ***
       // *** TEST CODE ***
       // *** TEST CODE ***
