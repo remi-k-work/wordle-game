@@ -11,10 +11,10 @@ import { RunScore } from "./run-score";
 export function YouWin() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
-  const wordScoreOption = useAtomValue(wordChallengeWordScoreAtom);
+  const wordScore = useAtomValue(wordChallengeWordScoreAtom);
 
-  if (Option.isNone(wordScoreOption)) return null;
-  const { timeSeconds } = wordScoreOption.value;
+  if (Option.isNone(wordScore)) return null;
+  const { timeSeconds } = wordScore.value;
 
   return (
     <article className="mx-auto max-w-prose space-y-4">

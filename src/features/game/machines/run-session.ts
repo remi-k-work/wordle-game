@@ -54,7 +54,7 @@ export const runSessionMachine = setup({
 }).createMachine({
   id: "runSession",
   // Hydrate the machine with the input from the KVS Atom
-  context: ({ input }) => ({ ...input }),
+  context: ({ input }) => ({ ...input }) as const satisfies RunSession,
   initial: "classifying",
 
   states: {

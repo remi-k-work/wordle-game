@@ -1,40 +1,63 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
+import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
+import { createActor } from "xstate";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { solutionsLanguageAtom } from "@/features/settings/state";
-import { wordChallengeMachineAtom, wordChallengeTheSecretWordAtom } from ".";
+import { wordChallengeTheSecretWordAtom } from ".";
+import { gameDataMachine } from "@/features/game/machines/game-data";
 
-// Effectful atom that fetches the solution dictionary and initializes a new word challenge
-export const gameDataSolutionsAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    yield* Effect.sleep("1 seconds");
+// types
+import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
 
-    const solutionsLanguage = get(solutionsLanguageAtom);
+type GameDataMachineSnapshot = SnapshotFrom<typeof gameDataMachine>;
+type GameDataMachineEvent = EventFromLogic<typeof gameDataMachine>;
+type GameDataMachineActor = Actor<typeof gameDataMachine>;
 
-    const { fetchSolutions, fetchDictionary } = yield* RpcGameClient;
-    const solutions = yield* fetchSolutions({ solutionsLanguage });
-    const dictionary = yield* fetchDictionary({ solutionsLanguage });
+// Creates an Atom-owned XState actor reference
+const gameDataMachineActorAtom = Atom.make<GameDataMachineActor>((get) => {
+  const actor = createActor(gameDataMachine);
+  actor.start();
 
-    // Notify the word challenge machine that the solutions have been loaded
-    yield* Atom.set(wordChallengeMachineAtom, {
-      type: "solutionsLoaded",
-      solutions: Option.some(solutions),
-      dictionary: Option.some(dictionary),
+  get.addFinalizer(() => {
+    actor.stop();
+  });
+
+  return actor;
+}).pipe(Atom.keepAlive);
+
+// The game data machine is now a living actor inside the effect atom
+export const gameDataMachineAtom = Atom.writable<GameDataMachineSnapshot, GameDataMachineEvent>(
+  (get) => {
+    const actor = get(gameDataMachineActorAtom);
+    const subscription = actor.subscribe((snapshot) => {
+      get.setSelf(snapshot);
     });
-  })
+
+    get.addFinalizer(() => {
+      subscription.unsubscribe();
+    });
+
+    return actor.getSnapshot();
+  },
+  (ctx, event) => {
+    ctx.get(gameDataMachineActorAtom).send(event);
+  }
 ).pipe(Atom.keepAlive);
 
-// Effectful atom that fetches the valid keypad layout for the selected language
-export const gameDataKeypadAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const solutionsLanguage = get(solutionsLanguageAtom);
+// Specialized selectors for granular state access and optimized re-renders
+export const gameDataSolutionsLanguageAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutionsLanguage));
+export const gameDataSolutionsAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutions));
+export const gameDataDictionaryAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.dictionary));
+export const gameDataKeypadAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.keypad));
+export const gameDataTheSecretWordAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theSecretWord));
 
-    const { fetchKeypad } = yield* RpcGameClient;
-    return yield* fetchKeypad({ solutionsLanguage });
-  })
-).pipe(Atom.keepAlive);
+// This reactive atom purely exists to bridge the language selection to the loader machine
+export const loaderBootstrapperAtom = Atom.make((get) => {
+  const solutionsLanguage = get(solutionsLanguageAtom);
+  get.set(gameDataMachineAtom, { type: "loadRequested", solutionsLanguage });
+}).pipe(Atom.keepAlive);
 
 // Effectful atom that reactively fetches a riddle whenever the secret word or language changes
 export const riddleAtom = RuntimeAtom.atom(

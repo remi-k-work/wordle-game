@@ -2,7 +2,7 @@
 import { Option } from "effect";
 
 // types
-import type { Color, GameState, RunSession } from ".";
+import type { Color, GameData, GameState, RunSession } from ".";
 
 // constants
 export const WORD_LENGTH = 5;
@@ -29,6 +29,14 @@ export const SPEED_MULTIPLIER_CATEGORY_MAP = {
   1.0: "⏱️ Average Pacer",
   0.8: "🐌 Slow Learner",
 } as const as Readonly<Record<number, string>>;
+
+export const INITIAL_GAME_DATA = {
+  solutionsLanguage: Option.none(),
+  solutions: Option.none(),
+  dictionary: Option.none(),
+  keypad: Option.none(),
+  theSecretWord: Option.none(),
+} as const satisfies GameData;
 
 export const INITIAL_GAME_STATE = {
   solutions: Option.none(),

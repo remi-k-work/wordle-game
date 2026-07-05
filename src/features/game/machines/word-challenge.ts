@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime, Option, HashSet, Effect } from "effect";
+import { DateTime, Option, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent, fromPromise } from "xstate";
@@ -67,7 +67,7 @@ const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { inp
 export const wordChallengeMachine = setup({
   types: {} as {
     events:
-      | { readonly type: "solutionsLoaded"; solutions: GameState["solutions"]; dictionary: GameState["solutions"] }
+      | { readonly type: "gameDataLoaded"; solutions: GameState["solutions"]; dictionary: GameState["dictionary"]; theSecretWord: GameState["theSecretWord"] }
       | { readonly type: "keyPressed"; readonly pressedKey: string }
       | { readonly type: "nextWordRequested" };
     context: GameState;
@@ -101,30 +101,11 @@ export const wordChallengeMachine = setup({
     },
   },
   actions: {
-    // Initialize by creating the dictionary of valid words and randomly selecting the secret word
-    initialize: assign(({ event }) => {
-      assertEvent(event, "solutionsLoaded");
-      const solutions = Option.getOrThrow(event.solutions);
-      const dictionary = Option.getOrThrow(event.dictionary);
-      const theSecretWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
+    // Save the loaded game data provided by the game data machine
+    saveGameData: assign(({ event }) => {
+      assertEvent(event, "gameDataLoaded");
 
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      console.log(`Secret word: ${theSecretWord}`);
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-
-      return {
-        ...INITIAL_GAME_STATE,
-        solutions: Option.some(solutions),
-
-        // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
-        dictionary: Option.some(HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()))),
-
-        theSecretWord,
-      } as const satisfies GameState;
+      return { ...INITIAL_GAME_STATE, ...event } as const satisfies GameState;
     }),
 
     addLetter: assign(({ context, event }) => {
@@ -133,6 +114,7 @@ export const wordChallengeMachine = setup({
       return {
         ...context,
         currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
+
         // Lazily assign startTime on the very first letter typed
         startTime: Option.isNone(context.startTime) ? Option.some(DateTime.makeUnsafe(Date.now())) : context.startTime,
       } as const satisfies GameState;
@@ -180,14 +162,14 @@ export const wordChallengeMachine = setup({
   actors: { onGuessRejectedActor, onGuessRevealedActor, onWordWonActor, onWordLostActor },
 }).createMachine({
   id: "wordChallenge",
-  context: { ...INITIAL_GAME_STATE },
+  context: { ...INITIAL_GAME_STATE } as const satisfies GameState,
   initial: "idle",
 
   states: {
-    // Waiting for solutions + dictionary to be loaded
+    // Waiting for the game data to be loaded
     idle: {
       on: {
-        solutionsLoaded: { target: "typing", actions: "initialize" },
+        gameDataLoaded: { target: "typing", actions: "saveGameData" },
       },
     },
 
