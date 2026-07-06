@@ -1,13 +1,9 @@
-// react
-import { useMemo } from "react";
-
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaMachineAtom, wordMetaTheRiddleAtom } from "@/features/game/state";
+import { wordMetaMachineAtom } from "@/features/game/state";
 import { solutionsLanguageAtom, voicePitchAtom, voiceRateAtom, voiceVoiceAtom, voiceVolumeAtom } from "@/features/settings/state";
-import { useSpeechVoices } from "@/hooks/use-speech-voices";
+import { useSanitizedRiddle, useSpeechVoices } from "@/hooks";
 
 // components
 import { Button, Popover } from "@base-ui/react";
@@ -24,7 +20,7 @@ interface RiddleProps {
 export function Riddle({ isVoiceTest = false }: RiddleProps) {
   const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
-  const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
+  const sanitizedRiddle = useSanitizedRiddle();
 
   // Fetch the available voices
   const voices = useSpeechVoices();
@@ -33,44 +29,6 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   const voiceVolume = useAtomValue(voiceVolumeAtom);
   const voiceRate = useAtomValue(voiceRateAtom);
   const voicePitch = useAtomValue(voicePitchAtom);
-
-  const riddleOutput = Option.getOrNull(theRiddle);
-
-  const sanitizedRiddle = useMemo(() => {
-    if (!riddleOutput) return null;
-
-    return (
-      riddleOutput
-        // Remove Markdown emphasis (bold/italic/underscore variants)
-        .replace(/\*\*(.*?)\*\*/g, "$1")
-        .replace(/\*(.*?)\*/g, "$1")
-        .replace(/__(.*?)__/g, "$1")
-        .replace(/_(.*?)_/g, "$1")
-
-        // Inline code
-        .replace(/`(.*?)`/g, "$1")
-
-        // Headings
-        .replace(/^#{1,6}\s*/gm, "")
-
-        // Blockquotes
-        .replace(/^>\s*/gm, "")
-
-        // Remove common Markdown list markers (often sneaks in from models)
-        .replace(/^[-*+]\s+/gm, "")
-
-        // Fix spacing before punctuation (TTS improvement)
-        .replace(/\s+([?.!,;:])/g, "$1")
-
-        // Collapse all whitespace (including newlines/tabs)
-        .replace(/\s+/g, " ")
-
-        // Remove space before punctuation (edge cleanup after collapse)
-        .replace(/\s+([?.!,;:])/g, "$1")
-
-        .trim()
-    );
-  }, [riddleOutput]);
 
   const speakRiddle = () => {
     // Guard for SSR in Next.js

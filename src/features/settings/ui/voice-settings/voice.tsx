@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { changeVoiceVoiceAction, voiceVoiceAtom } from "@/features/settings/state";
-import { useSpeechVoices } from "@/hooks/use-speech-voices";
+import { useSpeechVoices } from "@/hooks";
 
 // components
 import { Select } from "@base-ui/react";
