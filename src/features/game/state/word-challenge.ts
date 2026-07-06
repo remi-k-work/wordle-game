@@ -4,6 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState, deriveWordleGrid } from "@/features/game/domain";
+import { inspect } from ".";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -14,7 +15,7 @@ type WordChallengeMachineActor = Actor<typeof wordChallengeMachine>;
 
 // Creates an Atom-owned XState actor reference
 const wordChallengeMachineActorAtom = Atom.make<WordChallengeMachineActor>((get) => {
-  const actor = createActor(wordChallengeMachine);
+  const actor = createActor(wordChallengeMachine, { inspect });
   actor.start();
 
   get.addFinalizer(() => {

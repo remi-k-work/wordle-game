@@ -2,6 +2,7 @@
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { modalMachine } from "@/features/game/machines/modal";
+import { inspect } from ".";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -12,7 +13,7 @@ type ModalMachineActor = Actor<typeof modalMachine>;
 
 // Creates an Atom-owned XState actor reference
 const modalMachineActorAtom = Atom.make<ModalMachineActor>((get) => {
-  const actor = createActor(modalMachine);
+  const actor = createActor(modalMachine, { inspect });
   actor.start();
 
   get.addFinalizer(() => {

@@ -5,6 +5,7 @@ import { createActor } from "xstate";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
 import { runSessionMachine } from "@/features/game/machines/run-session";
+import { inspect } from ".";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -29,7 +30,7 @@ const runSessionMachineActorAtom = Atom.make<RunSessionMachineActor>((get) => {
   // Read persisted state from storage
   const persistedState = get.once(runSessionAtom);
 
-  const actor = createActor(runSessionMachine, { input: persistedState });
+  const actor = createActor(runSessionMachine, { input: persistedState, inspect });
   actor.start();
 
   get.addFinalizer(() => {

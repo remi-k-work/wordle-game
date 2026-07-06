@@ -3,6 +3,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { gameDataMachine } from "@/features/game/machines/game-data";
 import { solutionsLanguageAtom } from "@/features/settings/state";
+import { inspect } from ".";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -13,7 +14,7 @@ type GameDataMachineActor = Actor<typeof gameDataMachine>;
 
 // Creates an Atom-owned XState actor reference
 const gameDataMachineActorAtom = Atom.make<GameDataMachineActor>((get) => {
-  const actor = createActor(gameDataMachine);
+  const actor = createActor(gameDataMachine, { inspect });
   actor.start();
 
   get.addFinalizer(() => {

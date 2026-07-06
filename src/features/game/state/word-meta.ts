@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
 import { solutionsLanguageAtom } from "@/features/settings/state";
-import { wordChallengeTheSecretWordAtom } from ".";
+import { inspect, wordChallengeTheSecretWordAtom } from ".";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -15,7 +15,7 @@ type WordMetaMachineActor = Actor<typeof wordMetaMachine>;
 
 // Creates an Atom-owned XState actor reference
 const wordMetaMachineActorAtom = Atom.make<WordMetaMachineActor>((get) => {
-  const actor = createActor(wordMetaMachine);
+  const actor = createActor(wordMetaMachine, { inspect });
   actor.start();
 
   get.addFinalizer(() => {
