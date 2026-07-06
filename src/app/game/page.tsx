@@ -3,15 +3,15 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomMount } from "@effect/atom-react";
 import { playerSessionAtom } from "@/features/player/state";
-import { bootstrapperAtom, gameDataMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { gameDataBootstrapperAtom, gameDataMachineAtom, wordMetaBootstrapperAtom } from "@/features/game/state";
 
 // components
 import { Footer, FooterSkeleton, Header, HeaderSkeleton, Main, MainSkeleton } from "@/features/game/ui/board";
 
 export default function Page() {
   useAtomMount(playerSessionAtom);
-  useAtomMount(bootstrapperAtom);
-  useAtomMount(wordChallengeMachineAtom);
+  useAtomMount(gameDataBootstrapperAtom);
+  useAtomMount(wordMetaBootstrapperAtom);
   const gameDataMachineSnapshot = useAtomValue(gameDataMachineAtom);
 
   // If the game data machine is idle, loading, or failed, render the skeleton

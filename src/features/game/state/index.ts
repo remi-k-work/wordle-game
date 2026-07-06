@@ -1,4 +1,3 @@
-export * from "./bootstrapper";
 export * from "./game-data";
 export * from "./modal";
 export * from "./run-session";

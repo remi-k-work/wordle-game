@@ -1,7 +1,10 @@
 // services, features, and other libraries
+import { Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
+import { solutionsLanguageAtom } from "@/features/settings/state";
+import { wordChallengeTheSecretWordAtom } from ".";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -44,3 +47,12 @@ export const wordMetaMachineAtom = Atom.writable<WordMetaMachineSnapshot, WordMe
 // Specialized selectors for granular state access and optimized re-renders
 export const wordMetaTheRiddleAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddle));
 export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinition));
+
+// Bootstrapper - the reactive bridge - to automatically reload the word meta (when the solutions language or the secret word changes)
+export const wordMetaBootstrapperAtom = Atom.make((get) => {
+  const solutionsLanguage = get(solutionsLanguageAtom);
+  const theSecretWord = get(wordChallengeTheSecretWordAtom);
+
+  // Only trigger the actor if the secret word actually exists
+  if (Option.isSome(theSecretWord)) get.set(wordMetaMachineAtom, { type: "loadRequested", theSecretWord: theSecretWord.value, solutionsLanguage });
+}).pipe(Atom.keepAlive);
