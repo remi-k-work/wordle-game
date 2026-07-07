@@ -3,119 +3,97 @@ import { Effect, HashSet, Option, Random } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { assign, setup, fromPromise, assertEvent } from "xstate";
-import { wordChallengeMachineAtom } from "@/features/game/state";
+import { assign, setup, fromPromise } from "xstate";
+import { solutionsLanguageAtom } from "@/features/settings/state";
+import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 
 // types
-import type { GameData, SolutionsLanguage } from "@/features/game/domain";
+import type { GameData } from "@/features/game/domain";
 
 // constants
 import { INITIAL_GAME_DATA } from "@/features/game/domain";
 
 // Load the needed game data, create the dictionary of valid words, and pick a new random secret word
-const loadGameDataActor = fromPromise(
-  async ({ input: { solutionsLanguage }, signal }: { input: { solutionsLanguage: SolutionsLanguage }; signal: AbortSignal }) =>
-    RuntimeClient.runPromise(
-      Effect.gen(function* () {
-        yield* Effect.sleep("1 seconds");
+const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+  RuntimeClient.runPromise(
+    Effect.gen(function* () {
+      yield* Effect.sleep("1 seconds");
 
-        const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
-        const { solutions, dictionary, keypad } = yield* Effect.all(
-          { solutions: fetchSolutions({ solutionsLanguage }), dictionary: fetchDictionary({ solutionsLanguage }), keypad: fetchKeypad({ solutionsLanguage }) },
-          { concurrency: 3 }
-        );
+      const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 
-        // Pick a new random secret word
-        const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
-        const theSecretWord = solutions[randomIndex].toUpperCase();
+      const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
+      const { solutions, dictionary, keypad } = yield* Effect.all(
+        { solutions: fetchSolutions({ solutionsLanguage }), dictionary: fetchDictionary({ solutionsLanguage }), keypad: fetchKeypad({ solutionsLanguage }) },
+        { concurrency: 3 }
+      );
 
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-        yield* Effect.log(`Secret word: ${theSecretWord}`);
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-        // *** TEST CODE ***
+      // Pick a new random secret word
+      const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
+      const theSecretWord = solutions[randomIndex].toUpperCase();
 
-        return {
-          solutions: Option.some(solutions),
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+      yield* Effect.log(`Secret word: ${theSecretWord}`);
+      // *** TEST CODE ***
+      // *** TEST CODE ***
+      // *** TEST CODE ***
 
-          // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
-          dictionary: Option.some(HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()))),
-          keypad: Option.some(keypad),
-          theSecretWord: Option.some(theSecretWord),
-        } as const;
-      }),
-      { signal }
-    )
+      return {
+        solutions: Option.some(solutions),
+
+        // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
+        dictionary: Option.some(HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()))),
+
+        keypad: Option.some(keypad),
+        theSecretWord: Option.some(theSecretWord),
+      } as const satisfies GameData;
+    }),
+    { signal }
+  )
 );
 
-// Notify the word challenge machine that the game data has been loaded
-const onDataLoadedActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameData }; signal: AbortSignal }) =>
+const onReadyActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameData }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
-    Atom.set(wordChallengeMachineAtom, {
-      type: "gameDataLoaded",
-      solutions: context.solutions,
-      dictionary: context.dictionary,
-      theSecretWord: context.theSecretWord,
+    Effect.gen(function* () {
+      // Notify the word meta machine that the secret word has been picked
+      yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(context.theSecretWord) });
+
+      // Notify the word challenge machine that the game data has been loaded
+      yield* Atom.set(wordChallengeMachineAtom, {
+        type: "gameDataLoaded",
+        solutions: context.solutions,
+        dictionary: context.dictionary,
+        theSecretWord: context.theSecretWord,
+      });
     }),
-    {
-      signal,
-    }
+    { signal }
   )
 );
 
 export const gameDataMachine = setup({
   types: {} as {
-    events: { readonly type: "loadRequested"; readonly solutionsLanguage: SolutionsLanguage } | { readonly type: "retryRequested" };
+    events: { readonly type: "solutionsLanguageChanged" } | { readonly type: "retryRequested" };
     context: GameData;
   },
-  actions: {
-    saveSolutionsLanguage: assign({
-      solutionsLanguage: ({ event }) => {
-        assertEvent(event, "loadRequested");
-        return Option.some(event.solutionsLanguage);
-      },
-    }),
-  },
-  actors: { loadGameDataActor, onDataLoadedActor },
+  actors: { onLoadingActor, onReadyActor },
 }).createMachine({
   id: "gameData",
   context: { ...INITIAL_GAME_DATA } as const satisfies GameData,
-  initial: "idle",
+  initial: "loading",
 
   states: {
-    idle: {
-      on: { loadRequested: { target: "loading", actions: "saveSolutionsLanguage" } },
-    },
-
     loading: {
       invoke: {
-        src: "loadGameDataActor",
-        input: ({ context }) => ({ solutionsLanguage: Option.getOrThrow(context.solutionsLanguage) }),
+        src: "onLoadingActor",
 
-        onDone: {
-          target: "ready",
-          actions: assign(({ context, event }) => ({ ...context, ...event.output }) as const satisfies GameData),
-        },
-
-        onError: {
-          target: "failure",
-        },
+        onDone: { target: "ready", actions: assign(({ context, event }) => ({ ...context, ...event.output }) as const satisfies GameData) },
+        onError: { target: "failure" },
       },
     },
 
-    ready: {
-      invoke: {
-        src: "onDataLoadedActor",
-        input: ({ context }) => ({ context }),
-      },
+    ready: { invoke: { src: "onReadyActor", input: ({ context }) => ({ context }) }, on: { solutionsLanguageChanged: { target: "loading" } } },
 
-      on: { loadRequested: { target: "loading", actions: "saveSolutionsLanguage" } },
-    },
-
-    failure: {
-      on: { retryRequested: "loading" },
-    },
+    failure: { on: { retryRequested: "loading" } },
   },
 });

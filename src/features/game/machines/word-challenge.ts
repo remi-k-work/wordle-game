@@ -14,16 +14,17 @@ export type WordChallengeMachineContext = GameState;
 // constants
 import { INITIAL_GAME_STATE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
 
-const onGuessRejectedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackInvalidGuessSubmitted, { signal }));
+// Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
+const onRejectedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackInvalidGuessSubmitted, { signal }));
 
-const onGuessRevealedActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
+const onRevealingActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
       yield* trackValidGuessSubmitted(context);
 
-      // The new run session officially starts when the first guess is revealed
-      yield* Atom.set(runSessionMachineAtom, { type: "started" });
+      // Start a brand-new arcade run if it has not started yet as soon as a valid guess is submitted
+      yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
     }),
     { signal }
   )
@@ -36,9 +37,9 @@ const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { inpu
       const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
       yield* trackWordWon(runSessionMachineContext, context);
 
-      // Bank volatile points into the persistent run session
+      // Word won, bank volatile points
       const wordScore = Option.getOrThrow(context.wordScore);
-      yield* Atom.set(runSessionMachineAtom, { type: "wordBanked", wordScore });
+      yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore });
 
       // Command the modal machine actor to open up the status modal
       yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
@@ -54,8 +55,8 @@ const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { inp
       const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
       yield* trackWordLost(runSessionMachineContext, context);
 
-      // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
-      yield* Atom.set(runSessionMachineAtom, { type: "finished" });
+      // Word lost, finish the active run
+      yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
 
       // Command the modal machine actor to open up the status modal
       yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
@@ -69,7 +70,9 @@ export const wordChallengeMachine = setup({
     events:
       | { readonly type: "gameDataLoaded"; solutions: GameState["solutions"]; dictionary: GameState["dictionary"]; theSecretWord: GameState["theSecretWord"] }
       | { readonly type: "keyPressed"; readonly pressedKey: string }
-      | { readonly type: "nextWordRequested" };
+      | { readonly type: "nextWordRequested" }
+      | { readonly type: "startedNewRun" }
+      | { readonly type: "forfeitedRun" };
     context: GameState;
   },
   guards: {
@@ -144,7 +147,7 @@ export const wordChallengeMachine = setup({
     ),
 
     // Transition to the next word challenge while maintaining the current run streak
-    nextChallenge: assign(({ context }) => {
+    nextWord: assign(({ context }) => {
       const solutions = Option.getOrThrow(context.solutions);
       const theSecretWord = Option.some(solutions[Math.floor(Math.random() * solutions.length)].toUpperCase());
 
@@ -159,15 +162,15 @@ export const wordChallengeMachine = setup({
       return { ...INITIAL_GAME_STATE, solutions: context.solutions, dictionary: context.dictionary, theSecretWord } as const satisfies GameState;
     }),
   },
-  actors: { onGuessRejectedActor, onGuessRevealedActor, onWordWonActor, onWordLostActor },
+  actors: { onRejectedActor, onRevealingActor, onWordWonActor, onWordLostActor },
 }).createMachine({
   id: "wordChallenge",
   context: { ...INITIAL_GAME_STATE } as const satisfies GameState,
-  initial: "idle",
+  initial: "awaitingGameData",
 
   states: {
     // Waiting for the game data to be loaded
-    idle: {
+    awaitingGameData: {
       on: {
         gameDataLoaded: { target: "typing", actions: "saveGameData" },
       },
@@ -176,6 +179,12 @@ export const wordChallengeMachine = setup({
     // User is actively building their current guess
     typing: {
       on: {
+        // Forfeit the active run
+        forfeitedRun: { target: "runForfeited" },
+
+        // The game data has been reloaded again due to the settings change (restart the challenge)
+        gameDataLoaded: { actions: ["saveGameData", "nextWord"] },
+
         // The machine now routes the raw keyboard input natively
         keyPressed: [
           { guard: "isEnterKey", target: "validating" },
@@ -192,9 +201,15 @@ export const wordChallengeMachine = setup({
 
     // Invalid word entered; recover as soon as the user edits it
     rejected: {
-      invoke: { src: "onGuessRejectedActor" },
+      invoke: { src: "onRejectedActor" },
 
       on: {
+        // Forfeit the active run
+        forfeitedRun: { target: "runForfeited" },
+
+        // The game data has been reloaded again due to the settings change (restart the challenge)
+        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
+
         // Ensure users can recover from rejected states using the exact same generic event
         keyPressed: [
           { guard: "isBackspaceKey", target: "typing", actions: "removeLetter" },
@@ -205,36 +220,53 @@ export const wordChallengeMachine = setup({
 
     // Inputs are locked while tile flip animations play
     revealing: {
-      // The new run session officially starts when the first guess is revealed
-      invoke: { src: "onGuessRevealedActor", input: ({ context }) => ({ context }) },
+      invoke: { src: "onRevealingActor", input: ({ context }) => ({ context }) },
+
+      on: {
+        // Forfeit the active run
+        forfeitedRun: { target: "runForfeited" },
+
+        // The game data has been reloaded again due to the settings change (restart the challenge)
+        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
+      },
 
       after: {
-        1500: [{ guard: "isGameWon", target: "won" }, { guard: "isGameLost", target: "lost" }, { target: "typing" }],
+        1500: [{ guard: "isGameWon", target: "wordWon" }, { guard: "isGameLost", target: "wordLost" }, { target: "typing" }],
       },
     },
 
-    // Challenge completed successfully; waiting for next word
-    won: {
+    // Word won, waiting for next word being requested
+    wordWon: {
       entry: "calculateScore",
       invoke: { src: "onWordWonActor", input: ({ context }) => ({ context }) },
 
       on: {
-        nextWordRequested: {
-          target: "typing",
-          actions: "nextChallenge",
-        },
+        nextWordRequested: { target: "typing", actions: "nextWord" },
+
+        // The game data has been reloaded again due to the settings change (restart the challenge)
+        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
       },
     },
 
-    // Challenge failed; waiting for next word
-    lost: {
+    // Word lost, waiting for the new run to start
+    wordLost: {
       invoke: { src: "onWordLostActor", input: ({ context }) => ({ context }) },
 
       on: {
-        nextWordRequested: {
-          target: "typing",
-          actions: "nextChallenge",
-        },
+        startedNewRun: { target: "typing", actions: "nextWord" },
+
+        // The game data has been reloaded again due to the settings change (restart the challenge)
+        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
+      },
+    },
+
+    // Run forfeited, waiting for the new run to start
+    runForfeited: {
+      on: {
+        startedNewRun: { target: "typing", actions: "nextWord" },
+
+        // The game data has been reloaded again due to the settings change (restart the challenge)
+        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
       },
     },
   },

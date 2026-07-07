@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime, Duration, Effect, Metric, Option } from "effect";
-import { Atom, AtomRegistry } from "effect/unstable/reactivity";
+import { Atom } from "effect/unstable/reactivity";
 import {
   arcadeRunLength,
   failedWords,
@@ -72,9 +72,7 @@ export const trackInvalidGuessSubmitted = Effect.gen(function* () {
 });
 
 // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-export const trackValidGuessSubmitted = Effect.fnUntraced(function* (
-  wordChallengeMachineContext: WordChallengeMachineContext
-): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
+export const trackValidGuessSubmitted = Effect.fnUntraced(function* (wordChallengeMachineContext: WordChallengeMachineContext) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
@@ -88,7 +86,7 @@ export const trackValidGuessSubmitted = Effect.fnUntraced(function* (
 });
 
 // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-export const trackNewRunStarted = Effect.gen(function* () {
+export const trackStartedNewRun = Effect.gen(function* () {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
@@ -97,7 +95,7 @@ export const trackNewRunStarted = Effect.gen(function* () {
 });
 
 // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-export const trackRunForfeited = Effect.fnUntraced(function* (
+export const trackForfeitedRun = Effect.fnUntraced(function* (
   runSessionMachineContext: RunSessionMachineContext,
   wordChallengeMachineContext: WordChallengeMachineContext
 ) {
@@ -121,7 +119,7 @@ export const trackRunForfeited = Effect.fnUntraced(function* (
 export const trackWordWon = Effect.fnUntraced(function* (
   runSessionMachineContext: RunSessionMachineContext,
   wordChallengeMachineContext: WordChallengeMachineContext
-): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
+) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
@@ -142,7 +140,7 @@ export const trackWordWon = Effect.fnUntraced(function* (
 export const trackWordLost = Effect.fnUntraced(function* (
   runSessionMachineContext: RunSessionMachineContext,
   wordChallengeMachineContext: WordChallengeMachineContext
-): Generator<Effect.Effect<void, never, AtomRegistry.AtomRegistry>> {
+) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);

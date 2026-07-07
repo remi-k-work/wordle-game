@@ -5,7 +5,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
 import { modalMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
-import { trackRunForfeited, trackNewRunStarted } from "@/features/telemetry/state";
+import { trackForfeitedRun } from "@/features/telemetry/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -20,9 +20,9 @@ type GameFlowButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
 export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
-  if (wordChallengeMachineSnapshot.matches("idle")) return <GameFlowButtonSkeleton {...rest} />;
+  if (wordChallengeMachineSnapshot.matches("awaitingGameData")) return <GameFlowButtonSkeleton {...rest} />;
 
-  if (wordChallengeMachineSnapshot.matches("won"))
+  if (wordChallengeMachineSnapshot.matches("wordWon"))
     return (
       <Button
         className={cn("button", className)}
@@ -44,21 +44,19 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
       </Button>
     );
 
-  if (wordChallengeMachineSnapshot.matches("lost"))
+  if (wordChallengeMachineSnapshot.matches("wordLost") || wordChallengeMachineSnapshot.matches("runForfeited"))
     return (
       <Button
         className={cn("button", className)}
         onClick={async () =>
           await RuntimeClient.runPromise(
             Effect.gen(function* () {
-              // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-              yield* trackNewRunStarted;
-
               // Command the modal machine actor to close itself if open
               yield* Atom.set(modalMachineAtom, { type: "closed" });
 
-              // Transition to the next word challenge while maintaining the current run streak
-              yield* Atom.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
+              // Start a brand-new arcade run
+              yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
+              yield* Atom.set(wordChallengeMachineAtom, { type: "startedNewRun" });
             })
           )
         }
@@ -78,10 +76,11 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
             // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
             const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
             const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
-            yield* trackRunForfeited(runSessionMachineContext, wordChallengeMachineContext);
+            yield* trackForfeitedRun(runSessionMachineContext, wordChallengeMachineContext);
 
-            // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
-            yield* Atom.set(runSessionMachineAtom, { type: "finished" });
+            // Forfeit the active run
+            yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun" });
+            yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
 
             // Command the modal machine actor to open up the status modal
             yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });

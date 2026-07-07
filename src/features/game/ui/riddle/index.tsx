@@ -57,7 +57,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   };
 
   if (isVoiceTest) {
-    if (wordMetaMachineSnapshot.matches("idle") || wordMetaMachineSnapshot.matches("loading"))
+    if (wordMetaMachineSnapshot.matches("awaitingTheSecretWord") || wordMetaMachineSnapshot.matches("loading"))
       return <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>;
     else if (wordMetaMachineSnapshot.matches("ready"))
       return (
@@ -89,7 +89,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            {wordMetaMachineSnapshot.matches("idle") || wordMetaMachineSnapshot.matches("loading") ? (
+            {wordMetaMachineSnapshot.matches("awaitingTheSecretWord") || wordMetaMachineSnapshot.matches("loading") ? (
               <p className="animate-pulse">Thinking...</p>
             ) : wordMetaMachineSnapshot.matches("ready") ? (
               <div>

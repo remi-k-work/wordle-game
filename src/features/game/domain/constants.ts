@@ -31,7 +31,6 @@ export const SPEED_MULTIPLIER_CATEGORY_MAP = {
 } as const as Readonly<Record<number, string>>;
 
 export const INITIAL_GAME_DATA = {
-  solutionsLanguage: Option.none(),
   solutions: Option.none(),
   dictionary: Option.none(),
   keypad: Option.none(),

@@ -2,7 +2,6 @@
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { gameDataMachine } from "@/features/game/machines/game-data";
-import { solutionsLanguageAtom } from "@/features/settings/state";
 import { inspect } from ".";
 
 // types
@@ -44,14 +43,7 @@ export const gameDataMachineAtom = Atom.writable<GameDataMachineSnapshot, GameDa
 ).pipe(Atom.keepAlive);
 
 // Specialized selectors for granular state access and optimized re-renders
-export const gameDataSolutionsLanguageAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutionsLanguage));
 export const gameDataSolutionsAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutions));
 export const gameDataDictionaryAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.dictionary));
 export const gameDataKeypadAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.keypad));
 export const gameDataTheSecretWordAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theSecretWord));
-
-// Bootstrapper - the reactive bridge - to automatically reload the game data (when the solutions language changes)
-export const gameDataBootstrapperAtom = Atom.make((get) => {
-  const solutionsLanguage = get(solutionsLanguageAtom);
-  get.set(gameDataMachineAtom, { type: "loadRequested", solutionsLanguage });
-}).pipe(Atom.keepAlive);

@@ -3,11 +3,13 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { changeSolutionsLanguage, changeVoicePitch, changeVoiceRate, changeVoiceVoice, changeVoiceVolume, GameSettings } from "@/features/settings/domain";
 import { gameSettingsAtom } from ".";
+import { gameDataMachineAtom } from "@/features/game/state";
 
 // To change and manage game settings
 export const changeSolutionsLanguageAction = Atom.fn(
   Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
     get.set(gameSettingsAtom, changeSolutionsLanguage(get(gameSettingsAtom)));
+    get.set(gameDataMachineAtom, { type: "solutionsLanguageChanged" });
   })
 );
 

@@ -1,11 +1,6 @@
 // services, features, and other libraries
-import { Effect } from "effect";
-import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 import { changeSolutionsLanguageAction, solutionsLanguageAtom } from "@/features/settings/state";
-import { trackRunForfeited } from "@/features/telemetry/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -17,24 +12,8 @@ export function LangChanger() {
   const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
   const changeSolutionsLanguage = useAtomSet(changeSolutionsLanguageAction);
 
-  const handleLangToggled = async () => {
-    await RuntimeClient.runPromise(
-      Effect.gen(function* () {
-        // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-        const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
-        const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
-        yield* trackRunForfeited(runSessionMachineContext, wordChallengeMachineContext);
-
-        // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
-        yield* Atom.set(runSessionMachineAtom, { type: "finished" });
-      })
-    );
-
-    changeSolutionsLanguage();
-  };
-
   return (
-    <Button className="button" onClick={handleLangToggled}>
+    <Button className="button" onClick={() => changeSolutionsLanguage()}>
       {solutionsLanguage === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
       Language
     </Button>

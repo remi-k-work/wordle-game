@@ -30,7 +30,6 @@ export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLeng
 export const Keypad = Schema.Array(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(1))));
 
 export class GameData extends Schema.Class<GameData>("GameData")({
-  solutionsLanguage: Schema.Option(SolutionsLanguage),
   solutions: Schema.Option(Schema.Array(TheSecretWord)),
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   keypad: Schema.Option(Keypad),

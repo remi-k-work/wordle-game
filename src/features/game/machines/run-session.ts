@@ -1,6 +1,8 @@
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
-import { assign, assertEvent, setup } from "xstate";
+import { RuntimeClient } from "@/lib/runtime-client";
+import { setup, assign, assertEvent, fromPromise } from "xstate";
+import { trackStartedNewRun } from "@/features/telemetry/state";
 
 // types
 import type { RunSession, WordScore } from "@/features/game/domain";
@@ -9,19 +11,23 @@ export type RunSessionMachineContext = RunSession;
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 
+// Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
+const onStartingNewRunActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackStartedNewRun, { signal }));
+
 export const runSessionMachine = setup({
   types: {} as {
-    events: { readonly type: "started" } | { readonly type: "wordBanked"; readonly wordScore: WordScore } | { readonly type: "finished" };
+    events:
+      | { readonly type: "startedNewRun" }
+      | { readonly type: "forfeitedRun" }
+      | { readonly type: "wordWon"; readonly wordScore: WordScore }
+      | { readonly type: "wordLost" };
     context: RunSession;
     input: RunSession;
-    tags: "activeRun";
   },
-  guards: {
-    hasActiveRun: ({ context }) => Option.isSome(context.runId),
-  },
+  guards: { hasActiveRun: ({ context }) => Option.isSome(context.runId) },
   actions: {
     // Start a new arcade run, wiping previous run stats but preserving historical "best" stats
-    start: assign(
+    startNewRun: assign(
       ({ context }) =>
         ({
           ...INITIAL_RUN_SESSION,
@@ -34,7 +40,7 @@ export const runSessionMachine = setup({
 
     // Bank volatile points into the persistent run session
     bankWord: assign(({ context, event }) => {
-      assertEvent(event, "wordBanked");
+      assertEvent(event, "wordWon");
 
       const runScore = context.runScore + event.wordScore.wordScore;
       const streak = context.streak + 1;
@@ -48,9 +54,10 @@ export const runSessionMachine = setup({
       } as const satisfies RunSession;
     }),
 
-    // Close out the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
-    finish: assign(({ context }) => ({ ...context, runId: Option.none(), createdAt: Option.none() }) as const satisfies RunSession),
+    // Finish the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
+    finishActiveRun: assign(({ context }) => ({ ...context, runId: Option.none(), createdAt: Option.none() }) as const satisfies RunSession),
   },
+  actors: { onStartingNewRunActor },
 }).createMachine({
   id: "runSession",
   // Hydrate the machine with the input from the KVS Atom
@@ -66,28 +73,22 @@ export const runSessionMachine = setup({
     inactive: {
       on: {
         // Start a brand-new arcade run
-        started: {
-          target: "active",
-          actions: "start",
-        },
+        startedNewRun: { target: "startingNewRun", actions: "startNewRun" },
       },
     },
 
+    startingNewRun: { invoke: { src: "onStartingNewRunActor", onDone: "active", onError: "active" } },
+
     active: {
-      // Convenient tag for selectors and UI state checks
-      tags: ["activeRun"],
-
       on: {
-        // Bank volatile points into the persistent run session
-        wordBanked: {
-          actions: "bankWord",
-        },
+        // Forfeit the active run
+        forfeitedRun: { target: "inactive", actions: "finishActiveRun" },
 
-        // Finalize the run
-        finished: {
-          target: "inactive",
-          actions: "finish",
-        },
+        // Word won, bank volatile points
+        wordWon: { actions: "bankWord" },
+
+        // Word lost, finish the active run
+        wordLost: { target: "inactive", actions: "finishActiveRun" },
       },
     },
   },
