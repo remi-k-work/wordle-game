@@ -19,7 +19,7 @@
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.9",
+    "@ai-sdk/google": "^4.0.10",
     "@base-ui/react": "^1.6.0",
     "@effect/atom-react": "^4.0.0-beta.94",
     "@effect/opentelemetry": "^4.0.0-beta.78",
@@ -34,7 +34,7 @@
     "@opentelemetry/sdk-trace-node": "^2.9.0",
     "@opentelemetry/sdk-trace-web": "^2.9.0",
     "@vercel/analytics": "^2.0.1",
-    "ai": "^7.0.17",
+    "ai": "^7.0.18",
     "clsx": "^2.1.1",
     "effect": "^4.0.0-beta.78",
     "motion": "^12.42.2",

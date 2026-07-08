@@ -33,8 +33,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         yield* Effect.log(`[TelemetryWorker] Processing batch of ${readableSpanBatch.length} spans.`);
 
         for (const { name, attributes } of readableSpanBatch)
-          if (name === "logWordWonEvent") yield* addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributes));
-          else if (name === "logRunCompletedEvent") yield* addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributes));
+          if (name === "logWordWon") yield* addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributes));
+          else if (name === "logRunCompleted") yield* addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributes));
       });
 
     const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>

@@ -31,4 +31,4 @@ const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), RpcGame
 
 export const RuntimeTelemetryStarter = Atom.runtime(TelemetryStarterLayer);
 export const RuntimeAtom = Atom.runtime(MainLayer);
-export const RuntimeClient = ManagedRuntime.make(MainLayer);
+export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: Atom.runtime.memoMap });
