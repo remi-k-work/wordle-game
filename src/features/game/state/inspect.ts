@@ -2,5 +2,5 @@
 import { createBrowserInspector } from "@statelyai/inspect";
 
 // constants
-const SHOULD_INSPECT = process.env.NODE_ENV === "development";
+const SHOULD_INSPECT = false;
 export const { inspect } = SHOULD_INSPECT ? createBrowserInspector() : {};

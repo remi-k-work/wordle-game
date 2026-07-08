@@ -12,7 +12,7 @@ export type RunSessionMachineContext = RunSession;
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 
 // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-const onStartingNewRunActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackStartedNewRun, { signal }));
+const onStartedNewRunActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackStartedNewRun, { signal }));
 
 export const runSessionMachine = setup({
   types: {} as {
@@ -57,7 +57,7 @@ export const runSessionMachine = setup({
     // Finish the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
     finishActiveRun: assign(({ context }) => ({ ...context, runId: Option.none(), createdAt: Option.none() }) as const satisfies RunSession),
   },
-  actors: { onStartingNewRunActor },
+  actors: { onStartedNewRunActor },
 }).createMachine({
   id: "runSession",
   // Hydrate the machine with the input from the KVS Atom
@@ -73,11 +73,11 @@ export const runSessionMachine = setup({
     inactive: {
       on: {
         // Start a brand-new arcade run
-        startedNewRun: { target: "startingNewRun", actions: "startNewRun" },
+        startedNewRun: { target: "startedNewRun", actions: "startNewRun" },
       },
     },
 
-    startingNewRun: { invoke: { src: "onStartingNewRunActor", onDone: "active", onError: "active" } },
+    startedNewRun: { invoke: { src: "onStartedNewRunActor", onDone: "active", onError: "active" } },
 
     active: {
       on: {

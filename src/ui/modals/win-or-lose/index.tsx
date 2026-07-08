@@ -17,7 +17,7 @@ export function WinOrLoseModal() {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
 
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
-  const hasWon = wordChallengeMachineSnapshot.matches("won");
+  const hasWon = wordChallengeMachineSnapshot.matches("wordWon");
 
   return (
     <Modal isOpen={modalMachineSnapshot.matches("status")} title={hasWon ? "You Win" : "Run Over"}>

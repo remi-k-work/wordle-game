@@ -92,7 +92,7 @@ export const gameDataMachine = setup({
       },
     },
 
-    ready: { invoke: { src: "onReadyActor", input: ({ context }) => ({ context }) }, on: { solutionsLanguageChanged: { target: "loading" } } },
+    ready: { invoke: { src: "onReadyActor", input: ({ context }) => ({ context }) }, on: { solutionsLanguageChanged: "loading" } },
 
     failure: { on: { retryRequested: "loading" } },
   },

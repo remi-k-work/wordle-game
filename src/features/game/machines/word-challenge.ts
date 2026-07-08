@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent, fromPromise } from "xstate";
 import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
-import { modalMachineAtom, runSessionMachineAtom } from "@/features/game/state";
+import { modalMachineAtom, runSessionMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
 // types
@@ -63,6 +63,11 @@ const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { inp
     }),
     { signal }
   )
+);
+
+// Notify the word meta machine that the secret word has been picked
+const onPickedNewSecretWordActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
+  RuntimeClient.runPromise(Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(context.theSecretWord) }), { signal })
 );
 
 export const wordChallengeMachine = setup({
@@ -146,8 +151,8 @@ export const wordChallengeMachine = setup({
         }) as const satisfies GameState
     ),
 
-    // Transition to the next word challenge while maintaining the current run streak
-    nextWord: assign(({ context }) => {
+    // Pick a new random secret word from the available solutions
+    pickNewSecretWord: assign(({ context }) => {
       const solutions = Option.getOrThrow(context.solutions);
       const theSecretWord = Option.some(solutions[Math.floor(Math.random() * solutions.length)].toUpperCase());
 
@@ -162,29 +167,30 @@ export const wordChallengeMachine = setup({
       return { ...INITIAL_GAME_STATE, solutions: context.solutions, dictionary: context.dictionary, theSecretWord } as const satisfies GameState;
     }),
   },
-  actors: { onRejectedActor, onRevealingActor, onWordWonActor, onWordLostActor },
+  actors: { onRejectedActor, onRevealingActor, onWordWonActor, onWordLostActor, onPickedNewSecretWordActor },
 }).createMachine({
   id: "wordChallenge",
   context: { ...INITIAL_GAME_STATE } as const satisfies GameState,
   initial: "awaitingGameData",
 
+  // 🌟 GLOBAL TRANSITIONS 🌟
+  // Any state that does not explicitly handle these events will fall back to these rules
+  on: {
+    // Forfeit the active run
+    forfeitedRun: { target: ".runForfeited" },
+
+    // If settings change mid-game, restart the challenge from anywhere
+    // The gameDataMachine already generated a new word and already notified the meta machine!
+    gameDataLoaded: { target: ".typing", actions: "saveGameData" },
+  },
+
   states: {
     // Waiting for the game data to be loaded
-    awaitingGameData: {
-      on: {
-        gameDataLoaded: { target: "typing", actions: "saveGameData" },
-      },
-    },
+    awaitingGameData: {},
 
     // User is actively building their current guess
     typing: {
       on: {
-        // Forfeit the active run
-        forfeitedRun: { target: "runForfeited" },
-
-        // The game data has been reloaded again due to the settings change (restart the challenge)
-        gameDataLoaded: { actions: ["saveGameData", "nextWord"] },
-
         // The machine now routes the raw keyboard input natively
         keyPressed: [
           { guard: "isEnterKey", target: "validating" },
@@ -204,12 +210,6 @@ export const wordChallengeMachine = setup({
       invoke: { src: "onRejectedActor" },
 
       on: {
-        // Forfeit the active run
-        forfeitedRun: { target: "runForfeited" },
-
-        // The game data has been reloaded again due to the settings change (restart the challenge)
-        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
-
         // Ensure users can recover from rejected states using the exact same generic event
         keyPressed: [
           { guard: "isBackspaceKey", target: "typing", actions: "removeLetter" },
@@ -222,17 +222,7 @@ export const wordChallengeMachine = setup({
     revealing: {
       invoke: { src: "onRevealingActor", input: ({ context }) => ({ context }) },
 
-      on: {
-        // Forfeit the active run
-        forfeitedRun: { target: "runForfeited" },
-
-        // The game data has been reloaded again due to the settings change (restart the challenge)
-        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
-      },
-
-      after: {
-        1500: [{ guard: "isGameWon", target: "wordWon" }, { guard: "isGameLost", target: "wordLost" }, { target: "typing" }],
-      },
+      after: { 1500: [{ guard: "isGameWon", target: "wordWon" }, { guard: "isGameLost", target: "wordLost" }, { target: "typing" }] },
     },
 
     // Word won, waiting for next word being requested
@@ -240,34 +230,21 @@ export const wordChallengeMachine = setup({
       entry: "calculateScore",
       invoke: { src: "onWordWonActor", input: ({ context }) => ({ context }) },
 
-      on: {
-        nextWordRequested: { target: "typing", actions: "nextWord" },
-
-        // The game data has been reloaded again due to the settings change (restart the challenge)
-        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
-      },
+      on: { nextWordRequested: { target: "pickedNewSecretWord", actions: "pickNewSecretWord" } },
     },
 
     // Word lost, waiting for the new run to start
     wordLost: {
       invoke: { src: "onWordLostActor", input: ({ context }) => ({ context }) },
 
-      on: {
-        startedNewRun: { target: "typing", actions: "nextWord" },
-
-        // The game data has been reloaded again due to the settings change (restart the challenge)
-        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
-      },
+      on: { startedNewRun: { target: "pickedNewSecretWord", actions: "pickNewSecretWord" } },
     },
 
     // Run forfeited, waiting for the new run to start
     runForfeited: {
-      on: {
-        startedNewRun: { target: "typing", actions: "nextWord" },
-
-        // The game data has been reloaded again due to the settings change (restart the challenge)
-        gameDataLoaded: { target: "typing", actions: ["saveGameData", "nextWord"] },
-      },
+      on: { startedNewRun: { target: "pickedNewSecretWord", actions: "pickNewSecretWord" } },
     },
+
+    pickedNewSecretWord: { invoke: { src: "onPickedNewSecretWordActor", input: ({ context }) => ({ context }), onDone: "typing", onError: "typing" } },
   },
 });
