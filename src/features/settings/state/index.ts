@@ -1,2 +1,1 @@
-export * from "./actions";
-export * from "./settings";
+export * from "./game-settings";

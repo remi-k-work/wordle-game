@@ -15,7 +15,7 @@ import {
   validGuesses,
 } from "@/features/telemetry/domain";
 import { sessionIdAtom } from "@/features/player/state";
-import { solutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
 // types
 import type { RunSessionMachineContext } from "@/features/game/machines/run-session";
@@ -28,7 +28,7 @@ export const logWordWon = Effect.fn("logWordWon")(function* (
 ) {
   // Extract all the necessary attributes that will offer additional context for our span
   const runId = Option.getOrThrow(runSessionMachineContext.runId);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   const theSecretWord = Option.getOrThrow(wordChallengeMachineContext.theSecretWord);
   const currentTurn = wordChallengeMachineContext.currentTurn;
   const wordScore = Option.getOrThrow(wordChallengeMachineContext.wordScore);
@@ -47,7 +47,7 @@ export const logRunCompleted = Effect.fn("logRunCompleted")(function* (
   // Extract all the necessary attributes that will offer additional context for our span
   const runId = Option.getOrThrow(runSessionMachineContext.runId);
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   const theSecretWord = Option.getOrThrow(wordChallengeMachineContext.theSecretWord);
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
   const finalScore = runSessionMachineContext.runScore;
@@ -66,7 +66,7 @@ export const logRunCompleted = Effect.fn("logRunCompleted")(function* (
 export const trackInvalidGuessSubmitted = Effect.gen(function* () {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
   yield* Metric.update(invalidGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
 });
@@ -75,7 +75,7 @@ export const trackInvalidGuessSubmitted = Effect.gen(function* () {
 export const trackValidGuessSubmitted = Effect.fnUntraced(function* (wordChallengeMachineContext: WordChallengeMachineContext) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   const currentGuessWord = wordChallengeMachineContext.currentGuessWord;
   const currentTurn = wordChallengeMachineContext.currentTurn;
 
@@ -89,7 +89,7 @@ export const trackValidGuessSubmitted = Effect.fnUntraced(function* (wordChallen
 export const trackStartedNewRun = Effect.gen(function* () {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
   yield* Metric.update(runsStarted.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
 });
@@ -102,7 +102,7 @@ export const trackForfeitedRun = Effect.fnUntraced(function* (
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
   const runId = runSessionMachineContext.runId;
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   const streak = runSessionMachineContext.streak;
 
   // If the run has not started yet, there is nothing to track
@@ -122,7 +122,7 @@ export const trackWordWon = Effect.fnUntraced(function* (
 ) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   const currentTurn = wordChallengeMachineContext.currentTurn;
   const wordScore = Option.getOrThrow(wordChallengeMachineContext.wordScore);
   const guessedTurn = currentTurn - 1;
@@ -143,7 +143,7 @@ export const trackWordLost = Effect.fnUntraced(function* (
 ) {
   // Extract all the necessary attributes that will offer additional context for our metrics
   const sessionId = yield* Atom.get(sessionIdAtom);
-  const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   const streak = runSessionMachineContext.streak;
   const theSecretWord = Option.getOrThrow(wordChallengeMachineContext.theSecretWord);
 

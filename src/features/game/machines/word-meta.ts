@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
-import { solutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
 // types
 import type { TheSecretWord, WordMeta } from "@/features/game/domain";
@@ -17,7 +17,7 @@ const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: 
     Effect.gen(function* () {
       yield* Effect.sleep("1 seconds");
 
-      const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
       const { fetchRiddle, fetchDefinition } = yield* RpcGameClient;
       const { theRiddle, wordDefinition } = yield* Effect.all(

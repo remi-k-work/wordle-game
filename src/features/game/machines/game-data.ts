@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise } from "xstate";
-import { solutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 
 // types
@@ -19,7 +19,7 @@ const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =
     Effect.gen(function* () {
       yield* Effect.sleep("1 seconds");
 
-      const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
       const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
       const { solutions, dictionary, keypad } = yield* Effect.all(

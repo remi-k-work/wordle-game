@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { runSessionRunScoreAtom, runSessionStreakAtom } from "@/features/game/state";
-import { solutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
 // components
 import { Button, Input } from "@base-ui/react";
@@ -26,7 +26,7 @@ interface InitialsProps {
 export function Initials({ addHighScoreResult, addHighScore }: InitialsProps) {
   const runScore = useAtomValue(runSessionRunScoreAtom);
   const streak = useAtomValue(runSessionStreakAtom);
-  const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
+  const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
 
   const [initials, setInitials] = useState("");
 

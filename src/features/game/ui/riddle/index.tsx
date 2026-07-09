@@ -2,7 +2,13 @@
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaMachineAtom } from "@/features/game/state";
-import { solutionsLanguageAtom, voicePitchAtom, voiceRateAtom, voiceVoiceAtom, voiceVolumeAtom } from "@/features/settings/state";
+import {
+  gameSettingsSolutionsLanguageAtom,
+  gameSettingsVoicePitchAtom,
+  gameSettingsVoiceRateAtom,
+  gameSettingsVoiceVoiceAtom,
+  gameSettingsVoiceVolumeAtom,
+} from "@/features/settings/state";
 import { useSanitizedRiddle, useSpeechVoices } from "@/hooks";
 
 // components
@@ -18,17 +24,17 @@ interface RiddleProps {
 }
 
 export function Riddle({ isVoiceTest = false }: RiddleProps) {
-  const solutionsLanguage = useAtomValue(solutionsLanguageAtom);
+  const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const sanitizedRiddle = useSanitizedRiddle();
 
   // Fetch the available voices
   const voices = useSpeechVoices();
 
-  const voiceVoice = useAtomValue(voiceVoiceAtom);
-  const voiceVolume = useAtomValue(voiceVolumeAtom);
-  const voiceRate = useAtomValue(voiceRateAtom);
-  const voicePitch = useAtomValue(voicePitchAtom);
+  const voiceVoice = useAtomValue(gameSettingsVoiceVoiceAtom);
+  const voiceVolume = useAtomValue(gameSettingsVoiceVolumeAtom);
+  const voiceRate = useAtomValue(gameSettingsVoiceRateAtom);
+  const voicePitch = useAtomValue(gameSettingsVoicePitchAtom);
 
   const speakRiddle = () => {
     // Guard for SSR in Next.js

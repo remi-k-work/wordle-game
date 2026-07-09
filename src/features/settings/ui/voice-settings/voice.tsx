@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { changeVoiceVoiceAction, voiceVoiceAtom } from "@/features/settings/state";
+import { gameSettingsMachineAtom, gameSettingsVoiceVoiceAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks";
 
 // components
@@ -11,8 +11,8 @@ import { Select } from "@base-ui/react";
 import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
 export function Voice() {
-  const voiceVoice = useAtomValue(voiceVoiceAtom);
-  const changeVoiceVoice = useAtomSet(changeVoiceVoiceAction);
+  const voiceVoice = useAtomValue(gameSettingsVoiceVoiceAtom);
+  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
   // Fetch the available voices
   const voices = useSpeechVoices().map(({ default: isDefault, name, lang }) => ({
@@ -22,7 +22,7 @@ export function Voice() {
 
   return (
     <section>
-      <Select.Root items={voices} value={voiceVoice} onValueChange={changeVoiceVoice}>
+      <Select.Root items={voices} value={voiceVoice} onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}>
         <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Voice</Select.Label>
         <Select.Trigger
           className={cn(
