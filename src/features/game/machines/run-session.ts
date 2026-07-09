@@ -83,14 +83,14 @@ export const runSessionMachine = setup({
     inactive: {
       on: {
         // Start a brand-new arcade run
-        startedNewRun: { target: "active", actions: ["startNewRun", "trackStartedNewRun"] },
+        startedNewRun: { target: "active", actions: ["trackStartedNewRun", "startNewRun"] },
       },
     },
 
     active: {
       on: {
         // Forfeit the active run
-        forfeitedRun: { target: "inactive", actions: ["finishActiveRun", "trackForfeitedRun"] },
+        forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun"] },
 
         // Word won, bank volatile points
         wordWon: { actions: "bankWord" },

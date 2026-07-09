@@ -2,7 +2,7 @@
 import { DateTime, Option, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
-import { setup, assign, assertEvent, fromPromise } from "xstate";
+import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
 import { modalMachineAtom, runSessionMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
@@ -13,41 +13,6 @@ export type WordChallengeMachineContext = GameState;
 
 // constants
 import { INITIAL_GAME_STATE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
-
-const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
-      const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
-      yield* trackWordWon(runSessionMachineContext, context);
-
-      // Word won, bank volatile points
-      const wordScore = Option.getOrThrow(context.wordScore);
-      yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore });
-
-      // Command the modal machine actor to open up the status modal
-      yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
-    }),
-    { signal }
-  )
-);
-
-const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
-      const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
-      yield* trackWordLost(runSessionMachineContext, context);
-
-      // Word lost, finish the active run
-      yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
-
-      // Command the modal machine actor to open up the status modal
-      yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
-    }),
-    { signal }
-  )
-);
 
 export const wordChallengeMachine = setup({
   types: {} as {
@@ -152,13 +117,48 @@ export const wordChallengeMachine = setup({
     // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
     trackInvalidGuessSubmitted: () => RuntimeClient.runPromise(trackInvalidGuessSubmitted),
 
-    // Start a brand-new arcade run if it has not started yet as soon as a valid guess is submitted
-    startNewRun: () => RuntimeClient.runPromise(Atom.set(runSessionMachineAtom, { type: "startedNewRun" })),
-
     // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-    trackValidGuessSubmitted: ({ context }) => RuntimeClient.runPromise(trackValidGuessSubmitted(context)),
+    trackValidGuessSubmitted: ({ context }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          yield* trackValidGuessSubmitted(context);
+
+          // Start a brand-new arcade run if it has not started yet as soon as a valid guess is submitted
+          yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
+        })
+      ),
+
+    // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
+    trackWordWon: ({ context }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+          yield* trackWordWon(runSessionMachineContext, context);
+
+          // Word won, bank volatile points
+          const wordScore = Option.getOrThrow(context.wordScore);
+          yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore });
+
+          // Command the modal machine actor to open up the status modal
+          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
+        })
+      ),
+
+    // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
+    trackWordLost: ({ context }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+          yield* trackWordLost(runSessionMachineContext, context);
+
+          // Word lost, finish the active run
+          yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
+
+          // Command the modal machine actor to open up the status modal
+          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
+        })
+      ),
   },
-  actors: { onWordWonActor, onWordLostActor },
 }).createMachine({
   id: "wordChallenge",
   context: { ...INITIAL_GAME_STATE } as const satisfies GameState,
@@ -193,7 +193,7 @@ export const wordChallengeMachine = setup({
 
     // Immediately decide whether the submitted guess is valid
     validating: {
-      always: [{ guard: "isValidWord", target: "revealing", actions: "submitGuess" }, { target: "rejected" }],
+      always: [{ guard: "isValidWord", target: "revealing", actions: ["trackValidGuessSubmitted", "submitGuess"] }, { target: "rejected" }],
     },
 
     // Invalid word entered; recover as soon as the user edits it
@@ -211,22 +211,19 @@ export const wordChallengeMachine = setup({
 
     // Inputs are locked while tile flip animations play
     revealing: {
-      entry: ["startNewRun", "trackValidGuessSubmitted"],
-
       after: { 1500: [{ guard: "isGameWon", target: "wordWon" }, { guard: "isGameLost", target: "wordLost" }, { target: "typing" }] },
     },
 
     // Word won, waiting for next word being requested
     wordWon: {
-      entry: "calculateScore",
-      invoke: { src: "onWordWonActor", input: ({ context }) => ({ context }) },
+      entry: ["calculateScore", "trackWordWon"],
 
       on: { nextWordRequested: { target: "typing", actions: "pickNewSecretWord" } },
     },
 
     // Word lost, waiting for the new run to start
     wordLost: {
-      invoke: { src: "onWordLostActor", input: ({ context }) => ({ context }) },
+      entry: "trackWordLost",
 
       on: { startedNewRun: { target: "typing", actions: "pickNewSecretWord" } },
     },
