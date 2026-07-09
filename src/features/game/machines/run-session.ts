@@ -1,8 +1,10 @@
 // services, features, and other libraries
-import { DateTime, Option } from "effect";
+import { DateTime, Effect, Option } from "effect";
+import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
-import { setup, assign, assertEvent, fromPromise } from "xstate";
-import { trackStartedNewRun } from "@/features/telemetry/state";
+import { setup, assign, assertEvent } from "xstate";
+import { wordChallengeMachineAtom } from "@/features/game/state";
+import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state";
 
 // types
 import type { RunSession, WordScore } from "@/features/game/domain";
@@ -10,9 +12,6 @@ export type RunSessionMachineContext = RunSession;
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
-
-// Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-const onStartedNewRunActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackStartedNewRun, { signal }));
 
 export const runSessionMachine = setup({
   types: {} as {
@@ -56,8 +55,19 @@ export const runSessionMachine = setup({
 
     // Finish the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
     finishActiveRun: assign(({ context }) => ({ ...context, runId: Option.none(), createdAt: Option.none() }) as const satisfies RunSession),
+
+    // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
+    trackStartedNewRun: () => RuntimeClient.runPromise(trackStartedNewRun),
+
+    // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
+    trackForfeitedRun: ({ context }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
+          yield* trackForfeitedRun(context, wordChallengeMachineContext);
+        })
+      ),
   },
-  actors: { onStartedNewRunActor },
 }).createMachine({
   id: "runSession",
   // Hydrate the machine with the input from the KVS Atom
@@ -73,16 +83,14 @@ export const runSessionMachine = setup({
     inactive: {
       on: {
         // Start a brand-new arcade run
-        startedNewRun: { target: "startedNewRun", actions: "startNewRun" },
+        startedNewRun: { target: "active", actions: ["startNewRun", "trackStartedNewRun"] },
       },
     },
-
-    startedNewRun: { invoke: { src: "onStartedNewRunActor", onDone: "active", onError: "active" } },
 
     active: {
       on: {
         // Forfeit the active run
-        forfeitedRun: { target: "inactive", actions: "finishActiveRun" },
+        forfeitedRun: { target: "inactive", actions: ["finishActiveRun", "trackForfeitedRun"] },
 
         // Word won, bank volatile points
         wordWon: { actions: "bankWord" },

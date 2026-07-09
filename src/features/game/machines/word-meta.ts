@@ -15,7 +15,7 @@ import { INITIAL_WORD_META } from "@/features/game/domain";
 const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: { input: { theSecretWord: TheSecretWord }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
-      yield* Effect.sleep("3 seconds");
+      yield* Effect.sleep("1 seconds");
 
       const solutionsLanguage = yield* Atom.get(solutionsLanguageAtom);
 

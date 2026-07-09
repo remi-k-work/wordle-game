@@ -14,22 +14,6 @@ export type WordChallengeMachineContext = GameState;
 // constants
 import { INITIAL_GAME_STATE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
 
-// Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
-const onRejectedActor = fromPromise(async ({ signal }: { signal: AbortSignal }) => RuntimeClient.runPromise(trackInvalidGuessSubmitted, { signal }));
-
-const onRevealingActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-      yield* trackValidGuessSubmitted(context);
-
-      // Start a brand-new arcade run if it has not started yet as soon as a valid guess is submitted
-      yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
-    }),
-    { signal }
-  )
-);
-
 const onWordWonActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
@@ -63,11 +47,6 @@ const onWordLostActor = fromPromise(async ({ input: { context }, signal }: { inp
     }),
     { signal }
   )
-);
-
-// Notify the word meta machine that the secret word has been picked
-const onPickedNewSecretWordActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameState }; signal: AbortSignal }) =>
-  RuntimeClient.runPromise(Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(context.theSecretWord) }), { signal })
 );
 
 export const wordChallengeMachine = setup({
@@ -164,10 +143,22 @@ export const wordChallengeMachine = setup({
       // *** TEST CODE ***
       // *** TEST CODE ***
 
+      // Notify the word meta machine that the secret word has been picked
+      RuntimeClient.runPromise(Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(theSecretWord) }));
+
       return { ...INITIAL_GAME_STATE, solutions: context.solutions, dictionary: context.dictionary, theSecretWord } as const satisfies GameState;
     }),
+
+    // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
+    trackInvalidGuessSubmitted: () => RuntimeClient.runPromise(trackInvalidGuessSubmitted),
+
+    // Start a brand-new arcade run if it has not started yet as soon as a valid guess is submitted
+    startNewRun: () => RuntimeClient.runPromise(Atom.set(runSessionMachineAtom, { type: "startedNewRun" })),
+
+    // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
+    trackValidGuessSubmitted: ({ context }) => RuntimeClient.runPromise(trackValidGuessSubmitted(context)),
   },
-  actors: { onRejectedActor, onRevealingActor, onWordWonActor, onWordLostActor, onPickedNewSecretWordActor },
+  actors: { onWordWonActor, onWordLostActor },
 }).createMachine({
   id: "wordChallenge",
   context: { ...INITIAL_GAME_STATE } as const satisfies GameState,
@@ -207,7 +198,7 @@ export const wordChallengeMachine = setup({
 
     // Invalid word entered; recover as soon as the user edits it
     rejected: {
-      invoke: { src: "onRejectedActor" },
+      entry: "trackInvalidGuessSubmitted",
 
       on: {
         // Ensure users can recover from rejected states using the exact same generic event
@@ -220,7 +211,7 @@ export const wordChallengeMachine = setup({
 
     // Inputs are locked while tile flip animations play
     revealing: {
-      invoke: { src: "onRevealingActor", input: ({ context }) => ({ context }) },
+      entry: ["startNewRun", "trackValidGuessSubmitted"],
 
       after: { 1500: [{ guard: "isGameWon", target: "wordWon" }, { guard: "isGameLost", target: "wordLost" }, { target: "typing" }] },
     },
@@ -230,21 +221,19 @@ export const wordChallengeMachine = setup({
       entry: "calculateScore",
       invoke: { src: "onWordWonActor", input: ({ context }) => ({ context }) },
 
-      on: { nextWordRequested: { target: "pickedNewSecretWord", actions: "pickNewSecretWord" } },
+      on: { nextWordRequested: { target: "typing", actions: "pickNewSecretWord" } },
     },
 
     // Word lost, waiting for the new run to start
     wordLost: {
       invoke: { src: "onWordLostActor", input: ({ context }) => ({ context }) },
 
-      on: { startedNewRun: { target: "pickedNewSecretWord", actions: "pickNewSecretWord" } },
+      on: { startedNewRun: { target: "typing", actions: "pickNewSecretWord" } },
     },
 
     // Run forfeited, waiting for the new run to start
     runForfeited: {
-      on: { startedNewRun: { target: "pickedNewSecretWord", actions: "pickNewSecretWord" } },
+      on: { startedNewRun: { target: "typing", actions: "pickNewSecretWord" } },
     },
-
-    pickedNewSecretWord: { invoke: { src: "onPickedNewSecretWordActor", input: ({ context }) => ({ context }), onDone: "typing", onError: "typing" } },
   },
 });

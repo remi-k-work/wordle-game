@@ -5,7 +5,6 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
 import { modalMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
-import { trackForfeitedRun } from "@/features/telemetry/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -73,11 +72,6 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
       onClick={async () =>
         await RuntimeClient.runPromise(
           Effect.gen(function* () {
-            // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-            const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
-            const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
-            yield* trackForfeitedRun(runSessionMachineContext, wordChallengeMachineContext);
-
             // Forfeit the active run
             yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun" });
             yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
