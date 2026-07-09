@@ -10,7 +10,7 @@ export const playerSessionAtom = Atom.kvs({
   key: "@wordle/playerSession",
   schema: PlayerSession.mapFields(Struct.pick(["sessionId"])),
   defaultValue: () => ({ sessionId: crypto.randomUUID() }) as const satisfies PlayerSession,
-});
+}).pipe(Atom.keepAlive);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const sessionIdAtom = playerSessionAtom.pipe(Atom.map((state) => state.sessionId));
