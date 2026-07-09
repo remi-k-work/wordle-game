@@ -23,7 +23,7 @@ const runSessionAtom = Atom.kvs({
   key: "@wordle/runSession",
   schema: RunSession.mapFields(Struct.pick(["runId", "createdAt", "runScore", "streak", "bestRunScore", "bestStreak"])),
   defaultValue: () => INITIAL_RUN_SESSION,
-});
+}).pipe(Atom.keepAlive);
 
 // Creates an Atom-owned XState actor reference
 const runSessionMachineActorAtom = Atom.make<RunSessionMachineActor>((get) => {
