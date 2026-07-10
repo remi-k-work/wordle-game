@@ -16,6 +16,7 @@ import { INITIAL_RUN_SESSION } from "@/features/game/domain";
 export const runSessionMachine = setup({
   types: {} as {
     events:
+      | { readonly type: "solutionsLanguageChanged" }
       | { readonly type: "startedNewRun" }
       | { readonly type: "forfeitedRun" }
       | { readonly type: "wordWon"; readonly wordScore: WordScore }
@@ -89,6 +90,9 @@ export const runSessionMachine = setup({
 
     active: {
       on: {
+        // Solutions language changed, so forfeit the current run and immediately start a new one
+        solutionsLanguageChanged: { target: "active", actions: ["trackForfeitedRun", "finishActiveRun", "trackStartedNewRun", "startNewRun"], reenter: true },
+
         // Forfeit the active run
         forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun"] },
 

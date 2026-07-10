@@ -17,6 +17,7 @@ import { INITIAL_GAME_STATE, MAX_TURNS, WORD_LENGTH } from "@/features/game/doma
 export const wordChallengeMachine = setup({
   types: {} as {
     events:
+      | { readonly type: "solutionsLanguageChanged" }
       | { readonly type: "gameDataLoaded"; solutions: GameState["solutions"]; dictionary: GameState["dictionary"]; theSecretWord: GameState["theSecretWord"] }
       | { readonly type: "keyPressed"; readonly pressedKey: string }
       | { readonly type: "nextWordRequested" }
@@ -167,6 +168,9 @@ export const wordChallengeMachine = setup({
   // 🌟 GLOBAL TRANSITIONS 🌟
   // Any state that does not explicitly handle these events will fall back to these rules
   on: {
+    // Solutions language changed, go back to the initial state to await the new game data
+    solutionsLanguageChanged: { target: ".awaitingGameData" },
+
     // Forfeit the active run
     forfeitedRun: { target: ".runForfeited" },
 

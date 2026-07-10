@@ -21,6 +21,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
   if (wordChallengeMachineSnapshot.matches("awaitingGameData")) return <GameFlowButtonSkeleton {...rest} />;
 
+  // "Next Word" button (when wordWon)
   if (wordChallengeMachineSnapshot.matches("wordWon"))
     return (
       <Button
@@ -43,6 +44,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
       </Button>
     );
 
+  // "Start New Run" button (when wordLost or runForfeited)
   if (wordChallengeMachineSnapshot.matches("wordLost") || wordChallengeMachineSnapshot.matches("runForfeited"))
     return (
       <Button
@@ -66,6 +68,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
       </Button>
     );
 
+  // "Forfeit Run" button (default)
   return (
     <Button
       className={cn("button", className)}

@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
-import { gameDataMachineAtom, runSessionMachineAtom } from "@/features/game/state";
+import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // types
 import type { GameSettings } from "@/features/settings/domain";
@@ -49,17 +49,13 @@ export const gameSettingsMachine = setup({
       },
     }),
 
-    solutionsLanguageChanged: () => {
+    // Notify all the other machines about the solutions language change
+    onSolutionsLanguageToggled: () => {
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          // Forfeit the active run
-          yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun" });
-
-          // Notify the game data machine to reload solutions/dictionary when solutions language changes
+          yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
           yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged" });
-
-          // Start a brand-new arcade run
-          yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
+          yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
         })
       );
     },
@@ -72,7 +68,7 @@ export const gameSettingsMachine = setup({
   states: {
     active: {
       on: {
-        solutionsLanguageToggled: { actions: ["toggleSolutionsLanguage", "solutionsLanguageChanged"] },
+        solutionsLanguageToggled: { actions: ["toggleSolutionsLanguage", "onSolutionsLanguageToggled"] },
         voiceVoiceChanged: { actions: "changeVoiceVoice" },
         voiceVolumeChanged: { actions: "changeVoiceVolume" },
         voiceRateChanged: { actions: "changeVoiceRate" },
