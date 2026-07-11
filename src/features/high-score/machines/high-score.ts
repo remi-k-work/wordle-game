@@ -39,8 +39,7 @@ export const highScoreMachine = setup({
           streak: HighScoreMachineContext["streak"];
           solutionsLanguage: HighScoreMachineContext["solutionsLanguage"];
         }
-      | { readonly type: "initialsSubmitted"; playerName: HighScoreMachineContext["playerName"] }
-      | { readonly type: "retryRequested" };
+      | { readonly type: "initialsSubmitted"; playerName: HighScoreMachineContext["playerName"] };
     context: HighScoreMachineContext;
   },
   guards: {
@@ -108,6 +107,8 @@ export const highScoreMachine = setup({
 
     success: { on: { runFinished: { target: "checkingQualification", actions: "saveRunData" } } },
 
-    failure: { on: { retryRequested: "submitting", runFinished: { target: "checkingQualification", actions: "saveRunData" } } },
+    failure: {
+      on: { initialsSubmitted: { target: "submitting", actions: "saveInitials" }, runFinished: { target: "checkingQualification", actions: "saveRunData" } },
+    },
   },
 });
