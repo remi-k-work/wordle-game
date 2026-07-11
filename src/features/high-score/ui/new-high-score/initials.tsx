@@ -29,7 +29,7 @@ export function Initials() {
   const isSubmitting = highScoreMachineSnapshot.matches("submitting");
 
   return (
-    <form className="flex gap-4">
+    <form className="flex gap-4" onSubmit={(ev) => ev.preventDefault()}>
       <Input
         className="input text-center text-2xl"
         size={5}

@@ -45,9 +45,7 @@ export const highScoreMachine = setup({
   },
   guards: {
     // Determine if the current run qualifies for the high score
-    qualifiesForHighScore: ({ event }, params: { top10HighScores: ReadonlyArray<HighScore> }) => {
-      assertEvent(event, "runFinished");
-
+    qualifiesForHighScore: ({ context }, params: { top10HighScores: ReadonlyArray<HighScore> }) => {
       // If there are fewer than 10 entries, any score qualifies
       if (params.top10HighScores.length < 10) return true;
 
@@ -55,7 +53,7 @@ export const highScoreMachine = setup({
       const tail = params.top10HighScores.at(-1)!;
 
       // Qualification rule (score must be higher than the 10th place score, or if tied, streak must be higher than the 10th place streak)
-      return event.runScore > tail.score || (event.runScore === tail.score && event.streak > tail.streak);
+      return context.runScore > tail.score || (context.runScore === tail.score && context.streak > tail.streak);
     },
   },
   actions: {
