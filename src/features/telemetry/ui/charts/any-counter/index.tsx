@@ -1,10 +1,7 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getAnyCountersAction } from "@/features/telemetry/state";
+import { anyCountersAtom } from "@/features/telemetry/state";
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
@@ -29,13 +26,9 @@ interface AnyCounterChartsProps {
 }
 
 function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: AnyCounterChartProps) {
-  const [getAnyCountersResult, getAnyCounters] = useAtom(getAnyCountersAction(counterName));
+  const anyCounters = useAtomValue(anyCountersAtom(counterName));
 
-  useEffect(() => {
-    getAnyCounters();
-  }, [getAnyCounters]);
-
-  return AsyncResult.builder(getAnyCountersResult)
+  return AsyncResult.builder(anyCounters)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((anyCountersData) => {

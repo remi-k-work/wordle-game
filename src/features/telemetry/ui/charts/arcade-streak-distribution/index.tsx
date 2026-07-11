@@ -1,10 +1,7 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getArcadeStreakDistributionsAction } from "@/features/telemetry/state";
+import { arcadeStreakDistributionsAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
 // components
@@ -22,13 +19,9 @@ interface ArcadeStreakDistributionChartProps {
 }
 
 function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStreakDistributionChartProps) {
-  const [getArcadeStreakDistributionsResult, getArcadeStreakDistributions] = useAtom(getArcadeStreakDistributionsAction);
+  const arcadeStreakDistributions = useAtomValue(arcadeStreakDistributionsAtom);
 
-  useEffect(() => {
-    getArcadeStreakDistributions();
-  }, [getArcadeStreakDistributions]);
-
-  return AsyncResult.builder(getArcadeStreakDistributionsResult)
+  return AsyncResult.builder(arcadeStreakDistributions)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((arcadeStreakDistributionsData) => {

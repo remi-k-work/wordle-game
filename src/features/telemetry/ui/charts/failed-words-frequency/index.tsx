@@ -1,10 +1,7 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getFailedWordsFrequenciesAction } from "@/features/telemetry/state";
+import { failedWordsFrequenciesAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 
 // components
@@ -26,13 +23,9 @@ const CHART_PADDING_PX = 96;
 const BAR_HEIGHT_PX = 48;
 
 function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyChartProps) {
-  const [getFailedWordsFrequenciesResult, getFailedWordsFrequencies] = useAtom(getFailedWordsFrequenciesAction);
+  const failedWordsFrequencies = useAtomValue(failedWordsFrequenciesAtom);
 
-  useEffect(() => {
-    getFailedWordsFrequencies();
-  }, [getFailedWordsFrequencies]);
-
-  return AsyncResult.builder(getFailedWordsFrequenciesResult)
+  return AsyncResult.builder(failedWordsFrequencies)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((failedWordsFrequenciesData) => {

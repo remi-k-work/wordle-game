@@ -1,10 +1,7 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getGuessDistributionsAction } from "@/features/telemetry/state";
+import { guessDistributionsAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
 // components
@@ -22,13 +19,9 @@ interface GuessDistributionChartProps {
 }
 
 function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartProps) {
-  const [getGuessDistributionsResult, getGuessDistributions] = useAtom(getGuessDistributionsAction);
+  const guessDistributions = useAtomValue(guessDistributionsAtom);
 
-  useEffect(() => {
-    getGuessDistributions();
-  }, [getGuessDistributions]);
-
-  return AsyncResult.builder(getGuessDistributionsResult)
+  return AsyncResult.builder(guessDistributions)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((guessDistributionsData) => {

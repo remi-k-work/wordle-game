@@ -1,10 +1,7 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getTimeToSolveDistributionsAction } from "@/features/telemetry/state";
+import { timeToSolveDistributionsAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
 // components
@@ -31,13 +28,9 @@ const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = fal
 };
 
 function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistributionChartProps) {
-  const [getTimeToSolveDistributionsResult, getTimeToSolveDistributions] = useAtom(getTimeToSolveDistributionsAction);
+  const timeToSolveDistributions = useAtomValue(timeToSolveDistributionsAtom);
 
-  useEffect(() => {
-    getTimeToSolveDistributions();
-  }, [getTimeToSolveDistributions]);
-
-  return AsyncResult.builder(getTimeToSolveDistributionsResult)
+  return AsyncResult.builder(timeToSolveDistributions)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((timeToSolveDistributionsData) => {

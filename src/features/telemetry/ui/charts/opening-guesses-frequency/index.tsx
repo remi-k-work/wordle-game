@@ -1,10 +1,7 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getOpeningGuessesFrequenciesAction } from "@/features/telemetry/state";
+import { openingGuessesFrequenciesAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 
 // components
@@ -26,13 +23,9 @@ const CHART_PADDING_PX = 96;
 const BAR_HEIGHT_PX = 48;
 
 function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequencyChartProps) {
-  const [getOpeningGuessesFrequenciesResult, getOpeningGuessesFrequencies] = useAtom(getOpeningGuessesFrequenciesAction);
+  const openingGuessesFrequencies = useAtomValue(openingGuessesFrequenciesAtom);
 
-  useEffect(() => {
-    getOpeningGuessesFrequencies();
-  }, [getOpeningGuessesFrequencies]);
-
-  return AsyncResult.builder(getOpeningGuessesFrequenciesResult)
+  return AsyncResult.builder(openingGuessesFrequencies)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((openingGuessesFrequenciesData) => {

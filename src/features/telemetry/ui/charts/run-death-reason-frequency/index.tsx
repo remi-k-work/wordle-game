@@ -1,11 +1,8 @@
-// react
-import { useEffect } from "react";
-
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { getRunDeathReasonFrequenciesAction } from "@/features/telemetry/state";
-import { Tooltip, Legend, PieChart, Pie } from "recharts";
+import { runDeathReasonFrequenciesAtom } from "@/features/telemetry/state";
+import { Tooltip, Legend, PieChart, Pie, Sector } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
@@ -16,10 +13,19 @@ import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
+import type { PieSectorShapeProps } from "recharts";
+import type { RunDeathReasonFrequencyData } from "@/features/telemetry/services/charts-db";
 
 interface RunDeathReasonFrequencyChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
+
+// constants
+const COLORS_PERSONAL = { Forfeit: "var(--color-primary)", Guesses: "var(--color-accent)" } as const;
+const COLORS_GLOBAL = { Forfeit: "var(--color-secondary)", Guesses: "var(--color-accent)" } as const;
+
+const PieSlicePersonal = (props: PieSectorShapeProps) => <Sector {...props} fill={COLORS_PERSONAL[(props.payload as RunDeathReasonFrequencyData).reason]} />;
+const PieSliceGlobal = (props: PieSectorShapeProps) => <Sector {...props} fill={COLORS_GLOBAL[(props.payload as RunDeathReasonFrequencyData).reason]} />;
 
 const CustomLegend = () => (
   <div className="flex flex-col items-center font-sans text-text-2">
@@ -35,13 +41,9 @@ const CustomLegend = () => (
 );
 
 function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
-  const [getRunDeathReasonFrequenciesResult, getRunDeathReasonFrequencies] = useAtom(getRunDeathReasonFrequenciesAction);
+  const runDeathReasonFrequencies = useAtomValue(runDeathReasonFrequenciesAtom);
 
-  useEffect(() => {
-    getRunDeathReasonFrequencies();
-  }, [getRunDeathReasonFrequencies]);
-
-  return AsyncResult.builder(getRunDeathReasonFrequenciesResult)
+  return AsyncResult.builder(runDeathReasonFrequencies)
     .onInitialOrWaiting(() => null)
     .onFailure(() => null)
     .onSuccess((runDeathReasonFrequenciesData) => {
@@ -60,7 +62,7 @@ function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequ
           />
           <Legend content={<CustomLegend />} />
 
-          <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" fill="var(--color-primary)" label />
+          <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
           <Pie
             dataKey="global"
             nameKey="reason"
@@ -69,7 +71,7 @@ function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequ
             innerRadius="60%"
             outerRadius="80%"
             stroke="var(--color-accent)"
-            fill="var(--color-secondary)"
+            shape={PieSliceGlobal}
             label
           />
         </PieChart>

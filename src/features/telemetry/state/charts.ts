@@ -5,8 +5,8 @@ import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { sessionIdAtom } from "@/features/player/state";
 
-export const getGuessDistributionsAction = RuntimeAtom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const guessDistributionsAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const sessionId = get(sessionIdAtom);
 
     const { getGuessDistribution } = yield* RpcTelemetryClient;
@@ -16,8 +16,8 @@ export const getGuessDistributionsAction = RuntimeAtom.fn(
   })
 );
 
-export const getTimeToSolveDistributionsAction = RuntimeAtom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const timeToSolveDistributionsAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const sessionId = get(sessionIdAtom);
 
     const { getTimeToSolveDistribution } = yield* RpcTelemetryClient;
@@ -30,8 +30,8 @@ export const getTimeToSolveDistributionsAction = RuntimeAtom.fn(
   })
 );
 
-export const getArcadeStreakDistributionsAction = RuntimeAtom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const arcadeStreakDistributionsAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const sessionId = get(sessionIdAtom);
 
     const { getArcadeStreakDistribution } = yield* RpcTelemetryClient;
@@ -44,8 +44,8 @@ export const getArcadeStreakDistributionsAction = RuntimeAtom.fn(
   })
 );
 
-export const getOpeningGuessesFrequenciesAction = RuntimeAtom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const openingGuessesFrequenciesAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const sessionId = get(sessionIdAtom);
 
     const { getOpeningGuessesFrequency } = yield* RpcTelemetryClient;
@@ -58,8 +58,8 @@ export const getOpeningGuessesFrequenciesAction = RuntimeAtom.fn(
   })
 );
 
-export const getFailedWordsFrequenciesAction = RuntimeAtom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const failedWordsFrequenciesAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const sessionId = get(sessionIdAtom);
 
     const { getFailedWordsFrequency } = yield* RpcTelemetryClient;
@@ -72,8 +72,8 @@ export const getFailedWordsFrequenciesAction = RuntimeAtom.fn(
   })
 );
 
-export const getRunDeathReasonFrequenciesAction = RuntimeAtom.fn(
-  Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const runDeathReasonFrequenciesAtom = RuntimeAtom.atom(
+  Effect.fnUntraced(function* (get) {
     const sessionId = get(sessionIdAtom);
 
     const { getRunDeathReasonFrequency } = yield* RpcTelemetryClient;
@@ -86,9 +86,9 @@ export const getRunDeathReasonFrequenciesAction = RuntimeAtom.fn(
   })
 );
 
-export const getAnyCountersAction = Atom.family((counterName: string) =>
-  RuntimeAtom.fn(
-    Effect.fnUntraced(function* (_: void, get: Atom.FnContext) {
+export const anyCountersAtom = Atom.family((counterName: string) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
       const sessionId = get(sessionIdAtom);
 
       const { getAnyCounter } = yield* RpcTelemetryClient;
