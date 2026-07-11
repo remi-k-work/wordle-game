@@ -1,39 +1,49 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
-import { Atom, AsyncResult } from "effect/unstable/reactivity";
-import { RuntimeAtom } from "@/lib/runtime-client";
-import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
-import { qualifiesForHighScore } from "@/features/high-score/domain";
-import { runSessionRunScoreAtom, runSessionStreakAtom } from "@/features/game/state";
+import { Atom } from "effect/unstable/reactivity";
+import { createActor } from "xstate";
+import { highScoreMachine } from "@/features/high-score/machines/high-score";
+import { inspect } from "@/features/game/state";
 
 // types
-import type { AddHighScore } from "@/features/high-score/domain";
+import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
 
-// Reactive atom for the top 10 high scores
-export const top10HighScoresAtom = RuntimeAtom.atom(
-  Effect.gen(function* () {
-    const { top10HighScores } = yield* RpcHighScoreClient;
-    return yield* top10HighScores();
-  })
-);
+type HighScoreMachineSnapshot = SnapshotFrom<typeof highScoreMachine>;
+type HighScoreMachineEvent = EventFromLogic<typeof highScoreMachine>;
+type HighScoreMachineActor = Actor<typeof highScoreMachine>;
 
-// Action atom for adding a new high score
-export const addHighScoreAction = RuntimeAtom.fn((newHighScore: AddHighScore) =>
-  Effect.gen(function* () {
-    const { addHighScore } = yield* RpcHighScoreClient;
-    yield* addHighScore(newHighScore);
-  })
-);
+// Creates an Atom-owned XState actor reference
+const highScoreMachineActorAtom = Atom.make<HighScoreMachineActor>((get) => {
+  const actor = createActor(highScoreMachine, { inspect });
+  actor.start();
 
-// Derived atom to determine if the current run qualifies for the high score
-export const qualifiesForHighScoreAtom = Atom.make((get) => {
-  const top10HighScores = get(top10HighScoresAtom);
-  const runScore = get(runSessionRunScoreAtom);
-  const streak = get(runSessionStreakAtom);
-
-  // If we do not have a successful fetch yet, we cannot determine qualification
-  return Option.match(AsyncResult.value(top10HighScores), {
-    onNone: () => false,
-    onSome: (top10HighScores) => qualifiesForHighScore(top10HighScores, runScore, streak),
+  get.addFinalizer(() => {
+    actor.stop();
   });
-});
+
+  return actor;
+}).pipe(Atom.keepAlive);
+
+// The high score machine is now a living actor inside the effect atom
+export const highScoreMachineAtom = Atom.writable<HighScoreMachineSnapshot, HighScoreMachineEvent>(
+  (get) => {
+    const actor = get(highScoreMachineActorAtom);
+    const subscription = actor.subscribe((snapshot) => {
+      get.setSelf(snapshot);
+    });
+
+    get.addFinalizer(() => {
+      subscription.unsubscribe();
+    });
+
+    return actor.getSnapshot();
+  },
+  (ctx, event) => {
+    ctx.get(highScoreMachineActorAtom).send(event);
+  }
+).pipe(Atom.keepAlive);
+
+// Specialized selectors for granular state access and optimized re-renders
+export const highScorePlayerNameAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.playerName));
+export const highScoreRunScoreAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.runScore));
+export const highScoreStreakAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.streak));
+export const highScoreSolutionsLanguageAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutionsLanguage));

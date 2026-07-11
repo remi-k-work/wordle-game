@@ -36,10 +36,14 @@ export const wordMetaMachine = setup({
     events: { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord } | { readonly type: "retryRequested" };
     context: WordMeta;
   },
+  actions: {
+    // Save the loaded word meta
+    saveWordMeta: assign(({ context }, params: { wordMeta: WordMeta }) => ({ ...context, ...params.wordMeta }) as const satisfies WordMeta),
+  },
   actors: { onLoadingActor },
 }).createMachine({
   id: "wordMeta",
-  context: { ...INITIAL_WORD_META } as const satisfies WordMeta,
+  context: INITIAL_WORD_META,
   initial: "awaitingTheSecretWord",
 
   states: {
@@ -58,7 +62,7 @@ export const wordMetaMachine = setup({
           return { theSecretWord: event.theSecretWord };
         },
 
-        onDone: { target: "ready", actions: assign(({ context, event }) => ({ ...context, ...event.output }) as const satisfies WordMeta) },
+        onDone: { target: "ready", actions: { type: "saveWordMeta", params: ({ event }) => ({ wordMeta: event.output }) } },
         onError: { target: "failure" },
       },
     },

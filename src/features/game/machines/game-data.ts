@@ -53,33 +53,37 @@ const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =
   )
 );
 
-const onReadyActor = fromPromise(async ({ input: { context }, signal }: { input: { context: GameData }; signal: AbortSignal }) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Notify the word meta machine that the secret word has been picked
-      yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(context.theSecretWord) });
-
-      // Notify the word challenge machine that the game data has been loaded
-      yield* Atom.set(wordChallengeMachineAtom, {
-        type: "gameDataLoaded",
-        solutions: context.solutions,
-        dictionary: context.dictionary,
-        theSecretWord: context.theSecretWord,
-      });
-    }),
-    { signal }
-  )
-);
-
 export const gameDataMachine = setup({
   types: {} as {
     events: { readonly type: "solutionsLanguageChanged" } | { readonly type: "retryRequested" };
     context: GameData;
   },
-  actors: { onLoadingActor, onReadyActor },
+  actions: {
+    // Save the loaded game data
+    saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
+
+    // Notify all the other machines that the game data has been loaded
+    onGameDataLoaded: ({ context }) => {
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          // Notify the word meta machine that the secret word has been picked
+          yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(context.theSecretWord) });
+
+          // Notify the word challenge machine that the game data has been loaded
+          yield* Atom.set(wordChallengeMachineAtom, {
+            type: "gameDataLoaded",
+            solutions: context.solutions,
+            dictionary: context.dictionary,
+            theSecretWord: context.theSecretWord,
+          });
+        })
+      );
+    },
+  },
+  actors: { onLoadingActor },
 }).createMachine({
   id: "gameData",
-  context: { ...INITIAL_GAME_DATA } as const satisfies GameData,
+  context: INITIAL_GAME_DATA,
   initial: "loading",
 
   states: {
@@ -87,12 +91,12 @@ export const gameDataMachine = setup({
       invoke: {
         src: "onLoadingActor",
 
-        onDone: { target: "ready", actions: assign(({ context, event }) => ({ ...context, ...event.output }) as const satisfies GameData) },
+        onDone: { target: "ready", actions: [{ type: "saveGameData", params: ({ event }) => ({ gameData: event.output }) }, "onGameDataLoaded"] },
         onError: { target: "failure" },
       },
     },
 
-    ready: { invoke: { src: "onReadyActor", input: ({ context }) => ({ context }) }, on: { solutionsLanguageChanged: "loading" } },
+    ready: { on: { solutionsLanguageChanged: "loading" } },
 
     failure: { on: { retryRequested: "loading" } },
   },

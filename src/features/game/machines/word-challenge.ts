@@ -162,7 +162,7 @@ export const wordChallengeMachine = setup({
   },
 }).createMachine({
   id: "wordChallenge",
-  context: { ...INITIAL_GAME_STATE } as const satisfies GameState,
+  context: INITIAL_GAME_STATE,
   initial: "awaitingGameData",
 
   // 🌟 GLOBAL TRANSITIONS 🌟

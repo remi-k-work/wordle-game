@@ -4,6 +4,8 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { wordChallengeMachineAtom } from "@/features/game/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
+import { highScoreMachineAtom } from "@/features/high-score/state";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state";
 
 // types
@@ -68,6 +70,16 @@ export const runSessionMachine = setup({
           yield* trackForfeitedRun(context, wordChallengeMachineContext);
         })
       ),
+
+    // Notify high score machine that a run has finished
+    onRunFinished: ({ context }) => {
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+          yield* Atom.set(highScoreMachineAtom, { type: "runFinished", runScore: context.runScore, streak: context.streak, solutionsLanguage });
+        })
+      );
+    },
   },
 }).createMachine({
   id: "runSession",
@@ -94,13 +106,13 @@ export const runSessionMachine = setup({
         solutionsLanguageChanged: { target: "active", actions: ["trackForfeitedRun", "finishActiveRun", "trackStartedNewRun", "startNewRun"], reenter: true },
 
         // Forfeit the active run
-        forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun"] },
+        forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun", "onRunFinished"] },
 
         // Word won, bank volatile points
         wordWon: { actions: "bankWord" },
 
         // Word lost, finish the active run
-        wordLost: { target: "inactive", actions: "finishActiveRun" },
+        wordLost: { target: "inactive", actions: ["finishActiveRun", "onRunFinished"] },
       },
     },
   },

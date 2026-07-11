@@ -18,3 +18,10 @@ export class AddHighScore extends Schema.Class<AddHighScore>("AddHighScore")({
   streak: HighScore.fields.streak,
   solutionsLang: HighScore.fields.solutionsLang,
 }) {}
+
+export class HighScoreMachineContext extends Schema.Class<HighScoreMachineContext>("HighScoreMachineContext")({
+  playerName: HighScore.fields.playerName,
+  runScore: HighScore.fields.score,
+  streak: HighScore.fields.streak,
+  solutionsLanguage: HighScore.fields.solutionsLang,
+}) {}

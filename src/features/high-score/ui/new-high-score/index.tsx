@@ -1,7 +1,6 @@
 // services, features, and other libraries
-import { useAtom, useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
-import { addHighScoreAction, qualifiesForHighScoreAtom } from "@/features/high-score/state";
+import { useAtomValue } from "@effect/atom-react";
+import { highScoreMachineAtom } from "@/features/high-score/state";
 
 // components
 import { Success } from "./success";
@@ -12,14 +11,14 @@ import { Initials } from "./initials";
 import { TrophyIcon } from "@heroicons/react/24/outline";
 
 export function NewHighScore() {
-  const qualifiesForHighScore = useAtomValue(qualifiesForHighScoreAtom);
-  const [addHighScoreResult, addHighScore] = useAtom(addHighScoreAction);
+  const highScoreMachineSnapshot = useAtomValue(highScoreMachineAtom);
 
   // Hide the entire component if the player did not qualify
-  if (!qualifiesForHighScore) return null;
+  const isVisible = (["enteringInitials", "submitting", "failure", "success"] as const).some((state) => highScoreMachineSnapshot.matches(state));
+  if (!isVisible) return null;
 
   // Success replaces the form entirely
-  if (AsyncResult.isSuccess(addHighScoreResult)) return <Success />;
+  if (highScoreMachineSnapshot.matches("success")) return <Success />;
 
   return (
     <section className="grid place-items-center gap-4 rounded-md border-2 border-accent p-4">
@@ -33,8 +32,8 @@ export function NewHighScore() {
         Enter your arcade initials:
       </p>
 
-      <Failure addHighScoreResult={addHighScoreResult} />
-      <Initials addHighScoreResult={addHighScoreResult} addHighScore={addHighScore} />
+      <Failure />
+      <Initials />
     </section>
   );
 }
