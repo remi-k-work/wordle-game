@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
+import { toastManager } from "@/ui/toastify";
 
 // types
 import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain";
@@ -65,6 +66,9 @@ export const highScoreMachine = setup({
       assertEvent(event, "initialsSubmitted");
       return { ...context, playerName: event.playerName } as const satisfies HighScoreMachineContext;
     }),
+
+    onSuccess: () => toastManager.add({ title: "Score Recorded", description: "Good luck on your next run!" }),
+    onFailure: () => toastManager.add({ type: "error", title: "Submission Failed", description: "Failed to save your score. Please try again later." }),
   },
   actors: { top10HighScoresActor, addHighScoreActor },
 }).createMachine({
@@ -105,9 +109,10 @@ export const highScoreMachine = setup({
       },
     },
 
-    success: { on: { runFinished: { target: "checkingQualification", actions: "saveRunData" } } },
+    success: { entry: "onSuccess", on: { runFinished: { target: "checkingQualification", actions: "saveRunData" } } },
 
     failure: {
+      entry: "onFailure",
       on: { initialsSubmitted: { target: "submitting", actions: "saveInitials" }, runFinished: { target: "checkingQualification", actions: "saveRunData" } },
     },
   },
