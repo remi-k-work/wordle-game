@@ -63,8 +63,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   };
 
   if (isVoiceTest) {
-    if (wordMetaMachineSnapshot.matches("awaitingTheSecretWord") || wordMetaMachineSnapshot.matches("loading"))
-      return <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>;
+    if (wordMetaMachineSnapshot.matches("awaitingTheSecretWord") || wordMetaMachineSnapshot.matches("loading")) return <RiddleSkeleton isVoiceTest />;
     else if (wordMetaMachineSnapshot.matches("ready"))
       return (
         <div>
@@ -96,7 +95,7 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
             )}
           >
             {wordMetaMachineSnapshot.matches("awaitingTheSecretWord") || wordMetaMachineSnapshot.matches("loading") ? (
-              <p className="animate-pulse">Thinking...</p>
+              <RiddleSkeleton isVoiceTest />
             ) : wordMetaMachineSnapshot.matches("ready") ? (
               <div>
                 <p>{sanitizedRiddle}</p>
@@ -115,7 +114,19 @@ export function Riddle({ isVoiceTest = false }: RiddleProps) {
   );
 }
 
-export function RiddleSkeleton() {
+export function RiddleSkeleton({ isVoiceTest = false }: RiddleProps) {
+  if (isVoiceTest) {
+    return (
+      <div>
+        <p className="mx-auto animate-pulse text-center text-xl">Thinking...</p>
+        <Button className="button mx-auto mt-4 text-base" disabled>
+          <SpeakerWaveIcon className="size-11" />
+          Speak Riddle
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <Button className="button flex-none p-1" disabled>
       <SparklesIcon className="size-11" />

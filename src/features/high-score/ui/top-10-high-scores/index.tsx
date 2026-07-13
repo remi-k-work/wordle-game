@@ -49,3 +49,42 @@ export function Top10HighScores({ top10HighScores, newHighScoreId }: Top10HighSc
     </Table>
   );
 }
+
+export function Top10HighScoresSkeleton() {
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-16">#</TableHead>
+          <TableHead className="w-32">Name</TableHead>
+          <TableHead className="w-32 bg-accent/30 text-accent">
+            <TrophyIcon className="mx-auto size-11" />
+          </TableHead>
+          <TableHead className="w-24 bg-destructive/30 text-destructive">
+            <FireIcon className="mx-auto size-11" />
+          </TableHead>
+          <TableHead className="w-24">&nbsp;</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {[...Array(10)].map((_, index: number) => (
+          <TableRow key={index} className="odd:bg-surface-2">
+            <TableCell>{index + 1}</TableCell>
+            <TableCell>
+              <div className="mx-auto h-4 w-12 animate-pulse bg-accent" />
+            </TableCell>
+            <TableCell className="bg-accent/30">
+              <div className="mx-auto h-4 w-16 animate-pulse bg-accent" />
+            </TableCell>
+            <TableCell className="bg-destructive/30">
+              <div className="mx-auto h-4 w-8 animate-pulse bg-accent" />
+            </TableCell>
+            <TableCell>
+              <div className="mx-auto size-11 animate-pulse bg-accent" />
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}

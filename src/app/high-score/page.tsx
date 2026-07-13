@@ -8,7 +8,7 @@ import { runPageMainOrNavigate } from "@/lib/helpers-effect";
 
 // components
 import { PageHeader } from "@/ui/page-header";
-import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";
+import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import {
   AnyCounterCharts,
   AnyCounterChartsSkeleton,
@@ -76,6 +76,7 @@ function PageSkeleton() {
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
+      <Top10HighScoresSkeleton />
       <GuessDistributionChartsSkeleton />
       <TimeToSolveDistributionChartsSkeleton />
       <ArcadeStreakDistributionChartsSkeleton />

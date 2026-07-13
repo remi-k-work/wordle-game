@@ -6,7 +6,7 @@ import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/hig
 import { modalMachineAtom } from "@/features/game/state";
 
 // components
-import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";
+import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import { Button } from "@base-ui/react";
 
 // assets
@@ -20,8 +20,8 @@ export function Content() {
   return (
     <article className="mx-auto max-w-prose space-y-9">
       {AsyncResult.builder(top10HighScores)
-        .onInitialOrWaiting(() => null)
-        .onFailure(() => null)
+        .onInitialOrWaiting(() => <Top10HighScoresSkeleton />)
+        .onFailure(() => <Top10HighScoresSkeleton />)
         .onSuccess((top10HighScores) => <Top10HighScores top10HighScores={top10HighScores} newHighScoreId={Option.getOrUndefined(newHighScoreId)} />)
         .render()}
 

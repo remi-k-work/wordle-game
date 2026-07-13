@@ -92,3 +92,28 @@ export function Voice() {
     </section>
   );
 }
+
+export function VoiceSkeleton() {
+  return (
+    <section>
+      <Select.Root items={[]} value={null} onValueChange={() => {}} disabled>
+        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Voice</Select.Label>
+        <Select.Trigger
+          className={cn(
+            "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
+            "transition duration-300 ease-in-out",
+            "active:scale-95",
+            "focus-visible:outline-2 focus-visible:outline-offset-1",
+            "data-disabled:pointer-events-none data-disabled:opacity-50",
+            "hover:not-data-disabled:bg-accent data-popup-open:bg-accent"
+          )}
+        >
+          <Select.Value className="data-placeholder:text-text-2/50" placeholder="Select Voice" />
+          <Select.Icon>
+            <ChevronUpDownIcon className="size-11" />
+          </Select.Icon>
+        </Select.Trigger>
+      </Select.Root>
+    </section>
+  );
+}

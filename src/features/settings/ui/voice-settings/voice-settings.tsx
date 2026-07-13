@@ -1,9 +1,9 @@
 // components
-import { Voice } from "./voice";
-import { Volume } from "./volume";
-import { Rate } from "./rate";
-import { Pitch } from "./pitch";
-import { Riddle } from "@/features/game/ui/riddle";
+import { Voice, VoiceSkeleton } from "./voice";
+import { Volume, VolumeSkeleton } from "./volume";
+import { Rate, RateSkeleton } from "./rate";
+import { Pitch, PitchSkeleton } from "./pitch";
+import { Riddle, RiddleSkeleton } from "@/features/game/ui/riddle";
 
 export default function VoiceSettings() {
   return (
@@ -13,6 +13,18 @@ export default function VoiceSettings() {
       <Rate />
       <Pitch />
       <Riddle isVoiceTest />
+    </article>
+  );
+}
+
+export function VoiceSettingsSkeleton() {
+  return (
+    <article className="bg-surface-2 p-3 text-start">
+      <VoiceSkeleton />
+      <VolumeSkeleton />
+      <RateSkeleton />
+      <PitchSkeleton />
+      <RiddleSkeleton isVoiceTest />
     </article>
   );
 }
