@@ -26,8 +26,8 @@ function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyCh
   const failedWordsFrequencies = useAtomValue(failedWordsFrequenciesAtom);
 
   return AsyncResult.builder(failedWordsFrequencies)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)
+    .onFailure(() => <FailedWordsFrequencyChartSkeleton />)
     .onSuccess((failedWordsFrequenciesData) => {
       const failedWordsFrequencyData = failedWordsFrequenciesData[solutionsLanguage === "En" ? 0 : 1];
 
@@ -65,6 +65,10 @@ function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyCh
       );
     })
     .render();
+}
+
+function FailedWordsFrequencyChartSkeleton() {
+  return <div className="h-96 w-full animate-pulse bg-accent" />;
 }
 
 export function FailedWordsFrequencyCharts() {
@@ -108,7 +112,7 @@ export function FailedWordsFrequencyChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <FailedWordsFrequencyChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -119,7 +123,7 @@ export function FailedWordsFrequencyChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <FailedWordsFrequencyChartSkeleton />
       </div>
     </section>
   );

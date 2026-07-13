@@ -22,8 +22,8 @@ function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartPro
   const guessDistributions = useAtomValue(guessDistributionsAtom);
 
   return AsyncResult.builder(guessDistributions)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)
+    .onFailure(() => <GuessDistributionChartSkeleton />)
     .onSuccess((guessDistributionsData) => {
       const guessDistributionData = guessDistributionsData[solutionsLanguage === "En" ? 0 : 1];
 
@@ -54,6 +54,10 @@ function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartPro
       );
     })
     .render();
+}
+
+function GuessDistributionChartSkeleton() {
+  return <div className="h-96 w-full animate-pulse bg-accent" />;
 }
 
 export function GuessDistributionCharts() {
@@ -97,7 +101,7 @@ export function GuessDistributionChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <GuessDistributionChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -108,7 +112,7 @@ export function GuessDistributionChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <GuessDistributionChartSkeleton />
       </div>
     </section>
   );

@@ -31,8 +31,8 @@ function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistribu
   const timeToSolveDistributions = useAtomValue(timeToSolveDistributionsAtom);
 
   return AsyncResult.builder(timeToSolveDistributions)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <TimeToSolveDistributionChartSkeleton />)
+    .onFailure(() => <TimeToSolveDistributionChartSkeleton />)
     .onSuccess((timeToSolveDistributionsData) => {
       const timeToSolveDistributionData = timeToSolveDistributionsData[solutionsLanguage === "En" ? 0 : 1].map((row) => ({
         ...row,
@@ -66,6 +66,10 @@ function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistribu
       );
     })
     .render();
+}
+
+function TimeToSolveDistributionChartSkeleton() {
+  return <div className="h-96 w-full animate-pulse bg-accent" />;
 }
 
 export function TimeToSolveDistributionCharts() {
@@ -109,7 +113,7 @@ export function TimeToSolveDistributionChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <TimeToSolveDistributionChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -120,7 +124,7 @@ export function TimeToSolveDistributionChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <TimeToSolveDistributionChartSkeleton />
       </div>
     </section>
   );

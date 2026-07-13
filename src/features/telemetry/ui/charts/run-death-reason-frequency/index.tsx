@@ -44,8 +44,8 @@ function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequ
   const runDeathReasonFrequencies = useAtomValue(runDeathReasonFrequenciesAtom);
 
   return AsyncResult.builder(runDeathReasonFrequencies)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
+    .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
     .onSuccess((runDeathReasonFrequenciesData) => {
       const runDeathReasonFrequencyData = runDeathReasonFrequenciesData[solutionsLanguage === "En" ? 0 : 1];
 
@@ -78,6 +78,10 @@ function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequ
       );
     })
     .render();
+}
+
+function RunDeathReasonFrequencyChartSkeleton() {
+  return <div className="mx-auto size-96 animate-pulse bg-accent" />;
 }
 
 export function RunDeathReasonFrequencyCharts() {
@@ -121,7 +125,7 @@ export function RunDeathReasonFrequencyChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <RunDeathReasonFrequencyChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -132,7 +136,7 @@ export function RunDeathReasonFrequencyChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <RunDeathReasonFrequencyChartSkeleton />
       </div>
     </section>
   );

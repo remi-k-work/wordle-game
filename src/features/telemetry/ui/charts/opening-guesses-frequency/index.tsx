@@ -26,8 +26,8 @@ function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequ
   const openingGuessesFrequencies = useAtomValue(openingGuessesFrequenciesAtom);
 
   return AsyncResult.builder(openingGuessesFrequencies)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
+    .onFailure(() => <OpeningGuessesFrequencyChartSkeleton />)
     .onSuccess((openingGuessesFrequenciesData) => {
       const openingGuessesFrequencyData = openingGuessesFrequenciesData[solutionsLanguage === "En" ? 0 : 1];
 
@@ -65,6 +65,10 @@ function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequ
       );
     })
     .render();
+}
+
+function OpeningGuessesFrequencyChartSkeleton() {
+  return <div className="h-96 w-full animate-pulse bg-accent" />;
 }
 
 export function OpeningGuessesFrequencyCharts() {
@@ -108,7 +112,7 @@ export function OpeningGuessesFrequencyChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <OpeningGuessesFrequencyChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -119,7 +123,7 @@ export function OpeningGuessesFrequencyChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <OpeningGuessesFrequencyChartSkeleton />
       </div>
     </section>
   );

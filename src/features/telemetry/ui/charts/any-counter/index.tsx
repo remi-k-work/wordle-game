@@ -29,8 +29,8 @@ function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: Any
   const anyCounters = useAtomValue(anyCountersAtom(counterName));
 
   return AsyncResult.builder(anyCounters)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <AnyCounterChartSkeleton />)
+    .onFailure(() => <AnyCounterChartSkeleton />)
     .onSuccess((anyCountersData) => {
       const anyCounterData = anyCountersData[solutionsLanguage === "En" ? 0 : 1];
 
@@ -51,6 +51,22 @@ function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: Any
       );
     })
     .render();
+}
+
+function AnyCounterChartSkeleton() {
+  return (
+    <article className="grid grid-cols-2 gap-6">
+      <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+        <h3 className="animate-pulse bg-accent font-sans tracking-widest text-(--color-text-2)">&nbsp;</h3>
+        <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary)">&nbsp;</span>
+      </header>
+
+      <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+        <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
+        <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary)">&nbsp;</span>
+      </footer>
+    </article>
+  );
 }
 
 export function AnyCounterCharts({ title, counterName, personalHeader }: AnyCounterChartsProps) {
@@ -94,7 +110,7 @@ export function AnyCounterChartsSkeleton({ title }: Pick<AnyCounterChartsProps, 
             </span>
           }
         />
-        &nbsp;
+        <AnyCounterChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -105,7 +121,7 @@ export function AnyCounterChartsSkeleton({ title }: Pick<AnyCounterChartsProps, 
             </span>
           }
         />
-        &nbsp;
+        <AnyCounterChartSkeleton />
       </div>
     </section>
   );

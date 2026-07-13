@@ -22,8 +22,8 @@ function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStreakDistri
   const arcadeStreakDistributions = useAtomValue(arcadeStreakDistributionsAtom);
 
   return AsyncResult.builder(arcadeStreakDistributions)
-    .onInitialOrWaiting(() => null)
-    .onFailure(() => null)
+    .onInitialOrWaiting(() => <ArcadeStreakDistributionChartSkeleton />)
+    .onFailure(() => <ArcadeStreakDistributionChartSkeleton />)
     .onSuccess((arcadeStreakDistributionsData) => {
       const arcadeStreakDistributionData = arcadeStreakDistributionsData[solutionsLanguage === "En" ? 0 : 1].map((row) => ({
         ...row,
@@ -57,6 +57,10 @@ function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStreakDistri
       );
     })
     .render();
+}
+
+function ArcadeStreakDistributionChartSkeleton() {
+  return <div className="h-96 w-full animate-pulse bg-accent" />;
 }
 
 export function ArcadeStreakDistributionCharts() {
@@ -100,7 +104,7 @@ export function ArcadeStreakDistributionChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <ArcadeStreakDistributionChartSkeleton />
       </div>
       <div>
         <SectionHeader
@@ -111,7 +115,7 @@ export function ArcadeStreakDistributionChartsSkeleton() {
             </span>
           }
         />
-        &nbsp;
+        <ArcadeStreakDistributionChartSkeleton />
       </div>
     </section>
   );
