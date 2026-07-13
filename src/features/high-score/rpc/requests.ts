@@ -10,5 +10,6 @@ export class RpcHighScore extends RpcGroup.make(
 
   Rpc.make("addHighScore", {
     payload: AddHighScore,
+    success: Schema.Struct({ id: HighScore.fields.id }),
   })
 ) {}

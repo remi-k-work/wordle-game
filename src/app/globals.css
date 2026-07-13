@@ -3,6 +3,7 @@
 /* custom styles and animations */
 @import "../assets/styles/flip.css";
 @import "../assets/styles/bounce.css";
+@import "../assets/styles/wiggle.css";
 
 @custom-variant dark (&:is(.dark *));
 

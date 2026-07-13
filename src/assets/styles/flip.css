@@ -6,14 +6,17 @@
       transform: rotateX(0);
       background: transparent;
     }
+
     45% {
       transform: rotateX(90deg);
       background: transparent;
     }
+
     55% {
       transform: rotateX(90deg);
       background: var(--_background);
     }
+
     100% {
       transform: rotateX(0deg);
       background: var(--_background);

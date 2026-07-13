@@ -15,7 +15,7 @@ const RpcHighScoreLayer = RpcHighScore.toLayer({
   addHighScore: (payload) =>
     Effect.gen(function* () {
       const highScoreDB = yield* HighScoreDB;
-      yield* highScoreDB.addHighScore(payload);
+      return yield* highScoreDB.addHighScore(payload);
     }),
 }).pipe(Layer.provide(HighScoreDB.layer));
 

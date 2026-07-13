@@ -6,7 +6,7 @@ import type { ComponentPropsWithoutRef } from "react";
 
 function Table({ className, ...props }: ComponentPropsWithoutRef<"table">) {
   return (
-    <div data-slot="table-container" className="@container overflow-x-auto">
+    <div data-slot="table-container" className="@container overflow-x-auto overflow-y-clip">
       <table data-slot="table" className={cn("w-[100cqw] table-fixed caption-bottom border-collapse", className)} {...props} />
     </div>
   );

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
@@ -25,7 +25,9 @@ const addHighScoreActor = fromPromise(async ({ input: { context }, signal }: { i
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const { addHighScore } = yield* RpcHighScoreClient;
-      yield* addHighScore({ ...context, score: context.runScore, solutionsLang: context.solutionsLanguage } as const satisfies AddHighScore);
+      const { id } = yield* addHighScore({ ...context, score: context.runScore, solutionsLang: context.solutionsLanguage } as const satisfies AddHighScore);
+
+      return Option.some(id);
     }),
     { signal }
   )
@@ -67,6 +69,11 @@ export const highScoreMachine = setup({
       return { ...context, playerName: event.playerName } as const satisfies HighScoreMachineContext;
     }),
 
+    saveNewHighScoreId: assign(
+      ({ context }, params: { newHighScoreId: HighScoreMachineContext["newHighScoreId"] }) =>
+        ({ ...context, newHighScoreId: params.newHighScoreId }) as const satisfies HighScoreMachineContext
+    ),
+
     onSuccess: () => toastManager.add({ title: "Score Recorded", description: "Good luck on your next run!" }),
     onFailure: () => toastManager.add({ type: "error", title: "Submission Failed", description: "Failed to save your score. Please try again later." }),
   },
@@ -104,7 +111,7 @@ export const highScoreMachine = setup({
       invoke: {
         src: "addHighScoreActor",
         input: ({ context }) => ({ context }),
-        onDone: { target: "success" },
+        onDone: { target: "success", actions: { type: "saveNewHighScoreId", params: ({ event }) => ({ newHighScoreId: event.output }) } },
         onError: { target: "failure" },
       },
     },

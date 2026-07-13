@@ -4,6 +4,7 @@ import { SolutionsLanguage } from "@/features/game/domain";
 
 // Represents the high score entry for a player
 export class HighScore extends Schema.Class<HighScore>("HighScore")({
+  id: Schema.Int.check(Schema.isGreaterThan(0)),
   playerName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(3))),
   score: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
@@ -24,4 +25,5 @@ export class HighScoreMachineContext extends Schema.Class<HighScoreMachineContex
   runScore: HighScore.fields.score,
   streak: HighScore.fields.streak,
   solutionsLanguage: HighScore.fields.solutionsLang,
+  newHighScoreId: Schema.Option(HighScore.fields.id),
 }) {}

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { HighScore } from "@/features/high-score/domain";
+import { cn } from "@/lib/utils";
 
 // components
 import { InfoLine } from "@/ui/shared/info-line";
@@ -10,31 +10,34 @@ import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
+import type { HighScore } from "@/features/high-score/domain";
+
 interface Top10HighScoresProps {
   top10HighScores: ReadonlyArray<HighScore>;
+  newHighScoreId?: HighScore["id"];
 }
 
-export function Top10HighScores({ top10HighScores }: Top10HighScoresProps) {
+export function Top10HighScores({ top10HighScores, newHighScoreId }: Top10HighScoresProps) {
   if (top10HighScores.length === 0) return <InfoLine message="No High Scores yet!" />;
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>#</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead className="bg-accent/30 text-accent">
-            <TrophyIcon className="mx-auto size-9 sm:size-11" />
+          <TableHead className="w-16">#</TableHead>
+          <TableHead className="w-32">Name</TableHead>
+          <TableHead className="w-32 bg-accent/30 text-accent">
+            <TrophyIcon className="mx-auto size-11" />
           </TableHead>
-          <TableHead className="bg-destructive/30 text-destructive">
-            <FireIcon className="mx-auto size-9 sm:size-11" />
+          <TableHead className="w-24 bg-destructive/30 text-destructive">
+            <FireIcon className="mx-auto size-11" />
           </TableHead>
-          <TableHead>&nbsp;</TableHead>
+          <TableHead className="w-24">&nbsp;</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {top10HighScores.map(({ playerName, score, streak, solutionsLang }, index: number) => (
-          <TableRow key={index} className="odd:bg-surface-2">
+        {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
+          <TableRow key={id} className={cn("odd:bg-surface-2", id === newHighScoreId && "animate-wiggle bg-accent odd:bg-accent")}>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{playerName}</TableCell>
             <TableCell className="bg-accent/30">{score}</TableCell>

@@ -1,0 +1,14 @@
+@theme inline {
+  --animate-wiggle: wiggle 1.25s ease-in-out infinite;
+
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(-3deg) scale(0.99);
+    }
+
+    50% {
+      transform: rotate(3deg) scale(0.99);
+    }
+  }
+}

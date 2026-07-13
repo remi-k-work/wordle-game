@@ -9,7 +9,7 @@ import { LangChanger } from "@/features/settings/ui/lang-changer";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 
 // assets
-import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 export function GameMenu() {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
@@ -34,6 +34,10 @@ export function GameMenu() {
             <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "voice-settings" })}>
               <SpeakerWaveIcon className="size-11" />
               Voice Settings
+            </Button>
+            <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "high-score" })}>
+              <TrophyIcon className="size-11" />
+              High Score
             </Button>
             <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "help" })}>
               <QuestionMarkCircleIcon className="size-11" />

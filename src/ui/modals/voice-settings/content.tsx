@@ -3,8 +3,8 @@ import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/features/game/state";
 
 // components
-import { Button } from "@base-ui/react";
 import { VoiceSettings } from "@/features/settings/ui/voice-settings";
+import { Button } from "@base-ui/react";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";

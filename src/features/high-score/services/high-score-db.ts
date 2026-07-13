@@ -11,15 +11,22 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
     const top10HighScores = SqlSchema.findAll({
       Request: Schema.Void,
       Result: HighScore,
-      execute: () => sql`SELECT player_name, score, streak, solutions_lang, created_at FROM high_score ORDER BY score DESC, streak DESC LIMIT 10`,
+      execute: () => sql`SELECT id, player_name, score, streak, solutions_lang, created_at FROM high_score ORDER BY score DESC, streak DESC LIMIT 10`,
     });
 
-    const addHighScore = SqlSchema.void({ Request: AddHighScore, execute: (request) => sql`INSERT INTO high_score ${sql.insert(request)}` });
+    const addHighScore = SqlSchema.findOne({
+      Request: AddHighScore,
+      Result: Schema.Struct({ id: HighScore.fields.id }),
+      execute: (request) => sql`INSERT INTO high_score ${sql.insert(request)} RETURNING id`,
+    });
 
     return {
       top10HighScores: top10HighScores().pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
       addHighScore: (request: AddHighScore) =>
-        addHighScore(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
+        addHighScore(request).pipe(
+          Effect.tapError(Effect.logError),
+          Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die, NoSuchElementError: Effect.die })
+        ),
     } as const;
   }),
 }) {
