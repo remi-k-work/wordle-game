@@ -6,7 +6,7 @@ import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features
 import { SolutionsLanguage } from "@/features/game/domain";
 
 // types
-import type { ReadableSpan } from "@opentelemetry/sdk-trace-base";
+import type { Tracer } from "effect";
 
 const normalizeMetricPayload = (payload: Metric.Metric.Snapshot["state"]) => {
   if ("occurrences" in payload) return { occurrences: Object.fromEntries(payload.occurrences) };
@@ -27,14 +27,18 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const instanceId = crypto.randomUUID();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
-    const processSpanBatch = (readableSpanBatch: ReadonlyArray<ReadableSpan>) =>
+    const processSpanBatch = (spanBatch: ReadonlyArray<Tracer.Span>) =>
       Effect.gen(function* () {
-        if (readableSpanBatch.length === 0) return;
-        yield* Effect.log(`[TelemetryWorker] Processing batch of ${readableSpanBatch.length} spans.`);
+        if (spanBatch.length === 0) return;
+        yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
 
-        for (const { name, attributes } of readableSpanBatch)
-          if (name === "logWordWon") yield* addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributes));
-          else if (name === "logRunCompleted") yield* addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributes));
+        for (const { name, attributes } of spanBatch) {
+          // Convert the attributes map to a plain object for schema decoding and validation
+          const attributesObject = Object.fromEntries(attributes);
+
+          if (name === "logWordWon") yield* addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributesObject));
+          else if (name === "logRunCompleted") yield* addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributesObject));
+        }
       });
 
     const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>
@@ -58,11 +62,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
       });
 
     // --- Stream 1: Spans ---
-    const spanProcessor = Stream.fromPubSub(spanPubSub).pipe(
-      Stream.flatMap((readableSpans: ReadableSpan[]) => Stream.fromIterable(readableSpans)),
-      Stream.groupedWithin(50, Duration.seconds(5)),
-      Stream.runForEach(processSpanBatch)
-    );
+    const spanProcessor = Stream.fromPubSub(spanPubSub).pipe(Stream.groupedWithin(50, Duration.seconds(5)), Stream.runForEach(processSpanBatch));
 
     // --- Stream 2: Metrics (Native Snapshot Loop) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
