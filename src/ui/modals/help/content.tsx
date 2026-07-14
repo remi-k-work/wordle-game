@@ -3,7 +3,7 @@ import Image from "next/image";
 
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { modalMachineAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/state";
 
 // components
 import { Button } from "@base-ui/react";

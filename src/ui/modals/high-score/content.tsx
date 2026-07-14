@@ -3,11 +3,11 @@ import { Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state";
-import { modalMachineAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/state";
 
 // components
-import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import { Button } from "@base-ui/react";
+import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";

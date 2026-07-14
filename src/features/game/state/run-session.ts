@@ -5,7 +5,7 @@ import { createActor } from "xstate";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
 import { runSessionMachine } from "@/features/game/machines/run-session";
-import { inspect } from ".";
+import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";

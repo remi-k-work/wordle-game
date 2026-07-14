@@ -5,7 +5,7 @@ import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { createActor } from "xstate";
 import { highScoreMachine } from "@/features/high-score/machines/high-score";
-import { inspect } from "@/features/game/state";
+import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";

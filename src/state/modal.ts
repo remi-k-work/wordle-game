@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
-import { modalMachine } from "@/features/game/machines/modal";
-import { inspect } from ".";
+import { modalMachine } from "@/machines/modal";
+import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";

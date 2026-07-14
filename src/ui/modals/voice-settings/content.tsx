@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { modalMachineAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/state";
 
 // components
-import { VoiceSettings } from "@/features/settings/ui/voice-settings";
 import { Button } from "@base-ui/react";
+import { VoiceSettings } from "@/features/settings/ui/voice-settings";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";

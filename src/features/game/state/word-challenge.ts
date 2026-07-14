@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState, deriveWordleGrid } from "@/features/game/domain";
-import { inspect } from ".";
+import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";

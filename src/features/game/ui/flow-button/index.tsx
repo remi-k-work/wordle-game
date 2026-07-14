@@ -4,7 +4,8 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
-import { modalMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/state";
 
 // components
 import { Button } from "@base-ui/react";

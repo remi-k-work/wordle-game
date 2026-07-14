@@ -1,10 +1,11 @@
 // services, features, and other libraries
 import { useAtom, useAtomValue } from "@effect/atom-react";
-import { modalMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { wordChallengeMachineAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/state";
 
 // components
 import { Button } from "@base-ui/react";
-import { Modal } from "@/ui/modals";
+import { Modal } from "@/ui/modal";
 import { YouWin } from "./you-win";
 import { Nevermind } from "./nevermind";
 import { GameFlowButton } from "@/features/game/ui/flow-button";

@@ -4,8 +4,9 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
-import { modalMachineAtom, runSessionMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { runSessionMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
+import { modalMachineAtom } from "@/state";
 
 // types
 import type { GameState } from "@/features/game/domain";

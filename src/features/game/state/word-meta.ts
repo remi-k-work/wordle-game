@@ -2,7 +2,7 @@
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
-import { inspect } from ".";
+import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
