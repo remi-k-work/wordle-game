@@ -12,7 +12,7 @@ import { ThemeProvider } from "next-themes";
 import { AtomRegistryProvider } from "@/lib/atom-registry-provider";
 import { Toastify } from "@/ui/toastify";
 import { Header } from "@/ui/header";
-import { HelpModal, HighScoreModal, VoiceSettingsModal, WinOrLoseModal } from "@/ui/modals";
+import { Modals } from "@/ui/modals";
 
 // assets
 import { fontSans, fontMono } from "@/assets/fonts";
@@ -56,10 +56,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
                 <Header />
                 <main className="grid p-1">{children}</main>
               </div>
-              <HelpModal />
-              <VoiceSettingsModal />
-              <WinOrLoseModal />
-              <HighScoreModal />
+              <Modals />
             </Toastify>
           </AtomRegistryProvider>
         </ThemeProvider>
