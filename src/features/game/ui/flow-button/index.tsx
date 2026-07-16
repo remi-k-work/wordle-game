@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
-import { useAtomValue } from "@effect/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { alertMachineAtom, modalMachineAtom } from "@/state";
 import { runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
-import { modalMachineAtom } from "@/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -20,6 +20,8 @@ type GameFlowButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
 export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
+  const alertMachineEvent = useAtomSet(alertMachineAtom);
+
   if (wordChallengeMachineSnapshot.matches("awaitingGameData")) return <GameFlowButtonSkeleton {...rest} />;
 
   // "Next Word" button (when wordWon)
@@ -71,22 +73,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
 
   // "Forfeit Run" button (default)
   return (
-    <Button
-      className={cn("button", className)}
-      onClick={async () =>
-        await RuntimeClient.runPromise(
-          Effect.gen(function* () {
-            // Forfeit the active run
-            yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun" });
-            yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
-
-            // Command the modal machine actor to open up the status modal
-            yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
-          })
-        )
-      }
-      {...rest}
-    >
+    <Button className={cn("button", className)} onClick={() => alertMachineEvent({ type: "opened", alertType: "forfeit-run" })} {...rest}>
       <XCircleIcon className="size-11" />
       Forfeit Run
     </Button>

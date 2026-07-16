@@ -56,8 +56,8 @@ export const runSessionMachine = setup({
       } as const satisfies RunSession;
     }),
 
-    // Finish the active run by clearing identifiers, but LEAVE runScore and streak intact for the UI!
-    finishActiveRun: assign(({ context }) => ({ ...context, runId: Option.none(), createdAt: Option.none() }) as const satisfies RunSession),
+    // Finish the active run by clearing identifiers, but LEAVE runScore, streak, and createdAt intact for the UI!
+    finishActiveRun: assign(({ context }) => ({ ...context, runId: Option.none() }) as const satisfies RunSession),
 
     // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
     trackStartedNewRun: () => RuntimeClient.runPromise(trackStartedNewRun),

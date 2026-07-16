@@ -9,13 +9,13 @@ export const modalMachine = setup({
   id: "modal",
   initial: "closed",
   on: {
-    closed: { target: ".closed" },
     opened: [
       { guard: ({ event }) => event.modalType === "help", target: ".help" },
       { guard: ({ event }) => event.modalType === "status", target: ".status" },
       { guard: ({ event }) => event.modalType === "voice-settings", target: ".voice-settings" },
       { guard: ({ event }) => event.modalType === "high-score", target: ".high-score" },
     ],
+    closed: ".closed",
   },
   states: { closed: {}, help: {}, status: {}, "voice-settings": {}, "high-score": {} },
 });

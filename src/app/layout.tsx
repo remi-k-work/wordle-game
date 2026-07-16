@@ -13,6 +13,7 @@ import { AtomRegistryProvider } from "@/lib/atom-registry-provider";
 import { Toastify } from "@/ui/toastify";
 import { Header } from "@/ui/header";
 import { Modals } from "@/ui/modals";
+import { Alerts } from "@/ui/alerts";
 
 // assets
 import { fontSans, fontMono } from "@/assets/fonts";
@@ -57,6 +58,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
                 <main className="grid p-1">{children}</main>
               </div>
               <Modals />
+              <Alerts />
             </Toastify>
           </AtomRegistryProvider>
         </ThemeProvider>
