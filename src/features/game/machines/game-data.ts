@@ -92,7 +92,7 @@ export const gameDataMachine = setup({
         src: "onLoadingActor",
 
         onDone: { target: "ready", actions: [{ type: "saveGameData", params: ({ event }) => ({ gameData: event.output }) }, "onGameDataLoaded"] },
-        onError: { target: "failure" },
+        onError: "failure",
       },
     },
 

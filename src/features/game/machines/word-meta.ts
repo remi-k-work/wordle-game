@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
+import { Effect, Option, Result } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
@@ -19,13 +19,18 @@ const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: 
 
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
+      // Load both pieces of metadata independently; we use "result" mode so a failure in one request does not interrupt the other request
       const { fetchRiddle, fetchDefinition } = yield* RpcGameClient;
       const { theRiddle, wordDefinition } = yield* Effect.all(
         { theRiddle: fetchRiddle({ theSecretWord, solutionsLanguage }), wordDefinition: fetchDefinition({ solutionsLanguage, theSecretWord }) },
-        { concurrency: 2 }
+        { mode: "result", concurrency: 2 }
       );
 
-      return { theRiddle: Option.some(theRiddle), wordDefinition: Option.some(wordDefinition) } as const satisfies WordMeta;
+      // Riddles and definitions are optional enrichments; failed requests are converted into Option.none() instead of failing the entire actor
+      return {
+        theRiddle: Result.match(theRiddle, { onFailure: Option.none, onSuccess: Option.some }),
+        wordDefinition: Result.match(wordDefinition, { onFailure: Option.none, onSuccess: Option.some }),
+      } as const satisfies WordMeta;
     }),
     { signal }
   )
@@ -33,7 +38,7 @@ const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: 
 
 export const wordMetaMachine = setup({
   types: {} as {
-    events: { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord } | { readonly type: "retryRequested" };
+    events: { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord };
     context: WordMeta;
   },
   actions: {
@@ -49,26 +54,33 @@ export const wordMetaMachine = setup({
   states: {
     awaitingTheSecretWord: {
       on: {
-        secretWordPicked: { target: "loading" },
+        // Metadata cannot be loaded until the game data machine has selected the next secret word
+        secretWordPicked: "loading",
       },
     },
 
     loading: {
       invoke: {
         src: "onLoadingActor",
-        // Extract parameters directly from the incoming event that triggered this transition
+
+        // The secret word is supplied by the event that triggered this load
         input: ({ event }) => {
           assertEvent(event, "secretWordPicked");
           return { theSecretWord: event.theSecretWord };
         },
 
         onDone: { target: "ready", actions: { type: "saveWordMeta", params: ({ event }) => ({ wordMeta: event.output }) } },
-        onError: { target: "failure" },
+
+        // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
+        onError: "ready",
       },
     },
 
-    ready: { on: { secretWordPicked: "loading" } },
-
-    failure: { on: { retryRequested: "loading" } },
+    ready: {
+      on: {
+        // Reload metadata whenever a new secret word is selected
+        secretWordPicked: "loading",
+      },
+    },
   },
 });

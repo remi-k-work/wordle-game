@@ -170,10 +170,10 @@ export const wordChallengeMachine = setup({
   // Any state that does not explicitly handle these events will fall back to these rules
   on: {
     // Solutions language changed, go back to the initial state to await the new game data
-    solutionsLanguageChanged: { target: ".awaitingGameData" },
+    solutionsLanguageChanged: ".awaitingGameData",
 
     // Forfeit the active run
-    forfeitedRun: { target: ".runForfeited" },
+    forfeitedRun: ".runForfeited",
 
     // If settings change mid-game, restart the challenge from anywhere
     // The gameDataMachine already generated a new word and already notified the meta machine!
