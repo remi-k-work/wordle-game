@@ -64,7 +64,7 @@ export class GameState extends Schema.Class<GameState>("GameState")({
   solutions: Schema.Option(Schema.Array(TheSecretWord)),
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   theSecretWord: Schema.Option(TheSecretWord),
-  currentGuessWord: Schema.Trim.check(Schema.isNonEmpty()),
+  currentGuessWord: Schema.Trim,
   wordleGuesses: Schema.Array(TheSecretWord),
   currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   startTime: Schema.Option(Schema.DateTimeUtc),

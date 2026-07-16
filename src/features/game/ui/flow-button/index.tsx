@@ -83,7 +83,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
 export function GameFlowButtonSkeleton({ className, ...rest }: GameFlowButtonProps) {
   return (
     <Button className={cn("button", className)} disabled {...rest}>
-      &bnsp;
+      &nbsp;
     </Button>
   );
 }

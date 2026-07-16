@@ -100,12 +100,13 @@ export const wordChallengeMachine = setup({
     // Pick a new random secret word from the available solutions
     pickNewSecretWord: assign(({ context }) => {
       const solutions = Option.getOrThrow(context.solutions);
-      const theSecretWord = Option.some(solutions[Math.floor(Math.random() * solutions.length)].toUpperCase());
+      const randomWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
+      const theSecretWord = Option.some(randomWord);
 
       // *** TEST CODE ***
       // *** TEST CODE ***
       // *** TEST CODE ***
-      console.log(`Secret word: ${theSecretWord.valueOrUndefined}`);
+      console.log(`Secret word: ${randomWord}`);
       // *** TEST CODE ***
       // *** TEST CODE ***
       // *** TEST CODE ***

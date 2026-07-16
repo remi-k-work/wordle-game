@@ -51,13 +51,13 @@ export const wordMetaMachine = setup({
   context: INITIAL_WORD_META,
   initial: "awaitingTheSecretWord",
 
+  on: {
+    // Metadata cannot be loaded or reloaded until the game data machine has selected the next secret word
+    secretWordPicked: { target: ".loading", reenter: true },
+  },
+
   states: {
-    awaitingTheSecretWord: {
-      on: {
-        // Metadata cannot be loaded until the game data machine has selected the next secret word
-        secretWordPicked: "loading",
-      },
-    },
+    awaitingTheSecretWord: {},
 
     loading: {
       invoke: {
@@ -76,11 +76,6 @@ export const wordMetaMachine = setup({
       },
     },
 
-    ready: {
-      on: {
-        // Reload metadata whenever a new secret word is selected
-        secretWordPicked: "loading",
-      },
-    },
+    ready: {},
   },
 });

@@ -86,6 +86,8 @@ export const gameDataMachine = setup({
   context: INITIAL_GAME_DATA,
   initial: "loading",
 
+  on: { solutionsLanguageChanged: { target: ".loading", reenter: true } },
+
   states: {
     loading: {
       invoke: {
@@ -96,7 +98,7 @@ export const gameDataMachine = setup({
       },
     },
 
-    ready: { on: { solutionsLanguageChanged: "loading" } },
+    ready: {},
 
     failure: { on: { retryRequested: "loading" } },
   },
