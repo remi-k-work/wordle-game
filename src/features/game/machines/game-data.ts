@@ -8,16 +8,16 @@ import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 
 // types
-import type { GameData } from "@/features/game/domain";
+import type { GameData, SolutionsLanguage } from "@/features/game/domain";
 
 // constants
 import { INITIAL_GAME_DATA } from "@/features/game/domain";
 
 // Load the needed game data and create the dictionary of valid words
-const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+const onLoadingActor = fromPromise(async ({ input, signal }: { input: { solutionsLanguage?: SolutionsLanguage }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+      const solutionsLanguage = input.solutionsLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
 
       const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
       const { solutions, dictionary, keypad } = yield* Effect.all(
@@ -40,7 +40,10 @@ const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =
 
 export const gameDataMachine = setup({
   types: {} as {
-    events: { readonly type: "solutionsLanguageChanged" } | { readonly type: "nextWordRequested" } | { readonly type: "retryRequested" };
+    events:
+      | { readonly type: "solutionsLanguageChanged"; solutionsLanguage: SolutionsLanguage }
+      | { readonly type: "nextWordRequested" }
+      | { readonly type: "retryRequested" };
     context: GameData;
   },
   actions: {
@@ -87,6 +90,8 @@ export const gameDataMachine = setup({
       invoke: {
         src: "onLoadingActor",
 
+        // The solutions language is supplied by the event that triggered this load
+        input: ({ event }) => (event.type === "solutionsLanguageChanged" ? { solutionsLanguage: event.solutionsLanguage } : {}),
         onDone: { target: "ready", actions: [{ type: "saveGameData", params: ({ event }) => ({ gameData: event.output }) }, "onGameDataLoaded"] },
         onError: "failure",
       },

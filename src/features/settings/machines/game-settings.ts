@@ -50,17 +50,17 @@ export const gameSettingsMachine = setup({
     }),
 
     // Notify all the other machines about the solutions language change
-    onSolutionsLanguageToggled: () => {
+    onSolutionsLanguageToggled: ({ context }) => {
       RuntimeClient.runPromise(
         Effect.gen(function* () {
           // Reset the run session immediately
-          // yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
+          yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
 
           // Reset the challenge board immediately
-          // yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
+          yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
 
           // Trigger data reload
-          yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged" });
+          yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: context.solutionsLanguage });
         })
       );
     },
