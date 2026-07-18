@@ -13,12 +13,10 @@ import type { GameData } from "@/features/game/domain";
 // constants
 import { INITIAL_GAME_DATA } from "@/features/game/domain";
 
-// Load the needed game data, create the dictionary of valid words, and pick a new random secret word
+// Load the needed game data and create the dictionary of valid words
 const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
-      yield* Effect.sleep("1 seconds");
-
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
       const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
@@ -27,18 +25,6 @@ const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =
         { concurrency: 3 }
       );
 
-      // Pick a new random secret word
-      const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
-      const theSecretWord = solutions[randomIndex].toUpperCase();
-
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      yield* Effect.log(`Secret word: ${theSecretWord}`);
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-
       return {
         solutions: Option.some(solutions),
 
@@ -46,7 +32,6 @@ const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =
         dictionary: Option.some(HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()))),
 
         keypad: Option.some(keypad),
-        theSecretWord: Option.some(theSecretWord),
       } as const satisfies GameData;
     }),
     { signal }
@@ -55,30 +40,39 @@ const onLoadingActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =
 
 export const gameDataMachine = setup({
   types: {} as {
-    events: { readonly type: "solutionsLanguageChanged" } | { readonly type: "retryRequested" };
+    events: { readonly type: "solutionsLanguageChanged" } | { readonly type: "nextWordRequested" } | { readonly type: "retryRequested" };
     context: GameData;
   },
   actions: {
     // Save the loaded game data
     saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
 
-    // Notify all the other machines that the game data has been loaded
-    onGameDataLoaded: ({ context }) => {
+    // Pick a new random secret word from the available solutions
+    pickNewSecretWord: ({ context }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          // Notify the word meta machine that the secret word has been picked
-          yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(context.theSecretWord) });
+          const solutions = Option.getOrThrow(context.solutions);
+          const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
+          const theSecretWord = solutions[randomIndex].toUpperCase();
 
-          // Notify the word challenge machine that the game data has been loaded
-          yield* Atom.set(wordChallengeMachineAtom, {
-            type: "gameDataLoaded",
-            solutions: context.solutions,
-            dictionary: context.dictionary,
-            theSecretWord: context.theSecretWord,
-          });
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+          yield* Effect.log(`Secret word: ${theSecretWord}`);
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+
+          // Notify the word meta machine that the secret word has been picked
+          yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
+
+          // Notify the word challenge machine that a new puzzle is ready
+          yield* Atom.set(wordChallengeMachineAtom, { type: "newPuzzleReady", theSecretWord });
         })
-      );
-    },
+      ),
+
+    // Notify the word challenge machine that game data is ready (no word yet — idle state)
+    onGameDataLoaded: ({ context }) => RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
   },
   actors: { onLoadingActor },
 }).createMachine({
@@ -98,7 +92,7 @@ export const gameDataMachine = setup({
       },
     },
 
-    ready: {},
+    ready: { on: { nextWordRequested: { actions: "pickNewSecretWord" } } },
 
     failure: { on: { retryRequested: "loading" } },
   },

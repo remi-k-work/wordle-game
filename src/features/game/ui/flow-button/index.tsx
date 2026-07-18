@@ -5,7 +5,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { alertMachineAtom, modalMachineAtom } from "@/state";
-import { runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -36,7 +36,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
               yield* Atom.set(modalMachineAtom, { type: "closed" });
 
               // Transition to the next word challenge while maintaining the current run streak
-              yield* Atom.set(wordChallengeMachineAtom, { type: "nextWordRequested" });
+              yield* Atom.set(gameDataMachineAtom, { type: "nextWordRequested" });
             })
           )
         }
@@ -48,7 +48,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
     );
 
   // "Start New Run" button (when wordLost or runForfeited)
-  if (wordChallengeMachineSnapshot.matches("wordLost") || wordChallengeMachineSnapshot.matches("runForfeited"))
+  if (wordChallengeMachineSnapshot.matches("idle") || wordChallengeMachineSnapshot.matches("wordLost") || wordChallengeMachineSnapshot.matches("runForfeited"))
     return (
       <Button
         className={cn("button", className)}
@@ -60,7 +60,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
 
               // Start a brand-new arcade run
               yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
-              yield* Atom.set(wordChallengeMachineAtom, { type: "startedNewRun" });
+              yield* Atom.set(gameDataMachineAtom, { type: "nextWordRequested" });
             })
           )
         }

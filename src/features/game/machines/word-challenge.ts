@@ -4,27 +4,25 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
-import { runSessionMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { runSessionMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 import { modalMachineAtom } from "@/state";
 
 // types
-import type { GameState } from "@/features/game/domain";
-export type WordChallengeMachineContext = GameState;
+import type { WordChallenge } from "@/features/game/domain";
 
 // constants
-import { INITIAL_GAME_STATE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
+import { INITIAL_WORD_CHALLENGE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
 
 export const wordChallengeMachine = setup({
   types: {} as {
     events:
       | { readonly type: "solutionsLanguageChanged" }
-      | { readonly type: "gameDataLoaded"; solutions: GameState["solutions"]; dictionary: GameState["dictionary"]; theSecretWord: GameState["theSecretWord"] }
+      | { readonly type: "gameDataLoaded"; dictionary: WordChallenge["dictionary"] }
+      | { readonly type: "newPuzzleReady"; theSecretWord: string }
       | { readonly type: "keyPressed"; readonly pressedKey: string }
-      | { readonly type: "nextWordRequested" }
-      | { readonly type: "startedNewRun" }
       | { readonly type: "forfeitedRun" };
-    context: GameState;
+    context: WordChallenge;
   },
   guards: {
     isValidWord: ({ context }) => canSubmitGuess(context.currentGuessWord, context.currentTurn, context.wordleGuesses, Option.getOrThrow(context.dictionary)),
@@ -39,10 +37,12 @@ export const wordChallengeMachine = setup({
       assertEvent(event, "keyPressed");
       return isGuessKeyValid(event.pressedKey) && event.pressedKey.toUpperCase() === "ENTER";
     },
+
     isBackspaceKey: ({ event }) => {
       assertEvent(event, "keyPressed");
       return isGuessKeyValid(event.pressedKey) && event.pressedKey.toUpperCase() === "BACKSPACE";
     },
+
     isValidLetterKey: ({ context, event }) => {
       assertEvent(event, "keyPressed");
       if (!isGuessKeyValid(event.pressedKey)) return false;
@@ -55,11 +55,20 @@ export const wordChallengeMachine = setup({
     },
   },
   actions: {
-    // Save the loaded game data provided by the game data machine
+    // Save the dictionary provided by the game data machine (no word yet)
     saveGameData: assign(({ event }) => {
       assertEvent(event, "gameDataLoaded");
+      return { ...INITIAL_WORD_CHALLENGE, dictionary: event.dictionary } as const satisfies WordChallenge;
+    }),
 
-      return { ...INITIAL_GAME_STATE, ...event } as const satisfies GameState;
+    // Set up the board for a new puzzle with the secret word from gameDataMachine
+    startNewPuzzle: assign(({ context, event }) => {
+      assertEvent(event, "newPuzzleReady");
+      return {
+        ...INITIAL_WORD_CHALLENGE,
+        dictionary: context.dictionary,
+        theSecretWord: Option.some(event.theSecretWord),
+      } as const satisfies WordChallenge;
     }),
 
     addLetter: assign(({ context, event }) => {
@@ -71,11 +80,11 @@ export const wordChallengeMachine = setup({
 
         // Lazily assign startTime on the very first letter typed
         startTime: Option.isNone(context.startTime) ? Option.some(DateTime.makeUnsafe(Date.now())) : context.startTime,
-      } as const satisfies GameState;
+      } as const satisfies WordChallenge;
     }),
 
     // Remove the last letter from the current guess word
-    removeLetter: assign(({ context }) => ({ ...context, currentGuessWord: context.currentGuessWord.slice(0, -1) }) as const satisfies GameState),
+    removeLetter: assign(({ context }) => ({ ...context, currentGuessWord: context.currentGuessWord.slice(0, -1) }) as const satisfies WordChallenge),
 
     // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
     submitGuess: assign(
@@ -85,7 +94,7 @@ export const wordChallengeMachine = setup({
           currentGuessWord: "",
           wordleGuesses: [...context.wordleGuesses, context.currentGuessWord],
           currentTurn: context.currentTurn + 1,
-        }) as const satisfies GameState
+        }) as const satisfies WordChallenge
     ),
 
     // Calculates the player's word score based on the turn they won on and how long it took them
@@ -94,42 +103,13 @@ export const wordChallengeMachine = setup({
         ({
           ...context,
           wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.makeUnsafe(Date.now()))),
-        }) as const satisfies GameState
+        }) as const satisfies WordChallenge
     ),
-
-    // Pick a new random secret word from the available solutions
-    pickNewSecretWord: assign(({ context }) => {
-      const solutions = Option.getOrThrow(context.solutions);
-      const randomWord = solutions[Math.floor(Math.random() * solutions.length)].toUpperCase();
-      const theSecretWord = Option.some(randomWord);
-
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      console.log(`Secret word: ${randomWord}`);
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-      // *** TEST CODE ***
-
-      // Notify the word meta machine that the secret word has been picked
-      RuntimeClient.runPromise(Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord: Option.getOrThrow(theSecretWord) }));
-
-      return { ...INITIAL_GAME_STATE, solutions: context.solutions, dictionary: context.dictionary, theSecretWord } as const satisfies GameState;
-    }),
-
     // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
     trackInvalidGuessSubmitted: () => RuntimeClient.runPromise(trackInvalidGuessSubmitted),
 
     // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-    trackValidGuessSubmitted: ({ context }) =>
-      RuntimeClient.runPromise(
-        Effect.gen(function* () {
-          yield* trackValidGuessSubmitted(context);
-
-          // Start a brand-new arcade run if it has not started yet as soon as a valid guess is submitted
-          yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
-        })
-      ),
+    trackValidGuessSubmitted: ({ context }) => RuntimeClient.runPromise(trackValidGuessSubmitted(context)),
 
     // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
     trackWordWon: ({ context }) =>
@@ -137,7 +117,12 @@ export const wordChallengeMachine = setup({
         Effect.gen(function* () {
           const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
           yield* trackWordWon(runSessionMachineContext, context);
+        })
+      ),
 
+    onWordWon: ({ context }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
           // Word won, bank volatile points
           const wordScore = Option.getOrThrow(context.wordScore);
           yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore });
@@ -153,7 +138,12 @@ export const wordChallengeMachine = setup({
         Effect.gen(function* () {
           const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
           yield* trackWordLost(runSessionMachineContext, context);
+        })
+      ),
 
+    onWordLost: () =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
           // Word lost, finish the active run
           yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
 
@@ -164,26 +154,29 @@ export const wordChallengeMachine = setup({
   },
 }).createMachine({
   id: "wordChallenge",
-  context: INITIAL_GAME_STATE,
+  context: INITIAL_WORD_CHALLENGE,
   initial: "awaitingGameData",
 
-  // 🌟 GLOBAL TRANSITIONS 🌟
-  // Any state that does not explicitly handle these events will fall back to these rules
   on: {
-    // Solutions language changed, go back to the initial state to await the new game data
+    // Language changed → reset to awaiting new data
     solutionsLanguageChanged: ".awaitingGameData",
 
     // Forfeit the active run
     forfeitedRun: ".runForfeited",
 
-    // If settings change mid-game, restart the challenge from anywhere
-    // The gameDataMachine already generated a new word and already notified the meta machine!
-    gameDataLoaded: { target: ".typing", actions: "saveGameData" },
+    // Data loaded (initial or after language change) → park in idle
+    gameDataLoaded: { target: ".idle", actions: "saveGameData" },
+
+    // New puzzle word picked by gameDataMachine → start typing
+    newPuzzleReady: { target: ".typing", actions: "startNewPuzzle" },
   },
 
   states: {
     // Waiting for the game data to be loaded
     awaitingGameData: {},
+
+    // Data is loaded but no puzzle is active — waiting for "Start New Run" or "Next Word"
+    idle: {},
 
     // User is actively building their current guess
     typing: {
@@ -222,21 +215,13 @@ export const wordChallengeMachine = setup({
 
     // Word won, waiting for next word being requested
     wordWon: {
-      entry: ["calculateScore", "trackWordWon"],
-
-      on: { nextWordRequested: { target: "typing", actions: "pickNewSecretWord" } },
+      entry: ["calculateScore", "trackWordWon", "onWordWon"],
     },
 
     // Word lost, waiting for the new run to start
-    wordLost: {
-      entry: "trackWordLost",
-
-      on: { startedNewRun: { target: "typing", actions: "pickNewSecretWord" } },
-    },
+    wordLost: { entry: ["trackWordLost", "onWordLost"] },
 
     // Run forfeited, waiting for the new run to start
-    runForfeited: {
-      on: { startedNewRun: { target: "typing", actions: "pickNewSecretWord" } },
-    },
+    runForfeited: {},
   },
 });

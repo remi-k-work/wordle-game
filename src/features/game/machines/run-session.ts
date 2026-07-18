@@ -3,14 +3,12 @@ import { DateTime, Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
-import { wordChallengeMachineAtom } from "@/features/game/state";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { highScoreMachineAtom } from "@/features/high-score/state";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state";
 
 // types
-import type { RunSession, WordScore } from "@/features/game/domain";
-export type RunSessionMachineContext = RunSession;
+import type { RunSession, WordChallenge, WordScore } from "@/features/game/domain";
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
@@ -20,7 +18,7 @@ export const runSessionMachine = setup({
     events:
       | { readonly type: "solutionsLanguageChanged" }
       | { readonly type: "startedNewRun" }
-      | { readonly type: "forfeitedRun" }
+      | { readonly type: "forfeitedRun"; readonly wordChallenge: WordChallenge }
       | { readonly type: "wordWon"; readonly wordScore: WordScore }
       | { readonly type: "wordLost" };
     context: RunSession;
@@ -63,13 +61,14 @@ export const runSessionMachine = setup({
     trackStartedNewRun: () => RuntimeClient.runPromise(trackStartedNewRun),
 
     // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-    trackForfeitedRun: ({ context }) =>
-      RuntimeClient.runPromise(
-        Effect.gen(function* () {
-          const wordChallengeMachineContext = (yield* Atom.get(wordChallengeMachineAtom)).context;
-          yield* trackForfeitedRun(context, wordChallengeMachineContext);
-        })
-      ),
+    trackForfeitedRun: ({ context, event }) => {
+      assertEvent(event, "forfeitedRun");
+
+      // Only track if there is an active run to forfeit
+      if (Option.isNone(context.runId)) return;
+
+      RuntimeClient.runPromise(trackForfeitedRun(context, event.wordChallenge));
+    },
 
     // Notify high score machine that a run has finished
     onRunFinished: ({ context }) => {
@@ -102,8 +101,7 @@ export const runSessionMachine = setup({
 
     active: {
       on: {
-        // Solutions language changed, so forfeit the current run and immediately start a new one
-        solutionsLanguageChanged: { target: "active", actions: ["trackForfeitedRun", "finishActiveRun", "trackStartedNewRun", "startNewRun"], reenter: true },
+        on: { solutionsLanguageChanged: { target: "inactive", actions: "finishActiveRun" } },
 
         // Forfeit the active run
         forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun", "onRunFinished"] },

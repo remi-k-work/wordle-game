@@ -1,17 +1,21 @@
 // services, features, and other libraries
-import { DateTime, Option } from "effect";
+import { Array, DateTime, Option, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
-import { calculatePotentialScore, computeKeypadState, deriveWordleGrid } from "@/features/game/domain";
+import { calculatePotentialScore, computeKeypadState, formatGuess } from "@/features/game/domain";
 import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
+import type { Color } from "@/features/game/domain";
 
 type WordChallengeMachineSnapshot = SnapshotFrom<typeof wordChallengeMachine>;
 type WordChallengeMachineEvent = EventFromLogic<typeof wordChallengeMachine>;
 type WordChallengeMachineActor = Actor<typeof wordChallengeMachine>;
+
+// constants
+import { MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
 
 // Creates an Atom-owned XState actor reference
 const wordChallengeMachineActorAtom = Atom.make<WordChallengeMachineActor>((get) => {
@@ -57,10 +61,27 @@ export const potentialScoreAtom = Atom.make((get) =>
   calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
 );
 
-// View-ready representation of the 6x5 game grid derived from current guesses
-export const wordleGridAtom = Atom.make((get) => deriveWordleGrid(Option.getOrThrow(get(wordChallengeTheSecretWordAtom)), get(wordChallengeWordleGuessesAtom)));
+// Derive the full 6x5 grid state for rendering based on completed guesses
+export const wordleGridAtom = Atom.make((get) =>
+  Option.match(get(wordChallengeTheSecretWordAtom), {
+    onNone: () => Array.makeBy(MAX_TURNS, () => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color }))),
+    onSome: (theSecretWord) =>
+      Array.makeBy(MAX_TURNS, (rowIndex) =>
+        pipe(
+          Array.get(get(wordChallengeWordleGuessesAtom), rowIndex),
+          Option.match({
+            onNone: () => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color })),
+            onSome: (guess) => formatGuess(theSecretWord, guess),
+          })
+        )
+      ),
+  })
+);
 
 // Current coloring state of the keypad keys based on guess history
 export const keypadColorsAtom = Atom.make((get) =>
-  computeKeypadState(Option.getOrThrow(get(wordChallengeTheSecretWordAtom)), get(wordChallengeWordleGuessesAtom))
+  Option.match(get(wordChallengeTheSecretWordAtom), {
+    onNone: () => ({}) as Record<string, Color>,
+    onSome: (theSecretWord) => computeKeypadState(theSecretWord, get(wordChallengeWordleGuessesAtom)),
+  })
 );

@@ -2,7 +2,7 @@
 import { Option } from "effect";
 
 // types
-import type { Color, GameData, GameState, RunSession, WordMeta } from ".";
+import type { Color, GameData, RunSession, WordChallenge, WordMeta } from ".";
 
 // constants
 export const WORD_LENGTH = 5;
@@ -34,7 +34,6 @@ export const INITIAL_GAME_DATA = {
   solutions: Option.none(),
   dictionary: Option.none(),
   keypad: Option.none(),
-  theSecretWord: Option.none(),
 } as const satisfies GameData;
 
 export const INITIAL_WORD_META = {
@@ -42,8 +41,7 @@ export const INITIAL_WORD_META = {
   wordDefinition: Option.none(),
 } as const satisfies WordMeta;
 
-export const INITIAL_GAME_STATE = {
-  solutions: Option.none(),
+export const INITIAL_WORD_CHALLENGE = {
   dictionary: Option.none(),
   theSecretWord: Option.none(),
   currentGuessWord: "",
@@ -51,7 +49,7 @@ export const INITIAL_GAME_STATE = {
   currentTurn: 1,
   startTime: Option.none(),
   wordScore: Option.none(),
-} as const satisfies GameState;
+} as const satisfies WordChallenge;
 
 export const INITIAL_RUN_SESSION = {
   runId: Option.none(),

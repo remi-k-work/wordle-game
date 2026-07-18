@@ -33,7 +33,6 @@ export class GameData extends Schema.Class<GameData>("GameData")({
   solutions: Schema.Option(Schema.Array(TheSecretWord)),
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   keypad: Schema.Option(Keypad),
-  theSecretWord: Schema.Option(TheSecretWord),
 }) {}
 
 export class WordMeta extends Schema.Class<WordMeta>("WordMeta")({
@@ -59,9 +58,8 @@ export class WordScore extends Schema.Class<WordScore>("WordScore")({
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-// Represents the state of the current game challenge being in progress
-export class GameState extends Schema.Class<GameState>("GameState")({
-  solutions: Schema.Option(Schema.Array(TheSecretWord)),
+// Represents the state of the current word challenge being in progress
+export class WordChallenge extends Schema.Class<WordChallenge>("WordChallenge")({
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   theSecretWord: Schema.Option(TheSecretWord),
   currentGuessWord: Schema.Trim,

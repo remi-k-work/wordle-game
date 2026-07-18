@@ -21,7 +21,8 @@ export function ForfeitRunAlert() {
         await RuntimeClient.runPromise(
           Effect.gen(function* () {
             // Forfeit the active run
-            yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun" });
+            const wordChallenge = (yield* Atom.get(wordChallengeMachineAtom)).context;
+            yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge });
             yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
 
             // Command the modal machine actor to open up the status modal

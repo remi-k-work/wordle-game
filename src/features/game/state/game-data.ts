@@ -46,4 +46,3 @@ export const gameDataMachineAtom = Atom.writable<GameDataMachineSnapshot, GameDa
 export const gameDataSolutionsAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutions));
 export const gameDataDictionaryAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.dictionary));
 export const gameDataKeypadAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.keypad));
-export const gameDataTheSecretWordAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theSecretWord));

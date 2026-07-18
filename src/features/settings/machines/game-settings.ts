@@ -53,9 +53,14 @@ export const gameSettingsMachine = setup({
     onSolutionsLanguageToggled: () => {
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
+          // Reset the run session immediately
+          // yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
+
+          // Reset the challenge board immediately
+          // yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
+
+          // Trigger data reload
           yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged" });
-          yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
         })
       );
     },

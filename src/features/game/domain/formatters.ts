@@ -1,11 +1,11 @@
 // services, features, and other libraries
-import { Array, Duration, Option, pipe } from "effect";
+import { Duration } from "effect";
 
 // types
-import type { Color, Tile } from ".";
+import type { Tile } from ".";
 
 // constants
-import { MAX_TURNS, SPEED_MULTIPLIER_CATEGORY_MAP, WORD_LENGTH } from ".";
+import { SPEED_MULTIPLIER_CATEGORY_MAP } from ".";
 
 // Maps a speed multiplier to a category of a player (e.g. "Speed Demon")
 export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
@@ -37,15 +37,3 @@ export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
     return { tileKey: char, color: "grey" };
   });
 };
-
-// Derive the full 6x5 grid state for rendering based on completed guesses
-export const deriveWordleGrid = (theSecretWord: string, wordleGuesses: readonly string[]) =>
-  Array.makeBy(MAX_TURNS, (rowIndex) =>
-    pipe(
-      Array.get(wordleGuesses, rowIndex),
-      Option.match({
-        onNone: () => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color })),
-        onSome: (guess) => formatGuess(theSecretWord, guess),
-      })
-    )
-  );
