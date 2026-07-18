@@ -19,7 +19,7 @@ export const wordChallengeMachine = setup({
     events:
       | { readonly type: "solutionsLanguageChanged" }
       | { readonly type: "gameDataLoaded"; dictionary: WordChallenge["dictionary"] }
-      | { readonly type: "newPuzzleReady"; theSecretWord: string }
+      | { readonly type: "secretWordPicked"; theSecretWord: string }
       | { readonly type: "keyPressed"; readonly pressedKey: string }
       | { readonly type: "forfeitedRun" };
     context: WordChallenge;
@@ -63,7 +63,7 @@ export const wordChallengeMachine = setup({
 
     // Set up the board for a new puzzle with the secret word from gameDataMachine
     startNewPuzzle: assign(({ context, event }) => {
-      assertEvent(event, "newPuzzleReady");
+      assertEvent(event, "secretWordPicked");
       return {
         ...INITIAL_WORD_CHALLENGE,
         dictionary: context.dictionary,
@@ -159,7 +159,7 @@ export const wordChallengeMachine = setup({
 
   on: {
     // Language changed → reset to awaiting new data
-    solutionsLanguageChanged: ".awaitingGameData",
+    solutionsLanguageChanged: { target: ".awaitingGameData", actions: assign(() => INITIAL_WORD_CHALLENGE) },
 
     // Forfeit the active run
     forfeitedRun: ".runForfeited",
@@ -168,7 +168,7 @@ export const wordChallengeMachine = setup({
     gameDataLoaded: { target: ".idle", actions: "saveGameData" },
 
     // New puzzle word picked by gameDataMachine → start typing
-    newPuzzleReady: { target: ".typing", actions: "startNewPuzzle" },
+    secretWordPicked: { guard: ({ context }) => Option.isSome(context.dictionary), target: ".typing", actions: "startNewPuzzle" },
   },
 
   states: {
@@ -199,13 +199,11 @@ export const wordChallengeMachine = setup({
     rejected: {
       entry: "trackInvalidGuessSubmitted",
 
-      on: {
-        // Ensure users can recover from rejected states using the exact same generic event
-        keyPressed: [
-          { guard: "isBackspaceKey", target: "typing", actions: "removeLetter" },
-          { guard: "isValidLetterKey", target: "typing", actions: "addLetter" },
-        ],
-      },
+      // Only allow Backspace to manually interrupt the error state
+      on: { keyPressed: [{ guard: "isBackspaceKey", target: "typing", actions: "removeLetter" }] },
+
+      // Auto-recover back to typing after the CSS "shake" animation completes
+      after: { 4000: "typing" },
     },
 
     // Inputs are locked while tile flip animations play

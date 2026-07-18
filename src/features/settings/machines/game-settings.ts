@@ -50,7 +50,7 @@ export const gameSettingsMachine = setup({
     }),
 
     // Notify all the other machines about the solutions language change
-    onSolutionsLanguageToggled: ({ context }) => {
+    onSolutionsLanguageToggled: ({ context }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
           // Reset the run session immediately
@@ -62,8 +62,7 @@ export const gameSettingsMachine = setup({
           // Trigger data reload
           yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: context.solutionsLanguage });
         })
-      );
-    },
+      ),
   },
 }).createMachine({
   id: "gameSettings",

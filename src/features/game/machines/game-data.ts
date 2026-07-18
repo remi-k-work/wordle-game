@@ -70,7 +70,7 @@ export const gameDataMachine = setup({
           yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
 
           // Notify the word challenge machine that a new puzzle is ready
-          yield* Atom.set(wordChallengeMachineAtom, { type: "newPuzzleReady", theSecretWord });
+          yield* Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord });
         })
       ),
 

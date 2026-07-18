@@ -20,12 +20,14 @@ type GameFlowButtonProps = ComponentPropsWithoutRef<typeof Button>;
 
 export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
+  const runSessionMachineSnapshot = useAtomValue(runSessionMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
 
   if (wordChallengeMachineSnapshot.matches("awaitingGameData")) return <GameFlowButtonSkeleton {...rest} />;
+  const isRunActive = runSessionMachineSnapshot.matches("active");
 
-  // "Next Word" button (when wordWon)
-  if (wordChallengeMachineSnapshot.matches("wordWon"))
+  // "Next Word" button (won a word, OR returning to an active run with no current puzzle)
+  if (wordChallengeMachineSnapshot.matches("wordWon") || (wordChallengeMachineSnapshot.matches("idle") && isRunActive))
     return (
       <Button
         className={cn("button", className)}
@@ -47,7 +49,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
       </Button>
     );
 
-  // "Start New Run" button (when wordLost or runForfeited)
+  // "Start New Run" button (lost, forfeited, or idle with no active run)
   if (wordChallengeMachineSnapshot.matches("idle") || wordChallengeMachineSnapshot.matches("wordLost") || wordChallengeMachineSnapshot.matches("runForfeited"))
     return (
       <Button
@@ -71,7 +73,7 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
       </Button>
     );
 
-  // "Forfeit Run" button (default)
+  // "Forfeit Run" button (default — puzzle in progress)
   return (
     <Button className={cn("button", className)} onClick={() => alertMachineEvent({ type: "opened", alertType: "forfeit-run" })} {...rest}>
       <XCircleIcon className="size-11" />

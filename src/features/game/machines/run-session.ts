@@ -101,7 +101,7 @@ export const runSessionMachine = setup({
 
     active: {
       on: {
-        on: { solutionsLanguageChanged: { target: "inactive", actions: "finishActiveRun" } },
+        solutionsLanguageChanged: { target: "inactive", actions: "finishActiveRun" },
 
         // Forfeit the active run
         forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun", "onRunFinished"] },
