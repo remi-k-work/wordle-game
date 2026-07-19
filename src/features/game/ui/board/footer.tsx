@@ -2,7 +2,7 @@
 import { Option } from "effect";
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameDataKeypadAtom, keypadColorsAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { gameDataKeypadAtom, wordChallengeKeypadColorsAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -28,7 +28,7 @@ const MotionButton = motion.create(Button);
 
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
-  const keypadColors = useAtomValue(keypadColorsAtom);
+  const keypadColors = useAtomValue(wordChallengeKeypadColorsAtom);
   const wordChallengeMachineEvent = useAtomSet(wordChallengeMachineAtom);
 
   if (Option.isNone(gameDataKeypad)) return <FooterSkeleton />;

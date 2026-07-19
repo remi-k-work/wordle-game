@@ -57,12 +57,12 @@ export const wordChallengeStartTimeAtom = wordChallengeMachineAtom.pipe(Atom.map
 export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordScore));
 
 // Reactive selector for the "live" potential word score based on current progress
-export const potentialScoreAtom = Atom.make((get) =>
+export const wordChallengePotentialScoreAtom = Atom.make((get) =>
   calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
 );
 
 // Derive the full 6x5 grid state for rendering based on completed guesses
-export const wordleGridAtom = Atom.make((get) =>
+export const wordChallengeWordleGridAtom = Atom.make((get) =>
   Option.match(get(wordChallengeTheSecretWordAtom), {
     onNone: () => Array.makeBy(MAX_TURNS, () => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color }))),
     onSome: (theSecretWord) =>
@@ -79,7 +79,7 @@ export const wordleGridAtom = Atom.make((get) =>
 );
 
 // Current coloring state of the keypad keys based on guess history
-export const keypadColorsAtom = Atom.make((get) =>
+export const wordChallengeKeypadColorsAtom = Atom.make((get) =>
   Option.match(get(wordChallengeTheSecretWordAtom), {
     onNone: () => ({}) as Record<string, Color>,
     onSome: (theSecretWord) => computeKeypadState(theSecretWord, get(wordChallengeWordleGuessesAtom)),

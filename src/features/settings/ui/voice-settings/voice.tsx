@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsVoiceVoiceAtom } from "@/features/settings/state";
+import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceVoiceAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks";
 
 // components
@@ -11,14 +11,28 @@ import { Select } from "@base-ui/react";
 import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
 export function Voice() {
+  const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const voiceVoice = useAtomValue(gameSettingsVoiceVoiceAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
-  // Fetch the available voices
-  const voices = useSpeechVoices().map(({ default: isDefault, name, lang }) => ({
-    label: `${name} (${lang}) ${isDefault ? " — DEFAULT" : ""}`,
-    value: isDefault ? null : name,
-  }));
+  const targetLangPrefix = solutionsLanguage === "En" ? "en" : "pl";
+
+  // Filter voices by current language and ALWAYS store the actual name, never null
+  const voices = useSpeechVoices()
+    .sort((a, b) => {
+      // Put the target language at the top
+      const aIsTarget = a.lang.toLowerCase().startsWith(targetLangPrefix);
+      const bIsTarget = b.lang.toLowerCase().startsWith(targetLangPrefix);
+      if (aIsTarget && !bIsTarget) return -1;
+      if (!aIsTarget && bIsTarget) return 1;
+
+      // Otherwise keep original order
+      return 0;
+    })
+    .map(({ default: isDefault, name, lang }) => ({
+      label: `${name} (${lang}) ${isDefault ? " — DEFAULT" : ""}`,
+      value: name,
+    }));
 
   return (
     <section>

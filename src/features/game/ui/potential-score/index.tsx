@@ -1,13 +1,13 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { potentialScoreAtom } from "@/features/game/state";
+import { wordChallengePotentialScoreAtom } from "@/features/game/state";
 import { potentialScoreAsPercentage } from "@/features/game/domain";
 
 // components
 import { Progress } from "@base-ui/react";
 
 export function PotentialScore() {
-  const potentialScore = useAtomValue(potentialScoreAtom);
+  const potentialScore = useAtomValue(wordChallengePotentialScoreAtom);
 
   return (
     <section className="grid flex-1 place-items-center rounded-md border border-accent bg-surface-2 px-2 py-1">

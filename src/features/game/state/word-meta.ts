@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
@@ -45,3 +46,26 @@ export const wordMetaMachineAtom = Atom.writable<WordMetaMachineSnapshot, WordMe
 // Specialized selectors for granular state access and optimized re-renders
 export const wordMetaTheRiddleAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddle));
 export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinition));
+
+// The riddle text with Markdown stripped and whitespace collapsed for TTS
+export const wordMetaSanitizedRiddleAtom = Atom.make((get) => {
+  const riddleOutput = Option.getOrNull(get(wordMetaTheRiddleAtom));
+  if (!riddleOutput) return null;
+
+  return (
+    riddleOutput
+      // Remove Markdown emphasis (*, **, _, __)
+      .replace(/[*_]{1,2}(.*?)[*_]{1,2}/g, "$1")
+      // Inline code
+      .replace(/`(.*?)`/g, "$1")
+      // Headings and Blockquotes
+      .replace(/^[#>]{1,6}\s*/gm, "")
+      // Remove common Markdown list markers
+      .replace(/^[-*+]\s+/gm, "")
+      // Collapse all whitespace
+      .replace(/\s+/g, " ")
+      // Fix spacing before punctuation (TTS improvement)
+      .replace(/\s+([?.!,;:])/g, "$1")
+      .trim()
+  );
+});

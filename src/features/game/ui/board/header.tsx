@@ -9,7 +9,7 @@ export function Header() {
     <header className="flex items-center justify-between gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
       <Run />
       <PotentialScore />
-      <Riddle />
+      <Riddle mode="popover" />
       <GameMenu />
     </header>
   );
@@ -20,7 +20,7 @@ export function HeaderSkeleton() {
     <header className="flex items-center justify-between gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
       <RunSkeleton />
       <PotentialScoreSkeleton />
-      <RiddleSkeleton />
+      <RiddleSkeleton mode="popover" />
       <GameMenuSkeleton />
     </header>
   );

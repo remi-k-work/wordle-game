@@ -12,7 +12,7 @@ export default function VoiceSettings() {
       <Volume />
       <Rate />
       <Pitch />
-      <Riddle isVoiceTest />
+      <Riddle mode="voiceTest" />
     </article>
   );
 }
@@ -24,7 +24,7 @@ export function VoiceSettingsSkeleton() {
       <VolumeSkeleton />
       <RateSkeleton />
       <PitchSkeleton />
-      <RiddleSkeleton isVoiceTest />
+      <RiddleSkeleton mode="voiceTest" />
     </article>
   );
 }
