@@ -4,7 +4,7 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { anyCountersAtom } from "@/features/telemetry/state";
 
 // components
-import { InfoLine } from "@/ui/shared/info-line";
+import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
 
 // assets

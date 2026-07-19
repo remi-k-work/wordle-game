@@ -5,7 +5,7 @@ import { failedWordsFrequenciesAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 
 // components
-import { InfoLine } from "@/ui/shared/info-line";
+import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
 
 // assets

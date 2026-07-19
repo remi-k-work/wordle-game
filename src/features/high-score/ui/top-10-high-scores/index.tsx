@@ -2,8 +2,8 @@
 import { cn } from "@/lib/utils";
 
 // components
-import { InfoLine } from "@/ui/shared/info-line";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/shared/table";
+import { InfoLine } from "@/ui/info-line";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
 
 // assets
 import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";

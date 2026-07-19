@@ -5,7 +5,7 @@ import { runDeathReasonFrequenciesAtom } from "@/features/telemetry/state";
 import { Tooltip, Legend, PieChart, Pie, Sector } from "recharts";
 
 // components
-import { InfoLine } from "@/ui/shared/info-line";
+import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
 
 // assets
