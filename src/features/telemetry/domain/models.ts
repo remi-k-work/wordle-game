@@ -28,3 +28,7 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent>("AddRunWordEv
   guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
+
+export class BrowseCharts extends Schema.Class<BrowseCharts>("BrowseCharts")({
+  sl: SolutionsLanguage,
+}) {}
