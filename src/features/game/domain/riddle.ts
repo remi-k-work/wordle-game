@@ -2,7 +2,7 @@
 import { Context, Effect, ExecutionPlan, Layer, Schedule } from "effect";
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
-import { AiSdkError } from "@/lib/errors";
+import { AiSdkError } from "@/domain";
 
 // types
 import type { SolutionsLanguage } from ".";

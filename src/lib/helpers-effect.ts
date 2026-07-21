@@ -7,7 +7,7 @@ import { notFound, unauthorized } from "next/navigation";
 // services, features, and other libraries
 import { Effect, Result, Schema } from "effect";
 import { RuntimeServer } from "./runtime-server";
-import { InvalidPageInputsError } from "./errors";
+import { InvalidPageInputsError } from "@/domain";
 
 // types
 interface PageInputPromises {

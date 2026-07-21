@@ -4,26 +4,27 @@ import { Suspense } from "react";
 // services, features, and other libraries
 import { Effect } from "effect";
 import { HighScoreDB } from "@/features/high-score/services/high-score-db";
-import { runPageMainOrNavigate } from "@/lib/helpers-effect";
+import { runPageMainOrNavigate, validatePageInputs } from "@/lib/helpers-effect";
+import { HighScorePage } from "@/features/high-score/domain";
 
 // components
 import { PageHeader } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import {
-  AnyCounterCharts,
-  AnyCounterChartsSkeleton,
-  ArcadeStreakDistributionCharts,
-  ArcadeStreakDistributionChartsSkeleton,
-  FailedWordsFrequencyCharts,
-  FailedWordsFrequencyChartsSkeleton,
-  GuessDistributionCharts,
-  GuessDistributionChartsSkeleton,
-  OpeningGuessesFrequencyCharts,
-  OpeningGuessesFrequencyChartsSkeleton,
-  RunDeathReasonFrequencyCharts,
-  RunDeathReasonFrequencyChartsSkeleton,
-  TimeToSolveDistributionCharts,
-  TimeToSolveDistributionChartsSkeleton,
+  AnyCounterChart,
+  AnyCounterChartSkeleton,
+  ArcadeStreakDistributionChart,
+  ArcadeStreakDistributionChartSkeleton,
+  FailedWordsFrequencyChart,
+  FailedWordsFrequencyChartSkeleton,
+  GuessDistributionChart,
+  GuessDistributionChartSkeleton,
+  OpeningGuessesFrequencyChart,
+  OpeningGuessesFrequencyChartSkeleton,
+  RunDeathReasonFrequencyChart,
+  RunDeathReasonFrequencyChartSkeleton,
+  TimeToSolveDistributionChart,
+  TimeToSolveDistributionChartSkeleton,
 } from "@/features/telemetry/ui/charts";
 
 // types
@@ -34,40 +35,58 @@ export const metadata: Metadata = {
   title: "Wordle Overdrive ► High Score",
 };
 
-const main = Effect.gen(function* () {
-  const highScoreDB = yield* HighScoreDB;
-  return yield* highScoreDB.top10HighScores;
-});
+const main = ({ params, searchParams }: PageProps<"/high-score">) =>
+  Effect.gen(function* () {
+    // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
+    const {
+      searchParams: { sl },
+    } = yield* validatePageInputs(HighScorePage, { params, searchParams });
+
+    const highScoreDB = yield* HighScoreDB;
+    const top10HighScores = yield* highScoreDB.top10HighScores;
+
+    return { sl, top10HighScores } as const;
+  });
 
 // Page remains the fast, static shell
-export default function Page() {
+export default function Page({ params, searchParams }: PageProps<"/high-score">) {
   return (
     <Suspense fallback={<PageSkeleton />}>
-      <PageContent />
+      <PageContent params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
 // This new async component contains the dynamic logic
-async function PageContent() {
+async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
   // Execute the main effect for the page, map known errors to the subsequent navigation helpers, and return the payload
-  const top10HighScores = await runPageMainOrNavigate(main);
+  const { sl, top10HighScores } = await runPageMainOrNavigate(main({ params, searchParams }));
 
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScores top10HighScores={top10HighScores} />
-      <GuessDistributionCharts />
-      <TimeToSolveDistributionCharts />
-      <ArcadeStreakDistributionCharts />
-      <OpeningGuessesFrequencyCharts />
-      <FailedWordsFrequencyCharts />
-      <RunDeathReasonFrequencyCharts />
-      <AnyCounterCharts title="Total number of games played (both won and lost)" counterName="gamesPlayed" personalHeader="Your Games" />
-      <AnyCounterCharts title="Total number of arcade runs started" counterName="runsStarted" personalHeader="Your Runs" />
-      <AnyCounterCharts title="Total number of games won on the first try" counterName="perfectGames" personalHeader="Your Perfect Games" />
-      <AnyCounterCharts title="Total number of invalid guesses (not in dictionary)" counterName="invalidGuesses" personalHeader="Your Invalid Guesses" />
-      <AnyCounterCharts title="Total number of valid guesses submitted" counterName="validGuesses" personalHeader="Your Valid Guesses" />
+      <GuessDistributionChart solutionsLanguage={sl} />
+      <TimeToSolveDistributionChart solutionsLanguage={sl} />
+      <ArcadeStreakDistributionChart solutionsLanguage={sl} />
+      <OpeningGuessesFrequencyChart solutionsLanguage={sl} />
+      <FailedWordsFrequencyChart solutionsLanguage={sl} />
+      <RunDeathReasonFrequencyChart solutionsLanguage={sl} />
+      <AnyCounterChart counterName="gamesPlayed" solutionsLanguage={sl} title="Total number of games played (both won and lost)" personalHeader="Your Games" />
+      <AnyCounterChart counterName="runsStarted" solutionsLanguage={sl} title="Total number of arcade runs started" personalHeader="Your Runs" />
+      <AnyCounterChart
+        counterName="perfectGames"
+        solutionsLanguage={sl}
+        title="Total number of games won on the first try"
+        personalHeader="Your Perfect Games"
+      />
+      <AnyCounterChart
+        counterName="invalidGuesses"
+        solutionsLanguage={sl}
+        title="Total number of invalid guesses (not in dictionary)"
+        personalHeader="Your Invalid Guesses"
+      />
+      <AnyCounterChart counterName="validGuesses" solutionsLanguage={sl} title="Total number of valid guesses submitted" personalHeader="Your Valid Guesses" />
     </article>
   );
 }
@@ -77,17 +96,17 @@ function PageSkeleton() {
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScoresSkeleton />
-      <GuessDistributionChartsSkeleton />
-      <TimeToSolveDistributionChartsSkeleton />
-      <ArcadeStreakDistributionChartsSkeleton />
-      <OpeningGuessesFrequencyChartsSkeleton />
-      <FailedWordsFrequencyChartsSkeleton />
-      <RunDeathReasonFrequencyChartsSkeleton />
-      <AnyCounterChartsSkeleton title="Total number of games played (both won and lost)" />
-      <AnyCounterChartsSkeleton title="Total number of arcade runs started" />
-      <AnyCounterChartsSkeleton title="Total number of games won on the first try" />
-      <AnyCounterChartsSkeleton title="Total number of invalid guesses (not in dictionary)" />
-      <AnyCounterChartsSkeleton title="Total number of valid guesses submitted" />
+      <GuessDistributionChartSkeleton />
+      <TimeToSolveDistributionChartSkeleton />
+      <ArcadeStreakDistributionChartSkeleton />
+      <OpeningGuessesFrequencyChartSkeleton />
+      <FailedWordsFrequencyChartSkeleton />
+      <RunDeathReasonFrequencyChartSkeleton />
+      <AnyCounterChartSkeleton title="Total number of games played (both won and lost)" personalHeader="Your Games" />
+      <AnyCounterChartSkeleton title="Total number of arcade runs started" personalHeader="Your Runs" />
+      <AnyCounterChartSkeleton title="Total number of games won on the first try" personalHeader="Your Perfect Games" />
+      <AnyCounterChartSkeleton title="Total number of invalid guesses (not in dictionary)" personalHeader="Your Invalid Guesses" />
+      <AnyCounterChartSkeleton title="Total number of valid guesses submitted" personalHeader="Your Valid Guesses" />
     </article>
   );
 }

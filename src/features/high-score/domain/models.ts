@@ -1,6 +1,7 @@
 // services, features, and other libraries
-import { Schema } from "effect";
+import { Effect, Schema } from "effect";
 import { SolutionsLanguage } from "@/features/game/domain";
+import { BasePage } from "@/domain";
 
 // Represents the high score entry for a player
 export class HighScore extends Schema.Class<HighScore>("HighScore")({
@@ -26,4 +27,9 @@ export class HighScoreMachineContext extends Schema.Class<HighScoreMachineContex
   streak: HighScore.fields.streak,
   solutionsLanguage: HighScore.fields.solutionsLang,
   newHighScoreId: Schema.Option(HighScore.fields.id),
+}) {}
+
+// The high score page with all its inputs (params and searchParams)
+export class HighScorePage extends BasePage.extend<HighScorePage>("HighScorePage")({
+  searchParams: Schema.Struct({ sl: SolutionsLanguage.pipe(Schema.withDecodingDefault(Effect.succeed("En"))) }),
 }) {}

@@ -19,16 +19,7 @@ export function Voice() {
 
   // Filter voices by current language and ALWAYS store the actual name, never null
   const voices = useSpeechVoices()
-    .sort((a, b) => {
-      // Put the target language at the top
-      const aIsTarget = a.lang.toLowerCase().startsWith(targetLangPrefix);
-      const bIsTarget = b.lang.toLowerCase().startsWith(targetLangPrefix);
-      if (aIsTarget && !bIsTarget) return -1;
-      if (!aIsTarget && bIsTarget) return 1;
-
-      // Otherwise keep original order
-      return 0;
-    })
+    .filter((voice) => voice.lang.toLowerCase().startsWith(targetLangPrefix))
     .map(({ default: isDefault, name, lang }) => ({
       label: `${name} (${lang}) ${isDefault ? " — DEFAULT" : ""}`,
       value: name,

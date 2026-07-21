@@ -1,15 +1,12 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { runDeathReasonFrequenciesAtom } from "@/features/telemetry/state";
+import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state";
 import { Tooltip, Legend, PieChart, Pie, Sector } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
-
-// assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -40,104 +37,54 @@ const CustomLegend = () => (
   </div>
 );
 
-function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
-  const runDeathReasonFrequencies = useAtomValue(runDeathReasonFrequenciesAtom);
+export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
+  const runDeathReasonFrequency = useAtomValue(runDeathReasonFrequencyAtom(solutionsLanguage));
 
-  return AsyncResult.builder(runDeathReasonFrequencies)
-    .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
-    .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
-    .onSuccess((runDeathReasonFrequenciesData) => {
-      const runDeathReasonFrequencyData = runDeathReasonFrequenciesData[solutionsLanguage === "En" ? 0 : 1];
-
-      return runDeathReasonFrequencyData.length === 0 ? (
-        <InfoLine message="No frequency data tracked yet!" />
-      ) : (
-        <PieChart data={runDeathReasonFrequencyData} responsive className="mx-auto size-96 **:outline-none **:select-none">
-          <Tooltip
-            formatter={(value, name) => [`${value} times`, name]}
-            cursor={{ fill: "var(--color-surface-2)" }}
-            contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-            labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-            itemStyle={{ color: "var(--color-text-2)" }}
-          />
-          <Legend content={<CustomLegend />} />
-
-          <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
-          <Pie
-            dataKey="global"
-            nameKey="reason"
-            cx="50%"
-            cy="50%"
-            innerRadius="60%"
-            outerRadius="80%"
-            stroke="var(--color-accent)"
-            shape={PieSliceGlobal}
-            label
-          />
-        </PieChart>
-      );
-    })
-    .render();
-}
-
-function RunDeathReasonFrequencyChartSkeleton() {
-  return <div className="mx-auto size-96 animate-pulse bg-accent" />;
-}
-
-export function RunDeathReasonFrequencyCharts() {
   return (
-    <section className="grid gap-3 xl:grid-cols-2">
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              Reasons why an arcade run ended
-              <UsFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <RunDeathReasonFrequencyChart solutionsLanguage="En" />
-      </div>
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              Reasons why an arcade run ended
-              <PlFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <RunDeathReasonFrequencyChart solutionsLanguage="Pl" />
-      </div>
-    </section>
+    <>
+      <SectionHeader title="Reasons why an arcade run ended" />
+      {AsyncResult.builder(runDeathReasonFrequency)
+        .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
+        .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
+        .onSuccess((runDeathReasonFrequency) => {
+          return runDeathReasonFrequency.length === 0 ? (
+            <InfoLine message="No frequency data tracked yet!" />
+          ) : (
+            <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-96 **:outline-none **:select-none">
+              <Tooltip
+                formatter={(value, name) => [`${value} times`, name]}
+                cursor={{ fill: "var(--color-surface-2)" }}
+                contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
+                labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
+                itemStyle={{ color: "var(--color-text-2)" }}
+              />
+              <Legend content={<CustomLegend />} />
+
+              <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
+              <Pie
+                dataKey="global"
+                nameKey="reason"
+                cx="50%"
+                cy="50%"
+                innerRadius="60%"
+                outerRadius="80%"
+                stroke="var(--color-accent)"
+                shape={PieSliceGlobal}
+                label
+              />
+            </PieChart>
+          );
+        })
+        .render()}
+    </>
   );
 }
 
-export function RunDeathReasonFrequencyChartsSkeleton() {
+export function RunDeathReasonFrequencyChartSkeleton() {
   return (
-    <section className="grid gap-3 xl:grid-cols-2">
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              Reasons why an arcade run ended
-              <UsFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <RunDeathReasonFrequencyChartSkeleton />
-      </div>
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              Reasons why an arcade run ended
-              <PlFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <RunDeathReasonFrequencyChartSkeleton />
-      </div>
-    </section>
+    <>
+      <SectionHeader title="Reasons why an arcade run ended" />
+      <div className="mx-auto size-96 animate-pulse bg-accent" />;
+    </>
   );
 }

@@ -5,99 +5,86 @@ import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { sessionIdAtom } from "@/features/player/state";
 
-export const guessDistributionsAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const sessionId = get(sessionIdAtom);
+// types
+import type { SolutionsLanguage } from "@/features/game/domain";
 
-    const { getGuessDistribution } = yield* RpcTelemetryClient;
-    return yield* Effect.all([getGuessDistribution({ sessionId, solutionsLanguage: "En" }), getGuessDistribution({ sessionId, solutionsLanguage: "Pl" })], {
-      concurrency: 2,
-    });
-  })
+export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
+
+      const { getGuessDistribution } = yield* RpcTelemetryClient;
+      return yield* getGuessDistribution({ sessionId, solutionsLanguage });
+    })
+  )
 );
 
-export const timeToSolveDistributionsAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const sessionId = get(sessionIdAtom);
+export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
 
-    const { getTimeToSolveDistribution } = yield* RpcTelemetryClient;
-    return yield* Effect.all(
-      [getTimeToSolveDistribution({ sessionId, solutionsLanguage: "En" }), getTimeToSolveDistribution({ sessionId, solutionsLanguage: "Pl" })],
-      {
-        concurrency: 2,
-      }
-    );
-  })
+      const { getTimeToSolveDistribution } = yield* RpcTelemetryClient;
+      return yield* getTimeToSolveDistribution({ sessionId, solutionsLanguage }).pipe(
+        Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: row.maxSeconds === null ? Infinity : row.maxSeconds })))
+      );
+    })
+  )
 );
 
-export const arcadeStreakDistributionsAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const sessionId = get(sessionIdAtom);
+export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
 
-    const { getArcadeStreakDistribution } = yield* RpcTelemetryClient;
-    return yield* Effect.all(
-      [getArcadeStreakDistribution({ sessionId, solutionsLanguage: "En" }), getArcadeStreakDistribution({ sessionId, solutionsLanguage: "Pl" })],
-      {
-        concurrency: 2,
-      }
-    );
-  })
+      const { getArcadeStreakDistribution } = yield* RpcTelemetryClient;
+      return yield* getArcadeStreakDistribution({ sessionId, solutionsLanguage }).pipe(
+        Effect.map((data) => data.map((row) => ({ ...row, streak: row.streak === null ? Infinity : row.streak })))
+      );
+    })
+  )
 );
 
-export const openingGuessesFrequenciesAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const sessionId = get(sessionIdAtom);
+export const openingGuessesFrequencyAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
 
-    const { getOpeningGuessesFrequency } = yield* RpcTelemetryClient;
-    return yield* Effect.all(
-      [getOpeningGuessesFrequency({ sessionId, solutionsLanguage: "En" }), getOpeningGuessesFrequency({ sessionId, solutionsLanguage: "Pl" })],
-      {
-        concurrency: 2,
-      }
-    );
-  })
+      const { getOpeningGuessesFrequency } = yield* RpcTelemetryClient;
+      return yield* getOpeningGuessesFrequency({ sessionId, solutionsLanguage });
+    })
+  )
 );
 
-export const failedWordsFrequenciesAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const sessionId = get(sessionIdAtom);
+export const failedWordsFrequencyAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
 
-    const { getFailedWordsFrequency } = yield* RpcTelemetryClient;
-    return yield* Effect.all(
-      [getFailedWordsFrequency({ sessionId, solutionsLanguage: "En" }), getFailedWordsFrequency({ sessionId, solutionsLanguage: "Pl" })],
-      {
-        concurrency: 2,
-      }
-    );
-  })
+      const { getFailedWordsFrequency } = yield* RpcTelemetryClient;
+      return yield* getFailedWordsFrequency({ sessionId, solutionsLanguage });
+    })
+  )
 );
 
-export const runDeathReasonFrequenciesAtom = RuntimeAtom.atom(
-  Effect.fnUntraced(function* (get) {
-    const sessionId = get(sessionIdAtom);
+export const runDeathReasonFrequencyAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
 
-    const { getRunDeathReasonFrequency } = yield* RpcTelemetryClient;
-    return yield* Effect.all(
-      [getRunDeathReasonFrequency({ sessionId, solutionsLanguage: "En" }), getRunDeathReasonFrequency({ sessionId, solutionsLanguage: "Pl" })],
-      {
-        concurrency: 2,
-      }
-    );
-  })
+      const { getRunDeathReasonFrequency } = yield* RpcTelemetryClient;
+      return yield* getRunDeathReasonFrequency({ sessionId, solutionsLanguage });
+    })
+  )
 );
 
-export const anyCountersAtom = Atom.family((counterName: string) =>
+export const anyCounterAtom = Atom.family(({ counterName, solutionsLanguage }: { counterName: string; solutionsLanguage: SolutionsLanguage }) =>
   RuntimeAtom.atom(
     Effect.fnUntraced(function* (get) {
       const sessionId = get(sessionIdAtom);
 
       const { getAnyCounter } = yield* RpcTelemetryClient;
-      return yield* Effect.all(
-        [getAnyCounter({ counterName, sessionId, solutionsLanguage: "En" }), getAnyCounter({ counterName, sessionId, solutionsLanguage: "Pl" })],
-        {
-          concurrency: 2,
-        }
-      );
+      return yield* getAnyCounter({ counterName, sessionId, solutionsLanguage });
     })
   )
 );

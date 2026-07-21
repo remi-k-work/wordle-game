@@ -1,5 +1,5 @@
 // react
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
@@ -21,13 +21,6 @@ export function useSpeakRiddle() {
 
   // Fetch the available voices
   const voices = useSpeechVoices();
-
-  // Safety cleanup: Stop talking if the component unmounts
-  useEffect(() => {
-    return () => {
-      if (typeof window !== "undefined" && window.speechSynthesis) window.speechSynthesis.cancel();
-    };
-  }, []);
 
   return useCallback(
     (sanitizedRiddle: string) => {

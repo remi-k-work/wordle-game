@@ -1,14 +1,11 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { anyCountersAtom } from "@/features/telemetry/state";
+import { anyCounterAtom } from "@/features/telemetry/state";
 
 // components
 import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
-
-// assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -16,113 +13,56 @@ import type { SolutionsLanguage } from "@/features/game/domain";
 interface AnyCounterChartProps {
   counterName: string;
   solutionsLanguage: SolutionsLanguage;
-  personalHeader: string;
-}
-
-interface AnyCounterChartsProps {
   title: string;
-  counterName: string;
   personalHeader: string;
 }
 
-function AnyCounterChart({ counterName, solutionsLanguage, personalHeader }: AnyCounterChartProps) {
-  const anyCounters = useAtomValue(anyCountersAtom(counterName));
+export function AnyCounterChart({ counterName, solutionsLanguage, title, personalHeader }: AnyCounterChartProps) {
+  const anyCounter = useAtomValue(anyCounterAtom({ counterName, solutionsLanguage }));
 
-  return AsyncResult.builder(anyCounters)
-    .onInitialOrWaiting(() => <AnyCounterChartSkeleton />)
-    .onFailure(() => <AnyCounterChartSkeleton />)
-    .onSuccess((anyCountersData) => {
-      const anyCounterData = anyCountersData[solutionsLanguage === "En" ? 0 : 1];
-
-      return anyCounterData.length === 0 ? (
-        <InfoLine message="No counter data tracked yet!" />
-      ) : (
-        <article className="grid grid-cols-2 gap-6">
-          <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-            <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
-            <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary)">{anyCounterData[0].personal.toLocaleString()}</span>
-          </header>
-
-          <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-            <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
-            <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary)">{anyCounterData[0].global.toLocaleString()}</span>
-          </footer>
-        </article>
-      );
-    })
-    .render();
-}
-
-function AnyCounterChartSkeleton() {
   return (
-    <article className="grid grid-cols-2 gap-6">
-      <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-        <h3 className="animate-pulse bg-accent font-sans tracking-widest text-(--color-text-2)">&nbsp;</h3>
-        <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary)">&nbsp;</span>
-      </header>
+    <>
+      <SectionHeader title={title} />
+      {AsyncResult.builder(anyCounter)
+        .onInitialOrWaiting(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
+        .onFailure(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
+        .onSuccess((anyCounter) =>
+          anyCounter.length === 0 ? (
+            <InfoLine message="No counter data tracked yet!" />
+          ) : (
+            <article className="grid grid-cols-2 gap-6">
+              <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+                <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
+                <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary)">{anyCounter[0].personal.toLocaleString()}</span>
+              </header>
 
-      <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-        <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
-        <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary)">&nbsp;</span>
-      </footer>
-    </article>
+              <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+                <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
+                <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary)">{anyCounter[0].global.toLocaleString()}</span>
+              </footer>
+            </article>
+          )
+        )
+        .render()}
+    </>
   );
 }
 
-export function AnyCounterCharts({ title, counterName, personalHeader }: AnyCounterChartsProps) {
+export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCounterChartProps, "title" | "personalHeader">) {
   return (
-    <section className="grid gap-3 xl:grid-cols-2">
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              {title}
-              <UsFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <AnyCounterChart counterName={counterName} solutionsLanguage="En" personalHeader={personalHeader} />
-      </div>
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              {title}
-              <PlFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <AnyCounterChart counterName={counterName} solutionsLanguage="Pl" personalHeader={personalHeader} />
-      </div>
-    </section>
-  );
-}
+    <>
+      <SectionHeader title={title} />
+      <article className="grid grid-cols-2 gap-6">
+        <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+          <h3 className="animate-pulse bg-accent font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
+          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary)">&nbsp;</span>
+        </header>
 
-export function AnyCounterChartsSkeleton({ title }: Pick<AnyCounterChartsProps, "title">) {
-  return (
-    <section className="grid gap-3 xl:grid-cols-2">
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              {title}
-              <UsFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <AnyCounterChartSkeleton />
-      </div>
-      <div>
-        <SectionHeader
-          title={
-            <span className="flex items-center justify-between gap-3">
-              {title}
-              <PlFlagIcon className="size-11 shrink-0" />
-            </span>
-          }
-        />
-        <AnyCounterChartSkeleton />
-      </div>
-    </section>
+        <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+          <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
+          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary)">&nbsp;</span>
+        </footer>
+      </article>
+    </>
   );
 }
