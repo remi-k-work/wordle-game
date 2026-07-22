@@ -2,6 +2,7 @@
 
 export * from "./any-counter";
 export * from "./arcade-streak-distribution";
+export * from "./browse-charts";
 export * from "./failed-words-frequency";
 export * from "./guess-distribution";
 export * from "./opening-guesses-frequency";

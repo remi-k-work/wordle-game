@@ -27,7 +27,12 @@ export function Voice() {
 
   return (
     <section>
-      <Select.Root items={voices} value={voiceVoice} onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}>
+      <Select.Root
+        name="voiceVoice"
+        items={voices}
+        value={voiceVoice}
+        onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}
+      >
         <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Voice</Select.Label>
         <Select.Trigger
           className={cn(
@@ -101,7 +106,7 @@ export function Voice() {
 export function VoiceSkeleton() {
   return (
     <section>
-      <Select.Root items={[]} value={null} onValueChange={() => {}} disabled>
+      <Select.Root name="voiceVoice" items={[]} value={null} onValueChange={() => {}} disabled>
         <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Voice</Select.Label>
         <Select.Trigger
           className={cn(

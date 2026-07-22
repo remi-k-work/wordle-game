@@ -15,6 +15,8 @@ import {
   AnyCounterChartSkeleton,
   ArcadeStreakDistributionChart,
   ArcadeStreakDistributionChartSkeleton,
+  BrowseCharts,
+  BrowseChartsSkeleton,
   FailedWordsFrequencyChart,
   FailedWordsFrequencyChartSkeleton,
   GuessDistributionChart,
@@ -66,6 +68,7 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScores top10HighScores={top10HighScores} />
+      <BrowseCharts />
       <GuessDistributionChart solutionsLanguage={sl} />
       <TimeToSolveDistributionChart solutionsLanguage={sl} />
       <ArcadeStreakDistributionChart solutionsLanguage={sl} />
@@ -96,6 +99,7 @@ function PageSkeleton() {
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScoresSkeleton />
+      <BrowseChartsSkeleton />
       <GuessDistributionChartSkeleton />
       <TimeToSolveDistributionChartSkeleton />
       <ArcadeStreakDistributionChartSkeleton />

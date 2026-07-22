@@ -12,6 +12,7 @@ export function Volume() {
   return (
     <Slider.Root
       className="my-3 w-full"
+      name="voiceVolume"
       thumbAlignment="edge"
       min={0}
       max={1}
@@ -32,7 +33,7 @@ export function Volume() {
 
 export function VolumeSkeleton() {
   return (
-    <Slider.Root className="my-3 w-full" thumbAlignment="edge" min={0} max={1} step={0.1} value={1} onValueChange={() => {}} disabled>
+    <Slider.Root className="my-3 w-full" name="voiceVolume" thumbAlignment="edge" min={0} max={1} step={0.1} value={1} onValueChange={() => {}} disabled>
       <Slider.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Volume</Slider.Label>
       <Slider.Control className="flex w-full touch-none items-center py-3 select-none">
         <Slider.Track className="h-6 w-full bg-linear-to-l from-destructive via-tile-yellow to-tile-green select-none">

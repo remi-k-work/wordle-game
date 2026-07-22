@@ -72,8 +72,11 @@ export function useUrlScribe() {
   );
 
   // Programmatically navigates to a new url with updated search params
-  const navigate = useCallback((arg1?: Route | QueryParams, arg2?: QueryParams) => router.push(createHref(arg1, arg2)), [router, createHref]);
+  const navigate = useCallback(
+    (arg1?: Route | QueryParams, arg2?: QueryParams) => router.push(createHref(arg1, arg2), { scroll: false }),
+    [router, createHref]
+  );
 
   // We cast the functions to the appropriate types, which ensures that components using the hook see the nice, strict overloads
-  return { createHref: createHref as CreateHrefFn, navigate: navigate as NavigateFn };
+  return { createHref: createHref as CreateHrefFn, navigate: navigate as NavigateFn, searchParams } as const;
 }
