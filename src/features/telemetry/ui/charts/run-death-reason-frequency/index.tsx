@@ -40,44 +40,45 @@ const CustomLegend = () => (
 export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
   const runDeathReasonFrequency = useAtomValue(runDeathReasonFrequencyAtom(solutionsLanguage));
 
-  return (
-    <>
-      <SectionHeader title="Reasons why an arcade run ended" />
-      {AsyncResult.builder(runDeathReasonFrequency)
-        .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
-        .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
-        .onSuccess((runDeathReasonFrequency) => {
-          return runDeathReasonFrequency.length === 0 ? (
-            <InfoLine message="No frequency data tracked yet!" />
-          ) : (
-            <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-96 **:outline-none **:select-none">
-              <Tooltip
-                formatter={(value, name) => [`${value} times`, name]}
-                cursor={{ fill: "var(--color-surface-2)" }}
-                contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-                labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-                itemStyle={{ color: "var(--color-text-2)" }}
-              />
-              <Legend content={<CustomLegend />} />
+  return AsyncResult.builder(runDeathReasonFrequency)
+    .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
+    .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
+    .onSuccess((runDeathReasonFrequency) => {
+      return runDeathReasonFrequency.length === 0 ? (
+        <>
+          <SectionHeader title="Reasons why an arcade run ended" />
+          <InfoLine message="No frequency data tracked yet!" />
+        </>
+      ) : (
+        <>
+          <SectionHeader title="Reasons why an arcade run ended" />
+          <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-96 **:outline-none **:select-none">
+            <Tooltip
+              formatter={(value, name) => [`${value} times`, name]}
+              cursor={{ fill: "var(--color-surface-2)" }}
+              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
+              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
+              itemStyle={{ color: "var(--color-text-2)" }}
+            />
+            <Legend content={<CustomLegend />} />
 
-              <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
-              <Pie
-                dataKey="global"
-                nameKey="reason"
-                cx="50%"
-                cy="50%"
-                innerRadius="60%"
-                outerRadius="80%"
-                stroke="var(--color-accent)"
-                shape={PieSliceGlobal}
-                label
-              />
-            </PieChart>
-          );
-        })
-        .render()}
-    </>
-  );
+            <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
+            <Pie
+              dataKey="global"
+              nameKey="reason"
+              cx="50%"
+              cy="50%"
+              innerRadius="60%"
+              outerRadius="80%"
+              stroke="var(--color-accent)"
+              shape={PieSliceGlobal}
+              label
+            />
+          </PieChart>
+        </>
+      );
+    })
+    .render();
 }
 
 export function RunDeathReasonFrequencyChartSkeleton() {

@@ -22,49 +22,50 @@ const BAR_HEIGHT_PX = 48;
 export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyChartProps) {
   const failedWordsFrequency = useAtomValue(failedWordsFrequencyAtom(solutionsLanguage));
 
-  return (
-    <>
-      <SectionHeader title="Frequency of words that players failed to guess" />
-      {AsyncResult.builder(failedWordsFrequency)
-        .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)
-        .onFailure(() => <FailedWordsFrequencyChartSkeleton />)
-        .onSuccess((failedWordsFrequency) =>
-          failedWordsFrequency.length === 0 ? (
-            <InfoLine message="No frequency data tracked yet!" />
-          ) : (
-            <BarChart
-              data={failedWordsFrequency}
-              responsive
-              layout="vertical"
-              className="w-full **:outline-none **:select-none"
-              style={{ height: `${CHART_PADDING_PX + failedWordsFrequency.length * BAR_HEIGHT_PX}px` }}
-            >
-              <CartesianGrid stroke="var(--color-surface-3)" />
+  return AsyncResult.builder(failedWordsFrequency)
+    .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)
+    .onFailure(() => <FailedWordsFrequencyChartSkeleton />)
+    .onSuccess((failedWordsFrequency) =>
+      failedWordsFrequency.length === 0 ? (
+        <>
+          <SectionHeader title="Frequency of words that players failed to guess" />
+          <InfoLine message="No frequency data tracked yet!" />
+        </>
+      ) : (
+        <>
+          <SectionHeader title="Frequency of words that players failed to guess" />
+          <BarChart
+            data={failedWordsFrequency}
+            responsive
+            layout="vertical"
+            className="w-full **:outline-none **:select-none"
+            style={{ height: `${CHART_PADDING_PX + failedWordsFrequency.length * BAR_HEIGHT_PX}px` }}
+          >
+            <CartesianGrid stroke="var(--color-surface-3)" />
 
-              <XAxis type="number" stroke="var(--color-text-1)" />
-              <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
+            <XAxis type="number" stroke="var(--color-text-1)" />
+            <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
-              <Tooltip
-                formatter={(value, name) => [`${value}`, name === "personal" ? "Your Misses" : "Global Misses"]}
-                labelFormatter={(label) => `${label}`}
-                cursor={{ fill: "var(--color-surface-2)" }}
-                contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-                labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-                itemStyle={{ color: "var(--color-text-2)" }}
-              />
-              <Legend
-                formatter={(value) => (value === "personal" ? "Your Misses" : "Global Misses")}
-                labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
-              />
+            <Tooltip
+              formatter={(value, name) => [`${value}`, name === "personal" ? "Your Misses" : "Global Misses"]}
+              labelFormatter={(label) => `${label}`}
+              cursor={{ fill: "var(--color-surface-2)" }}
+              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
+              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
+              itemStyle={{ color: "var(--color-text-2)" }}
+            />
+            <Legend
+              formatter={(value) => (value === "personal" ? "Your Misses" : "Global Misses")}
+              labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
+            />
 
-              <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
-              <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
-            </BarChart>
-          )
-        )
-        .render()}
-    </>
-  );
+            <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
+            <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
+          </BarChart>
+        </>
+      )
+    )
+    .render();
 }
 
 export function FailedWordsFrequencyChartSkeleton() {

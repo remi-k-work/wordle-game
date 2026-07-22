@@ -18,42 +18,43 @@ interface GuessDistributionChartProps {
 export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartProps) {
   const guessDistribution = useAtomValue(guessDistributionAtom(solutionsLanguage));
 
-  return (
-    <>
-      <SectionHeader title="Distribution of guesses needed to win a game" />
-      {AsyncResult.builder(guessDistribution)
-        .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)
-        .onFailure(() => <GuessDistributionChartSkeleton />)
-        .onSuccess((guessDistribution) =>
-          guessDistribution.length === 0 ? (
-            <InfoLine message="No Guesses yet!" />
-          ) : (
-            <ComposedChart data={guessDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
-              <CartesianGrid stroke="var(--color-surface-3)" />
+  return AsyncResult.builder(guessDistribution)
+    .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)
+    .onFailure(() => <GuessDistributionChartSkeleton />)
+    .onSuccess((guessDistribution) =>
+      guessDistribution.length === 0 ? (
+        <>
+          <SectionHeader title="Distribution of guesses needed to win a game" />
+          <InfoLine message="No Guesses yet!" />
+        </>
+      ) : (
+        <>
+          <SectionHeader title="Distribution of guesses needed to win a game" />
+          <ComposedChart data={guessDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
+            <CartesianGrid stroke="var(--color-surface-3)" />
 
-              <XAxis dataKey="turn" tickFormatter={(tick) => `Turn ${tick}`} stroke="var(--color-text-1)" />
+            <XAxis dataKey="turn" tickFormatter={(tick) => `Turn ${tick}`} stroke="var(--color-text-1)" />
 
-              <Tooltip
-                formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Guesses" : "Global Average"]}
-                labelFormatter={(label) => `Turn: ${label}`}
-                cursor={{ fill: "var(--color-surface-2)" }}
-                contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-                labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-                itemStyle={{ color: "var(--color-text-2)" }}
-              />
-              <Legend
-                formatter={(value) => (value === "personalPct" ? "Your Guesses" : "Global Average")}
-                labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
-              />
+            <Tooltip
+              formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Guesses" : "Global Average"]}
+              labelFormatter={(label) => `Turn: ${label}`}
+              cursor={{ fill: "var(--color-surface-2)" }}
+              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
+              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
+              itemStyle={{ color: "var(--color-text-2)" }}
+            />
+            <Legend
+              formatter={(value) => (value === "personalPct" ? "Your Guesses" : "Global Average")}
+              labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
+            />
 
-              <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[9, 9, 0, 0]} />
-              <Line type="monotone" dataKey="globalPct" stroke="var(--color-secondary)" strokeWidth={4} />
-            </ComposedChart>
-          )
-        )
-        .render()}
-    </>
-  );
+            <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[9, 9, 0, 0]} />
+            <Line type="monotone" dataKey="globalPct" stroke="var(--color-secondary)" strokeWidth={4} />
+          </ComposedChart>
+        </>
+      )
+    )
+    .render();
 }
 
 export function GuessDistributionChartSkeleton() {

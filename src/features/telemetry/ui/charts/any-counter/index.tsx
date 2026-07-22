@@ -20,32 +20,33 @@ interface AnyCounterChartProps {
 export function AnyCounterChart({ counterName, solutionsLanguage, title, personalHeader }: AnyCounterChartProps) {
   const anyCounter = useAtomValue(anyCounterAtom({ counterName, solutionsLanguage }));
 
-  return (
-    <>
-      <SectionHeader title={title} />
-      {AsyncResult.builder(anyCounter)
-        .onInitialOrWaiting(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
-        .onFailure(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
-        .onSuccess((anyCounter) =>
-          anyCounter.length === 0 ? (
-            <InfoLine message="No counter data tracked yet!" />
-          ) : (
-            <article className="grid grid-cols-2 gap-6">
-              <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-                <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
-                <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary)">{anyCounter[0].personal.toLocaleString()}</span>
-              </header>
+  return AsyncResult.builder(anyCounter)
+    .onInitialOrWaiting(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
+    .onFailure(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
+    .onSuccess((anyCounter) =>
+      anyCounter.length === 0 ? (
+        <>
+          <SectionHeader title={title} />
+          <InfoLine message="No counter data tracked yet!" />
+        </>
+      ) : (
+        <>
+          <SectionHeader title={title} />
+          <article className="grid grid-cols-2 gap-6">
+            <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+              <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
+              <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary)">{anyCounter[0].personal.toLocaleString()}</span>
+            </header>
 
-              <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-                <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
-                <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary)">{anyCounter[0].global.toLocaleString()}</span>
-              </footer>
-            </article>
-          )
-        )
-        .render()}
-    </>
-  );
+            <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
+              <h3 className="font-sans tracking-widest text-(--color-text-2)">Global Total</h3>
+              <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary)">{anyCounter[0].global.toLocaleString()}</span>
+            </footer>
+          </article>
+        </>
+      )
+    )
+    .render();
 }
 
 export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCounterChartProps, "title" | "personalHeader">) {
@@ -54,7 +55,7 @@ export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCount
       <SectionHeader title={title} />
       <article className="grid grid-cols-2 gap-6">
         <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl bg-(--color-surface-2) p-6 text-center shadow-sm ring-1 ring-(--color-accent)">
-          <h3 className="animate-pulse bg-accent font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
+          <h3 className="font-sans tracking-widest text-(--color-text-2)">{personalHeader}</h3>
           <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary)">&nbsp;</span>
         </header>
 

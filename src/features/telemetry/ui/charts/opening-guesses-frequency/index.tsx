@@ -22,49 +22,50 @@ const BAR_HEIGHT_PX = 48;
 export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequencyChartProps) {
   const openingGuessesFrequency = useAtomValue(openingGuessesFrequencyAtom(solutionsLanguage));
 
-  return (
-    <>
-      <SectionHeader title="Frequency of the first word guessed in a game" />
-      {AsyncResult.builder(openingGuessesFrequency)
-        .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
-        .onFailure(() => <OpeningGuessesFrequencyChartSkeleton />)
-        .onSuccess((openingGuessesFrequency) =>
-          openingGuessesFrequency.length === 0 ? (
-            <InfoLine message="No frequency data tracked yet!" />
-          ) : (
-            <BarChart
-              data={openingGuessesFrequency}
-              responsive
-              layout="vertical"
-              className="w-full **:outline-none **:select-none"
-              style={{ height: `${CHART_PADDING_PX + openingGuessesFrequency.length * BAR_HEIGHT_PX}px` }}
-            >
-              <CartesianGrid stroke="var(--color-surface-3)" />
+  return AsyncResult.builder(openingGuessesFrequency)
+    .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
+    .onFailure(() => <OpeningGuessesFrequencyChartSkeleton />)
+    .onSuccess((openingGuessesFrequency) =>
+      openingGuessesFrequency.length === 0 ? (
+        <>
+          <SectionHeader title="Frequency of the first word guessed in a game" />
+          <InfoLine message="No frequency data tracked yet!" />
+        </>
+      ) : (
+        <>
+          <SectionHeader title="Frequency of the first word guessed in a game" />
+          <BarChart
+            data={openingGuessesFrequency}
+            responsive
+            layout="vertical"
+            className="w-full **:outline-none **:select-none"
+            style={{ height: `${CHART_PADDING_PX + openingGuessesFrequency.length * BAR_HEIGHT_PX}px` }}
+          >
+            <CartesianGrid stroke="var(--color-surface-3)" />
 
-              <XAxis type="number" stroke="var(--color-text-1)" />
-              <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
+            <XAxis type="number" stroke="var(--color-text-1)" />
+            <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
-              <Tooltip
-                formatter={(value, name) => [`${value}`, name === "personal" ? "Your Guesses" : "Global Guesses"]}
-                labelFormatter={(label) => `${label}`}
-                cursor={{ fill: "var(--color-surface-2)" }}
-                contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-                labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-                itemStyle={{ color: "var(--color-text-2)" }}
-              />
-              <Legend
-                formatter={(value) => (value === "personal" ? "Your Guesses" : "Global Guesses")}
-                labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
-              />
+            <Tooltip
+              formatter={(value, name) => [`${value}`, name === "personal" ? "Your Guesses" : "Global Guesses"]}
+              labelFormatter={(label) => `${label}`}
+              cursor={{ fill: "var(--color-surface-2)" }}
+              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
+              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
+              itemStyle={{ color: "var(--color-text-2)" }}
+            />
+            <Legend
+              formatter={(value) => (value === "personal" ? "Your Guesses" : "Global Guesses")}
+              labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
+            />
 
-              <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
-              <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
-            </BarChart>
-          )
-        )
-        .render()}
-    </>
-  );
+            <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
+            <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
+          </BarChart>
+        </>
+      )
+    )
+    .render();
 }
 
 export function OpeningGuessesFrequencyChartSkeleton() {
