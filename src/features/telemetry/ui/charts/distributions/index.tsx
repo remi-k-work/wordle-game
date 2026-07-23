@@ -18,10 +18,10 @@ interface DistributionChartsProps {
 
 export function DistributionCharts({ solutionsLanguage }: DistributionChartsProps) {
   return (
-    <Tabs.Root className="w-full" defaultValue="guesses">
+    <Tabs.Root className="my-8 w-full" defaultValue="guesses">
       <Tabs.List className="relative z-1 -mb-px flex gap-1">
-        <ChartTab value="guesses">Guesses</ChartTab>
-        <ChartTab value="time">Time</ChartTab>
+        <ChartTab value="guesses">Guesses to Win</ChartTab>
+        <ChartTab value="time">Time to Solve</ChartTab>
         <ChartTab value="streak">Streak</ChartTab>
         <Tabs.Indicator
           className={cn(
@@ -45,7 +45,7 @@ export function DistributionCharts({ solutionsLanguage }: DistributionChartsProp
 
 export function DistributionChartsSkeleton() {
   return (
-    <Tabs.Root className="w-full" defaultValue="guesses">
+    <Tabs.Root className="my-8 w-full" defaultValue="guesses">
       <Tabs.List className="relative z-1 -mb-px flex gap-1">
         <ChartTabSkeleton value="guesses" />
         <ChartTabSkeleton value="time" />

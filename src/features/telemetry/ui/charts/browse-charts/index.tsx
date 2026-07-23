@@ -12,7 +12,7 @@ export function BrowseCharts() {
   const { sl, browseChartsMachineEvent } = useBrowseCharts();
 
   return (
-    <h2 className="mt-4 flex max-w-none items-center justify-between gap-3 bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-3 font-sans text-xl leading-none sm:text-3xl lg:text-4xl">
+    <h2 className="my-8 flex max-w-none items-center justify-between gap-3 bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-3 font-sans text-xl leading-none sm:text-3xl lg:text-4xl">
       Game Charts
       <label className="flex items-center gap-3">
         <UsFlagIcon className="mx-auto size-11" />
@@ -39,7 +39,7 @@ export function BrowseCharts() {
 
 export function BrowseChartsSkeleton() {
   return (
-    <h2 className="mt-4 flex max-w-none items-center justify-between gap-3 bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-3 font-sans text-xl leading-none sm:text-3xl lg:text-4xl">
+    <h2 className="my-8 flex max-w-none items-center justify-between gap-3 bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-3 font-sans text-xl leading-none sm:text-3xl lg:text-4xl">
       Game Charts
       <label className="flex items-center gap-3">
         <UsFlagIcon className="mx-auto size-11" />

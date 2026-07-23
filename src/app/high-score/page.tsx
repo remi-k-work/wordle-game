@@ -17,12 +17,8 @@ import {
   BrowseChartsSkeleton,
   DistributionCharts,
   DistributionChartsSkeleton,
-  FailedWordsFrequencyChart,
-  FailedWordsFrequencyChartSkeleton,
-  OpeningGuessesFrequencyChart,
-  OpeningGuessesFrequencyChartSkeleton,
-  RunDeathReasonFrequencyChart,
-  RunDeathReasonFrequencyChartSkeleton,
+  FrequencyCharts,
+  FrequencyChartsSkeleton,
 } from "@/features/telemetry/ui/charts";
 
 // types
@@ -66,9 +62,7 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
       <Top10HighScores top10HighScores={top10HighScores} />
       <BrowseCharts />
       <DistributionCharts solutionsLanguage={sl} />
-      <OpeningGuessesFrequencyChart solutionsLanguage={sl} />
-      <FailedWordsFrequencyChart solutionsLanguage={sl} />
-      <RunDeathReasonFrequencyChart solutionsLanguage={sl} />
+      <FrequencyCharts solutionsLanguage={sl} />
       <AnyCounterChart counterName="gamesPlayed" solutionsLanguage={sl} title="Total number of games played (both won and lost)" personalHeader="Your Games" />
       <AnyCounterChart counterName="runsStarted" solutionsLanguage={sl} title="Total number of arcade runs started" personalHeader="Your Runs" />
       <AnyCounterChart
@@ -95,9 +89,7 @@ function PageSkeleton() {
       <Top10HighScoresSkeleton />
       <BrowseChartsSkeleton />
       <DistributionChartsSkeleton />
-      <OpeningGuessesFrequencyChartSkeleton />
-      <FailedWordsFrequencyChartSkeleton />
-      <RunDeathReasonFrequencyChartSkeleton />
+      <FrequencyChartsSkeleton />
       <AnyCounterChartSkeleton title="Total number of games played (both won and lost)" personalHeader="Your Games" />
       <AnyCounterChartSkeleton title="Total number of arcade runs started" personalHeader="Your Runs" />
       <AnyCounterChartSkeleton title="Total number of games won on the first try" personalHeader="Your Perfect Games" />

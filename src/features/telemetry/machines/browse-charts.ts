@@ -16,9 +16,9 @@ export const browseChartsMachine = setup({
     context: BrowseCharts & { navigate?: ReturnType<typeof useUrlScribe>["navigate"] };
   },
   actions: {
-    syncUrl: assign(({ context, event }) => {
+    syncUrl: assign(({ event }) => {
       assertEvent(event, "urlSynced");
-      return { ...context, ...event.browseCharts, navigate: event.navigate } as const satisfies BrowseCharts & {
+      return { ...INITIAL_BROWSE_CHARTS, ...event.browseCharts, navigate: event.navigate } as const satisfies BrowseCharts & {
         navigate?: ReturnType<typeof useUrlScribe>["navigate"];
       };
     }),

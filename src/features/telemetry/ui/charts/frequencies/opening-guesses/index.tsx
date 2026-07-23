@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { failedWordsFrequencyAtom } from "@/features/telemetry/state";
+import { openingGuessesFrequencyAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 
 // components
@@ -11,7 +11,7 @@ import { SectionHeader } from "@/ui/section-header";
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
 
-interface FailedWordsFrequencyChartProps {
+interface OpeningGuessesFrequencyChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
@@ -19,27 +19,27 @@ interface FailedWordsFrequencyChartProps {
 const CHART_PADDING_PX = 96;
 const BAR_HEIGHT_PX = 48;
 
-export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyChartProps) {
-  const failedWordsFrequency = useAtomValue(failedWordsFrequencyAtom(solutionsLanguage));
+export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequencyChartProps) {
+  const openingGuessesFrequency = useAtomValue(openingGuessesFrequencyAtom(solutionsLanguage));
 
-  return AsyncResult.builder(failedWordsFrequency)
-    .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)
-    .onFailure(() => <FailedWordsFrequencyChartSkeleton />)
-    .onSuccess((failedWordsFrequency) =>
-      failedWordsFrequency.length === 0 ? (
+  return AsyncResult.builder(openingGuessesFrequency)
+    .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
+    .onFailure(() => <OpeningGuessesFrequencyChartSkeleton />)
+    .onSuccess((openingGuessesFrequency) =>
+      openingGuessesFrequency.length === 0 ? (
         <>
-          <SectionHeader title="Frequency of words that players failed to guess" />
+          <SectionHeader title="First word guessed in a game" />
           <InfoLine message="No frequency data tracked yet!" />
         </>
       ) : (
         <>
-          <SectionHeader title="Frequency of words that players failed to guess" />
+          <SectionHeader title="First word guessed in a game" />
           <BarChart
-            data={failedWordsFrequency}
+            data={openingGuessesFrequency}
             responsive
             layout="vertical"
             className="w-full **:outline-none **:select-none"
-            style={{ height: `${CHART_PADDING_PX + failedWordsFrequency.length * BAR_HEIGHT_PX}px` }}
+            style={{ height: `${CHART_PADDING_PX + openingGuessesFrequency.length * BAR_HEIGHT_PX}px` }}
           >
             <CartesianGrid stroke="var(--color-surface-3)" />
 
@@ -47,7 +47,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
             <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
             <Tooltip
-              formatter={(value, name) => [`${value}`, name === "personal" ? "Your Misses" : "Global Misses"]}
+              formatter={(value, name) => [`${value}`, name === "personal" ? "Your Guesses" : "Global Guesses"]}
               labelFormatter={(label) => `${label}`}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
@@ -55,7 +55,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personal" ? "Your Misses" : "Global Misses")}
+              formatter={(value) => (value === "personal" ? "Your Guesses" : "Global Guesses")}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -68,10 +68,10 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
     .render();
 }
 
-export function FailedWordsFrequencyChartSkeleton() {
+export function OpeningGuessesFrequencyChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Frequency of words that players failed to guess" />
+      <SectionHeader title="First word guessed in a game" />
       <div className="h-96 w-full animate-pulse bg-accent" />
     </>
   );

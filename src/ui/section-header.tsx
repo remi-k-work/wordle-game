@@ -9,9 +9,5 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({ title }: SectionHeaderProps) {
-  return (
-    <>
-      <h2 className={cn("my-8 bg-linear-to-r from-secondary to-surface-1 p-3 font-sans text-lg", "sm:text-2xl lg:text-3xl")}>{title}</h2>
-    </>
-  );
+  return <h2 className={cn("my-8 bg-linear-to-r from-secondary to-surface-1 p-3 font-sans text-lg", "sm:text-2xl lg:text-3xl")}>{title}</h2>;
 }
