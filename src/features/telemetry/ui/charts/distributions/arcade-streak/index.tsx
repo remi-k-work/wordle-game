@@ -24,12 +24,12 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
     .onSuccess((arcadeStreakDistribution) =>
       arcadeStreakDistribution.length === 0 ? (
         <>
-          <SectionHeader title="Distribution of run lengths (streak) before a loss" />
+          <SectionHeader title="Streak before a loss" />
           <InfoLine message="No streak data tracked yet!" />
         </>
       ) : (
         <>
-          <SectionHeader title="Distribution of run lengths (streak) before a loss" />
+          <SectionHeader title="Streak before a loss" />
           <ComposedChart data={arcadeStreakDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
@@ -60,7 +60,7 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
 export function ArcadeStreakDistributionChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Distribution of run lengths (streak) before a loss" />
+      <SectionHeader title="Streak before a loss" />
       <div className="h-96 w-full animate-pulse bg-accent" />
     </>
   );

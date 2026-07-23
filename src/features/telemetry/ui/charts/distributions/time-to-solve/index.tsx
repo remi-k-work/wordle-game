@@ -33,12 +33,12 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
     .onSuccess((timeToSolveDistribution) =>
       timeToSolveDistribution.length === 0 ? (
         <>
-          <SectionHeader title="Distribution of time taken to solve a word" />
+          <SectionHeader title="Time taken to solve a word" />
           <InfoLine message="No speed data tracked yet!" />
         </>
       ) : (
         <>
-          <SectionHeader title="Distribution of time taken to solve a word" />
+          <SectionHeader title="Time taken to solve a word" />
           <ComposedChart data={timeToSolveDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
@@ -69,7 +69,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
 export function TimeToSolveDistributionChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Distribution of time taken to solve a word" />
+      <SectionHeader title="Time taken to solve a word" />
       <div className="h-96 w-full animate-pulse bg-accent" />
     </>
   );

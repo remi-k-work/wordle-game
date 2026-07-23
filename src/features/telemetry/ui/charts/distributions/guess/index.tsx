@@ -24,12 +24,12 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
     .onSuccess((guessDistribution) =>
       guessDistribution.length === 0 ? (
         <>
-          <SectionHeader title="Distribution of guesses needed to win a game" />
+          <SectionHeader title="Guesses needed to win a game" />
           <InfoLine message="No Guesses yet!" />
         </>
       ) : (
         <>
-          <SectionHeader title="Distribution of guesses needed to win a game" />
+          <SectionHeader title="Guesses needed to win a game" />
           <ComposedChart data={guessDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
@@ -60,7 +60,7 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
 export function GuessDistributionChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Distribution of guesses needed to win a game" />
+      <SectionHeader title="Guesses needed to win a game" />
       <div className="h-96 w-full animate-pulse bg-accent" />
     </>
   );

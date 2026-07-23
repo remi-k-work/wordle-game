@@ -13,20 +13,16 @@ import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/
 import {
   AnyCounterChart,
   AnyCounterChartSkeleton,
-  ArcadeStreakDistributionChart,
-  ArcadeStreakDistributionChartSkeleton,
   BrowseCharts,
   BrowseChartsSkeleton,
+  DistributionCharts,
+  DistributionChartsSkeleton,
   FailedWordsFrequencyChart,
   FailedWordsFrequencyChartSkeleton,
-  GuessDistributionChart,
-  GuessDistributionChartSkeleton,
   OpeningGuessesFrequencyChart,
   OpeningGuessesFrequencyChartSkeleton,
   RunDeathReasonFrequencyChart,
   RunDeathReasonFrequencyChartSkeleton,
-  TimeToSolveDistributionChart,
-  TimeToSolveDistributionChartSkeleton,
 } from "@/features/telemetry/ui/charts";
 
 // types
@@ -69,9 +65,7 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScores top10HighScores={top10HighScores} />
       <BrowseCharts />
-      <GuessDistributionChart solutionsLanguage={sl} />
-      <TimeToSolveDistributionChart solutionsLanguage={sl} />
-      <ArcadeStreakDistributionChart solutionsLanguage={sl} />
+      <DistributionCharts solutionsLanguage={sl} />
       <OpeningGuessesFrequencyChart solutionsLanguage={sl} />
       <FailedWordsFrequencyChart solutionsLanguage={sl} />
       <RunDeathReasonFrequencyChart solutionsLanguage={sl} />
@@ -100,9 +94,7 @@ function PageSkeleton() {
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScoresSkeleton />
       <BrowseChartsSkeleton />
-      <GuessDistributionChartSkeleton />
-      <TimeToSolveDistributionChartSkeleton />
-      <ArcadeStreakDistributionChartSkeleton />
+      <DistributionChartsSkeleton />
       <OpeningGuessesFrequencyChartSkeleton />
       <FailedWordsFrequencyChartSkeleton />
       <RunDeathReasonFrequencyChartSkeleton />
