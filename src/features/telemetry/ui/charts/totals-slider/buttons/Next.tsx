@@ -1,0 +1,40 @@
+// react
+import { useCallback, useEffect, useState } from "react";
+
+// components
+import { Button } from "@base-ui/react";
+
+// assets
+import { NextIcon } from "@/assets/icons";
+
+// types
+import type { EmblaCarouselType } from "embla-carousel";
+
+interface NextProps {
+  emblaApi?: EmblaCarouselType;
+}
+
+export function Next({ emblaApi }: NextProps) {
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
+    setIsDisabled(!emblaApi.canScrollNext());
+  }, []);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    onSelect(emblaApi);
+    emblaApi.on("reInit", onSelect).on("select", onSelect);
+
+    return () => {
+      emblaApi.off("reInit", onSelect).off("select", onSelect);
+    };
+  }, [emblaApi, onSelect]);
+
+  return (
+    <Button className="button p-1" disabled={isDisabled} onClick={() => emblaApi?.scrollNext()}>
+      <NextIcon className="size-9" />
+    </Button>
+  );
+}
