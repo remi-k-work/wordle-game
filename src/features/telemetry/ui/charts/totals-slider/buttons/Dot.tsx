@@ -38,8 +38,16 @@ export function Dot({ emblaApi, index }: DotProps) {
   }, [emblaApi, onSelect]);
 
   return (
-    <Button className={cn("button p-1", index === selectedIndex && "bg-accent")} onClick={() => emblaApi?.scrollTo(index)}>
-      {index === selectedIndex ? <ViewfinderCircleIconS className="size-6" /> : <ViewfinderCircleIconO className="size-6" />}
+    <Button className={cn("button bg-secondary p-0", index === selectedIndex && "bg-accent")} onClick={() => emblaApi?.scrollTo(index)}>
+      {index === selectedIndex ? <ViewfinderCircleIconS className="size-11" /> : <ViewfinderCircleIconO className="size-11" />}
+    </Button>
+  );
+}
+
+export function DotSkeleton() {
+  return (
+    <Button className="button bg-secondary p-0" disabled>
+      <ViewfinderCircleIconO className="size-11" />
     </Button>
   );
 }

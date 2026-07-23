@@ -11,14 +11,14 @@ import { HighScorePage } from "@/features/high-score/domain";
 import { PageHeader } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import {
-  AnyCounterChart,
-  AnyCounterChartSkeleton,
   BrowseCharts,
   BrowseChartsSkeleton,
   DistributionCharts,
   DistributionChartsSkeleton,
   FrequencyCharts,
   FrequencyChartsSkeleton,
+  TotalsSlider,
+  TotalsSliderSkeleton,
 } from "@/features/telemetry/ui/charts";
 
 // types
@@ -61,23 +61,9 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScores top10HighScores={top10HighScores} />
       <BrowseCharts />
+      <TotalsSlider solutionsLanguage={sl} />
       <DistributionCharts solutionsLanguage={sl} />
       <FrequencyCharts solutionsLanguage={sl} />
-      <AnyCounterChart counterName="gamesPlayed" solutionsLanguage={sl} title="Total number of games played (both won and lost)" personalHeader="Your Games" />
-      <AnyCounterChart counterName="runsStarted" solutionsLanguage={sl} title="Total number of arcade runs started" personalHeader="Your Runs" />
-      <AnyCounterChart
-        counterName="perfectGames"
-        solutionsLanguage={sl}
-        title="Total number of games won on the first try"
-        personalHeader="Your Perfect Games"
-      />
-      <AnyCounterChart
-        counterName="invalidGuesses"
-        solutionsLanguage={sl}
-        title="Total number of invalid guesses (not in dictionary)"
-        personalHeader="Your Invalid Guesses"
-      />
-      <AnyCounterChart counterName="validGuesses" solutionsLanguage={sl} title="Total number of valid guesses submitted" personalHeader="Your Valid Guesses" />
     </article>
   );
 }
@@ -88,13 +74,9 @@ function PageSkeleton() {
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScoresSkeleton />
       <BrowseChartsSkeleton />
+      <TotalsSliderSkeleton />
       <DistributionChartsSkeleton />
       <FrequencyChartsSkeleton />
-      <AnyCounterChartSkeleton title="Total number of games played (both won and lost)" personalHeader="Your Games" />
-      <AnyCounterChartSkeleton title="Total number of arcade runs started" personalHeader="Your Runs" />
-      <AnyCounterChartSkeleton title="Total number of games won on the first try" personalHeader="Your Perfect Games" />
-      <AnyCounterChartSkeleton title="Total number of invalid guesses (not in dictionary)" personalHeader="Your Invalid Guesses" />
-      <AnyCounterChartSkeleton title="Total number of valid guesses submitted" personalHeader="Your Valid Guesses" />
     </article>
   );
 }

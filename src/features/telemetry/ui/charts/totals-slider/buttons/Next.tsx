@@ -34,7 +34,15 @@ export function Next({ emblaApi }: NextProps) {
 
   return (
     <Button className="button p-1" disabled={isDisabled} onClick={() => emblaApi?.scrollNext()}>
-      <NextIcon className="size-9" />
+      <NextIcon className="size-11" />
+    </Button>
+  );
+}
+
+export function NextSkeleton() {
+  return (
+    <Button className="button p-1" disabled>
+      <NextIcon className="size-11" />
     </Button>
   );
 }

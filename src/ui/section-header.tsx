@@ -1,11 +1,8 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
-// types
-import type { ReactNode } from "react";
-
 interface SectionHeaderProps {
-  title: string | ReactNode;
+  title: string;
 }
 
 export function SectionHeader({ title }: SectionHeaderProps) {
