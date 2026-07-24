@@ -33,14 +33,18 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
         <>
           <SectionHeader title={title} />
           <article className="grid grid-cols-2 gap-6">
-            <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-6 text-center">
-              <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase">{personalHeader}</h3>
-              <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary)">{anyCounter[0].personal.toLocaleString()}</span>
+            <header className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
+              <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase sm:text-xl md:text-2xl lg:text-3xl">{personalHeader}</h3>
+              <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary) sm:text-5xl md:text-6xl lg:text-7xl">
+                {anyCounter[0].personal.toLocaleString()}
+              </span>
             </header>
 
-            <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-6 text-center">
-              <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase">Global Total</h3>
-              <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary)">{anyCounter[0].global.toLocaleString()}</span>
+            <footer className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
+              <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Total</h3>
+              <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary) sm:text-5xl md:text-6xl lg:text-7xl">
+                {anyCounter[0].global.toLocaleString()}
+              </span>
             </footer>
           </article>
         </>
@@ -54,14 +58,18 @@ export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCount
     <>
       <SectionHeader title={title} />
       <article className="grid grid-cols-2 gap-6">
-        <header className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-6 text-center">
-          <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase">{personalHeader}</h3>
-          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary)">&nbsp;</span>
+        <header className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
+          <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase sm:text-xl md:text-2xl lg:text-3xl">{personalHeader}</h3>
+          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary) sm:text-5xl md:text-6xl lg:text-7xl">
+            &nbsp;
+          </span>
         </header>
 
-        <footer className="grid w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-6 text-center">
-          <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase">Global Total</h3>
-          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary)">&nbsp;</span>
+        <footer className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
+          <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Total</h3>
+          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary) sm:text-5xl md:text-6xl lg:text-7xl">
+            &nbsp;
+          </span>
         </footer>
       </article>
     </>

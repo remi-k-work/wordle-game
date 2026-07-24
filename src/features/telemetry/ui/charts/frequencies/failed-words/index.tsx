@@ -72,7 +72,7 @@ export function FailedWordsFrequencyChartSkeleton() {
   return (
     <>
       <SectionHeader title="Words that players failed to guess" />
-      <div className="h-96 w-full animate-pulse bg-accent" />
+      <div className="h-96 w-full lg:h-192" />
     </>
   );
 }

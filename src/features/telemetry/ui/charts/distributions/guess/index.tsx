@@ -30,7 +30,7 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
       ) : (
         <>
           <SectionHeader title="Guesses needed to win a game" />
-          <ComposedChart data={guessDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
+          <ComposedChart data={guessDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
             <XAxis dataKey="turn" tickFormatter={(tick) => `Turn ${tick}`} stroke="var(--color-text-1)" />
@@ -61,7 +61,7 @@ export function GuessDistributionChartSkeleton() {
   return (
     <>
       <SectionHeader title="Guesses needed to win a game" />
-      <div className="h-96 w-full animate-pulse bg-accent" />
+      <div className="h-96 w-full lg:h-192" />
     </>
   );
 }

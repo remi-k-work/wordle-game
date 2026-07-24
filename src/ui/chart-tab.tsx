@@ -16,8 +16,8 @@ export function ChartTab({ value, children }: ChartTabProps) {
   return (
     <Tabs.Tab
       className={cn(
-        "flex items-center justify-center px-2 py-2 text-text-2",
-        "md:px-6 md:py-4 md:text-lg md:font-semibold md:tracking-widest md:uppercase",
+        "flex items-center justify-center px-2 py-2 font-semibold tracking-tight text-text-2 uppercase",
+        "sm:px-6 sm:py-4 sm:text-lg sm:tracking-widest",
         "break-keep whitespace-nowrap outline-none select-none",
         "hover:text-text-2",
         "focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid",
@@ -34,8 +34,8 @@ export function ChartTabSkeleton({ value }: Pick<ChartTabProps, "value">) {
   return (
     <Tabs.Tab
       className={cn(
-        "flex items-center justify-center px-2 py-2 text-text-2",
-        "md:px-6 md:py-4 md:text-lg md:font-semibold md:tracking-widest md:uppercase",
+        "flex items-center justify-center px-2 py-2 font-semibold tracking-tight text-text-2 uppercase",
+        "sm:px-6 sm:py-4 sm:text-lg sm:tracking-widest",
         "break-keep whitespace-nowrap outline-none select-none",
         "hover:text-text-2",
         "focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid",

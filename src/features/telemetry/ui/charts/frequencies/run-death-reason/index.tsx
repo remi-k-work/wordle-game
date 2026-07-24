@@ -52,7 +52,7 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
       ) : (
         <>
           <SectionHeader title="Reasons why an arcade run ended" />
-          <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-96 **:outline-none **:select-none">
+          <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
             <Tooltip
               formatter={(value, name) => [`${value} times`, name]}
               cursor={{ fill: "var(--color-surface-2)" }}
@@ -85,7 +85,7 @@ export function RunDeathReasonFrequencyChartSkeleton() {
   return (
     <>
       <SectionHeader title="Reasons why an arcade run ended" />
-      <div className="mx-auto size-96 animate-pulse bg-accent" />;
+      <div className="mx-auto size-86 w-full lg:size-172" />
     </>
   );
 }

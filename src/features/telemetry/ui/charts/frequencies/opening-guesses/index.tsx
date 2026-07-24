@@ -72,7 +72,7 @@ export function OpeningGuessesFrequencyChartSkeleton() {
   return (
     <>
       <SectionHeader title="First word guessed in a game" />
-      <div className="h-96 w-full animate-pulse bg-accent" />
+      <div className="h-96 w-full lg:h-192" />
     </>
   );
 }

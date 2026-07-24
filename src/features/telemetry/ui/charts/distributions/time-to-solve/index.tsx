@@ -39,7 +39,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
       ) : (
         <>
           <SectionHeader title="Time taken to solve a word" />
-          <ComposedChart data={timeToSolveDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
+          <ComposedChart data={timeToSolveDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
             <XAxis dataKey="maxSeconds" tickFormatter={(tick) => formatSpeedCategory(tick, true)} stroke="var(--color-text-1)" fontSize={32} />
@@ -70,7 +70,7 @@ export function TimeToSolveDistributionChartSkeleton() {
   return (
     <>
       <SectionHeader title="Time taken to solve a word" />
-      <div className="h-96 w-full animate-pulse bg-accent" />
+      <div className="h-96 w-full lg:h-192" />
     </>
   );
 }

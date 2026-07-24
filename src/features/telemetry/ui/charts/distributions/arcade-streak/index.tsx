@@ -30,7 +30,7 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
       ) : (
         <>
           <SectionHeader title="Streak before a loss" />
-          <ComposedChart data={arcadeStreakDistribution} responsive className="h-96 w-full **:outline-none **:select-none">
+          <ComposedChart data={arcadeStreakDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
             <XAxis dataKey="streak" tickFormatter={(tick) => (tick === Infinity ? "14+" : `${tick}`)} stroke="var(--color-text-1)" />
@@ -61,7 +61,7 @@ export function ArcadeStreakDistributionChartSkeleton() {
   return (
     <>
       <SectionHeader title="Streak before a loss" />
-      <div className="h-96 w-full animate-pulse bg-accent" />
+      <div className="h-96 w-full lg:h-192" />
     </>
   );
 }
