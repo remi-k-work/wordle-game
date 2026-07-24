@@ -7,6 +7,7 @@ import { sessionIdAtom } from "@/features/player/state";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
+import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/services/charts-db";
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   RuntimeAtom.atom(
@@ -78,13 +79,34 @@ export const runDeathReasonFrequencyAtom = Atom.family((solutionsLanguage: Solut
   )
 );
 
-export const anyCounterAtom = Atom.family(({ counterName, solutionsLanguage }: { counterName: string; solutionsLanguage: SolutionsLanguage }) =>
-  RuntimeAtom.atom(
-    Effect.fnUntraced(function* (get) {
-      const sessionId = get(sessionIdAtom);
+export const anyCounterAtom = Atom.family(
+  ({ counterName, solutionsLanguage }: { counterName: AnyCounterArgs["counterName"]; solutionsLanguage: SolutionsLanguage }) =>
+    RuntimeAtom.atom(
+      Effect.fnUntraced(function* (get) {
+        const sessionId = get(sessionIdAtom);
 
-      const { getAnyCounter } = yield* RpcTelemetryClient;
-      return yield* getAnyCounter({ counterName, sessionId, solutionsLanguage });
-    })
-  )
+        const { getAnyCounter } = yield* RpcTelemetryClient;
+        return yield* getAnyCounter({ counterName, sessionId, solutionsLanguage });
+      })
+    )
+);
+
+export const anyAvgStatAtom = Atom.family(
+  ({
+    statColumn,
+    statTable,
+    solutionsLanguage,
+  }: {
+    statColumn: AnyAvgStatArgs["statColumn"];
+    statTable: AnyAvgStatArgs["statTable"];
+    solutionsLanguage: SolutionsLanguage;
+  }) =>
+    RuntimeAtom.atom(
+      Effect.fnUntraced(function* (get) {
+        const sessionId = get(sessionIdAtom);
+
+        const { getAnyAvgStat } = yield* RpcTelemetryClient;
+        return yield* getAnyAvgStat({ statColumn, statTable, sessionId, solutionsLanguage });
+      })
+    )
 );

@@ -3,7 +3,7 @@ import useEmblaCarousel from "embla-carousel-react";
 
 // components
 import { Dot, DotSkeleton, Next, NextSkeleton, Prev, PrevSkeleton } from "./buttons";
-import { AnyCounterChart, AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts";
+import { AnyAvgStatChart, AnyAvgStatChartSkeleton, AnyCounterChart, AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -29,7 +29,7 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
             <AnyCounterChart
               counterName="perfectGames"
               solutionsLanguage={solutionsLanguage}
-              title="Games won on the first try"
+              title="Games solved on the first guess"
               personalHeader="Your Perfect Games"
             />
           </div>
@@ -47,6 +47,51 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
               solutionsLanguage={solutionsLanguage}
               title="Valid guesses submitted"
               personalHeader="Your Valid Guesses"
+            />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChart
+              statColumn="guessedTurn"
+              statTable="runWordEvent"
+              solutionsLanguage={solutionsLanguage}
+              title="Average guesses to win"
+              personalHeader="Your Average Guesses"
+            />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChart
+              statColumn="timeSeconds"
+              statTable="runWordEvent"
+              solutionsLanguage={solutionsLanguage}
+              title="Average time to solve a word"
+              personalHeader="Your Average Time"
+            />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChart
+              statColumn="finalScore"
+              statTable="arcadeRunSummary"
+              solutionsLanguage={solutionsLanguage}
+              title="Average score per arcade run"
+              personalHeader="Your Average Score"
+            />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChart
+              statColumn="finalStreak"
+              statTable="arcadeRunSummary"
+              solutionsLanguage={solutionsLanguage}
+              title="Average streak per arcade run"
+              personalHeader="Your Average Streak"
+            />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChart
+              statColumn="durationSeconds"
+              statTable="arcadeRunSummary"
+              solutionsLanguage={solutionsLanguage}
+              title="Average run duration"
+              personalHeader="Your Average Duration"
             />
           </div>
         </div>
@@ -76,13 +121,28 @@ export function TotalsSliderSkeleton() {
             <AnyCounterChartSkeleton title="Arcade runs started" personalHeader="Your Runs" />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyCounterChartSkeleton title="Games won on the first try" personalHeader="Your Perfect Games" />
+            <AnyCounterChartSkeleton title="Games solved on the first guess" personalHeader="Your Perfect Games" />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
             <AnyCounterChartSkeleton title="Invalid guesses (not in dictionary)" personalHeader="Your Invalid Guesses" />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
             <AnyCounterChartSkeleton title="Valid guesses submitted" personalHeader="Your Valid Guesses" />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChartSkeleton title="Average guesses to win" personalHeader="Your Average Guesses" />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChartSkeleton title="Average time to solve a word" personalHeader="Your Average Time" />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChartSkeleton title="Average score per arcade run" personalHeader="Your Average Score" />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChartSkeleton title="Average streak per arcade run" personalHeader="Your Average Streak" />
+          </div>
+          <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
+            <AnyAvgStatChartSkeleton title="Average run duration" personalHeader="Your Average Duration" />
           </div>
         </div>
       </section>
@@ -91,7 +151,7 @@ export function TotalsSliderSkeleton() {
         <NextSkeleton />
       </header>
       <footer className="flex flex-wrap items-center justify-end gap-1 p-2 [grid-area:dots]">
-        {[...Array(5)].map((_, index) => (
+        {[...Array(10)].map((_, index) => (
           <DotSkeleton key={index} />
         ))}
       </footer>

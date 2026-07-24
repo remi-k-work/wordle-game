@@ -3,6 +3,7 @@ import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
 import {
+  AnyAvgStatArgs,
   AnyChartArgs,
   AnyCounterArgs,
   AnyCounterData,
@@ -59,6 +60,11 @@ export class RpcTelemetry extends RpcGroup.make(
 
   Rpc.make("getAnyCounter", {
     payload: AnyCounterArgs,
+    success: Schema.Array(AnyCounterData),
+  }),
+
+  Rpc.make("getAnyAvgStat", {
+    payload: AnyAvgStatArgs,
     success: Schema.Array(AnyCounterData),
   })
 ) {}

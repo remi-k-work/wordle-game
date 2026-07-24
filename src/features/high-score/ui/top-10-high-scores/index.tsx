@@ -40,8 +40,8 @@ export function Top10HighScores({ top10HighScores, newHighScoreId }: Top10HighSc
           <TableRow key={id} className={cn("odd:bg-surface-2", id === newHighScoreId && "animate-wiggle bg-accent odd:bg-accent")}>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{playerName}</TableCell>
-            <TableCell className="bg-accent/30">{score}</TableCell>
-            <TableCell className="bg-destructive/30">{streak}</TableCell>
+            <TableCell className="bg-accent/30">{score.toLocaleString()}</TableCell>
+            <TableCell className="bg-destructive/30">{streak.toLocaleString()}</TableCell>
             <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
           </TableRow>
         ))}

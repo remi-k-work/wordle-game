@@ -1,7 +1,9 @@
 // services, features, and other libraries
+import { Duration } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { anyCounterAtom } from "@/features/telemetry/state";
+import { anyAvgStatAtom } from "@/features/telemetry/state";
+import { formatDuration } from "@/features/game/domain";
 
 // components
 import { InfoLine } from "@/ui/info-line";
@@ -9,26 +11,27 @@ import { SectionHeader } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
-import type { AnyCounterArgs } from "@/features/telemetry/services/charts-db";
+import type { AnyAvgStatArgs } from "@/features/telemetry/services/charts-db";
 
-interface AnyCounterChartProps {
-  counterName: AnyCounterArgs["counterName"];
+interface AnyAvgStatChartProps {
+  statColumn: AnyAvgStatArgs["statColumn"];
+  statTable: AnyAvgStatArgs["statTable"];
   solutionsLanguage: SolutionsLanguage;
   title: string;
   personalHeader: string;
 }
 
-export function AnyCounterChart({ counterName, solutionsLanguage, title, personalHeader }: AnyCounterChartProps) {
-  const anyCounter = useAtomValue(anyCounterAtom({ counterName, solutionsLanguage }));
+export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, title, personalHeader }: AnyAvgStatChartProps) {
+  const anyAvgStat = useAtomValue(anyAvgStatAtom({ statColumn, statTable, solutionsLanguage }));
 
-  return AsyncResult.builder(anyCounter)
-    .onInitialOrWaiting(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
-    .onFailure(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
-    .onSuccess((anyCounter) =>
-      anyCounter.length === 0 ? (
+  return AsyncResult.builder(anyAvgStat)
+    .onInitialOrWaiting(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
+    .onFailure(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
+    .onSuccess((anyAvgStat) =>
+      anyAvgStat.length === 0 ? (
         <>
           <SectionHeader title={title} />
-          <InfoLine message="No counter data tracked yet!" />
+          <InfoLine message="No stats data tracked yet!" />
         </>
       ) : (
         <>
@@ -37,14 +40,18 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
             <header className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
               <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase sm:text-xl md:text-2xl lg:text-3xl">{personalHeader}</h3>
               <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary) sm:text-5xl md:text-6xl lg:text-7xl">
-                {anyCounter[0].personal.toLocaleString()}
+                {statColumn === "timeSeconds" || statColumn === "durationSeconds"
+                  ? formatDuration(Duration.seconds(anyAvgStat[0].personal))
+                  : anyAvgStat[0].personal.toLocaleString()}
               </span>
             </header>
 
             <footer className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
-              <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Total</h3>
+              <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Average</h3>
               <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary) sm:text-5xl md:text-6xl lg:text-7xl">
-                {anyCounter[0].global.toLocaleString()}
+                {statColumn === "timeSeconds" || statColumn === "durationSeconds"
+                  ? formatDuration(Duration.seconds(anyAvgStat[0].global))
+                  : anyAvgStat[0].global.toLocaleString()}
               </span>
             </footer>
           </article>
@@ -54,7 +61,7 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
     .render();
 }
 
-export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCounterChartProps, "title" | "personalHeader">) {
+export function AnyAvgStatChartSkeleton({ title, personalHeader }: Pick<AnyAvgStatChartProps, "title" | "personalHeader">) {
   return (
     <>
       <SectionHeader title={title} />
@@ -67,7 +74,7 @@ export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCount
         </header>
 
         <footer className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
-          <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Total</h3>
+          <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Average</h3>
           <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary) sm:text-5xl md:text-6xl lg:text-7xl">
             &nbsp;
           </span>

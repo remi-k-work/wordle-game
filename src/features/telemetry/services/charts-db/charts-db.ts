@@ -2,6 +2,8 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import {
+  AnyAvgStatArgs,
+  anyAvgStatQuery,
   AnyChartArgs,
   AnyCounterArgs,
   anyCounterQuery,
@@ -74,6 +76,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);
     const getRunDeathReasonFrequency = runDeathReasonFrequencyQuery(sql);
     const getAnyCounter = anyCounterQuery(sql);
+    const getAnyAvgStat = anyAvgStatQuery(sql);
 
     return {
       getGuessDistribution: (request: AnyChartArgs) => getGuessDistribution(request),
@@ -83,6 +86,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       getFailedWordsFrequency: (request: AnyChartArgs) => getFailedWordsFrequency(request),
       getRunDeathReasonFrequency: (request: AnyChartArgs) => getRunDeathReasonFrequency(request),
       getAnyCounter: (request: AnyCounterArgs) => getAnyCounter(request),
+      getAnyAvgStat: (request: AnyAvgStatArgs) => getAnyAvgStat(request),
     } as const;
   }),
 }) {

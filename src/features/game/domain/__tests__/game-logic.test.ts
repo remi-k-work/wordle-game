@@ -116,5 +116,18 @@ describe("gameLogic", () => {
         expect(formatDuration(DateTime.distance(start, end))).toBe("00:05");
       })
     );
+
+    it.effect("formats time with days for durations over 24 hours", () =>
+      Effect.gen(function* () {
+        const start = yield* DateTime.now;
+
+        const duration = Duration.sum(Duration.days(1), Duration.sum(Duration.hours(2), Duration.sum(Duration.minutes(3), Duration.seconds(4))));
+
+        yield* TestClock.adjust(duration);
+        const end = yield* DateTime.now;
+
+        expect(formatDuration(DateTime.distance(start, end))).toBe("1d 02:03:04");
+      })
+    );
   });
 });

@@ -1,3 +1,4 @@
+export * from "./any-avg-stat";
 export * from "./any-counter";
 export * from "./arcade-streak-distribution";
 export * from "./failed-words-frequency";

@@ -10,12 +10,14 @@ import { SPEED_MULTIPLIER_CATEGORY_MAP } from ".";
 // Maps a speed multiplier to a category of a player (e.g. "Speed Demon")
 export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
 
-// Formats an Effect Duration into a human-readable HH:mm:ss string
+// Formats an Effect Duration into a human-readable HH:mm:ss string (also considers days)
 export const formatDuration = (duration: Duration.Duration) => {
-  const { hours, minutes, seconds } = Duration.parts(duration);
+  const { days, hours, minutes, seconds } = Duration.parts(duration);
   const pad = (n: number) => n.toString().padStart(2, "0");
 
-  return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
+  if (days > 0) return `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return `${pad(minutes)}:${pad(seconds)}`;
 };
 
 // Format the current guess word into an array of letter objects with color coding

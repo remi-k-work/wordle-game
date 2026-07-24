@@ -1,5 +1,6 @@
 "use client";
 
+export * from "./any-avg-stat";
 export * from "./any-counter";
 export * from "./browse-charts";
 export * from "./distributions";

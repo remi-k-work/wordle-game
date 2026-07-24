@@ -66,6 +66,12 @@ const RpcTelemetryLayer = RpcTelemetry.toLayer({
       const chartsDB = yield* ChartsDB;
       return yield* chartsDB.getAnyCounter(payload);
     }),
+
+  getAnyAvgStat: (payload) =>
+    Effect.gen(function* () {
+      const chartsDB = yield* ChartsDB;
+      return yield* chartsDB.getAnyAvgStat(payload);
+    }),
 }).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer)));
 
 const RpcLayer = RpcServer.layerHttp({
