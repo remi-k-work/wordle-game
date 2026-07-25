@@ -19,8 +19,8 @@ interface FrequencyChartsProps {
 
 export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
   return (
-    <Tabs.Root className="my-8 w-full" defaultValue="firstWords">
-      <Tabs.List className="relative z-1 -mb-px flex gap-1">
+    <Tabs.Root className="@container my-8 w-full" defaultValue="firstWords">
+      <Tabs.List className="relative z-1 -mb-px flex w-[100cqw] scrollbar-none gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <ChartTab value="firstWords">First Words</ChartTab>
         <ChartTab value="missedWords">Missed Words</ChartTab>
         <ChartTab value="runDeaths">Run Deaths</ChartTab>
@@ -50,8 +50,8 @@ export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
 
 export function FrequencyChartsSkeleton() {
   return (
-    <Tabs.Root className="my-8 w-full" defaultValue="firstWords">
-      <Tabs.List className="relative z-1 -mb-px flex gap-1">
+    <Tabs.Root className="@container my-8 w-full" defaultValue="firstWords">
+      <Tabs.List className="relative z-1 -mb-px flex w-[100cqw] scrollbar-none gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <ChartTabSkeleton value="firstWords" />
         <ChartTabSkeleton value="missedWords" />
         <ChartTabSkeleton value="runDeaths" />

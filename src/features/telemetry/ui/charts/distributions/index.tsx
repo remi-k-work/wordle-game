@@ -18,8 +18,8 @@ interface DistributionChartsProps {
 
 export function DistributionCharts({ solutionsLanguage }: DistributionChartsProps) {
   return (
-    <Tabs.Root className="my-8 w-full" defaultValue="guesses">
-      <Tabs.List className="relative z-1 -mb-px flex gap-1">
+    <Tabs.Root className="@container my-8 w-full" defaultValue="guesses">
+      <Tabs.List className="relative z-1 -mb-px flex w-[100cqw] scrollbar-none gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <ChartTab value="guesses">Guesses to Win</ChartTab>
         <ChartTab value="time">Time to Solve</ChartTab>
         <ChartTab value="streak">Streak</ChartTab>
@@ -45,8 +45,8 @@ export function DistributionCharts({ solutionsLanguage }: DistributionChartsProp
 
 export function DistributionChartsSkeleton() {
   return (
-    <Tabs.Root className="my-8 w-full" defaultValue="guesses">
-      <Tabs.List className="relative z-1 -mb-px flex gap-1">
+    <Tabs.Root className="@container my-8 w-full" defaultValue="guesses">
+      <Tabs.List className="relative z-1 -mb-px flex w-[100cqw] scrollbar-none gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
         <ChartTabSkeleton value="guesses" />
         <ChartTabSkeleton value="time" />
         <ChartTabSkeleton value="streak" />
