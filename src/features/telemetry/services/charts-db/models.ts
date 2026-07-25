@@ -21,44 +21,40 @@ export class AnyCounterData extends Schema.Class<AnyCounterData>("AnyCounterData
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-export class GuessDistributionData extends Schema.Class<GuessDistributionData>("GuessDistributionData")({
+export class GuessDistributionData extends AnyCounterData.extend<GuessDistributionData>("GuessDistributionData")({
   turn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
   globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
 }) {}
 
-export class TimeToSolveDistributionData extends Schema.Class<TimeToSolveDistributionData>("TimeToSolveDistributionData")({
+export class TimeToSolveDistributionData extends AnyCounterData.extend<TimeToSolveDistributionData>("TimeToSolveDistributionData")({
   maxSeconds: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
   globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
 }) {}
 
-export class ArcadeStreakDistributionData extends Schema.Class<ArcadeStreakDistributionData>("ArcadeStreakDistributionData")({
+export class ArcadeStreakDistributionData extends AnyCounterData.extend<ArcadeStreakDistributionData>("ArcadeStreakDistributionData")({
   streak: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
   globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
 }) {}
 
-export class OpeningGuessesFrequencyData extends Schema.Class<OpeningGuessesFrequencyData>("OpeningGuessesFrequencyData")({
+export class OpeningGuessesFrequencyData extends AnyCounterData.extend<OpeningGuessesFrequencyData>("OpeningGuessesFrequencyData")({
   word: TheSecretWord,
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-export class FailedWordsFrequencyData extends Schema.Class<FailedWordsFrequencyData>("FailedWordsFrequencyData")({
+export class FailedWordsFrequencyData extends AnyCounterData.extend<FailedWordsFrequencyData>("FailedWordsFrequencyData")({
   word: TheSecretWord,
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-export class RunDeathReasonFrequencyData extends Schema.Class<RunDeathReasonFrequencyData>("RunDeathReasonFrequencyData")({
+export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathReasonFrequencyData>("RunDeathReasonFrequencyData")({
   reason: Schema.Literals(["Forfeit", "Guesses"]),
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}
+
+export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData>("HardestWordsLeaderboardData")({
+  word: TheSecretWord,
+  personalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  personalAvgGuesses: Schema.NumberFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
+  globalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  globalAvgGuesses: Schema.NumberFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
 }) {}

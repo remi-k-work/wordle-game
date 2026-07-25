@@ -8,6 +8,7 @@ import { ChartPanel, ChartPanelSkeleton } from "@/ui/chart-panel";
 import { OpeningGuessesFrequencyChart, OpeningGuessesFrequencyChartSkeleton } from "./opening-guesses";
 import { FailedWordsFrequencyChart, FailedWordsFrequencyChartSkeleton } from "./failed-words";
 import { RunDeathReasonFrequencyChart, RunDeathReasonFrequencyChartSkeleton } from "./run-death-reason";
+import { HardestWordsLeaderboardChart, HardestWordsLeaderboardChartSkeleton } from "@/features/telemetry/ui/charts/leaderboards/hardest-words";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -23,6 +24,7 @@ export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
         <ChartTab value="firstWords">First Words</ChartTab>
         <ChartTab value="missedWords">Missed Words</ChartTab>
         <ChartTab value="runDeaths">Run Deaths</ChartTab>
+        <ChartTab value="hardestWords">Hardest Words</ChartTab>
         <Tabs.Indicator
           className={cn(
             "absolute top-0 left-0 -z-1 h-full w-(--active-tab-width) border-x border-t bg-surface-1",
@@ -39,6 +41,9 @@ export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
       <ChartPanel value="runDeaths">
         <RunDeathReasonFrequencyChart solutionsLanguage={solutionsLanguage} />
       </ChartPanel>
+      <ChartPanel value="hardestWords">
+        <HardestWordsLeaderboardChart solutionsLanguage={solutionsLanguage} />
+      </ChartPanel>
     </Tabs.Root>
   );
 }
@@ -50,6 +55,7 @@ export function FrequencyChartsSkeleton() {
         <ChartTabSkeleton value="firstWords" />
         <ChartTabSkeleton value="missedWords" />
         <ChartTabSkeleton value="runDeaths" />
+        <ChartTabSkeleton value="hardestWords" />
         <Tabs.Indicator
           className={cn(
             "absolute top-0 left-0 -z-1 h-full w-(--active-tab-width) border-x border-t bg-surface-1",
@@ -65,6 +71,9 @@ export function FrequencyChartsSkeleton() {
       </ChartPanelSkeleton>
       <ChartPanelSkeleton value="runDeaths">
         <RunDeathReasonFrequencyChartSkeleton />
+      </ChartPanelSkeleton>
+      <ChartPanelSkeleton value="hardestWords">
+        <HardestWordsLeaderboardChartSkeleton />
       </ChartPanelSkeleton>
     </Tabs.Root>
   );

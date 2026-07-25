@@ -13,6 +13,7 @@ import {
   failedWordsFrequencyQuery,
   GuessDistributionData,
   guessDistributionQuery,
+  hardestWordsLeaderboardQuery,
   openingGuessesFrequencyQuery,
   runDeathReasonFrequencyQuery,
   TimeToSolveDistributionData,
@@ -77,6 +78,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const getRunDeathReasonFrequency = runDeathReasonFrequencyQuery(sql);
     const getAnyCounter = anyCounterQuery(sql);
     const getAnyAvgStat = anyAvgStatQuery(sql);
+    const getHardestWordsLeaderboard = hardestWordsLeaderboardQuery(sql);
 
     return {
       getGuessDistribution: (request: AnyChartArgs) => getGuessDistribution(request),
@@ -87,6 +89,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       getRunDeathReasonFrequency: (request: AnyChartArgs) => getRunDeathReasonFrequency(request),
       getAnyCounter: (request: AnyCounterArgs) => getAnyCounter(request),
       getAnyAvgStat: (request: AnyAvgStatArgs) => getAnyAvgStat(request),
+      getHardestWordsLeaderboard: (request: AnyChartArgs) => getHardestWordsLeaderboard(request),
     } as const;
   }),
 }) {

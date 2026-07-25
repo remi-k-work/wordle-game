@@ -110,3 +110,14 @@ export const anyAvgStatAtom = Atom.family(
       })
     )
 );
+
+export const hardestWordsLeaderboardAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.fnUntraced(function* (get) {
+      const sessionId = get(sessionIdAtom);
+
+      const { getHardestWordsLeaderboard } = yield* RpcTelemetryClient;
+      return yield* getHardestWordsLeaderboard({ sessionId, solutionsLanguage });
+    })
+  )
+);

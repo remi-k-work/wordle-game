@@ -10,6 +10,7 @@ import {
   ArcadeStreakDistributionData,
   FailedWordsFrequencyData,
   GuessDistributionData,
+  HardestWordsLeaderboardData,
   OpeningGuessesFrequencyData,
   RunDeathReasonFrequencyData,
   TimeToSolveDistributionData,
@@ -66,5 +67,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getAnyAvgStat", {
     payload: AnyAvgStatArgs,
     success: Schema.Array(AnyCounterData),
+  }),
+
+  Rpc.make("getHardestWordsLeaderboard", {
+    payload: AnyChartArgs,
+    success: Schema.Array(HardestWordsLeaderboardData),
   })
 ) {}
