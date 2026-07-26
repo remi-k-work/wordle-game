@@ -17,7 +17,7 @@ export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLa
       const { getGuessDistribution } = yield* RpcTelemetryClient;
       return yield* getGuessDistribution({ sessionId, solutionsLanguage });
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -30,7 +30,7 @@ export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: Solut
         Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: row.maxSeconds === null ? Infinity : row.maxSeconds })))
       );
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -43,7 +43,7 @@ export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: Solu
         Effect.map((data) => data.map((row) => ({ ...row, streak: row.streak === null ? Infinity : row.streak })))
       );
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const openingGuessesFrequencyAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -54,7 +54,7 @@ export const openingGuessesFrequencyAtom = Atom.family((solutionsLanguage: Solut
       const { getOpeningGuessesFrequency } = yield* RpcTelemetryClient;
       return yield* getOpeningGuessesFrequency({ sessionId, solutionsLanguage });
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const failedWordsFrequencyAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -65,7 +65,7 @@ export const failedWordsFrequencyAtom = Atom.family((solutionsLanguage: Solution
       const { getFailedWordsFrequency } = yield* RpcTelemetryClient;
       return yield* getFailedWordsFrequency({ sessionId, solutionsLanguage });
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const runDeathReasonFrequencyAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -76,7 +76,7 @@ export const runDeathReasonFrequencyAtom = Atom.family((solutionsLanguage: Solut
       const { getRunDeathReasonFrequency } = yield* RpcTelemetryClient;
       return yield* getRunDeathReasonFrequency({ sessionId, solutionsLanguage });
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const anyCounterAtom = Atom.family(
@@ -88,7 +88,7 @@ export const anyCounterAtom = Atom.family(
         const { getAnyCounter } = yield* RpcTelemetryClient;
         return yield* getAnyCounter({ counterName, sessionId, solutionsLanguage });
       })
-    )
+    ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const anyAvgStatAtom = Atom.family(
@@ -108,7 +108,7 @@ export const anyAvgStatAtom = Atom.family(
         const { getAnyAvgStat } = yield* RpcTelemetryClient;
         return yield* getAnyAvgStat({ statColumn, statTable, sessionId, solutionsLanguage });
       })
-    )
+    ).pipe(Atom.setIdleTTL("5 minutes"))
 );
 
 export const hardestWordsLeaderboardAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -119,5 +119,5 @@ export const hardestWordsLeaderboardAtom = Atom.family((solutionsLanguage: Solut
       const { getHardestWordsLeaderboard } = yield* RpcTelemetryClient;
       return yield* getHardestWordsLeaderboard({ sessionId, solutionsLanguage });
     })
-  )
+  ).pipe(Atom.setIdleTTL("5 minutes"))
 );
