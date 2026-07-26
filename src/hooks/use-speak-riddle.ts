@@ -40,7 +40,22 @@ export function useSpeakRiddle() {
       const utterance = new SpeechSynthesisUtterance(trimmed);
 
       // Find the specific voice object using Kimi's safer fallback chain
-      const selectedVoice = voices.find((voice) => voice.name === voiceVoice) ?? voices.find((voice) => voice.default) ?? voices[0] ?? null;
+      const targetLangPrefix = solutionsLanguage === "En" ? "en" : "pl";
+      const matchingLangs = voices.filter((voice) => voice.lang.toLowerCase().startsWith(targetLangPrefix));
+
+      // A previously stored voice name still wins
+      const exactByName = voices.find((voice) => voice.name === voiceVoice);
+
+      // A "default: true" voice within the active language
+      const defaultInLang = matchingLangs.find((voice) => voice.default);
+
+      // First voice whose lang starts with the active language prefix
+      const anyInLang = matchingLangs[0];
+
+      // Last-resort, any voice we can find
+      const fallback = voices[0];
+
+      const selectedVoice = exactByName ?? defaultInLang ?? anyInLang ?? fallback ?? null;
 
       // Set the voice and language appropriately
       if (selectedVoice) {
