@@ -1,45 +1,19 @@
 // services, features, and other libraries
 import { Context, Effect, ExecutionPlan, Layer, Schedule } from "effect";
-import { generateText } from "ai";
+import { generateText, Output } from "ai";
 import { google } from "@ai-sdk/google";
 import { AiSdkError } from "@/domain";
+import { z } from "zod";
 
 // types
 import type { SolutionsLanguage } from ".";
 import type { LanguageModel } from "ai";
 
 // constants
-const RIDDLE_PROMPT_EN = (theSecretWord: string) => `
-You are a witty puzzle master for an arcade word game.
-Write a short, clever riddle for the secret word below.
-
-Rules:
-- Return only the riddle text.
-- Plain text only.
-- No Markdown or special formatting.
-- No headings, lists, labels, quotations, emojis, or explanations.
-- Do not reveal, spell, or directly reference the secret word.
-- Keep the riddle concise and suitable for a fast-paced arcade game.
-- The riddle will be displayed as plain text and read aloud by a text-to-speech engine.
-
-Secret Word: ${theSecretWord}
-`;
-
-const RIDDLE_PROMPT_PL = (theSecretWord: string) => `
-Jesteś błyskotliwym mistrzem łamigłówek w zręcznościowej grze słownej.
-Napisz krótką, sprytną zagadkę do poniższego sekretnego słowa.
-
-Zasady:
-- Zwróć tylko tekst zagadki.
-- Tylko zwykły tekst.
-- Bez znaczników Markdown ani specjalnego formatowania.
-- Bez nagłówków, list, etykiet, cytatów, emotikonów i wyjaśnień.
-- Nie ujawniaj, nie literuj ani nie powołuj się bezpośrednio na sekretne słowo.
-- Zagadka powinna być zwięzła i odpowiednia do dynamicznej gry zręcznościowej.
-- Zagadka zostanie wyświetlona jako zwykły tekst i odczytana na głos przez moduł przetwarzania tekstu na mowę.
-
-Sekretne Słowo: ${theSecretWord}
-`;
+const SYSTEM_PROMPT_EN = "You are a witty puzzle master for an arcade word game. Do not reveal the secret word.";
+const SYSTEM_PROMPT_PL = "Jesteś błyskotliwym mistrzem łamigłówek w zręcznościowej grze słownej. Nie ujawniaj wprost ukrytego słowa.";
+const RIDDLE_PROMPT_EN = (theSecretWord: string) => `Write a short, clever riddle for the word "${theSecretWord}".`;
+const RIDDLE_PROMPT_PL = (theSecretWord: string) => `Napisz krótką, sprytną zagadkę do słowa "${theSecretWord}".`;
 
 // Riddle model as a typed dependency (a service)
 const RiddleModel = Context.Service<LanguageModel>("RiddleModel");
@@ -49,9 +23,27 @@ const attemptRiddleWithModel = Effect.fn("riddle.attemptRiddleWithModel")(functi
   const model = yield* RiddleModel;
 
   return yield* Effect.tryPromise({
-    try: () => generateText({ model, prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord), maxRetries: 0 }),
+    try: () =>
+      generateText({
+        model,
+        instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN : SYSTEM_PROMPT_PL,
+        prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN(theSecretWord) : RIDDLE_PROMPT_PL(theSecretWord),
+        maxRetries: 0,
+        output: Output.object({
+          schema: z.object({
+            riddle: z
+              .string()
+              .trim()
+              .describe(
+                solutionsLanguage === "En"
+                  ? "The riddle text in plain text only. Absolutely no Markdown, special formatting, emojis, headings, or list markers. Must be suitable for direct text-to-speech reading."
+                  : "Tekst zagadki wyłącznie w postaci zwykłego tekstu. Absolutnie bez Markdownu, specjalnego formatowania, emotikonów, nagłówków ani znaczników list. Tekst musi nadawać się do bezpośredniego odczytu tekstu na mowę."
+              ),
+          }),
+        }),
+      }),
     catch: (cause) => new AiSdkError({ message: `The attempt to generate a riddle using the "${model}" model was unsuccessful.`, cause }),
-  }).pipe(Effect.map(({ text }) => text));
+  }).pipe(Effect.map(({ output }) => output.riddle));
 });
 
 const RiddlePlan = ExecutionPlan.make(

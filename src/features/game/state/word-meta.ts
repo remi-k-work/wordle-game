@@ -54,14 +54,8 @@ export const wordMetaSanitizedRiddleAtom = Atom.make((get) => {
 
   return (
     riddleOutput
-      // Remove Markdown emphasis (*, **, _, __)
-      .replace(/[*_]{1,2}(.*?)[*_]{1,2}/g, "$1")
-      // Inline code
-      .replace(/`(.*?)`/g, "$1")
-      // Headings and Blockquotes
-      .replace(/^[#>]{1,6}\s*/gm, "")
-      // Remove common Markdown list markers
-      .replace(/^[-*+]\s+/gm, "")
+      // Strip any stray inline markdown characters (asterisks, underscores, backticks)
+      .replace(/[*_`]/g, "")
       // Collapse all whitespace
       .replace(/\s+/g, " ")
       // Fix spacing before punctuation (TTS improvement)
