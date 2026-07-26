@@ -8,6 +8,7 @@ import { formatDuration } from "@/features/game/domain";
 // components
 import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
+import { StatCard, StatCardSkeleton } from "@/ui/stat-card";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -23,6 +24,8 @@ interface AnyAvgStatChartProps {
 
 export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, title, personalHeader }: AnyAvgStatChartProps) {
   const anyAvgStat = useAtomValue(anyAvgStatAtom({ statColumn, statTable, solutionsLanguage }));
+  const isDuration = statColumn === "timeSeconds" || statColumn === "durationSeconds";
+  const formatStatValue = (value: number) => (isDuration ? formatDuration(Duration.seconds(value)) : value.toLocaleString());
 
   return AsyncResult.builder(anyAvgStat)
     .onInitialOrWaiting(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
@@ -36,24 +39,13 @@ export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, titl
       ) : (
         <>
           <SectionHeader title={title} />
-          <article className="grid grid-cols-2 gap-6">
-            <header className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
-              <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase sm:text-xl md:text-2xl lg:text-3xl">{personalHeader}</h3>
-              <span className="text-4xl font-semibold wrap-anywhere text-(--color-primary) sm:text-5xl md:text-6xl lg:text-7xl">
-                {statColumn === "timeSeconds" || statColumn === "durationSeconds"
-                  ? formatDuration(Duration.seconds(anyAvgStat[0].personal))
-                  : anyAvgStat[0].personal.toLocaleString()}
-              </span>
-            </header>
-
-            <footer className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
-              <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Average</h3>
-              <span className="text-4xl font-semibold wrap-anywhere text-(--color-secondary) sm:text-5xl md:text-6xl lg:text-7xl">
-                {statColumn === "timeSeconds" || statColumn === "durationSeconds"
-                  ? formatDuration(Duration.seconds(anyAvgStat[0].global))
-                  : anyAvgStat[0].global.toLocaleString()}
-              </span>
-            </footer>
+          <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
+            <StatCard Tag="header" variant="primary" title={personalHeader}>
+              {formatStatValue(anyAvgStat[0].personal)}
+            </StatCard>
+            <StatCard Tag="footer" variant="secondary" title="Global Average">
+              {formatStatValue(anyAvgStat[0].global)}
+            </StatCard>
           </article>
         </>
       )
@@ -65,20 +57,13 @@ export function AnyAvgStatChartSkeleton({ title, personalHeader }: Pick<AnyAvgSt
   return (
     <>
       <SectionHeader title={title} />
-      <article className="grid grid-cols-2 gap-6">
-        <header className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-primary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
-          <h3 className="font-semibold tracking-widest text-(--color-primary) uppercase sm:text-xl md:text-2xl lg:text-3xl">{personalHeader}</h3>
-          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-primary) sm:text-5xl md:text-6xl lg:text-7xl">
-            &nbsp;
-          </span>
-        </header>
-
-        <footer className="grid aspect-auto w-3/4 max-w-sm gap-3 justify-self-center rounded-xl border-2 border-secondary bg-(--color-surface-1) p-3 text-center md:aspect-square md:p-6 lg:p-9">
-          <h3 className="font-semibold tracking-widest text-(--color-secondary) uppercase sm:text-xl md:text-2xl lg:text-3xl">Global Average</h3>
-          <span className="animate-pulse bg-accent text-4xl font-semibold wrap-anywhere text-(--color-secondary) sm:text-5xl md:text-6xl lg:text-7xl">
-            &nbsp;
-          </span>
-        </footer>
+      <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
+        <StatCard Tag="header" variant="primary" title={personalHeader}>
+          <StatCardSkeleton />
+        </StatCard>
+        <StatCard Tag="footer" variant="secondary" title="Global Average">
+          <StatCardSkeleton />
+        </StatCard>
       </article>
     </>
   );
