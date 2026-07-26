@@ -44,6 +44,14 @@ export const metadata: Metadata = {
 
   metadataBase: new URL("https://wordle-game.remiforge.dev"),
   alternates: { canonical: "/" },
+
+  // iOS "Add to Home Screen": launch in a standalone window without Safari's URL bar.
+  // The Web App Manifest (manifest.ts) covers the equivalent for Android Chrome.
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Wordle Overdrive",
+  },
 };
 
 export default function Layout({ children }: LayoutProps<"/">) {
