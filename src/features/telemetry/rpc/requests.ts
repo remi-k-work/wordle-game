@@ -8,6 +8,8 @@ import {
   AnyCounterArgs,
   AnyCounterData,
   ArcadeStreakDistributionData,
+  BestRunTrophyCardArgs,
+  BestRunTrophyCardData,
   FailedWordsFrequencyData,
   GuessDistributionData,
   HardestWordsLeaderboardData,
@@ -72,5 +74,10 @@ export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("getHardestWordsLeaderboard", {
     payload: AnyChartArgs,
     success: Schema.Array(HardestWordsLeaderboardData),
+  }),
+
+  Rpc.make("getBestRunTrophyCard", {
+    payload: BestRunTrophyCardArgs,
+    success: Schema.Option(BestRunTrophyCardData),
   })
 ) {}

@@ -1,6 +1,7 @@
 export * from "./any-avg-stat";
 export * from "./any-counter";
 export * from "./arcade-streak-distribution";
+export * from "./best-run-trophy-card";
 export * from "./failed-words-frequency";
 export * from "./guess-distribution";
 export * from "./hardest-words-leaderboard";

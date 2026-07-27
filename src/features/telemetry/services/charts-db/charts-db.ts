@@ -9,6 +9,8 @@ import {
   anyCounterQuery,
   ArcadeStreakDistributionData,
   arcadeStreakDistributionQuery,
+  BestRunTrophyCardArgs,
+  bestRunTrophyCardQuery,
   cumulativeToDistribution,
   failedWordsFrequencyQuery,
   GuessDistributionData,
@@ -79,6 +81,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const getAnyCounter = anyCounterQuery(sql);
     const getAnyAvgStat = anyAvgStatQuery(sql);
     const getHardestWordsLeaderboard = hardestWordsLeaderboardQuery(sql);
+    const getBestRunTrophyCard = bestRunTrophyCardQuery(sql);
 
     return {
       getGuessDistribution: (request: AnyChartArgs) => getGuessDistribution(request),
@@ -90,6 +93,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       getAnyCounter: (request: AnyCounterArgs) => getAnyCounter(request),
       getAnyAvgStat: (request: AnyAvgStatArgs) => getAnyAvgStat(request),
       getHardestWordsLeaderboard: (request: AnyChartArgs) => getHardestWordsLeaderboard(request),
+      getBestRunTrophyCard: (request: BestRunTrophyCardArgs) => getBestRunTrophyCard(request),
     } as const;
   }),
 }) {

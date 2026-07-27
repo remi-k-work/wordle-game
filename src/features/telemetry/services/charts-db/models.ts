@@ -58,3 +58,15 @@ export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeader
   globalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   globalAvgGuesses: Schema.NumberFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
 }) {}
+
+export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCardArgs>("BestRunTrophyCardArgs")({
+  whichBestRun: Schema.Literals(["personal", "global"]),
+}) {}
+
+export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData>("BestRunTrophyCardData")({
+  deathReason: Schema.Literals(["Forfeit", "Guesses"]),
+  failedOnWord: Schema.Union([TheSecretWord, Schema.Literal("N/A")]),
+  finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}

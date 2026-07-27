@@ -7,7 +7,7 @@ import { sessionIdAtom } from "@/features/player/state";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
-import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/services/charts-db";
+import type { AnyAvgStatArgs, AnyCounterArgs, BestRunTrophyCardArgs } from "@/features/telemetry/services/charts-db";
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   RuntimeAtom.atom(
@@ -120,4 +120,16 @@ export const hardestWordsLeaderboardAtom = Atom.family((solutionsLanguage: Solut
       return yield* getHardestWordsLeaderboard({ sessionId, solutionsLanguage });
     })
   ).pipe(Atom.setIdleTTL("5 minutes"))
+);
+
+export const bestRunTrophyCardAtom = Atom.family(
+  ({ whichBestRun, solutionsLanguage }: { whichBestRun: BestRunTrophyCardArgs["whichBestRun"]; solutionsLanguage: SolutionsLanguage }) =>
+    RuntimeAtom.atom(
+      Effect.fnUntraced(function* (get) {
+        const sessionId = get(sessionIdAtom);
+
+        const { getBestRunTrophyCard } = yield* RpcTelemetryClient;
+        return yield* getBestRunTrophyCard({ whichBestRun, sessionId, solutionsLanguage });
+      })
+    ).pipe(Atom.setIdleTTL("5 minutes"))
 );
