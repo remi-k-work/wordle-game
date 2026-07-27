@@ -44,5 +44,5 @@ export function StatCard({ Tag = "section", variant, title, children }: StatCard
 }
 
 export function StatCardSkeleton() {
-  return <span className="inline-block w-full animate-pulse bg-accent">&nbsp;</span>;
+  return <span className="inline-block w-full">&nbsp;</span>;
 }

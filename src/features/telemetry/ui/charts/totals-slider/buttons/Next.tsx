@@ -1,5 +1,5 @@
 // react
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // components
 import { Button } from "@base-ui/react";
@@ -17,12 +17,9 @@ interface NextProps {
 export function Next({ emblaApi }: NextProps) {
   const [isDisabled, setIsDisabled] = useState(true);
 
-  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-    setIsDisabled(!emblaApi.canScrollNext());
-  }, []);
-
   useEffect(() => {
     if (!emblaApi) return;
+    const onSelect = (emblaApi: EmblaCarouselType) => setIsDisabled(!emblaApi.canScrollNext());
 
     onSelect(emblaApi);
     emblaApi.on("reInit", onSelect).on("select", onSelect);
@@ -30,7 +27,7 @@ export function Next({ emblaApi }: NextProps) {
     return () => {
       emblaApi.off("reInit", onSelect).off("select", onSelect);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi]);
 
   return (
     <Button className="button p-1" disabled={isDisabled} onClick={() => emblaApi?.scrollNext()}>

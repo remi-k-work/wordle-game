@@ -1,5 +1,5 @@
 // react
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
@@ -22,12 +22,9 @@ interface DotProps {
 export function Dot({ emblaApi, index }: DotProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, []);
-
   useEffect(() => {
     if (!emblaApi) return;
+    const onSelect = (emblaApi: EmblaCarouselType) => setSelectedIndex(emblaApi.selectedScrollSnap());
 
     onSelect(emblaApi);
     emblaApi.on("reInit", onSelect).on("select", onSelect);
@@ -35,7 +32,7 @@ export function Dot({ emblaApi, index }: DotProps) {
     return () => {
       emblaApi.off("reInit", onSelect).off("select", onSelect);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi]);
 
   return (
     <Button className={cn("button bg-secondary p-0", index === selectedIndex && "bg-accent")} onClick={() => emblaApi?.scrollTo(index)}>

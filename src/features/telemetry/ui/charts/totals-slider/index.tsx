@@ -23,7 +23,7 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
 
   useEffect(() => {
     if (!emblaApi) return;
-    const onSelect = (api: EmblaCarouselType) => setSelectedIndex(api.selectedScrollSnap());
+    const onSelect = (emblaApi: EmblaCarouselType) => setSelectedIndex(emblaApi.selectedScrollSnap());
 
     onSelect(emblaApi);
     emblaApi.on("reInit", onSelect).on("select", onSelect);
