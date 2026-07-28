@@ -11,6 +11,8 @@ import { HighScorePage } from "@/features/high-score/domain";
 import { PageHeader } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import {
+  BestRunTrophyCardChart,
+  BestRunTrophyCardChartSkeleton,
   BrowseCharts,
   BrowseChartsSkeleton,
   DistributionCharts,
@@ -61,6 +63,7 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScores top10HighScores={top10HighScores} />
       <BrowseCharts />
+      <BestRunTrophyCardChart solutionsLanguage={sl} />
       <TotalsSlider solutionsLanguage={sl} />
       <DistributionCharts solutionsLanguage={sl} />
       <FrequencyCharts solutionsLanguage={sl} />
@@ -74,6 +77,7 @@ function PageSkeleton() {
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <Top10HighScoresSkeleton />
       <BrowseChartsSkeleton />
+      <BestRunTrophyCardChartSkeleton />
       <TotalsSliderSkeleton />
       <DistributionChartsSkeleton />
       <FrequencyChartsSkeleton />

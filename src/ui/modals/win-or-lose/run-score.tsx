@@ -56,7 +56,7 @@ export function RunScore() {
         <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Score</h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
           <TrophyIcon className="size-7" />
-          {runScore}
+          {runScore.toLocaleString()}
         </span>
       </div>
       <div className="bg-surface-3 p-3">
@@ -70,7 +70,7 @@ export function RunScore() {
         <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Best Run Score</h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
           <TrophyIcon className="size-7" />
-          {bestRunScore}
+          {bestRunScore.toLocaleString()}
         </span>
       </div>
       <div className="bg-surface-2 p-3">

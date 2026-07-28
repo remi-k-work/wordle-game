@@ -69,4 +69,5 @@ export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData>("
   finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  createdAt: Schema.DateTimeUtcFromDate,
 }) {}

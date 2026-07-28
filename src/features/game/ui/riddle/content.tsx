@@ -21,7 +21,7 @@ export function Content() {
 
   return (
     <>
-      <p className={cn("mx-auto text-center text-xl leading-relaxed", (isAwaiting || isLoading) && "animate-pulse")}>
+      <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", (isAwaiting || isLoading) && "animate-pulse")}>
         {isAwaiting ? "Waiting for the secret word..." : isLoading ? "Thinking..." : (sanitizedRiddle ?? "Riddle unavailable. You are on your own!")}
       </p>
       <Button className="button mx-auto mt-4" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedRiddle)}>
@@ -35,7 +35,7 @@ export function Content() {
 export function ContentSkeleton() {
   return (
     <>
-      <p className="mx-auto animate-pulse text-center text-xl leading-relaxed">Thinking...</p>
+      <p className="mx-auto animate-pulse text-center text-lg leading-relaxed sm:text-xl lg:text-2xl">Thinking...</p>
       <Button className="button mx-auto mt-4" disabled>
         <SpeakerWaveIcon className="size-11" />
         Speak Riddle
