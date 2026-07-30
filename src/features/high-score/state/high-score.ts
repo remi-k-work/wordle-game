@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { createActor } from "xstate";
 import { highScoreMachine } from "@/features/high-score/machines/high-score";
 import { inspect } from "@/machines/inspect";
@@ -55,7 +56,8 @@ export const highScoreNewHighScoreIdAtom = highScoreMachineAtom.pipe(Atom.map((s
 // Atom to fetch the top 10 high scores
 export const top10HighScoresAtom = RuntimeAtom.atom(
   Effect.gen(function* () {
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
     const { top10HighScores } = yield* RpcHighScoreClient;
-    return yield* top10HighScores();
+    return yield* top10HighScores(solutionsLanguage);
   })
 );

@@ -27,7 +27,7 @@ const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: 
       // Riddles and definitions are optional enrichments; failed requests are converted into Option.none() instead of failing the entire actor
       return {
         theRiddle: Result.match(theRiddle, { onFailure: Option.none, onSuccess: Option.some }),
-        wordDefinition: Result.match(wordDefinition, { onFailure: Option.none, onSuccess: Option.some }),
+        wordDefinition: Result.match(wordDefinition, { onFailure: Option.none, onSuccess: (definition) => definition }),
       } as const satisfies WordMeta;
     }),
     { signal }
@@ -36,12 +36,13 @@ const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: 
 
 export const wordMetaMachine = setup({
   types: {} as {
-    events: { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord };
+    events: { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord } | { readonly type: "resetRequested" };
     context: WordMeta;
   },
   actions: {
     // Save the loaded word meta
     saveWordMeta: assign(({ context }, params: { wordMeta: WordMeta }) => ({ ...context, ...params.wordMeta }) as const satisfies WordMeta),
+    clearWordMeta: assign(() => INITIAL_WORD_META),
   },
   actors: { onLoadingActor },
 }).createMachine({
@@ -51,7 +52,8 @@ export const wordMetaMachine = setup({
 
   on: {
     // Metadata cannot be loaded or reloaded until the game data machine has selected the next secret word
-    secretWordPicked: { target: ".loading", reenter: true },
+    secretWordPicked: { target: ".loading", reenter: true, actions: "clearWordMeta" },
+    resetRequested: { target: ".awaitingTheSecretWord", actions: "clearWordMeta" },
   },
 
   states: {

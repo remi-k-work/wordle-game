@@ -12,8 +12,7 @@ export function BrowseCharts() {
   const { sl, browseChartsMachineEvent } = useBrowseCharts();
 
   return (
-    <h2 className="my-8 flex max-w-none items-center justify-between gap-3 bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-3 font-sans text-xl leading-none sm:text-3xl lg:text-4xl">
-      Game Charts
+    <header className="my-8 flex justify-end bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
       <label className="flex items-center gap-3">
         <UsFlagIcon className="mx-auto size-11" />
         <Switch.Root
@@ -25,7 +24,7 @@ export function BrowseCharts() {
           )}
           name="browseChartsSl"
           aria-label="browseChartsSl"
-          title="Switch Solutions Language for Charts"
+          title="Switch Solutions Language"
           checked={sl === "Pl"}
           onCheckedChange={(isPl) => browseChartsMachineEvent({ type: "slChanged", sl: isPl ? "Pl" : "En" })}
         >
@@ -33,14 +32,13 @@ export function BrowseCharts() {
         </Switch.Root>
         <PlFlagIcon className="mx-auto size-11" />
       </label>
-    </h2>
+    </header>
   );
 }
 
 export function BrowseChartsSkeleton() {
   return (
-    <h2 className="my-8 flex max-w-none items-center justify-between gap-3 bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-3 font-sans text-xl leading-none sm:text-3xl lg:text-4xl">
-      Game Charts
+    <header className="my-8 flex justify-end bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
       <label className="flex items-center gap-3">
         <UsFlagIcon className="mx-auto size-11" />
         <Switch.Root
@@ -52,7 +50,7 @@ export function BrowseChartsSkeleton() {
           )}
           name="browseChartsSl"
           aria-label="browseChartsSl"
-          title="Switch Solutions Language for Charts"
+          title="Switch Solutions Language"
           checked={false}
           onCheckedChange={() => {}}
           disabled
@@ -61,6 +59,6 @@ export function BrowseChartsSkeleton() {
         </Switch.Root>
         <PlFlagIcon className="mx-auto size-11" />
       </label>
-    </h2>
+    </header>
   );
 }

@@ -6,10 +6,10 @@ import { RpcHighScore } from "./requests";
 import { HighScoreDB } from "@/features/high-score/services/high-score-db";
 
 const RpcHighScoreLayer = RpcHighScore.toLayer({
-  top10HighScores: () =>
+  top10HighScores: (solutionsLanguage) =>
     Effect.gen(function* () {
       const highScoreDB = yield* HighScoreDB;
-      return yield* highScoreDB.top10HighScores;
+      return yield* highScoreDB.top10HighScores(solutionsLanguage);
     }),
 
   addHighScore: (payload) =>

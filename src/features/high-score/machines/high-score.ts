@@ -11,11 +11,11 @@ import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/feature
 // constants
 import { INITIAL_HIGH_SCORE_CONTEXT } from "@/features/high-score/domain";
 
-const top10HighScoresActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+const top10HighScoresActor = fromPromise(async ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const { top10HighScores } = yield* RpcHighScoreClient;
-      return yield* top10HighScores();
+      return yield* top10HighScores(input.solutionsLanguage);
     }),
     { signal }
   )
@@ -25,9 +25,7 @@ const addHighScoreActor = fromPromise(async ({ input: { context }, signal }: { i
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const { addHighScore } = yield* RpcHighScoreClient;
-      const { id } = yield* addHighScore({ ...context, score: context.runScore, solutionsLang: context.solutionsLanguage } as const satisfies AddHighScore);
-
-      return Option.some(id);
+      return yield* addHighScore({ ...context, score: context.runScore, solutionsLang: context.solutionsLanguage } as const satisfies AddHighScore);
     }),
     { signal }
   )
@@ -75,6 +73,7 @@ export const highScoreMachine = setup({
     ),
 
     onSuccess: () => toastManager.add({ title: "Score Recorded", description: "Good luck on your next run!" }),
+    onNoLongerQualified: () => toastManager.add({ type: "error", title: "Leaderboard Updated", description: "This score no longer qualifies for the Top 10." }),
     onFailure: () => toastManager.add({ type: "error", title: "Submission Failed", description: "Failed to save your score. Please try again later." }),
   },
   actors: { top10HighScoresActor, addHighScoreActor },
@@ -91,6 +90,7 @@ export const highScoreMachine = setup({
     checkingQualification: {
       invoke: {
         src: "top10HighScoresActor",
+        input: ({ context }) => ({ solutionsLanguage: context.solutionsLanguage }),
         onDone: [
           { guard: { type: "qualifiesForHighScore", params: ({ event }) => ({ top10HighScores: event.output }) }, target: "enteringInitials" },
 
@@ -111,7 +111,14 @@ export const highScoreMachine = setup({
       invoke: {
         src: "addHighScoreActor",
         input: ({ context }) => ({ context }),
-        onDone: { target: "success", actions: { type: "saveNewHighScoreId", params: ({ event }) => ({ newHighScoreId: event.output }) } },
+        onDone: [
+          {
+            guard: ({ event }) => Option.isSome(event.output),
+            target: "success",
+            actions: { type: "saveNewHighScoreId", params: ({ event }) => ({ newHighScoreId: event.output }) },
+          },
+          { target: "awaitingFinishedRun", actions: "onNoLongerQualified" },
+        ],
         onError: { target: "failure" },
       },
     },

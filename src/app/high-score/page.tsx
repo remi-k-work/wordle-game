@@ -39,7 +39,7 @@ const main = ({ params, searchParams }: PageProps<"/high-score">) =>
     } = yield* validatePageInputs(HighScorePage, { params, searchParams });
 
     const highScoreDB = yield* HighScoreDB;
-    const top10HighScores = yield* highScoreDB.top10HighScores;
+    const top10HighScores = yield* highScoreDB.top10HighScores(sl);
 
     return { sl, top10HighScores } as const;
   });
@@ -61,8 +61,8 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
-      <Top10HighScores top10HighScores={top10HighScores} />
       <BrowseCharts />
+      <Top10HighScores top10HighScores={top10HighScores} />
       <BestRunTrophyCardChart solutionsLanguage={sl} />
       <TotalsSlider solutionsLanguage={sl} />
       <DistributionCharts solutionsLanguage={sl} />
@@ -75,8 +75,8 @@ function PageSkeleton() {
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
-      <Top10HighScoresSkeleton />
       <BrowseChartsSkeleton />
+      <Top10HighScoresSkeleton />
       <BestRunTrophyCardChartSkeleton />
       <TotalsSliderSkeleton />
       <DistributionChartsSkeleton />

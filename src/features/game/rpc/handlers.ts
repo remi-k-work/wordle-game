@@ -36,7 +36,7 @@ const RpcGameLayer = RpcGame.toLayer({
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
-    Effect.succeed(Option.fromNullishOr(solutionsLanguage === "En" ? DEFINITIONS_EN[theSecretWord] : DEFINITIONS_PL[theSecretWord]).pipe(Option.getOrNull)),
+    Effect.succeed(Option.fromNullishOr(solutionsLanguage === "En" ? DEFINITIONS_EN[theSecretWord] : DEFINITIONS_PL[theSecretWord])),
 });
 
 const RpcLayer = RpcServer.layerHttp({

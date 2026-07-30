@@ -21,9 +21,11 @@ type GameFlowButtonProps = ComponentPropsWithoutRef<typeof Button>;
 export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
   const runSessionMachineSnapshot = useAtomValue(runSessionMachineAtom);
+  const gameDataMachineSnapshot = useAtomValue(gameDataMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
 
-  if (wordChallengeMachineSnapshot.matches("awaitingGameData")) return <GameFlowButtonSkeleton {...rest} />;
+  if (wordChallengeMachineSnapshot.matches("awaitingGameData") || gameDataMachineSnapshot.matches("loading") || gameDataMachineSnapshot.matches("selectingWord"))
+    return <GameFlowButtonSkeleton {...rest} />;
   const isRunActive = runSessionMachineSnapshot.matches("active");
 
   // "Next Word" button (won a word, OR returning to an active run with no current puzzle)

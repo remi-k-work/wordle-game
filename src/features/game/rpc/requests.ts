@@ -26,6 +26,6 @@ export class RpcGame extends RpcGroup.make(
 
   Rpc.make("fetchDefinition", {
     payload: { solutionsLanguage: SolutionsLanguage, theSecretWord: TheSecretWord },
-    success: WordDefinition,
+    success: Schema.Option(WordDefinition),
   })
 ) {}

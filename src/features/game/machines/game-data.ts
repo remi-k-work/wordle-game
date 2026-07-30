@@ -38,6 +38,16 @@ const onLoadingActor = fromPromise(async ({ input, signal }: { input: { solution
   )
 );
 
+const selectSecretWordActor = fromPromise(async ({ input, signal }: { input: { solutions: ReadonlyArray<string> }; signal: AbortSignal }) =>
+  RuntimeClient.runPromise(
+    Effect.gen(function* () {
+      const randomIndex = yield* Random.nextIntBetween(0, input.solutions.length);
+      return input.solutions[randomIndex].toUpperCase();
+    }),
+    { signal }
+  )
+);
+
 export const gameDataMachine = setup({
   types: {} as {
     events:
@@ -50,26 +60,20 @@ export const gameDataMachine = setup({
     // Save the loaded game data
     saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
 
-    // Pick a new random secret word from the available solutions
-    pickNewSecretWord: ({ context }) =>
+    onSecretWordSelected: (_, params: { theSecretWord: string }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          const solutions = Option.getOrThrow(context.solutions);
-          const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
-          const theSecretWord = solutions[randomIndex].toUpperCase();
+          const theSecretWord = params.theSecretWord;
 
           // *** TEST CODE ***
           // *** TEST CODE ***
           // *** TEST CODE ***
-          yield* Effect.log(`Secret word: ${theSecretWord}`);
+          yield* Effect.log(`The Secret Word: ${theSecretWord}`);
           // *** TEST CODE ***
           // *** TEST CODE ***
           // *** TEST CODE ***
 
-          // Notify the word meta machine that the secret word has been picked
           yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
-
-          // Notify the word challenge machine that a new puzzle is ready
           yield* Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord });
         })
       ),
@@ -77,7 +81,7 @@ export const gameDataMachine = setup({
     // Notify the word challenge machine that game data is ready (no word yet — idle state)
     onGameDataLoaded: ({ context }) => RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
   },
-  actors: { onLoadingActor },
+  actors: { onLoadingActor, selectSecretWordActor },
 }).createMachine({
   id: "gameData",
   context: INITIAL_GAME_DATA,
@@ -97,7 +101,17 @@ export const gameDataMachine = setup({
       },
     },
 
-    ready: { on: { nextWordRequested: { actions: "pickNewSecretWord" } } },
+    ready: { on: { nextWordRequested: { target: "selectingWord" } } },
+
+    selectingWord: {
+      tags: ["loading"],
+      invoke: {
+        src: "selectSecretWordActor",
+        input: ({ context }) => ({ solutions: Option.getOrThrow(context.solutions) }),
+        onDone: { target: "ready", actions: { type: "onSecretWordSelected", params: ({ event }) => ({ theSecretWord: event.output }) } },
+        onError: "failure",
+      },
+    },
 
     failure: { on: { retryRequested: "loading" } },
   },

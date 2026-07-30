@@ -1,7 +1,8 @@
 // services, features, and other libraries
-import { Context, Effect, Layer, Schema } from "effect";
+import { Context, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { HighScore, AddHighScore } from "@/features/high-score/domain";
+import { SolutionsLanguage } from "@/features/game/domain";
 import { PgLive } from "@/lib/pg-live";
 
 export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
@@ -9,9 +10,10 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
     const sql = yield* SqlClient.SqlClient;
 
     const top10HighScores = SqlSchema.findAll({
-      Request: Schema.Void,
+      Request: SolutionsLanguage,
       Result: HighScore,
-      execute: () => sql`SELECT id, player_name, score, streak, solutions_lang, created_at FROM high_score ORDER BY score DESC, streak DESC LIMIT 10`,
+      execute: (solutionsLanguage) =>
+        sql`SELECT id, player_name, score, streak, solutions_lang, created_at FROM high_score WHERE solutions_lang = ${solutionsLanguage} ORDER BY score DESC, streak DESC LIMIT 10`,
     });
 
     const addHighScore = SqlSchema.findOne({
@@ -21,9 +23,24 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
     });
 
     return {
-      top10HighScores: top10HighScores().pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
+      top10HighScores: (solutionsLanguage: SolutionsLanguage) =>
+        top10HighScores(solutionsLanguage).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
       addHighScore: (request: AddHighScore) =>
-        addHighScore(request).pipe(
+        sql
+          .withTransaction(
+            Effect.gen(function* () {
+              // Serialize qualification and insertion so two simultaneous submissions cannot both claim the same final slot.
+              yield* sql`LOCK TABLE high_score IN SHARE ROW EXCLUSIVE MODE`;
+              const currentTop10 = yield* top10HighScores(request.solutionsLang);
+              const tail = currentTop10.at(-1);
+              const qualifies = currentTop10.length < 10 || tail === undefined || request.score > tail.score || (request.score === tail.score && request.streak > tail.streak);
+              if (!qualifies) return Option.none();
+
+              const { id } = yield* addHighScore(request);
+              return Option.some(id);
+            })
+          )
+          .pipe(
           Effect.tapError(Effect.logError),
           Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die, NoSuchElementError: Effect.die })
         ),

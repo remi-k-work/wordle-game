@@ -14,10 +14,10 @@ export type Color = typeof Color.Type;
 export type WordleGrid = typeof WordleGrid.Type;
 export type Keypad = typeof Keypad.Type;
 
-export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(WORD_LENGTH)));
+export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isMinLength(WORD_LENGTH)), Schema.check(Schema.isMaxLength(WORD_LENGTH)));
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
 export const TheRiddle = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
-export const WordDefinition = Schema.Union([Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())), Schema.Null]);
+export const WordDefinition = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
 
 // All the available colors for a single tile
 export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
