@@ -6,9 +6,10 @@ import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { highScoreMachineAtom } from "@/features/high-score/state";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state";
+import { runResultAtom } from "@/features/game/state";
 
 // types
-import type { RunSession, WordChallenge, WordScore } from "@/features/game/domain";
+import type { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain";
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
@@ -55,7 +56,24 @@ export const runSessionMachine = setup({
     }),
 
     // Finish the active run by clearing identifiers, but LEAVE runScore, streak, and createdAt intact for the UI!
-    finishActiveRun: assign(({ context }) => ({ ...context, runId: Option.none() }) as const satisfies RunSession),
+    finishActiveRun: assign(
+      ({ context }) => ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession
+    ),
+
+    clearFinishedRun: () => RuntimeClient.runPromise(Atom.set(runResultAtom, Option.none())),
+
+    saveFinishedRun: ({ context }, params: { deathReason: RunDeathReason }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          const now = DateTime.makeUnsafe(Date.now());
+          const runId = Option.getOrThrow(context.runId);
+          const createdAt = Option.getOrElse(context.createdAt, () => now);
+          yield* Atom.set(
+            runResultAtom,
+            Option.some({ runId, createdAt, finishedAt: now, runScore: context.runScore, streak: context.streak, deathReason: params.deathReason })
+          );
+        })
+      ),
 
     // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
     trackStartedNewRun: () => RuntimeClient.runPromise(trackStartedNewRun),
@@ -95,22 +113,28 @@ export const runSessionMachine = setup({
     inactive: {
       on: {
         // Start a brand-new arcade run
-        startedNewRun: { target: "active", actions: ["trackStartedNewRun", "startNewRun"] },
+        startedNewRun: { target: "active", actions: ["trackStartedNewRun", "startNewRun", "clearFinishedRun"] },
       },
     },
 
     active: {
       on: {
-        solutionsLanguageChanged: { target: "inactive", actions: "finishActiveRun" },
+        solutionsLanguageChanged: { target: "inactive", actions: ["finishActiveRun", "clearFinishedRun"] },
 
         // Forfeit the active run
-        forfeitedRun: { target: "inactive", actions: ["trackForfeitedRun", "finishActiveRun", "onRunFinished"] },
+        forfeitedRun: {
+          target: "inactive",
+          actions: ["trackForfeitedRun", { type: "saveFinishedRun", params: { deathReason: "Forfeit" } }, "onRunFinished", "finishActiveRun"],
+        },
 
         // Word won, bank volatile points
         wordWon: { actions: "bankWord" },
 
         // Word lost, finish the active run
-        wordLost: { target: "inactive", actions: ["finishActiveRun", "onRunFinished"] },
+        wordLost: {
+          target: "inactive",
+          actions: [{ type: "saveFinishedRun", params: { deathReason: "Guesses" } }, "onRunFinished", "finishActiveRun"],
+        },
       },
     },
   },

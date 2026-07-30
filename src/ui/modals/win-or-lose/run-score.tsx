@@ -11,6 +11,7 @@ import {
   runSessionRunIdAtom,
   runSessionRunScoreAtom,
   runSessionStreakAtom,
+  runResultAtom,
 } from "@/features/game/state";
 import { formatDuration } from "@/features/game/domain";
 
@@ -18,30 +19,39 @@ import { formatDuration } from "@/features/game/domain";
 import { ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 export function RunScore() {
-  const runId = useAtomValue(runSessionRunIdAtom);
-  const createdAt = useAtomValue(runSessionCreatedAtAtom);
-  const runScore = useAtomValue(runSessionRunScoreAtom);
-  const streak = useAtomValue(runSessionStreakAtom);
+  const runResult = useAtomValue(runResultAtom);
+  const activeRunId = useAtomValue(runSessionRunIdAtom);
+  const activeCreatedAt = useAtomValue(runSessionCreatedAtAtom);
+  const activeRunScore = useAtomValue(runSessionRunScoreAtom);
+  const activeStreak = useAtomValue(runSessionStreakAtom);
   const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);
   const bestStreak = useAtomValue(runSessionBestStreakAtom);
 
-  // We calculate the total real-world time the run was alive
   const [now, setNow] = useState(() => DateTime.makeUnsafe(Date.now()));
-  const runDuration = DateTime.distance(
-    Option.getOrElse(createdAt, () => now),
-    now
-  );
 
   useEffect(() => {
     // If we do not have an active run, time freezes
-    if (Option.isNone(runId)) return;
+    if (Option.isNone(activeRunId)) return;
 
     const interval = setInterval(() => {
       setNow(DateTime.makeUnsafe(Date.now()));
     }, 1000);
 
-    return () => interval && clearInterval(interval);
-  }, [runId]);
+    return () => clearInterval(interval);
+  }, [activeRunId]);
+
+  const summary = Option.match(runResult, {
+    onSome: ({ createdAt, finishedAt, runScore, streak }) => ({ createdAt, finishedAt, runScore, streak }),
+    onNone: () =>
+      Option.match(activeRunId, {
+        onNone: () => null,
+        onSome: () => ({ createdAt: Option.getOrElse(activeCreatedAt, () => now), finishedAt: now, runScore: activeRunScore, streak: activeStreak }),
+      }),
+  });
+
+  // We calculate the total real-world time the run was alive
+  if (summary === null) return null;
+  const runDuration = DateTime.distance(summary.createdAt, summary.finishedAt);
 
   return (
     <section className="grid grid-cols-2 grid-rows-2 border">
@@ -56,14 +66,14 @@ export function RunScore() {
         <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Score</h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
           <TrophyIcon className="size-7" />
-          {runScore.toLocaleString()}
+          {summary.runScore.toLocaleString()}
         </span>
       </div>
       <div className="bg-surface-3 p-3">
         <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Streak</h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
           <FireIcon className="size-7" />
-          {streak}
+          {summary.streak}
         </span>
       </div>
       <div className="bg-surface-3 p-3">

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Struct } from "effect";
+import { Option, Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { RuntimeAtom } from "@/lib/runtime-client";
@@ -9,6 +9,7 @@ import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
+import type { RunResult } from "@/features/game/domain";
 
 type RunSessionMachineSnapshot = SnapshotFrom<typeof runSessionMachine>;
 type RunSessionMachineEvent = EventFromLogic<typeof runSessionMachine>;
@@ -69,3 +70,6 @@ export const runSessionRunScoreAtom = runSessionMachineAtom.pipe(Atom.map((snaps
 export const runSessionStreakAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.streak));
 export const runSessionBestRunScoreAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.bestRunScore));
 export const runSessionBestStreakAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.bestStreak));
+
+// A completed run belongs to the result UI, not durable active-run storage
+export const runResultAtom = Atom.make<Option.Option<RunResult>>(Option.none()).pipe(Atom.keepAlive);

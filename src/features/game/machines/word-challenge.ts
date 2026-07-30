@@ -4,9 +4,8 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
-import { runSessionMachineAtom } from "@/features/game/state";
+import { gameFlowMachineAtom, runSessionMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
-import { modalMachineAtom } from "@/state";
 
 // types
 import type { WordChallenge } from "@/features/game/domain";
@@ -123,12 +122,8 @@ export const wordChallengeMachine = setup({
     onWordWon: ({ context }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          // Word won, bank volatile points
           const wordScore = Option.getOrThrow(context.wordScore);
-          yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore });
-
-          // Command the modal machine actor to open up the status modal
-          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
+          yield* Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore });
         })
       ),
 
@@ -141,16 +136,7 @@ export const wordChallengeMachine = setup({
         })
       ),
 
-    onWordLost: () =>
-      RuntimeClient.runPromise(
-        Effect.gen(function* () {
-          // Word lost, finish the active run
-          yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
-
-          // Command the modal machine actor to open up the status modal
-          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
-        })
-      ),
+    onWordLost: () => RuntimeClient.runPromise(Atom.set(gameFlowMachineAtom, { type: "word.lost" })),
   },
 }).createMachine({
   id: "wordChallenge",

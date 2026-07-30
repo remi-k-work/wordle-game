@@ -9,6 +9,7 @@ export type TheSecretWord = typeof TheSecretWord.Type;
 export type SolutionsLanguage = typeof SolutionsLanguage.Type;
 export type TheRiddle = typeof TheRiddle.Type;
 export type WordDefinition = typeof WordDefinition.Type;
+export type RunDeathReason = typeof RunDeathReason.Type;
 
 export type Color = typeof Color.Type;
 export type WordleGrid = typeof WordleGrid.Type;
@@ -18,6 +19,7 @@ export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isMinLength(WO
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
 export const TheRiddle = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
 export const WordDefinition = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
+export const RunDeathReason = Schema.Literals(["Forfeit", "Guesses"]);
 
 // All the available colors for a single tile
 export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
@@ -48,6 +50,16 @@ export class RunSession extends Schema.Class<RunSession>("RunSession")({
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   bestRunScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   bestStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+}) {}
+
+// Immutable summary of a completed run. This is intentionally separate from the active persisted session
+export class RunResult extends Schema.Class<RunResult>("RunResult")({
+  runId: Schema.Trim.check(Schema.isUUID()),
+  createdAt: Schema.DateTimeUtc,
+  finishedAt: Schema.DateTimeUtc,
+  runScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  deathReason: RunDeathReason,
 }) {}
 
 // Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)

@@ -1,9 +1,8 @@
 // services, features, and other libraries
-import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
-import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { gameFlowMachineAtom } from "@/features/game/state";
 
 // types
 import type { GameSettings } from "@/features/settings/domain";
@@ -51,21 +50,7 @@ export const gameSettingsMachine = setup({
 
     // Notify all the other machines about the solutions language change
     onSolutionsLanguageToggled: ({ context }) =>
-      RuntimeClient.runPromise(
-        Effect.gen(function* () {
-          // Reset the run session immediately
-          yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
-
-          // Reset the challenge board immediately
-          yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
-
-          // Clear metadata from the previous language/puzzle immediately
-          yield* Atom.set(wordMetaMachineAtom, { type: "resetRequested" });
-
-          // Trigger data reload
-          yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: context.solutionsLanguage });
-        })
-      ),
+      RuntimeClient.runPromise(Atom.set(gameFlowMachineAtom, { type: "language.changed", solutionsLanguage: context.solutionsLanguage })),
   },
 }).createMachine({
   id: "gameSettings",
