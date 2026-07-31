@@ -6,7 +6,7 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -60,7 +60,7 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
 export function GuessDistributionChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Guesses needed to win a game" />
+      <SectionHeaderSkeleton title="Guesses needed to win a game" />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

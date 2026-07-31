@@ -6,7 +6,7 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "rec
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -71,7 +71,7 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
 export function OpeningGuessesFrequencyChartSkeleton() {
   return (
     <>
-      <SectionHeader title="First word guessed in a game" />
+      <SectionHeaderSkeleton title="First word guessed in a game" />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

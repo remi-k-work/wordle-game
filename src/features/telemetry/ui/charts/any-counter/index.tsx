@@ -5,7 +5,7 @@ import { anyCounterAtom } from "@/features/telemetry/state";
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { StatCard, StatCardSkeleton } from "@/ui/stat-card";
 
 // types
@@ -51,7 +51,7 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
 export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCounterChartProps, "title" | "personalHeader">) {
   return (
     <>
-      <SectionHeader title={title} />
+      <SectionHeaderSkeleton title={title} />
       <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
         <StatCard Tag="header" variant="primary" title={personalHeader}>
           <StatCardSkeleton />

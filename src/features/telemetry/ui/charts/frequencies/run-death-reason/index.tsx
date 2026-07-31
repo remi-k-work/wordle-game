@@ -6,7 +6,7 @@ import { Tooltip, Legend, PieChart, Pie, Sector } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -84,7 +84,7 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
 export function RunDeathReasonFrequencyChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Reasons why an arcade run ended" />
+      <SectionHeaderSkeleton title="Reasons why an arcade run ended" />
       <div className="mx-auto size-86 w-full lg:size-172" />
     </>
   );

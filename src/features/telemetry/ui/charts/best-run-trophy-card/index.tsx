@@ -4,7 +4,7 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { bestRunTrophyCardAtom } from "@/features/telemetry/state";
 
 // components
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { BestRunCard, BestRunCardSkeleton } from "./best-run-card";
 
 // types
@@ -41,7 +41,7 @@ export function BestRunTrophyCardChart({ solutionsLanguage }: BestRunTrophyCardC
 export function BestRunTrophyCardChartSkeleton() {
   return (
     <>
-      <SectionHeader title="The best run trophy card" />
+      <SectionHeaderSkeleton title="The best run trophy card" />
       <article className="mb-8 grid grid-cols-1 grid-rows-7 gap-1 space-y-4 sm:grid-cols-2 sm:gap-2 sm:space-y-0">
         <BestRunCardSkeleton Tag="header" variant="primary" title="Your Personal Best" />
         <BestRunCardSkeleton Tag="footer" variant="secondary" title="Global Best" />

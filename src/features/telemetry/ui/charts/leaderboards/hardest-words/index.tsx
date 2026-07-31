@@ -8,7 +8,7 @@ import { formatDuration } from "@/features/game/domain";
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -87,7 +87,7 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
 export function HardestWordsLeaderboardChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Hardest words by average solve time" />
+      <SectionHeaderSkeleton title="Hardest words by average solve time" />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

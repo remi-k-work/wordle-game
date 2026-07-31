@@ -6,7 +6,7 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -69,7 +69,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
 export function TimeToSolveDistributionChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Time taken to solve a word" />
+      <SectionHeaderSkeleton title="Time taken to solve a word" />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

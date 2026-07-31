@@ -7,7 +7,7 @@ import { runPageMainOrNavigate, validatePageInputs } from "@/lib/helpers-effect"
 import { HighScorePage } from "@/features/high-score/domain";
 
 // components
-import { PageHeader } from "@/ui/page-header";
+import { PageHeader, PageHeaderSkeleton } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import {
   BestRunTrophyCardChart,
@@ -70,7 +70,10 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
 function PageSkeleton() {
   return (
     <article className="mx-auto w-full max-w-384">
-      <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
+      <PageHeaderSkeleton
+        title="High Score & Charts"
+        description="The following section displays the top 10 scores, along with various informative game charts."
+      />
       <BrowseChartsSkeleton />
       <Top10HighScoresSkeleton />
       <BestRunTrophyCardChartSkeleton />

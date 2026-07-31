@@ -5,6 +5,7 @@ import { modalMachineAtom } from "@/state";
 
 // components
 import { Dialog } from "@base-ui/react";
+import { RevealTitle } from "@/ui/reveal-title";
 
 // types
 import type { ReactNode } from "react";
@@ -37,9 +38,11 @@ export function Modal({ isOpen = false, title, children }: ModalProps) {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <h1 className="mb-5 max-w-none bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-2 font-sans text-4xl tracking-widest text-text-2 uppercase">
-              {title}
-            </h1>
+            <RevealTitle
+              className="mb-5 max-w-none bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-2 font-sans text-4xl tracking-widest text-text-2 uppercase"
+              title={title}
+              unit="char"
+            />
             {children}
           </Dialog.Popup>
         </Dialog.Viewport>

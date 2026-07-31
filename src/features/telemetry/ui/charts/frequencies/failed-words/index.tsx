@@ -6,7 +6,7 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "rec
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -71,7 +71,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
 export function FailedWordsFrequencyChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Words that players failed to guess" />
+      <SectionHeaderSkeleton title="Words that players failed to guess" />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

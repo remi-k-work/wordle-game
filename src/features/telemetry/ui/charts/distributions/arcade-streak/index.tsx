@@ -6,7 +6,7 @@ import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from 
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader } from "@/ui/section-header";
+import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -60,7 +60,7 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
 export function ArcadeStreakDistributionChartSkeleton() {
   return (
     <>
-      <SectionHeader title="Streak before a loss" />
+      <SectionHeaderSkeleton title="Streak before a loss" />
       <div className="h-96 w-full lg:h-192" />
     </>
   );
