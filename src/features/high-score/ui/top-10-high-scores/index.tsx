@@ -2,6 +2,10 @@
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Option } from "effect";
+import { useAtomValue } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
+import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state";
 import { motion } from "motion/react";
 
 // components
@@ -13,11 +17,10 @@ import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
-import type { HighScore } from "@/features/high-score/domain";
+import type { SolutionsLanguage } from "@/features/game/domain";
 
 interface Top10HighScoresProps {
-  top10HighScores: ReadonlyArray<HighScore>;
-  newHighScoreId?: HighScore["id"];
+  solutionsLanguage: SolutionsLanguage;
 }
 
 // constants
@@ -36,37 +39,50 @@ const rowVariants = {
 const MotionTableBody = motion.create(TableBody);
 const MotionTableRow = motion.create(TableRow);
 
-export function Top10HighScores({ top10HighScores, newHighScoreId }: Top10HighScoresProps) {
-  if (top10HighScores.length === 0) return <InfoLine message="No High Scores yet!" />;
+export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
+  const top10HighScores = useAtomValue(top10HighScoresAtom(solutionsLanguage));
+  const newHighScoreId = useAtomValue(highScoreNewHighScoreIdAtom);
 
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-16">#</TableHead>
-          <TableHead className="w-32">Name</TableHead>
-          <TableHead className="w-32 bg-accent/30 text-accent">
-            <TrophyIcon className="mx-auto size-11" />
-          </TableHead>
-          <TableHead className="w-24 bg-destructive/30 text-destructive">
-            <FireIcon className="mx-auto size-11" />
-          </TableHead>
-          <TableHead className="w-24">&nbsp;</TableHead>
-        </TableRow>
-      </TableHeader>
-      <MotionTableBody variants={containerVariants} initial="hidden" animate="visible">
-        {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
-          <MotionTableRow key={id} className={cn("odd:bg-surface-2", id === newHighScoreId && "animate-wiggle bg-accent odd:bg-accent")} variants={rowVariants}>
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>{playerName}</TableCell>
-            <TableCell className="bg-accent/30">{score.toLocaleString()}</TableCell>
-            <TableCell className="bg-destructive/30">{streak.toLocaleString()}</TableCell>
-            <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
-          </MotionTableRow>
-        ))}
-      </MotionTableBody>
-    </Table>
-  );
+  return AsyncResult.builder(top10HighScores)
+    .onInitialOrWaiting(() => <Top10HighScoresSkeleton />)
+    .onFailure(() => <Top10HighScoresSkeleton />)
+    .onSuccess((top10HighScores) =>
+      top10HighScores.length === 0 ? (
+        <InfoLine message="No High Scores yet!" />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-16">#</TableHead>
+              <TableHead className="w-32">Name</TableHead>
+              <TableHead className="w-32 bg-accent/30 text-accent">
+                <TrophyIcon className="mx-auto size-11" />
+              </TableHead>
+              <TableHead className="w-24 bg-destructive/30 text-destructive">
+                <FireIcon className="mx-auto size-11" />
+              </TableHead>
+              <TableHead className="w-24">&nbsp;</TableHead>
+            </TableRow>
+          </TableHeader>
+          <MotionTableBody variants={containerVariants} initial="hidden" animate="visible">
+            {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
+              <MotionTableRow
+                key={id}
+                className={cn("odd:bg-surface-2", id === Option.getOrUndefined(newHighScoreId) && "animate-wiggle bg-accent odd:bg-accent")}
+                variants={rowVariants}
+              >
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{playerName}</TableCell>
+                <TableCell className="bg-accent/30">{score.toLocaleString()}</TableCell>
+                <TableCell className="bg-destructive/30">{streak.toLocaleString()}</TableCell>
+                <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
+              </MotionTableRow>
+            ))}
+          </MotionTableBody>
+        </Table>
+      )
+    )
+    .render();
 }
 
 export function Top10HighScoresSkeleton() {

@@ -3,7 +3,6 @@ import { Suspense } from "react";
 
 // services, features, and other libraries
 import { Effect } from "effect";
-import { HighScoreDB } from "@/features/high-score/services/high-score-db";
 import { runPageMainOrNavigate, validatePageInputs } from "@/lib/helpers-effect";
 import { HighScorePage } from "@/features/high-score/domain";
 
@@ -38,10 +37,7 @@ const main = ({ params, searchParams }: PageProps<"/high-score">) =>
       searchParams: { sl },
     } = yield* validatePageInputs(HighScorePage, { params, searchParams });
 
-    const highScoreDB = yield* HighScoreDB;
-    const top10HighScores = yield* highScoreDB.top10HighScores(sl);
-
-    return { sl, top10HighScores } as const;
+    return { sl } as const;
   });
 
 // Page remains the fast, static shell
@@ -56,13 +52,13 @@ export default function Page({ params, searchParams }: PageProps<"/high-score">)
 // This new async component contains the dynamic logic
 async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
   // Execute the main effect for the page, map known errors to the subsequent navigation helpers, and return the payload
-  const { sl, top10HighScores } = await runPageMainOrNavigate(main({ params, searchParams }));
+  const { sl } = await runPageMainOrNavigate(main({ params, searchParams }));
 
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
       <BrowseCharts />
-      <Top10HighScores top10HighScores={top10HighScores} />
+      <Top10HighScores solutionsLanguage={sl} />
       <BestRunTrophyCardChart solutionsLanguage={sl} />
       <TotalsSlider solutionsLanguage={sl} />
       <DistributionCharts solutionsLanguage={sl} />

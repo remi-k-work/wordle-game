@@ -3,13 +3,13 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
-import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { createActor } from "xstate";
 import { highScoreMachine } from "@/features/high-score/machines/high-score";
 import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
+import type { SolutionsLanguage } from "@/features/game/domain";
 
 type HighScoreMachineSnapshot = SnapshotFrom<typeof highScoreMachine>;
 type HighScoreMachineEvent = EventFromLogic<typeof highScoreMachine>;
@@ -54,10 +54,11 @@ export const highScoreSolutionsLanguageAtom = highScoreMachineAtom.pipe(Atom.map
 export const highScoreNewHighScoreIdAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.newHighScoreId));
 
 // Atom to fetch the top 10 high scores
-export const top10HighScoresAtom = RuntimeAtom.atom(
-  Effect.gen(function* () {
-    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-    const { top10HighScores } = yield* RpcHighScoreClient;
-    return yield* top10HighScores(solutionsLanguage);
-  })
+export const top10HighScoresAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
+  RuntimeAtom.atom(
+    Effect.gen(function* () {
+      const { top10HighScores } = yield* RpcHighScoreClient;
+      return yield* top10HighScores(solutionsLanguage);
+    })
+  )
 );
