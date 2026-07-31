@@ -12,9 +12,10 @@ import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
 import type { Color } from "@/features/game/domain";
-import type { Transition } from "motion/react";
 
 // constants
+import { motionTokens } from "@/lib/motion-tokens";
+
 const COLOR_MAP = {
   grey: "var(--color-tile-grey)",
   yellow: "var(--color-tile-yellow)",
@@ -22,7 +23,6 @@ const COLOR_MAP = {
   red: "var(--color-destructive)",
   "": "transparent",
 } as const satisfies Record<Color, string>;
-const SPRING_TRANSITION = { type: "spring", damping: 40, stiffness: 200 } as const satisfies Transition;
 
 const MotionButton = motion.create(Button);
 
@@ -46,9 +46,7 @@ export function Footer() {
           return (
             <MotionButton
               key={key}
-              layout
-              exit={{ opacity: 0, scale: 0, transition: { duration: 3, ease: "easeOut" } }}
-              transition={SPRING_TRANSITION}
+              exit={{ opacity: 0, scale: 0, transition: { duration: motionTokens.duration.crawl, ease: motionTokens.easing.smooth } }}
               className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
               style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
               onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: key })}
@@ -61,8 +59,6 @@ export function Footer() {
         {/* Always include BACKSPACE and ENTER, and make sure they animate alongside the letters */}
         <MotionButton
           key="Backspace"
-          layout
-          transition={SPRING_TRANSITION}
           className="button basis-12 bg-secondary p-0"
           onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: "BACKSPACE" })}
         >
@@ -71,8 +67,6 @@ export function Footer() {
 
         <MotionButton
           key="Enter"
-          layout
-          transition={SPRING_TRANSITION}
           className="button basis-12 bg-secondary p-0"
           onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: "ENTER" })}
         >

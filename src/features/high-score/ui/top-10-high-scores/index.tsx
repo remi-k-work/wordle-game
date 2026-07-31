@@ -1,5 +1,8 @@
+"use client";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
 // components
 import { InfoLine } from "@/ui/info-line";
@@ -16,6 +19,22 @@ interface Top10HighScoresProps {
   top10HighScores: ReadonlyArray<HighScore>;
   newHighScoreId?: HighScore["id"];
 }
+
+// constants
+import { motionTokens, springs } from "@/lib/motion-tokens";
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.05, delayChildren: motionTokens.duration.fast } },
+} as const;
+
+const rowVariants = {
+  hidden: { opacity: 0, y: motionTokens.distance.sm },
+  visible: { opacity: 1, y: 0, transition: springs.gentle },
+} as const;
+
+const MotionTableBody = motion.create(TableBody);
+const MotionTableRow = motion.create(TableRow);
 
 export function Top10HighScores({ top10HighScores, newHighScoreId }: Top10HighScoresProps) {
   if (top10HighScores.length === 0) return <InfoLine message="No High Scores yet!" />;
@@ -35,17 +54,17 @@ export function Top10HighScores({ top10HighScores, newHighScoreId }: Top10HighSc
           <TableHead className="w-24">&nbsp;</TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
+      <MotionTableBody variants={containerVariants} initial="hidden" animate="visible">
         {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
-          <TableRow key={id} className={cn("odd:bg-surface-2", id === newHighScoreId && "animate-wiggle bg-accent odd:bg-accent")}>
+          <MotionTableRow key={id} className={cn("odd:bg-surface-2", id === newHighScoreId && "animate-wiggle bg-accent odd:bg-accent")} variants={rowVariants}>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{playerName}</TableCell>
             <TableCell className="bg-accent/30">{score.toLocaleString()}</TableCell>
             <TableCell className="bg-destructive/30">{streak.toLocaleString()}</TableCell>
             <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
-          </TableRow>
+          </MotionTableRow>
         ))}
-      </TableBody>
+      </MotionTableBody>
     </Table>
   );
 }
