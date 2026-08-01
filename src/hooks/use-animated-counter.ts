@@ -7,49 +7,30 @@ import { animate } from "motion";
 // constants
 import { motionTokens } from "@/lib/motion-tokens";
 
-// Animated number counter. On first mount, animates from 0 up to the
-// current value. On subsequent value changes, animates from the previous
-// value to the new one. Writes to a ref via the `motion` `animate()`
-// helper — no React re-renders per frame
-interface UseAnimatedCounterOptions {
-  /** Animation duration in seconds. Defaults to `crawl` for satisfying count-ups. */
-  duration?: number;
-  /** Initial value the counter should animate from on first mount. Defaults to 0. */
-  initialFrom?: number;
-  /** Optional formatting applied to the rounded integer before writing to the DOM. */
-  format?: (n: number) => string;
-}
-
-export function useAnimatedCounter(value: number, { duration = motionTokens.duration.crawl, initialFrom = 0, format }: UseAnimatedCounterOptions = {}) {
+// Animated number counter. Always animates from the previous value to the
+// new one. Writes to a ref via the `motion` `animate()` helper — no React
+// re-renders per frame.
+export function useAnimatedCounter(value: number, format?: (value: number) => string) {
   const nodeRef = useRef<HTMLElement | null>(null);
-  const previousRef = useRef<number>(initialFrom);
-  const isFirstRunRef = useRef<boolean>(true);
+  const previousRef = useRef<number>(value);
 
   useEffect(() => {
     const node = nodeRef.current;
     if (!node) return;
 
-    const from = isFirstRunRef.current ? initialFrom : previousRef.current;
-    const controls = animate(from, value, {
-      duration,
+    const controls = animate(previousRef.current, value, {
+      duration: motionTokens.duration.crawl,
       ease: motionTokens.easing.smooth,
       onUpdate: (v) => {
-        node.textContent = format ? format(v) : Math.round(v).toString();
-      },
-      onComplete: () => {
-        previousRef.current = value;
-        isFirstRunRef.current = false;
+        node.textContent = format ? format(v) : Math.round(v).toLocaleString();
       },
     });
 
     return () => {
-      controls.stop();
-
-      // Persist current progress so we do not snap-back on next render
       previousRef.current = value;
-      isFirstRunRef.current = false;
+      controls.stop();
     };
-  }, [value, duration, initialFrom, format]);
+  }, [value, format]);
 
   return nodeRef;
 }

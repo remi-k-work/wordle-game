@@ -73,7 +73,7 @@ export function RunScore() {
         <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Streak</h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
           <FireIcon className="size-7" />
-          {summary.streak}
+          {summary.streak.toLocaleString()}
         </span>
       </div>
       <div className="bg-surface-3 p-3">
@@ -87,7 +87,7 @@ export function RunScore() {
         <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Best Streak</h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
           <FireIcon className="size-7" />
-          {bestStreak}
+          {bestStreak.toLocaleString()}
         </span>
       </div>
     </section>

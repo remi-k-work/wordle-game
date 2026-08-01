@@ -28,13 +28,13 @@ export function Run() {
         <div className="flex items-center gap-1">
           <TrophyIcon className="size-6 text-accent sm:size-7" />
           <span ref={runScoreRef} className="text-lg font-semibold tabular-nums sm:text-2xl">
-            {runScore}
+            {runScore.toLocaleString()}
           </span>
         </div>
         <div className="flex items-center gap-1 text-destructive">
           <FireIcon className="size-6 sm:size-7" />
           <span ref={streakRef} className="text-lg font-semibold tabular-nums sm:text-2xl">
-            {streak}
+            {streak.toLocaleString()}
           </span>
         </div>
       </div>

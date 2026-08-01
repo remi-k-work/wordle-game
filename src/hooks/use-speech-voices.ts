@@ -1,23 +1,20 @@
 // react
 import { useEffect, useState } from "react";
 
+// Lists available SpeechSynthesis voices
 export function useSpeechVoices() {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
+    const controller = new AbortController();
     const synth = window.speechSynthesis;
 
     const update = () => setVoices(synth.getVoices());
-
     update();
 
-    synth.addEventListener("voiceschanged", update);
+    synth.addEventListener("voiceschanged", update, { signal: controller.signal });
 
-    return () => {
-      synth.removeEventListener("voiceschanged", update);
-    };
+    return () => controller.abort();
   }, []);
 
   return voices;

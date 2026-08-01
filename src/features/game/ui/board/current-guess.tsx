@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomValue, useAtom } from "@effect/atom-react";
+import { useAtom, useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentGuessWordAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
@@ -19,27 +19,26 @@ export function CurrentGuess() {
   const [wordChallengeMachineSnapshot, wordChallengeMachineEvent] = useAtom(wordChallengeMachineAtom);
   const currentGuessWord = useAtomValue(wordChallengeCurrentGuessWordAtom);
 
+  // Single AbortController removes the keyup listener on unmount or re-run
   useEffect(() => {
-    // Handle the keyboard input one key at a time
-    function handleKeyUp(ev: KeyboardEvent) {
-      wordChallengeMachineEvent({ type: "keyPressed", pressedKey: ev.key });
-    }
+    const controller = new AbortController();
+    window.addEventListener("keyup", (ev) => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: ev.key }), { signal: controller.signal });
 
-    window.addEventListener("keyup", handleKeyUp);
-    return () => {
-      window.removeEventListener("keyup", handleKeyUp);
-    };
+    return () => controller.abort();
   }, [wordChallengeMachineEvent]);
 
   const isInvalidGuess = wordChallengeMachineSnapshot.matches("rejected");
-  const currentGuessTiles = [...currentGuessWord].map((tileKey) => ({ tileKey, color: (isInvalidGuess ? "red" : "") as Color }));
-  const remainingEmptyTiles = Array<Tile>(WORD_LENGTH - currentGuessTiles.length).fill({ tileKey: "", color: "" as Color });
-  const finalGuessTiles = [...currentGuessTiles, ...remainingEmptyTiles];
+  const currentLength = currentGuessWord.length;
+
+  const finalGuessTiles: Tile[] = [
+    ...currentGuessWord.split("").map<Tile>((tileKey) => ({ tileKey, color: (isInvalidGuess ? "red" : "") as Color })),
+    ...Array.from({ length: WORD_LENGTH - currentLength }, () => ({ tileKey: "", color: "" as Color })),
+  ];
 
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isInvalidGuess && "animate-pulse")}>
       {finalGuessTiles.map((tile, tileIndex) => (
-        <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentGuessTiles.length - 1} />
+        <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentLength - 1} />
       ))}
     </div>
   );

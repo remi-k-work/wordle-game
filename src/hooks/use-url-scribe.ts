@@ -24,6 +24,21 @@ interface NavigateFn {
   (newRoute: Route, paramsToSet: QueryParams): void;
 }
 
+// Merges `paramsToSet` into the current search params, handling array values (joined with `,`), empty-string deletion, and numeric coercion
+function applyParams(params: URLSearchParams, paramsToSet: QueryParams): void {
+  for (const [key, value] of Object.entries(paramsToSet)) {
+    if (Array.isArray(value)) {
+      if (value.length > 0) params.set(key, value.join(","));
+      else params.delete(key);
+    } else if (typeof value === "string") {
+      if (value.trim().length > 0) params.set(key, value);
+      else params.delete(key);
+    } else {
+      params.set(key, String(value));
+    }
+  }
+}
+
 // A hook to easily create new route strings with updated search parameters (it preserves existing search params)
 export function useUrlScribe() {
   // Access next.js routing utilities
@@ -38,35 +53,16 @@ export function useUrlScribe() {
       const params = new URLSearchParams(searchParams.toString());
 
       // Detect if the first arg is a Route (string) or QueryParams (object)
-      let newRoute: Route | undefined, paramsToSet: QueryParams | undefined;
-      if (typeof arg1 === "string") {
-        newRoute = arg1;
-        paramsToSet = arg2;
-      } else {
-        // If the first arg is not a Route (string), it must be QueryParams (or undefined)
-        paramsToSet = arg1;
-      }
+      const newRoute = typeof arg1 === "string" ? arg1 : undefined;
+      const paramsToSet = typeof arg1 === "string" ? arg2 : arg1;
 
       // Only modify params if an object was provided
-      if (paramsToSet) {
-        // Set or update each parameter from the input object
-        for (const [key, value] of Object.entries(paramsToSet)) {
-          if (Array.isArray(value)) {
-            if (value.length > 0) params.set(key, value.join(","));
-            else params.delete(key);
-          } else {
-            if (typeof value === "string") {
-              if (value.trim().length > 0) params.set(key, value);
-              else params.delete(key);
-            } else {
-              params.set(key, String(value));
-            }
-          }
-        }
-      }
+      if (paramsToSet) applyParams(params, paramsToSet);
 
       // Return the new href and do not include the search params if they are empty (the "?" becomes unnecessary)
-      return params.toString().length > 0 ? (`${newRoute ?? pathname}?${params.toString()}` as Route) : (`${newRoute ?? pathname}` as Route);
+      const query = params.toString();
+      const base = newRoute ?? pathname;
+      return (query.length > 0 ? `${base}?${query}` : base) as Route;
     },
     [pathname, searchParams]
   );

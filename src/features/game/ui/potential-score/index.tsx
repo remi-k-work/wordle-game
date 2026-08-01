@@ -24,7 +24,7 @@ export function PotentialScore() {
     >
       <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">Potential</h2>
       <span ref={potentialScoreRef} className="font-semibold tabular-nums sm:text-lg">
-        {potentialScore}
+        {potentialScore.toLocaleString()}
       </span>
       <Progress.Root className="grid w-full" value={potentialScoreAsPercentage(potentialScore)}>
         <Progress.Track className="h-2 overflow-hidden rounded-sm border bg-linear-to-r from-destructive via-tile-yellow to-tile-green">
