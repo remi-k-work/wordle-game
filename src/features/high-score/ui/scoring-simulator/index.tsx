@@ -37,7 +37,7 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
     <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
       <header className="grid place-items-center gap-3 rounded-md border border-accent bg-surface-1 p-3">
         <h3 className="font-sans text-2xl font-semibold tracking-widest text-accent uppercase">{isReportingScore ? "Final Word Score" : "Live Potential"}</h3>
-        <span className="text-3xl font-semibold tabular-nums sm:text-4xl">{potentialScore}</span>
+        <span className="text-3xl font-semibold tabular-nums sm:text-4xl">{potentialScore.toLocaleString()}</span>
         <span className="text-xl font-semibold text-text-2 sm:text-2xl">{speedMultiplierToCategory(speedMultiplier)}</span>
         <Progress.Root className="grid w-full" value={potentialScoreAsPercentage(potentialScore)}>
           <Progress.Track className="h-9 overflow-hidden rounded-sm border bg-linear-to-r from-destructive via-tile-yellow to-tile-green">
@@ -70,7 +70,7 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
             </Slider.Control>
           </Slider.Root>
           <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Base Points</h4>
-          <span className="font-semibold tabular-nums sm:text-lg">{basePointsPerTurn}</span>
+          <span className="font-semibold tabular-nums sm:text-lg">{basePointsPerTurn.toLocaleString()}</span>
         </section>
 
         <section className="grid place-items-center bg-surface-1 p-3">
@@ -105,8 +105,9 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
       {!isReportingScore && (
         <footer className="mx-auto bg-surface-1 p-3 text-center text-lg sm:text-xl lg:text-2xl">
           <p>
-            Final Word Score = Base Points (<span className="inline-block min-w-[4ch] font-semibold text-text-2 tabular-nums">{basePointsPerTurn}</span>) x
-            Speed Multiplier (<span className="inline-block min-w-[3ch] font-semibold text-text-2 tabular-nums">{speedMultiplier}</span>)
+            Final Word Score = Base Points (
+            <span className="inline-block min-w-[4ch] font-semibold text-text-2 tabular-nums">{basePointsPerTurn.toLocaleString()}</span>) x Speed Multiplier (
+            <span className="inline-block min-w-[3ch] font-semibold text-text-2 tabular-nums">{speedMultiplier}</span>)
           </p>
         </footer>
       )}
