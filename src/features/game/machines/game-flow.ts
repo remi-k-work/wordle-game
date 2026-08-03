@@ -85,10 +85,7 @@ export const gameFlowMachine = setup({
           const runSession = (yield* Atom.get(runSessionMachineAtom)).context;
           const accepted = runSession.runId._tag === "Some" && runSession.runScore >= event.cost;
           if (accepted) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: event.cost });
-          yield* Atom.set(overdriveHacksMachineAtom, {
-            type: accepted ? "charge.accepted" : "charge.rejected",
-            requestId: event.requestId,
-          });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: accepted ? "charge.accepted" : "charge.rejected", requestId: event.requestId });
         })
       ),
   },

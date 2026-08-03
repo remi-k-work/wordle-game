@@ -97,12 +97,7 @@ export const overdriveHacksMachine = setup({
       const effect = event.output.value;
       const hackId: OverdriveHackId = effect._tag === "EmpApplied" ? "emp" : "sonar";
       RuntimeClient.runPromise(
-        Atom.set(gameFlowMachineAtom, {
-          type: "hack.chargeRequested",
-          requestId: context.pendingRequestId.value,
-          hackId,
-          cost: OVERDRIVE_HACK_COST(hackId),
-        })
+        Atom.set(gameFlowMachineAtom, { type: "hack.chargeRequested", requestId: context.pendingRequestId.value, hackId, cost: OVERDRIVE_HACK_COST(hackId) })
       );
     },
     forwardKeyPress: ({ context, event }) => {

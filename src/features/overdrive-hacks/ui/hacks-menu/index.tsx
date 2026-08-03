@@ -1,6 +1,11 @@
+// react
+import { useState } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomSet } from "@effect/atom-react";
+import { Option } from "effect";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { runSessionRunIdAtom, runSessionRunScoreAtom } from "@/features/game/state";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // components
@@ -13,10 +18,18 @@ import { LifebuoyIcon } from "@heroicons/react/24/outline";
 import { EMP_COST, SONAR_COST } from "@/features/overdrive-hacks/domain";
 
 export function HacksMenu() {
+  const runId = useAtomValue(runSessionRunIdAtom);
+  const runScore = useAtomValue(runSessionRunScoreAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
+  const isEmpEnabled = Option.isSome(runId) && runScore >= EMP_COST;
+  const isSonarEnabled = Option.isSome(runId) && runScore >= SONAR_COST;
+
+  // Controls whether the popover is open or not
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger openOnHover title="Lifeline" className="button flex-none p-1 data-popup-open:bg-accent">
         <LifebuoyIcon className="size-11" />
       </Popover.Trigger>
@@ -30,12 +43,26 @@ export function HacksMenu() {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <Button className="button grid grid-cols-[auto_1fr_1fr]" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" })}>
+            <Button
+              className="button grid grid-cols-[auto_1fr_1fr]"
+              disabled={!isEmpEnabled}
+              onClick={() => {
+                overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" });
+                setIsOpen(false);
+              }}
+            >
               <LifebuoyIcon className="size-11" />
               <span className="justify-self-start">EMP</span>
               <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{EMP_COST.toLocaleString()} pts</span>
             </Button>
-            <Button className="button grid grid-cols-[auto_1fr_1fr]" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" })}>
+            <Button
+              className="button grid grid-cols-[auto_1fr_1fr]"
+              disabled={!isSonarEnabled}
+              onClick={() => {
+                overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" });
+                setIsOpen(false);
+              }}
+            >
               <LifebuoyIcon className="size-11" />
               <span className="justify-self-start">Sonar</span>
               <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{SONAR_COST.toLocaleString()} pts</span>

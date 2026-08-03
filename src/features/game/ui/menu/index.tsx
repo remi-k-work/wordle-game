@@ -1,3 +1,6 @@
+// react
+import { useState } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
@@ -12,8 +15,11 @@ import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "
 export function GameMenu() {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
+  // Controls whether the popover is open or not
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger openOnHover title="Menu" className="button flex-none p-1 data-popup-open:bg-accent">
         <Bars3Icon className="size-11" />
       </Popover.Trigger>
@@ -27,15 +33,33 @@ export function GameMenu() {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "voice-settings" })}>
+            <Button
+              className="button"
+              onClick={() => {
+                modalMachineEvent({ type: "opened", modalType: "voice-settings" });
+                setIsOpen(false);
+              }}
+            >
               <SpeakerWaveIcon className="size-11" />
               Voice Settings
             </Button>
-            <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "high-score" })}>
+            <Button
+              className="button"
+              onClick={() => {
+                modalMachineEvent({ type: "opened", modalType: "high-score" });
+                setIsOpen(false);
+              }}
+            >
               <TrophyIcon className="size-11" />
               High Score
             </Button>
-            <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "help" })}>
+            <Button
+              className="button"
+              onClick={() => {
+                modalMachineEvent({ type: "opened", modalType: "help" });
+                setIsOpen(false);
+              }}
+            >
               <QuestionMarkCircleIcon className="size-11" />
               Help
             </Button>
