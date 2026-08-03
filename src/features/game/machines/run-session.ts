@@ -9,7 +9,7 @@ import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/stat
 import { runResultAtom } from "@/features/game/state";
 
 // types
-import type { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain";
+import type { LifelineId, RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain";
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain";
@@ -21,6 +21,7 @@ export const runSessionMachine = setup({
       | { readonly type: "startedNewRun" }
       | { readonly type: "forfeitedRun"; readonly wordChallenge: WordChallenge }
       | { readonly type: "wordWon"; readonly wordScore: WordScore }
+      | { readonly type: "lifelineUsed"; readonly cost: WordScore["wordScore"]; readonly lifelineId: LifelineId }
       | { readonly type: "wordLost" };
     context: RunSession;
     input: RunSession;
@@ -53,6 +54,12 @@ export const runSessionMachine = setup({
         bestRunScore: Math.max(context.bestRunScore, runScore),
         bestStreak: Math.max(context.bestStreak, streak),
       } as const satisfies RunSession;
+    }),
+
+    // Spend a portion of the current run score to use an Overdrive Hacks lifeline
+    deductLifelineCost: assign(({ context, event }) => {
+      assertEvent(event, "lifelineUsed");
+      return { ...context, runScore: Math.max(0, context.runScore - event.cost) } as const satisfies RunSession;
     }),
 
     // Finish the active run by clearing identifiers, but LEAVE runScore, streak, and createdAt intact for the UI!
@@ -129,6 +136,9 @@ export const runSessionMachine = setup({
 
         // Word won, bank volatile points
         wordWon: { actions: "bankWord" },
+
+        // Overdrive Hacks lifeline used: deduct the cost
+        lifelineUsed: { actions: "deductLifelineCost" },
 
         // Word lost, finish the active run
         wordLost: {

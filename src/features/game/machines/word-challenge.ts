@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime, Option, Effect } from "effect";
+import { DateTime, Option, Effect, Array, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -8,7 +8,7 @@ import { gameFlowMachineAtom, runSessionMachineAtom } from "@/features/game/stat
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
 // types
-import type { WordChallenge } from "@/features/game/domain";
+import type { SonarReveal, TheSecretWord, WordChallenge } from "@/features/game/domain";
 
 // constants
 import { INITIAL_WORD_CHALLENGE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
@@ -17,9 +17,11 @@ export const wordChallengeMachine = setup({
   types: {} as {
     events:
       | { readonly type: "solutionsLanguageChanged" }
-      | { readonly type: "gameDataLoaded"; dictionary: WordChallenge["dictionary"] }
-      | { readonly type: "secretWordPicked"; theSecretWord: string }
+      | { readonly type: "gameDataLoaded"; readonly dictionary: WordChallenge["dictionary"] }
+      | { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord }
       | { readonly type: "keyPressed"; readonly pressedKey: string }
+      | { readonly type: "applyNukedLetters"; readonly letters: WordChallenge["empNukedLetters"] }
+      | { readonly type: "applySonarReveal"; readonly vowel: SonarReveal["vowel"]; readonly positions: SonarReveal["positions"] }
       | { readonly type: "forfeitedRun" };
     context: WordChallenge;
   },
@@ -48,9 +50,12 @@ export const wordChallengeMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       if (normalizedKey === "ENTER" || normalizedKey === "BACKSPACE") return false;
 
-      // Prevent typing greyed out keys
-      const keypadColors = computeKeypadState(Option.getOrThrow(context.theSecretWord), context.wordleGuesses);
-      return keypadColors[normalizedKey] !== "grey";
+      // Prevent typing greyed-out keys as well as emp-nuked letters
+      const theSecretWord = Option.getOrThrow(context.theSecretWord);
+      const keypadState = computeKeypadState(theSecretWord, context.wordleGuesses);
+      if (keypadState[normalizedKey] === "grey") return false;
+      if (context.empNukedLetters.includes(normalizedKey)) return false;
+      return true;
     },
   },
   actions: {
@@ -95,6 +100,24 @@ export const wordChallengeMachine = setup({
           currentTurn: context.currentTurn + 1,
         }) as const satisfies WordChallenge
     ),
+
+    // EMP receiver: append the 3 picked target letters to `empNukedLetters`
+    applyNukedLetters: assign(({ context, event }) => {
+      assertEvent(event, "applyNukedLetters");
+      return {
+        ...context,
+        empNukedLetters: pipe(context.empNukedLetters, Array.appendAll(event.letters)),
+      } as const satisfies WordChallenge;
+    }),
+
+    // Sonar receiver: append the { vowel, positions } tuple to `sonarRevealedLetters`
+    applySonarReveal: assign(({ context, event }) => {
+      assertEvent(event, "applySonarReveal");
+      return {
+        ...context,
+        sonarRevealedLetters: pipe(context.sonarRevealedLetters, Array.append({ vowel: event.vowel, positions: Array.fromIterable(event.positions) })),
+      } as const satisfies WordChallenge;
+    }),
 
     // Calculates the player's word score based on the turn they won on and how long it took them
     calculateScore: assign(
@@ -155,6 +178,10 @@ export const wordChallengeMachine = setup({
 
     // New puzzle word picked by gameDataMachine → start typing
     secretWordPicked: { guard: ({ context }) => Option.isSome(context.dictionary), target: ".typing", actions: "startNewPuzzle" },
+
+    // Global lifeline receiver events — overdriveHacksMachine forwards these (so this machine can react even mid-typing)
+    applyNukedLetters: { actions: "applyNukedLetters" },
+    applySonarReveal: { actions: "applySonarReveal" },
   },
 
   states: {

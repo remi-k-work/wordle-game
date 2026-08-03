@@ -15,7 +15,7 @@ type WordChallengeMachineEvent = EventFromLogic<typeof wordChallengeMachine>;
 type WordChallengeMachineActor = Actor<typeof wordChallengeMachine>;
 
 // constants
-import { MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
+import { COLOR_PRIORITY, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
 
 // Creates an Atom-owned XState actor reference
 const wordChallengeMachineActorAtom = Atom.make<WordChallengeMachineActor>((get) => {
@@ -55,6 +55,8 @@ export const wordChallengeWordleGuessesAtom = wordChallengeMachineAtom.pipe(Atom
 export const wordChallengeCurrentTurnAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.currentTurn));
 export const wordChallengeStartTimeAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.startTime));
 export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordScore));
+export const wordChallengeEmpNukedLettersAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.empNukedLetters));
+export const wordChallengeSonarRevealedLettersAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sonarRevealedLetters));
 
 // Reactive selector for the "live" potential word score based on current progress
 export const wordChallengePotentialScoreAtom = Atom.make((get) =>
@@ -78,10 +80,21 @@ export const wordChallengeWordleGridAtom = Atom.make((get) =>
   })
 );
 
-// Current coloring state of the keypad keys based on guess history
+// Current coloring state of the keypad keys based on guess history merged with any letters manually greyed-out by an emp hack
 export const wordChallengeKeypadColorsAtom = Atom.make((get) =>
   Option.match(get(wordChallengeTheSecretWordAtom), {
-    onNone: () => ({}) as Record<string, Color>,
-    onSome: (theSecretWord) => computeKeypadState(theSecretWord, get(wordChallengeWordleGuessesAtom)),
+    onNone: () => ({}) as Record<string, Color | undefined>,
+    onSome: (theSecretWord) => {
+      const keypadState = computeKeypadState(theSecretWord, get(wordChallengeWordleGuessesAtom));
+      const empNukedLetters = get(wordChallengeEmpNukedLettersAtom);
+      return pipe(
+        empNukedLetters,
+        Array.reduce({ ...keypadState }, (acc, nukedLetter) => {
+          const color = acc[nukedLetter];
+          if (color === undefined || color === "" || COLOR_PRIORITY[color] < COLOR_PRIORITY["grey"]) acc[nukedLetter] = "grey";
+          return acc;
+        })
+      );
+    },
   })
 );

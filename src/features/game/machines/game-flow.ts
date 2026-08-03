@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup } from "xstate";
-import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom, overdriveHacksMachineAtom } from "@/features/game/state";
 import { modalMachineAtom } from "@/state";
 
 // types
@@ -67,6 +67,7 @@ export const gameFlowMachine = setup({
           if (event.type !== "language.changed") return;
           yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
           yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" });
           yield* Atom.set(wordMetaMachineAtom, { type: "resetRequested" });
           yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: event.solutionsLanguage });
         })

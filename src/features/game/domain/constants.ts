@@ -2,7 +2,7 @@
 import { Option } from "effect";
 
 // types
-import type { Color, GameData, RunSession, WordChallenge, WordMeta } from ".";
+import type { Color, GameData, OverdriveHacks, RunSession, SolutionsLanguage, WordChallenge, WordMeta } from ".";
 
 // constants
 export const WORD_LENGTH = 5;
@@ -30,6 +30,19 @@ export const SPEED_MULTIPLIER_CATEGORY_MAP = {
   0.8: "🐌 Slow Learner",
 } as const as Readonly<Record<number, string>>;
 
+// EMP lifeline (to instantly mark incorrect letters as grey on the keypad)
+export const EMP_COST = 1500;
+export const EMP_LETTER_COUNT = 3;
+
+// Sonar lifeline (reveal one vowel and its positions in the secret word)
+export const SONAR_COST = 2000;
+
+// Language-aware vowel sets for the Sonar lifeline
+export const VOWELS_BY_LANGUAGE = {
+  En: ["A", "E", "I", "O", "U"],
+  Pl: ["A", "Ą", "E", "Ę", "I", "O", "Ó", "U", "Y"],
+} as const satisfies Readonly<Record<SolutionsLanguage, readonly string[]>>;
+
 export const INITIAL_GAME_DATA = {
   solutions: Option.none(),
   dictionary: Option.none(),
@@ -49,7 +62,14 @@ export const INITIAL_WORD_CHALLENGE = {
   currentTurn: 1,
   startTime: Option.none(),
   wordScore: Option.none(),
+  empNukedLetters: [],
+  sonarRevealedLetters: [],
 } as const satisfies WordChallenge;
+
+export const INITIAL_OVERDRIVE_HACKS = {
+  theSecretWord: Option.none(),
+  keypad: Option.none(),
+} as const satisfies OverdriveHacks;
 
 export const INITIAL_RUN_SESSION = {
   runId: Option.none(),

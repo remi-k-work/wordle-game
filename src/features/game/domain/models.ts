@@ -10,6 +10,8 @@ export type SolutionsLanguage = typeof SolutionsLanguage.Type;
 export type TheRiddle = typeof TheRiddle.Type;
 export type WordDefinition = typeof WordDefinition.Type;
 export type RunDeathReason = typeof RunDeathReason.Type;
+export type LifelineId = typeof LifelineId.Type;
+export type SonarReveal = typeof SonarReveal.Type;
 
 export type Color = typeof Color.Type;
 export type WordleGrid = typeof WordleGrid.Type;
@@ -20,6 +22,15 @@ export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
 export const TheRiddle = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
 export const WordDefinition = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
 export const RunDeathReason = Schema.Literals(["Forfeit", "Guesses"]);
+
+// The identifier of an Overdrive Hack lifeline
+export const LifelineId = Schema.Literals(["emp", "sonar"]);
+
+// A single vowel letter revealed by the Sonar lifeline plus every index in the secret word where that vowel appears
+export const SonarReveal = Schema.Struct({
+  vowel: Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(1)),
+  positions: Schema.Array(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
+});
 
 // All the available colors for a single tile
 export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
@@ -79,4 +90,12 @@ export class WordChallenge extends Schema.Class<WordChallenge>("WordChallenge")(
   currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   startTime: Schema.Option(Schema.DateTimeUtc),
   wordScore: Schema.Option(WordScore),
+  empNukedLetters: Schema.Array(Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(1))),
+  sonarRevealedLetters: Schema.Array(SonarReveal),
+}) {}
+
+// Handles all lifeline cost/affordability/candidate logic
+export class OverdriveHacks extends Schema.Class<OverdriveHacks>("OverdriveHacks")({
+  theSecretWord: Schema.Option(TheSecretWord),
+  keypad: Schema.Option(Keypad),
 }) {}

@@ -5,7 +5,7 @@ import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
-import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { wordChallengeMachineAtom, wordMetaMachineAtom, overdriveHacksMachineAtom } from "@/features/game/state";
 
 // types
 import type { GameData, SolutionsLanguage } from "@/features/game/domain";
@@ -51,7 +51,7 @@ const selectSecretWordActor = fromPromise(async ({ input, signal }: { input: { s
 export const gameDataMachine = setup({
   types: {} as {
     events:
-      | { readonly type: "solutionsLanguageChanged"; solutionsLanguage: SolutionsLanguage }
+      | { readonly type: "solutionsLanguageChanged"; readonly solutionsLanguage: SolutionsLanguage }
       | { readonly type: "nextWordRequested" }
       | { readonly type: "retryRequested" };
     context: GameData;
@@ -75,11 +75,18 @@ export const gameDataMachine = setup({
 
           yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
           yield* Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "secretWordPicked", theSecretWord });
         })
       ),
 
     // Notify the word challenge machine that game data is ready (no word yet — idle state)
-    onGameDataLoaded: ({ context }) => RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
+    onGameDataLoaded: ({ context }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          yield* Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "gameDataLoaded", keypad: context.keypad });
+        })
+      ),
   },
   actors: { onLoadingActor, selectSecretWordActor },
 }).createMachine({
