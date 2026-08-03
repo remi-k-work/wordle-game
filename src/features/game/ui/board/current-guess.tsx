@@ -3,8 +3,9 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtom, useAtomValue } from "@effect/atom-react";
+import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { wordChallengeCurrentGuessWordAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // components
 import { GuessTile } from "./guess-tile";
@@ -16,16 +17,17 @@ import type { Color, Tile } from "@/features/game/domain";
 import { WORD_LENGTH } from "@/features/game/domain";
 
 export function CurrentGuess() {
-  const [wordChallengeMachineSnapshot, wordChallengeMachineEvent] = useAtom(wordChallengeMachineAtom);
+  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
+  const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
   const currentGuessWord = useAtomValue(wordChallengeCurrentGuessWordAtom);
 
   // Single AbortController removes the keyup listener on unmount or re-run
   useEffect(() => {
     const controller = new AbortController();
-    window.addEventListener("keyup", (ev) => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: ev.key }), { signal: controller.signal });
+    window.addEventListener("keyup", (ev) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: ev.key }), { signal: controller.signal });
 
     return () => controller.abort();
-  }, [wordChallengeMachineEvent]);
+  }, [overdriveHacksMachineEvent]);
 
   const isInvalidGuess = wordChallengeMachineSnapshot.matches("rejected");
   const currentLength = currentGuessWord.length;

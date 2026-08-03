@@ -2,13 +2,8 @@
 import { Option } from "effect";
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import {
-  gameDataKeypadAtom,
-  wordChallengeKeypadColorsAtom,
-  wordChallengeMachineAtom,
-  runSessionRunScoreAtom,
-  overdriveHacksMachineAtom,
-} from "@/features/game/state";
+import { gameDataKeypadAtom } from "@/features/game/state";
+import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // components
 import { Button } from "@base-ui/react";
@@ -21,7 +16,7 @@ import type { Color } from "@/features/game/domain";
 
 // constants
 import { motionTokens } from "@/lib/motion-tokens";
-import { EMP_COST, SONAR_COST } from "@/features/game/domain";
+import { EMP_COST, SONAR_COST } from "@/features/overdrive-hacks/domain";
 
 const COLOR_MAP = {
   grey: "var(--color-tile-grey)",
@@ -35,10 +30,7 @@ const MotionButton = motion.create(Button);
 
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
-  const keypadColors = useAtomValue(wordChallengeKeypadColorsAtom);
-  const wordChallengeMachineEvent = useAtomSet(wordChallengeMachineAtom);
-
-  const runScore = useAtomValue(runSessionRunScoreAtom);
+  const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
   if (Option.isNone(gameDataKeypad)) return <FooterSkeleton />;
@@ -50,10 +42,10 @@ export function Footer() {
     <div className="flex flex-col items-center gap-1">
       {/* Overdrive Hacks lifelines — raw, unstyled buttons (per "plumbing first" spec) */}
       <div className="flex gap-2">
-        <button type="button" onClick={() => overdriveHacksMachineEvent({ type: "lifelineUsed", lifelineId: "emp", currentRunScore: runScore })}>
+        <button type="button" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" })}>
           Use EMP (-{EMP_COST.toLocaleString()})
         </button>
-        <button type="button" onClick={() => overdriveHacksMachineEvent({ type: "lifelineUsed", lifelineId: "sonar", currentRunScore: runScore })}>
+        <button type="button" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" })}>
           Use Sonar (-{SONAR_COST.toLocaleString()})
         </button>
       </div>
@@ -70,7 +62,7 @@ export function Footer() {
                 exit={{ opacity: 0, scale: 0, transition: { duration: motionTokens.duration.crawl, ease: motionTokens.easing.smooth } }}
                 className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
                 style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
-                onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: key })}
+                onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: key })}
               >
                 {key}
               </MotionButton>
@@ -81,7 +73,7 @@ export function Footer() {
           <MotionButton
             key="Backspace"
             className="button basis-12 bg-secondary p-0"
-            onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: "BACKSPACE" })}
+            onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: "BACKSPACE" })}
           >
             <BackspaceIcon className="size-7" />
           </MotionButton>
@@ -89,7 +81,7 @@ export function Footer() {
           <MotionButton
             key="Enter"
             className="button basis-12 bg-secondary p-0"
-            onClick={() => wordChallengeMachineEvent({ type: "keyPressed", pressedKey: "ENTER" })}
+            onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: "ENTER" })}
           >
             <PaperAirplaneIcon className="size-7" />
           </MotionButton>

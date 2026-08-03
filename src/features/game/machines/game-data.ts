@@ -5,7 +5,8 @@ import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
-import { wordChallengeMachineAtom, wordMetaMachineAtom, overdriveHacksMachineAtom } from "@/features/game/state";
+import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // types
 import type { GameData, SolutionsLanguage } from "@/features/game/domain";
@@ -75,7 +76,7 @@ export const gameDataMachine = setup({
 
           yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
           yield* Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "secretWordPicked", theSecretWord });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.started", theSecretWord });
         })
       ),
 

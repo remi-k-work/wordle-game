@@ -3,11 +3,13 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup } from "xstate";
-import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom, overdriveHacksMachineAtom } from "@/features/game/state";
+import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 import { modalMachineAtom } from "@/state";
 
 // types
 import type { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain";
+import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
 
 export const gameFlowMachine = setup({
   types: {} as {
@@ -19,6 +21,7 @@ export const gameFlowMachine = setup({
       | { readonly type: "run.forfeitConfirmed"; readonly wordChallenge: WordChallenge }
       | { readonly type: "word.won"; readonly wordScore: WordScore }
       | { readonly type: "word.lost" }
+      | { readonly type: "hack.chargeRequested"; readonly requestId: string; readonly hackId: OverdriveHackId; readonly cost: number }
       | { readonly type: "language.changed"; readonly solutionsLanguage: SolutionsLanguage };
   },
   actions: {
@@ -43,6 +46,7 @@ export const gameFlowMachine = setup({
           if (event.type !== "run.forfeitConfirmed") return;
           yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge });
           yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
           yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
         })
       ),
@@ -51,6 +55,7 @@ export const gameFlowMachine = setup({
         Effect.gen(function* () {
           if (event.type !== "word.won") return;
           yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
           yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
         })
       ),
@@ -58,6 +63,7 @@ export const gameFlowMachine = setup({
       RuntimeClient.runPromise(
         Effect.gen(function* () {
           yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
           yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
         })
       ),
@@ -70,6 +76,19 @@ export const gameFlowMachine = setup({
           yield* Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" });
           yield* Atom.set(wordMetaMachineAtom, { type: "resetRequested" });
           yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: event.solutionsLanguage });
+        })
+      ),
+    settleHackCharge: ({ event }) =>
+      RuntimeClient.runPromise(
+        Effect.gen(function* () {
+          if (event.type !== "hack.chargeRequested") return;
+          const runSession = (yield* Atom.get(runSessionMachineAtom)).context;
+          const accepted = runSession.runId._tag === "Some" && runSession.runScore >= event.cost;
+          if (accepted) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: event.cost });
+          yield* Atom.set(overdriveHacksMachineAtom, {
+            type: accepted ? "charge.accepted" : "charge.rejected",
+            requestId: event.requestId,
+          });
         })
       ),
   },
@@ -96,6 +115,7 @@ export const gameFlowMachine = setup({
         "word.won": { target: "betweenWords", actions: "bankWonWord" },
         "word.lost": { target: "ready", actions: "finishLostRun" },
         "run.forfeitConfirmed": { target: "ready", actions: "forfeitRun" },
+        "hack.chargeRequested": { actions: "settleHackCharge" },
         "language.changed": { target: "ready", actions: "changeLanguage" },
       },
     },
