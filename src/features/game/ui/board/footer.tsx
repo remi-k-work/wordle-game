@@ -43,7 +43,7 @@ export function Footer() {
 
   return (
     <footer className="grid gap-1">
-      <section className="flex items-center justify-center gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
+      <section className="grid grid-cols-[1fr_1fr_2fr_3fr] gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
         <HacksMenu />
         <Riddle mode="popover" />
         <LangChanger />
@@ -94,7 +94,7 @@ export function Footer() {
 export function FooterSkeleton() {
   return (
     <footer className="grid gap-1">
-      <section className="flex items-center justify-center gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
+      <section className="grid grid-cols-[1fr_1fr_2fr_3fr] gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
         <HacksMenuSkeleton />
         <RiddleSkeleton mode="popover" />
         <LangChangerSkeleton />

@@ -13,16 +13,18 @@ export function LangChanger() {
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
   return (
-    <Button className="button p-1" title="Switch Solutions Language" onClick={() => gameSettingsMachineEvent({ type: "solutionsLanguageToggled" })}>
+    <Button className="button max-sm:p-1" title="Switch Solutions Language" onClick={() => gameSettingsMachineEvent({ type: "solutionsLanguageToggled" })}>
       {solutionsLanguage === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
+      <span className="hidden sm:block">Language</span>
     </Button>
   );
 }
 
 export function LangChangerSkeleton() {
   return (
-    <Button className="button p-1" title="Switch Solutions Language" disabled>
-      <UsFlagIcon className="size-11" />
+    <Button className="button max-sm:p-1" title="Switch Solutions Language" disabled>
+      <div className="size-11 animate-pulse bg-accent" />
+      <span className="hidden sm:block">Language</span>
     </Button>
   );
 }

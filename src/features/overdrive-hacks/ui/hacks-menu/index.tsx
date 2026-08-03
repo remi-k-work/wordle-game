@@ -30,13 +30,15 @@ export function HacksMenu() {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <Button className="button" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" })}>
+            <Button className="button grid grid-cols-[auto_1fr_1fr]" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" })}>
               <LifebuoyIcon className="size-11" />
-              Use EMP (-{EMP_COST.toLocaleString()})
+              <span className="justify-self-start">EMP</span>
+              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{EMP_COST.toLocaleString()} pts</span>
             </Button>
-            <Button className="button" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" })}>
+            <Button className="button grid grid-cols-[auto_1fr_1fr]" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" })}>
               <LifebuoyIcon className="size-11" />
-              Use Sonar (-{SONAR_COST.toLocaleString()})
+              <span className="justify-self-start">Sonar</span>
+              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{SONAR_COST.toLocaleString()} pts</span>
             </Button>
           </Popover.Popup>
         </Popover.Positioner>

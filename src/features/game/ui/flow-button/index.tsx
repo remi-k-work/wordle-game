@@ -22,20 +22,20 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
 
-  if (wordChallengeMachineSnapshot.matches("awaitingGameData") || gameDataMachineSnapshot.matches("loading") || gameDataMachineSnapshot.matches("selectingWord"))
+  if (
+    wordChallengeMachineSnapshot.matches("awaitingGameData") ||
+    gameDataMachineSnapshot.matches("loading") ||
+    gameDataMachineSnapshot.matches("selectingWord")
+  )
     return <GameFlowButtonSkeleton {...rest} />;
   if (gameFlowMachineSnapshot.matches("starting")) return <GameFlowButtonSkeleton {...rest} />;
 
   // "Next Word" button (won a word, OR returning to an active run with no current puzzle)
   if (gameFlowMachineSnapshot.matches("betweenWords"))
     return (
-      <Button
-        className={cn("button", className)}
-        onClick={() => gameFlowMachineEvent({ type: "word.nextRequested" })}
-        {...rest}
-      >
+      <Button className={cn("button max-sm:p-1", className)} title="Next Word" onClick={() => gameFlowMachineEvent({ type: "word.nextRequested" })} {...rest}>
         <ForwardIcon className="size-11" />
-        Next Word
+        <span className="hidden sm:block">Next Word</span>
       </Button>
     );
 
@@ -43,28 +43,34 @@ export function GameFlowButton({ className, ...rest }: GameFlowButtonProps) {
   if (gameFlowMachineSnapshot.matches("ready"))
     return (
       <Button
-        className={cn("button", className)}
+        className={cn("button max-sm:p-1", className)}
+        title="Start New Run"
         onClick={() => gameFlowMachineEvent({ type: "run.startRequested" })}
         {...rest}
       >
         <ArrowPathIcon className="size-11" />
-        Start New Run
+        <span className="hidden sm:block">Start New Run</span>
       </Button>
     );
 
   // "Forfeit Run" button (default — puzzle in progress)
   return (
-    <Button className={cn("button", className)} onClick={() => alertMachineEvent({ type: "opened", alertType: "forfeit-run" })} {...rest}>
+    <Button
+      className={cn("button bg-destructive max-sm:p-1", className)}
+      title="Forfeit Run"
+      onClick={() => alertMachineEvent({ type: "opened", alertType: "forfeit-run" })}
+      {...rest}
+    >
       <XCircleIcon className="size-11" />
-      Forfeit Run
+      <span className="hidden sm:block">Forfeit Run</span>
     </Button>
   );
 }
 
 export function GameFlowButtonSkeleton({ className, ...rest }: GameFlowButtonProps) {
   return (
-    <Button className={cn("button", className)} disabled {...rest}>
-      &nbsp;
+    <Button className={cn("button max-sm:p-1", className)} disabled {...rest}>
+      <div className="size-full animate-pulse bg-accent" />
     </Button>
   );
 }
