@@ -7,6 +7,10 @@ import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/fea
 
 // components
 import { Button } from "@base-ui/react";
+import { HacksMenu, HacksMenuSkeleton } from "@/features/overdrive-hacks/ui/hacks-menu";
+import { Riddle, RiddleSkeleton } from "@/features/game/ui/riddle";
+import { LangChanger, LangChangerSkeleton } from "@/features/settings/ui/lang-changer";
+import { GameFlowButton, GameFlowButtonSkeleton } from "@/features/game/ui/flow-button";
 
 // assets
 import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
@@ -16,7 +20,6 @@ import type { Color } from "@/features/game/domain";
 
 // constants
 import { motionTokens } from "@/lib/motion-tokens";
-import { EMP_COST, SONAR_COST } from "@/features/overdrive-hacks/domain";
 
 const COLOR_MAP = {
   grey: "var(--color-tile-grey)",
@@ -39,18 +42,15 @@ export function Footer() {
   const availableKeys = gameDataKeypad.value.filter((key) => keypadColors[key] !== "grey");
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      {/* Overdrive Hacks lifelines — raw, unstyled buttons (per "plumbing first" spec) */}
-      <div className="flex gap-2">
-        <button type="button" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" })}>
-          Use EMP (-{EMP_COST.toLocaleString()})
-        </button>
-        <button type="button" onClick={() => overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" })}>
-          Use Sonar (-{SONAR_COST.toLocaleString()})
-        </button>
-      </div>
+    <footer className="grid gap-1">
+      <section className="flex items-center justify-center gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
+        <HacksMenu />
+        <Riddle mode="popover" />
+        <LangChanger />
+        <GameFlowButton />
+      </section>
 
-      <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
+      <section className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
         {/* AnimatePresence handles elements being unmounted (removed from the array) */}
         <AnimatePresence mode="sync">
           {availableKeys.map((key) => {
@@ -86,23 +86,22 @@ export function Footer() {
             <PaperAirplaneIcon className="size-7" />
           </MotionButton>
         </AnimatePresence>
-      </footer>
-    </div>
+      </section>
+    </footer>
   );
 }
 
 export function FooterSkeleton() {
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="flex gap-2">
-        <button type="button" disabled style={{ visibility: "hidden" }}>
-          Use EMP
-        </button>
-        <button type="button" disabled style={{ visibility: "hidden" }}>
-          Use Sonar
-        </button>
-      </div>
-      <footer className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
+    <footer className="grid gap-1">
+      <section className="flex items-center justify-center gap-2 bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
+        <HacksMenuSkeleton />
+        <RiddleSkeleton mode="popover" />
+        <LangChangerSkeleton />
+        <GameFlowButtonSkeleton />
+      </section>
+
+      <section className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
         {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].map((key) => (
           <Button key={key} className="button basis-12 border-secondary bg-transparent p-0 font-sans text-xl leading-9" disabled>
             {key}
@@ -114,7 +113,7 @@ export function FooterSkeleton() {
         <Button className="button basis-12 bg-secondary p-0" disabled>
           <PaperAirplaneIcon className="size-7" />
         </Button>
-      </footer>
-    </div>
+      </section>
+    </footer>
   );
 }

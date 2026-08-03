@@ -21,7 +21,7 @@ const COLOR_MAP = {
 export function GuessTile({ tile: { tileKey, color }, bounceAnim = false }: GuessTileProps) {
   return (
     <div className={cn("@container grid place-items-center border-2", color && COLOR_MAP[color], bounceAnim && "animate-bounce")}>
-      <span className="text-[60cqi] leading-0 font-semibold sm:text-[50cqi]">{tileKey}</span>
+      <span className="text-[60cqi] leading-0 font-semibold sm:text-[40cqi]">{tileKey}</span>
     </div>
   );
 }
@@ -29,7 +29,7 @@ export function GuessTile({ tile: { tileKey, color }, bounceAnim = false }: Gues
 export function GuessTileSkeleton() {
   return (
     <div className="@container grid place-items-center border-2">
-      <span className="text-[60cqi] leading-0 font-semibold sm:text-[50cqi]">&nbsp;</span>
+      <span className="text-[60cqi] leading-0 font-semibold sm:text-[40cqi]">&nbsp;</span>
     </div>
   );
 }

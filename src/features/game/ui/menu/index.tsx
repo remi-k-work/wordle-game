@@ -5,8 +5,6 @@ import { modalMachineAtom } from "@/state";
 
 // components
 import { Button, Popover } from "@base-ui/react";
-import { LangChanger } from "@/features/settings/ui/lang-changer";
-import { GameFlowButton } from "@/features/game/ui/flow-button";
 
 // assets
 import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "@heroicons/react/24/outline";
@@ -29,8 +27,6 @@ export function GameMenu() {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <LangChanger />
-            <GameFlowButton />
             <Button className="button" onClick={() => modalMachineEvent({ type: "opened", modalType: "voice-settings" })}>
               <SpeakerWaveIcon className="size-11" />
               Voice Settings

@@ -9,7 +9,7 @@ import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/s
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // types
-import type { GameData, SolutionsLanguage } from "@/features/game/domain";
+import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
 // constants
 import { INITIAL_GAME_DATA } from "@/features/game/domain";
@@ -61,7 +61,7 @@ export const gameDataMachine = setup({
     // Save the loaded game data
     saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
 
-    onSecretWordSelected: (_, params: { theSecretWord: string }) =>
+    onSecretWordSelected: (_, params: { theSecretWord: TheSecretWord }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
           const theSecretWord = params.theSecretWord;
