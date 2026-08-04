@@ -25,7 +25,7 @@ export function WinOrLoseModal() {
       {hasWon ? <YouWin /> : <Nevermind />}
 
       <section className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
-        <GameFlowButton tabIndex={-1} />
+        <GameFlowButton keepText tabIndex={-1} />
         <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
           <XCircleIcon className="size-11" />
           Maybe Later
