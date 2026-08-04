@@ -1,17 +1,21 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
-import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines";
-import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
+import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
+import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
 import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
 import type { Color, Tile, WordleGrid } from "@/features/game/domain";
+import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
 
 type OverdriveHacksMachineSnapshot = SnapshotFrom<typeof overdriveHacksMachine>;
 type OverdriveHacksMachineEvent = EventFromLogic<typeof overdriveHacksMachine>;
 type OverdriveHacksMachineActor = Actor<typeof overdriveHacksMachine>;
+
+// constants
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
 // Creates an Atom-owned XState actor reference
 const overdriveHacksMachineActorAtom = Atom.make<OverdriveHacksMachineActor>((get) => {
@@ -62,3 +66,12 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
     })
   ) as WordleGrid;
 });
+
+// Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
+export const overdriveHacksCanApplyHackAtom = Atom.family((overdriveHackId: OverdriveHackId) =>
+  Atom.make((get) => {
+    const gameFlowMachineSnapshot = get(gameFlowMachineAtom);
+    const runScore = get(runSessionRunScoreAtom);
+    return gameFlowMachineSnapshot.matches("playing") && runScore >= OVERDRIVE_HACK_COST(overdriveHackId);
+  })
+);

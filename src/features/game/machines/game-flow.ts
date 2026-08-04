@@ -4,11 +4,15 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { setup, assertEvent } from "xstate";
 import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksCanApplyHackAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 import { modalMachineAtom } from "@/state";
 
 // types
 import type { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain";
+import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
+
+// constants
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
 export const gameFlowMachine = setup({
   types: {} as {
@@ -20,7 +24,7 @@ export const gameFlowMachine = setup({
       | { readonly type: "run.forfeitConfirmed"; readonly wordChallenge: WordChallenge }
       | { readonly type: "word.won"; readonly wordScore: WordScore }
       | { readonly type: "word.lost" }
-      | { readonly type: "hack.chargeRequested"; readonly amount: WordScore["wordScore"] }
+      | { readonly type: "hack.chargeRequested"; readonly overdriveHackId: OverdriveHackId }
       | { readonly type: "language.changed"; readonly solutionsLanguage: SolutionsLanguage };
   },
   actions: {
@@ -81,10 +85,9 @@ export const gameFlowMachine = setup({
       RuntimeClient.runPromise(
         Effect.gen(function* () {
           assertEvent(event, "hack.chargeRequested");
-          const runSession = (yield* Atom.get(runSessionMachineAtom)).context;
-          const accepted = runSession.runId._tag === "Some" && runSession.runScore >= event.amount;
-          if (accepted) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: event.amount });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: accepted ? "charge.accepted" : "charge.rejected" });
+          const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom(event.overdriveHackId));
+          if (canApplyHack) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(event.overdriveHackId) });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: canApplyHack ? "charge.accepted" : "charge.rejected" });
         })
       ),
   },

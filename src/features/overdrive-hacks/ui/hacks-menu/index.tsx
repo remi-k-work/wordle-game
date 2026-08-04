@@ -3,10 +3,8 @@ import { useState } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { runSessionRunIdAtom, runSessionRunScoreAtom } from "@/features/game/state";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksCanApplyHackAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // components
 import { Button, Popover } from "@base-ui/react";
@@ -18,12 +16,10 @@ import { LifebuoyIcon } from "@heroicons/react/24/outline";
 import { EMP_COST, SONAR_COST } from "@/features/overdrive-hacks/domain";
 
 export function HacksMenu() {
-  const runId = useAtomValue(runSessionRunIdAtom);
-  const runScore = useAtomValue(runSessionRunScoreAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
-  const isEmpEnabled = Option.isSome(runId) && runScore >= EMP_COST;
-  const isSonarEnabled = Option.isSome(runId) && runScore >= SONAR_COST;
+  const canApplyHackEmp = useAtomValue(overdriveHacksCanApplyHackAtom("emp"));
+  const canApplyHackSonar = useAtomValue(overdriveHacksCanApplyHackAtom("sonar"));
 
   // Controls whether the popover is open or not
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +41,7 @@ export function HacksMenu() {
           >
             <Button
               className="button grid grid-cols-[auto_1fr_1fr]"
-              disabled={!isEmpEnabled}
+              disabled={!canApplyHackEmp}
               onClick={() => {
                 overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" });
                 setIsOpen(false);
@@ -57,7 +53,7 @@ export function HacksMenu() {
             </Button>
             <Button
               className="button grid grid-cols-[auto_1fr_1fr]"
-              disabled={!isSonarEnabled}
+              disabled={!canApplyHackSonar}
               onClick={() => {
                 overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" });
                 setIsOpen(false);

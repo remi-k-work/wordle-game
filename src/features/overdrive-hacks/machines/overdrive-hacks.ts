@@ -12,7 +12,7 @@ import type { Keypad, TheSecretWord } from "@/features/game/domain";
 import type { OverdriveHackEffect, OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain";
 
 // constants
-import { INITIAL_OVERDRIVE_HACKS, OVERDRIVE_HACK_COST, VOWELS_BY_LANGUAGE } from "@/features/overdrive-hacks/domain";
+import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE } from "@/features/overdrive-hacks/domain";
 
 type ResolveInput = {
   readonly hackId: OverdriveHackId;
@@ -120,8 +120,8 @@ export const overdriveHacksMachine = setup({
       if (Option.isNone(event.output)) return;
       const effect = event.output.value;
       // Reverse-map the effect tag back to the hack ID for game-flow's cost lookup
-      const hackId: OverdriveHackId = effect._tag === "EmpApplied" ? "emp" : "sonar";
-      RuntimeClient.runPromise(Atom.set(gameFlowMachineAtom, { type: "hack.chargeRequested", amount: OVERDRIVE_HACK_COST(hackId) }));
+      const overdriveHackId: OverdriveHackId = effect._tag === "EmpApplied" ? "emp" : "sonar";
+      RuntimeClient.runPromise(Atom.set(gameFlowMachineAtom, { type: "hack.chargeRequested", overdriveHackId }));
     },
 
     // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
