@@ -2,7 +2,7 @@
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
-import { assign, fromPromise, setup } from "xstate";
+import { setup, assign, fromPromise, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { gameFlowMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 import { calculateEmpTargets, calculateSonarTarget } from "@/features/overdrive-hacks/domain";
@@ -14,6 +14,9 @@ import type { OverdriveHackEffect, OverdriveHackId, OverdriveHacks } from "@/fea
 // constants
 import { INITIAL_OVERDRIVE_HACKS, OVERDRIVE_HACK_COST, VOWELS_BY_LANGUAGE } from "@/features/overdrive-hacks/domain";
 
+// Map the effect's discriminated-union tag back to the hack ID that triggered it
+const hackIdFromEffect = (effect: OverdriveHackEffect): OverdriveHackId => (effect._tag === "EmpApplied" ? "emp" : "sonar");
+
 type ResolveInput = {
   readonly hackId: OverdriveHackId;
   readonly theSecretWord: TheSecretWord;
@@ -22,6 +25,8 @@ type ResolveInput = {
   readonly sonarReveals: OverdriveHacks["sonarReveals"];
 };
 
+// Resolves the selected hack into a concrete effect (nuked letters or a vowel reveal).
+// Returns Option.none() when no valid targets remain (e.g. all vowels already revealed).
 const resolveHackActor = fromPromise(async ({ input, signal }: { input: ResolveInput; signal: AbortSignal }): Promise<Option.Option<OverdriveHackEffect>> =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
@@ -44,6 +49,19 @@ const resolveHackActor = fromPromise(async ({ input, signal }: { input: ResolveI
   )
 );
 
+// ── State machine ──────────────────────────────────────────────────────────────
+//
+// Flow: awaitingGameData → idle → active → resolving → charging → active
+//
+// "active"     — puzzle in progress, hacks can be requested.
+// "resolving"  — hack target computation is running (e.g. shuffling candidates).
+// "charging"   — awaiting score-deduction approval from the game-flow machine
+//                before applying the effect to context.
+//
+// The charging gate prevents applying effects without sufficient score
+// and keeps the requestId → response handshake type-safe.
+// ───────────────────────────────────────────────────────────────────────────────
+
 export const overdriveHacksMachine = setup({
   types: {} as {
     context: OverdriveHacks;
@@ -65,21 +83,37 @@ export const overdriveHacksMachine = setup({
       context.pendingRequestId.value === event.requestId,
   },
   actions: {
-    saveGameData: assign(({ event }) => (event.type === "gameDataLoaded" ? { ...INITIAL_OVERDRIVE_HACKS, keypad: event.keypad } : INITIAL_OVERDRIVE_HACKS)),
-    startPuzzle: assign(({ context, event }) =>
-      event.type === "puzzle.started" ? { ...INITIAL_OVERDRIVE_HACKS, keypad: context.keypad, theSecretWord: Option.some(event.theSecretWord) } : context
-    ),
-    requestHack: assign(({ context, event }) =>
-      event.type === "hack.useRequested" ? { ...context, pendingRequestId: Option.some(crypto.randomUUID()) } : context
-    ),
+    // On gameDataLoaded: reset all hack state but preserve the incoming keypad layout
+    saveGameData: assign(({ event }) => {
+      assertEvent(event, "gameDataLoaded");
+      return { ...INITIAL_OVERDRIVE_HACKS, keypad: event.keypad };
+    }),
+
+    // Puzzle start: reset context but carry forward the keypad we already have
+    startPuzzle: assign(({ context, event }) => {
+      assertEvent(event, "puzzle.started");
+      return { ...INITIAL_OVERDRIVE_HACKS, keypad: context.keypad, theSecretWord: Option.some(event.theSecretWord) };
+    }),
+
+    // Mark the hack as requested and generate a unique charge request ID
+    requestHack: assign(({ context, event }) => {
+      assertEvent(event, "hack.useRequested");
+      return { ...context, pendingRequestId: Option.some(crypto.randomUUID()) };
+    }),
+
+    // Save the resolved effect to context for the charging state to apply once the score is settled
     savePendingEffect: assign(({ context, event }) => {
-      if (event.type !== "xstate.done.actor.resolveHack") return context;
+      assertEvent(event, "xstate.done.actor.resolveHack");
       return Option.match(event.output, {
         onNone: () => ({ ...context, pendingRequestId: Option.none() }),
         onSome: (effect) => ({ ...context, pendingEffect: Option.some(effect) }),
       });
     }),
+
+    // Clear any in-flight hack state (used when charging fails or puzzle ends)
     clearPendingRequest: assign(({ context }) => ({ ...context, pendingEffect: Option.none(), pendingRequestId: Option.none() })),
+
+    // Charge accepted: merge the pending effect into permanent hack state
     applyPendingEffect: assign(({ context }) =>
       Option.match(context.pendingEffect, {
         onNone: () => ({ ...context, pendingRequestId: Option.none() }),
@@ -92,17 +126,27 @@ export const overdriveHacksMachine = setup({
         },
       })
     ),
+
+    // Send the resolved effect to game-flow so it can charge the player's score
     requestCharge: ({ context, event }) => {
-      if (event.type !== "xstate.done.actor.resolveHack" || Option.isNone(event.output) || Option.isNone(context.pendingRequestId)) return;
+      assertEvent(event, "xstate.done.actor.resolveHack");
+      if (Option.isNone(event.output) || Option.isNone(context.pendingRequestId)) return;
       const effect = event.output.value;
-      const hackId: OverdriveHackId = effect._tag === "EmpApplied" ? "emp" : "sonar";
       RuntimeClient.runPromise(
-        Atom.set(gameFlowMachineAtom, { type: "hack.chargeRequested", requestId: context.pendingRequestId.value, hackId, cost: OVERDRIVE_HACK_COST(hackId) })
+        Atom.set(gameFlowMachineAtom, {
+          type: "hack.chargeRequested",
+          requestId: context.pendingRequestId.value,
+          hackId: hackIdFromEffect(effect),
+          cost: OVERDRIVE_HACK_COST(hackIdFromEffect(effect)),
+        })
       );
     },
+
+    // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
     forwardKeyPress: ({ context, event }) => {
-      if (event.type !== "input.keyPressed") return;
+      assertEvent(event, "input.keyPressed");
       const key = event.pressedKey.toUpperCase();
+      // Don't forward discarded EMP'd letters
       if (context.empNukedLetters.includes(key)) return;
       RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },
@@ -119,8 +163,10 @@ export const overdriveHacksMachine = setup({
     "puzzle.ended": { target: ".idle", actions: "clearPendingRequest" },
   },
   states: {
+    // No game data yet; waits for keypad layout from the game-data machine
     awaitingGameData: {},
     idle: {},
+    // An active puzzle is running — hacks and keypress forwarding are live
     active: {
       on: {
         "input.keyPressed": { actions: "forwardKeyPress" },
@@ -133,7 +179,8 @@ export const overdriveHacksMachine = setup({
         id: "resolveHack",
         src: "resolveHack",
         input: ({ context, event }) => {
-          if (event.type !== "hack.useRequested" || Option.isNone(context.theSecretWord) || Option.isNone(context.keypad)) {
+          assertEvent(event, "hack.useRequested");
+          if (Option.isNone(context.theSecretWord) || Option.isNone(context.keypad)) {
             throw new Error("Overdrive hack resolution started without an active puzzle");
           }
           return {
@@ -144,6 +191,8 @@ export const overdriveHacksMachine = setup({
             sonarReveals: context.sonarReveals,
           };
         },
+        // First branch: no eligible targets → drop the request and return to active (no score change)
+        // Second branch: targets found → save the effect and ask game-flow to charge the player's score
         onDone: [
           { guard: ({ event }) => Option.isNone(event.output), target: "active", actions: "clearPendingRequest" },
           { target: "charging", actions: ["savePendingEffect", "requestCharge"] },
@@ -151,10 +200,13 @@ export const overdriveHacksMachine = setup({
         onError: { target: "active", actions: "clearPendingRequest" },
       },
     },
+    // Awaiting score-deduction confirmation from the game-flow machine
     charging: {
       on: {
         "input.keyPressed": { actions: "forwardKeyPress" },
+        // Score was accepted → apply the hack effect
         "charge.accepted": { guard: "isCurrentCharge", target: "active", actions: "applyPendingEffect" },
+        // Not enough score → discard the pending effect and go back
         "charge.rejected": { guard: "isCurrentCharge", target: "active", actions: "clearPendingRequest" },
       },
     },

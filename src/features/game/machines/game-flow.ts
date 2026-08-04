@@ -2,7 +2,7 @@
 import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
-import { setup } from "xstate";
+import { setup, assertEvent } from "xstate";
 import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 import { modalMachineAtom } from "@/state";
@@ -43,7 +43,7 @@ export const gameFlowMachine = setup({
     forfeitRun: ({ event }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          if (event.type !== "run.forfeitConfirmed") return;
+          assertEvent(event, "run.forfeitConfirmed");
           yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge });
           yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
           yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
@@ -53,7 +53,7 @@ export const gameFlowMachine = setup({
     bankWonWord: ({ event }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          if (event.type !== "word.won") return;
+          assertEvent(event, "word.won");
           yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore });
           yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
           yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
@@ -70,7 +70,7 @@ export const gameFlowMachine = setup({
     changeLanguage: ({ event }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          if (event.type !== "language.changed") return;
+          assertEvent(event, "language.changed");
           yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
           yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
           yield* Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" });
@@ -81,7 +81,7 @@ export const gameFlowMachine = setup({
     settleHackCharge: ({ event }) =>
       RuntimeClient.runPromise(
         Effect.gen(function* () {
-          if (event.type !== "hack.chargeRequested") return;
+          assertEvent(event, "hack.chargeRequested");
           const runSession = (yield* Atom.get(runSessionMachineAtom)).context;
           const accepted = runSession.runId._tag === "Some" && runSession.runScore >= event.cost;
           if (accepted) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: event.cost });

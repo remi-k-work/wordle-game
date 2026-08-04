@@ -6,6 +6,10 @@ import { computeKeypadState } from "@/features/game/domain";
 import type { TheSecretWord } from "@/features/game/domain";
 import type { SonarReveal } from ".";
 
+// Sonar reveals one vowel (and its positions) from the secret word.
+// The pipeline works in two phases: candidate list → random single pick.
+// Vowels already known to the player (via correct guesses or previous reveals)
+// are excluded so each activation always delivers new information.
 export const computeSonarCandidates = (
   theSecretWord: TheSecretWord,
   wordleGuesses: ReadonlyArray<TheSecretWord>,
@@ -14,8 +18,11 @@ export const computeSonarCandidates = (
 ) =>
   pipe(
     vowels,
+    // Keep only vowels that actually appear somewhere in the secret word
     Array.filter((vowel) => theSecretWord.includes(vowel)),
+    // Exclude vowels already revealed by previous sonar activations
     Array.filter((vowel) => !alreadyRevealedLetters.includes(vowel)),
+    // Keep vowels the player hasn't positively identified yet (untouched or only greyed-out guesses)
     Array.filter((vowel) => {
       const color = computeKeypadState(theSecretWord, wordleGuesses)[vowel];
       return color === undefined || color === "" || color === "grey";
@@ -32,11 +39,13 @@ export const calculateSonarTarget = (
     const candidates = computeSonarCandidates(theSecretWord, wordleGuesses, vowels, alreadyRevealedVowels);
     if (candidates.length === 0) return Option.none();
 
+    // Shuffle then pick exactly one vowel at random from equally-valid candidates
     const [vowel] = Array.take(1)(yield* Random.shuffle(candidates));
     if (vowel === undefined) return Option.none();
 
     return Option.some({
       vowel,
+      // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
       positions: pipe(
         Array.makeBy(theSecretWord.length, (index) => (theSecretWord[index] === vowel ? index : -1)),
         Array.filter((index) => index >= 0)
