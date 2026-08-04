@@ -9,7 +9,6 @@ import { modalMachineAtom } from "@/state";
 
 // types
 import type { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain";
-import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
 
 export const gameFlowMachine = setup({
   types: {} as {
@@ -21,7 +20,7 @@ export const gameFlowMachine = setup({
       | { readonly type: "run.forfeitConfirmed"; readonly wordChallenge: WordChallenge }
       | { readonly type: "word.won"; readonly wordScore: WordScore }
       | { readonly type: "word.lost" }
-      | { readonly type: "hack.chargeRequested"; readonly requestId: string; readonly hackId: OverdriveHackId; readonly cost: number }
+      | { readonly type: "hack.chargeRequested"; readonly amount: WordScore["wordScore"] }
       | { readonly type: "language.changed"; readonly solutionsLanguage: SolutionsLanguage };
   },
   actions: {
@@ -83,9 +82,9 @@ export const gameFlowMachine = setup({
         Effect.gen(function* () {
           assertEvent(event, "hack.chargeRequested");
           const runSession = (yield* Atom.get(runSessionMachineAtom)).context;
-          const accepted = runSession.runId._tag === "Some" && runSession.runScore >= event.cost;
-          if (accepted) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: event.cost });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: accepted ? "charge.accepted" : "charge.rejected", requestId: event.requestId });
+          const accepted = runSession.runId._tag === "Some" && runSession.runScore >= event.amount;
+          if (accepted) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: event.amount });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: accepted ? "charge.accepted" : "charge.rejected" });
         })
       ),
   },

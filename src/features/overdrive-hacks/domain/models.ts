@@ -30,6 +30,6 @@ export class OverdriveHacks extends Schema.Class<OverdriveHacks>("OverdriveHacks
   keypad: Schema.Option(Keypad),
   empNukedLetters: Schema.Array(Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(1))),
   sonarReveals: Schema.Array(SonarReveal),
+  // Holds the resolved effect between the resolve actor's onDone and the score-charge verdict
   pendingEffect: Schema.Option(OverdriveHackEffect),
-  pendingRequestId: Schema.Option(Schema.Trim.check(Schema.isUUID())),
 }) {}
