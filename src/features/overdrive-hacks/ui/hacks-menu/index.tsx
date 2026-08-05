@@ -13,7 +13,7 @@ import { Button, Popover } from "@base-ui/react";
 import { LifebuoyIcon } from "@heroicons/react/24/outline";
 
 // constants
-import { EMP_COST, SONAR_COST } from "@/features/overdrive-hacks/domain";
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
 export function HacksMenu() {
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
@@ -49,7 +49,7 @@ export function HacksMenu() {
             >
               <LifebuoyIcon className="size-11" />
               <span className="justify-self-start">EMP</span>
-              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{EMP_COST.toLocaleString()} pts</span>
+              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{OVERDRIVE_HACK_COST("emp").toLocaleString()} pts</span>
             </Button>
             <Button
               className="button grid grid-cols-[auto_1fr_1fr]"
@@ -61,7 +61,7 @@ export function HacksMenu() {
             >
               <LifebuoyIcon className="size-11" />
               <span className="justify-self-start">Sonar</span>
-              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{SONAR_COST.toLocaleString()} pts</span>
+              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{OVERDRIVE_HACK_COST("sonar").toLocaleString()} pts</span>
             </Button>
           </Popover.Popup>
         </Popover.Positioner>

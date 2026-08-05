@@ -56,7 +56,7 @@ export const runSessionMachine = setup({
       } as const satisfies RunSession;
     }),
 
-    // Score spending is a generic run concern; GameFlow authorizes individual purchases
+    // Score spending is a generic run concern
     spendRunScore: assign(({ context, event }) => {
       assertEvent(event, "runScoreSpent");
       return { ...context, runScore: Math.max(0, context.runScore - event.amount) } as const satisfies RunSession;

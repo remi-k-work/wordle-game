@@ -6,10 +6,7 @@ import { computeKeypadState } from "@/features/game/domain";
 import type { TheSecretWord } from "@/features/game/domain";
 import type { SonarReveal } from ".";
 
-// Sonar reveals one vowel (and its positions) from the secret word.
-// The pipeline works in two phases: candidate list → random single pick.
-// Vowels already known to the player (via correct guesses or previous reveals)
-// are excluded so each activation always delivers new information.
+// Randomly reveals one previously unknown vowel and all of its positions in the secret word
 export const computeSonarCandidates = (
   theSecretWord: TheSecretWord,
   wordleGuesses: ReadonlyArray<TheSecretWord>,

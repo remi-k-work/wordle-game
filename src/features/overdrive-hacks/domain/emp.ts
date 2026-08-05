@@ -8,9 +8,7 @@ import type { Keypad, TheSecretWord } from "@/features/game/domain";
 // constants
 import { EMP_LETTER_COUNT } from ".";
 
-// EMP nukes letters from the virtual keyboard, permanently greying them out.
-// Eligibility: a letter is NOT in the secret word, has NOT been nuked already,
-// and has NOT been discovered by the player via any prior guess.
+// EMP permanently greys out eligible incorrect letters on the virtual keyboard
 export const computeEmpCandidates = (
   theSecretWord: TheSecretWord,
   wordleGuesses: ReadonlyArray<TheSecretWord>,
@@ -30,8 +28,7 @@ export const computeEmpCandidates = (
     })
   );
 
-// EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation.
-// If eligible candidates drop below that count the hack is unavailable.
+// EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation
 export const calculateEmpTargets = (
   theSecretWord: TheSecretWord,
   wordleGuesses: ReadonlyArray<TheSecretWord>,
