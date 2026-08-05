@@ -76,18 +76,12 @@ export const gameDataMachine = setup({
 
           yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
           yield* Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.started", theSecretWord });
+          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.started" });
         })
       ),
 
     // Notify the word challenge machine that game data is ready (no word yet — idle state)
-    onGameDataLoaded: ({ context }) =>
-      RuntimeClient.runPromise(
-        Effect.gen(function* () {
-          yield* Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "gameDataLoaded", keypad: context.keypad });
-        })
-      ),
+    onGameDataLoaded: ({ context }) => RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
   },
   actors: { onLoadingActor, selectSecretWordActor },
 }).createMachine({

@@ -5,6 +5,7 @@ import { BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
+import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { TelemetryHub } from "@/features/telemetry/services/telemetry-hub";
 import { HubTracerLayer } from "@/features/telemetry/services/hub-tracer";
 import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
@@ -17,7 +18,14 @@ const AtomReadyLayer = Layer.mergeAll(Layer.succeed(AtomRegistry.AtomRegistry, s
 const TelemetryStarterLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), TelemetryWorkerLayer, AtomReadyLayer).pipe(
   Layer.provideMerge(TelemetryReadyLayer)
 );
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), RpcGameClient.layer, RpcHighScoreClient.layer, TelemetryReadyLayer, AtomReadyLayer);
+const MainLayer = Layer.mergeAll(
+  Logger.layer([Logger.consolePretty()]),
+  RpcGameClient.layer,
+  RpcHighScoreClient.layer,
+  RpcOverdriveHacksClient.layer,
+  TelemetryReadyLayer,
+  AtomReadyLayer
+);
 
 export const RuntimeTelemetryStarter = Atom.runtime(TelemetryStarterLayer);
 export const RuntimeAtom = Atom.runtime(MainLayer);

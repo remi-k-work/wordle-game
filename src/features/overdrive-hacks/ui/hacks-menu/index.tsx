@@ -43,7 +43,7 @@ export function HacksMenu() {
               className="button grid grid-cols-[auto_1fr_1fr]"
               disabled={!canApplyHackEmp}
               onClick={() => {
-                overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "emp" });
+                overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "emp" });
                 setIsOpen(false);
               }}
             >
@@ -55,7 +55,7 @@ export function HacksMenu() {
               className="button grid grid-cols-[auto_1fr_1fr]"
               disabled={!canApplyHackSonar}
               onClick={() => {
-                overdriveHacksMachineEvent({ type: "hack.useRequested", hackId: "sonar" });
+                overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "sonar" });
                 setIsOpen(false);
               }}
             >

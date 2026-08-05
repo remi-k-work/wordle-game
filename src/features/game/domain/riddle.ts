@@ -19,7 +19,7 @@ const RIDDLE_PROMPT_PL = (theSecretWord: string) => `Napisz krótką, sprytną z
 const RiddleModel = Context.Service<LanguageModel>("RiddleModel");
 
 // Attempt to generate a riddle using the provided model
-const attemptRiddleWithModel = Effect.fn("riddle.attemptRiddleWithModel")(function* (theSecretWord: string, solutionsLanguage: SolutionsLanguage) {
+const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (theSecretWord: string, solutionsLanguage: SolutionsLanguage) {
   const model = yield* RiddleModel;
 
   return yield* Effect.tryPromise({
