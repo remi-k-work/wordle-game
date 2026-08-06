@@ -11,6 +11,8 @@ import {
   wordChallengeMachineAtom,
   wordChallengeTheSecretWordAtom,
   wordChallengeWordleGuessesAtom,
+  wordMetaTheRiddleAtom,
+  wordMetaWordDefinitionAtom,
 } from "@/features/game/state";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state";
 import { calculateEmpTargets, calculateSonarTarget } from "@/features/overdrive-hacks/domain";
@@ -89,10 +91,13 @@ const applyOverrideHackActor = fromPromise(async ({ signal }: { signal: AbortSig
       if (!canApplyHack) return Option.none();
 
       const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
+      const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
+      const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
+      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
       const { fetchOverride } = yield* RpcOverdriveHacksClient;
-      const theOverride = yield* fetchOverride({ theSecretWord, solutionsLanguage });
+      const theOverride = yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
 
       // Charge the player's run score for the hack, if applicable
       if (Option.isSome(theOverride)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
