@@ -10,7 +10,12 @@ import { Button } from "@base-ui/react";
 // assets
 import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
 
-export function Content() {
+// types
+interface ContentProps {
+  mode: "popover" | "voiceTest";
+}
+
+export function Content({ mode }: ContentProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const sanitizedRiddle = useAtomValue(wordMetaSanitizedRiddleAtom);
   const speakRiddle = useSpeakRiddle();
@@ -26,19 +31,19 @@ export function Content() {
       </p>
       <Button className="button mx-auto mt-4" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedRiddle)}>
         <SpeakerWaveIcon className="size-11" />
-        Speak Riddle
+        {mode === "voiceTest" ? "Test Voice" : "Speak Riddle"}
       </Button>
     </>
   );
 }
 
-export function ContentSkeleton() {
+export function ContentSkeleton({ mode }: ContentProps) {
   return (
     <>
       <p className="mx-auto animate-pulse text-center text-lg leading-relaxed sm:text-xl lg:text-2xl">Thinking...</p>
       <Button className="button mx-auto mt-4" disabled>
         <SpeakerWaveIcon className="size-11" />
-        Speak Riddle
+        {mode === "voiceTest" ? "Test Voice" : "Speak Riddle"}
       </Button>
     </>
   );

@@ -1,13 +1,27 @@
 // services, features, and other libraries
-import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaWordDefinitionAtom } from "@/features/game/state";
+import { wordMetaSanitizedDefinitionAtom } from "@/features/game/state";
+import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
+
+// components
+import { Button } from "@base-ui/react";
+
+// assets
+import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
 
 export function Definition() {
-  const wordDefinition = useAtomValue(wordMetaWordDefinitionAtom);
+  const sanitizedDefinition = useAtomValue(wordMetaSanitizedDefinitionAtom);
+  const speakRiddle = useSpeakRiddle();
 
-  return Option.match(wordDefinition, {
-    onNone: () => <p>📖 The secret word definition is unavailable. 📖</p>,
-    onSome: (wordDefinition) => <p>📖 {wordDefinition ?? "The secret word definition is unavailable."} 📖</p>,
-  });
+  const canSpeak = sanitizedDefinition !== null;
+
+  return (
+    <>
+      <p>📖 {sanitizedDefinition ?? "The secret word definition is unavailable."} 📖</p>
+      <Button className="button mx-auto mt-4" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedDefinition)}>
+        <SpeakerWaveIcon className="size-11" />
+        Speak Definition
+      </Button>
+    </>
+  );
 }

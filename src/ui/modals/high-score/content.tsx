@@ -18,7 +18,7 @@ export function Content() {
     <article className="mx-auto max-w-prose space-y-9">
       <Top10HighScores solutionsLanguage={solutionsLanguage} />
 
-      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "closed" })}>
+      <Button tabIndex={-1} className="button mx-auto mt-8 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
         <XCircleIcon className="size-11" />
         Close
       </Button>

@@ -20,7 +20,7 @@ export function Riddle({ mode }: RiddleProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const isLoading = wordMetaMachineSnapshot.matches("loading");
 
-  if (mode === "voiceTest") return <Content />;
+  if (mode === "voiceTest") return <Content mode="voiceTest" />;
 
   return (
     <Popover.Root>
@@ -37,7 +37,7 @@ export function Riddle({ mode }: RiddleProps) {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <Content />
+            <Content mode="popover" />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
@@ -46,7 +46,7 @@ export function Riddle({ mode }: RiddleProps) {
 }
 
 export function RiddleSkeleton({ mode }: RiddleProps) {
-  if (mode === "voiceTest") return <ContentSkeleton />;
+  if (mode === "voiceTest") return <ContentSkeleton mode="voiceTest" />;
 
   return (
     <Button className="button flex-none p-1" disabled>

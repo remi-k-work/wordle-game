@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Config, Effect, Layer } from "effect";
+import { Config, Effect, Layer, Option } from "effect";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcOverdriveHacks } from "./requests";
@@ -10,11 +10,11 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
     Effect.gen(function* () {
       // Do not generate an override in the AI off mode to avoid rate limits and unnecessary token usage
       const aiSwitch = yield* Config.literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
-      if (aiSwitch === "off") return yield* Effect.sleep("5 seconds").pipe(Effect.as("No override available in the AI off mode."));
+      if (aiSwitch === "off") return yield* Effect.sleep("5 seconds").pipe(Effect.as(Option.some("No override available in the AI off mode.")));
       return yield* generateOverride(theSecretWord, solutionsLanguage);
     }).pipe(
       Effect.tapError(Effect.logError),
-      Effect.orElseSucceed(() => "Override unavailable. You are on your own!")
+      Effect.orElseSucceed(() => Option.none())
     ),
 });
 

@@ -50,3 +50,6 @@ export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((sna
 
 // The riddle text with Markdown stripped and whitespace collapsed for TTS
 export const wordMetaSanitizedRiddleAtom = Atom.make((get) => get(wordMetaTheRiddleAtom).pipe(Option.map(formatTextForTTS), Option.getOrNull));
+
+// The definition text with Markdown stripped and whitespace collapsed for TTS
+export const wordMetaSanitizedDefinitionAtom = Atom.make((get) => get(wordMetaWordDefinitionAtom).pipe(Option.map(formatTextForTTS), Option.getOrNull));

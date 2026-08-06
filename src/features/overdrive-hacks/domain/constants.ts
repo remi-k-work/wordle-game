@@ -8,7 +8,7 @@ import type { OverdriveHackId, OverdriveHacks } from ".";
 // constants
 export const EMP_LETTER_COUNT = 3;
 
-export const OVERDRIVE_HACK_COSTS = { emp: 1500, sonar: 2000, override: 0 } as const satisfies Readonly<Record<OverdriveHackId, number>>;
+export const OVERDRIVE_HACK_COSTS = { emp: 1500, sonar: 2000, override: 1 } as const satisfies Readonly<Record<OverdriveHackId, number>>;
 export const OVERDRIVE_HACK_COST = (hackId: OverdriveHackId) => OVERDRIVE_HACK_COSTS[hackId];
 
 export const VOWELS_BY_LANGUAGE = {

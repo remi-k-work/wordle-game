@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Context, Effect, ExecutionPlan, Layer, Schedule } from "effect";
+import { Context, Effect, ExecutionPlan, Layer, Option, Schedule } from "effect";
 import { generateText, Output } from "ai";
 import { google } from "@ai-sdk/google";
 import { AiSdkError } from "@/domain";
@@ -43,7 +43,7 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
         }),
       }),
     catch: (cause) => new AiSdkError({ message: `The attempt to generate an override using the "${model}" model was unsuccessful.`, cause }),
-  }).pipe(Effect.map(({ output }) => output.override));
+  }).pipe(Effect.map(({ output }) => Option.some(output.override)));
 });
 
 const OverridePlan = ExecutionPlan.make(

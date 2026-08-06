@@ -28,14 +28,14 @@ export function Content() {
           ? "Waiting for the override being requested..."
           : isLoading
             ? "Thinking..."
-            : (sanitizedOverride ?? "Override unavailable. You are on your own! Your run score has been reinbursed. Please try again later.")}
+            : (sanitizedOverride ?? "Override unavailable. You are on your own! Please try again later.")}
       </p>
       <Button className="button mx-auto mt-4" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedOverride)}>
         <SpeakerWaveIcon className="size-11" />
         Speak Override
       </Button>
 
-      <Button tabIndex={-1} className="button mx-auto mt-8" onClick={() => modalMachineEvent({ type: "closed" })}>
+      <Button tabIndex={-1} className="button mx-auto mt-8 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
         <XCircleIcon className="size-11" />
         Close
       </Button>

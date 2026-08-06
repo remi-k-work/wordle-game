@@ -95,9 +95,9 @@ const applyOverrideHackActor = fromPromise(async ({ signal }: { signal: AbortSig
       const theOverride = yield* fetchOverride({ theSecretWord, solutionsLanguage });
 
       // Charge the player's run score for the hack, if applicable
-      if (theOverride) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
+      if (Option.isSome(theOverride)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
 
-      return Option.some(theOverride);
+      return theOverride;
     }),
     { signal }
   )
