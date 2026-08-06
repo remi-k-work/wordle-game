@@ -7,12 +7,12 @@ import { useState } from "react";
 import { Duration } from "effect";
 import {
   calculatePotentialScore,
-  formatDuration,
   getBasePointsPerTurn,
   getSpeedMultiplier,
   potentialScoreAsPercentage,
   speedMultiplierToCategory,
 } from "@/features/game/domain";
+import { formatDuration } from "@/lib/formatters";
 
 // components
 import { Progress, Slider } from "@base-ui/react";

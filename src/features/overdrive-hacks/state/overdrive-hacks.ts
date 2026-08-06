@@ -1,9 +1,11 @@
 // services, features, and other libraries
+import { Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
 import { inspect } from "@/machines/inspect";
+import { formatTextForTTS } from "@/lib/formatters";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -45,6 +47,7 @@ export const overdriveHacksMachineAtom = Atom.writable<OverdriveHacksMachineSnap
 // Specialized selectors for granular state access and optimized re-renders
 export const overdriveHacksEmpNukedLettersAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.empNukedLetters));
 export const overdriveHacksSonarRevealsAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sonarReveals));
+export const overdriveHacksTheOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverride));
 
 export const overdriveHacksKeypadColorsAtom = Atom.make((get) => {
   const colors = { ...get(wordChallengeKeypadColorsAtom) } as Record<string, Color | undefined>;
@@ -75,3 +78,6 @@ export const overdriveHacksCanApplyHackAtom = Atom.family((overdriveHackId: Over
     return gameFlowMachineSnapshot.matches("playing") && runScore >= OVERDRIVE_HACK_COST(overdriveHackId);
   })
 );
+
+// The override text with Markdown stripped and whitespace collapsed for TTS
+export const overdriveHacksSanitizedOverrideAtom = Atom.make((get) => get(overdriveHacksTheOverrideAtom).pipe(Option.map(formatTextForTTS), Option.getOrNull));

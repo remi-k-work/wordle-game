@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { DateTime, Duration, Option } from "effect";
-import { formatDuration } from "@/features/game/domain";
+import { formatDuration } from "@/lib/formatters";
 
 // components
 import { InfoLine } from "@/ui/info-line";

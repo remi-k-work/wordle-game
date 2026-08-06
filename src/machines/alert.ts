@@ -11,6 +11,7 @@ export const alertMachine = setup({
 }).createMachine({
   id: "alert",
   initial: "closed",
+
   on: {
     opened: [{ guard: ({ event }) => event.alertType === "forfeit-run", target: ".forfeit-run" }],
     okayed: {
@@ -21,5 +22,6 @@ export const alertMachine = setup({
     },
     cancelled: ".closed",
   },
+
   states: { closed: {}, "forfeit-run": {} },
 });

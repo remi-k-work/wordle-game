@@ -13,7 +13,7 @@ import {
   runSessionStreakAtom,
   runResultAtom,
 } from "@/features/game/state";
-import { formatDuration } from "@/features/game/domain";
+import { formatDuration } from "@/lib/formatters";
 
 // assets
 import { ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/24/outline";

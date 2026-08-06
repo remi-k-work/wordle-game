@@ -2,6 +2,7 @@
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
+import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, fromPromise, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import {
@@ -13,21 +14,25 @@ import {
 } from "@/features/game/state";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state";
 import { calculateEmpTargets, calculateSonarTarget } from "@/features/overdrive-hacks/domain";
+import { modalMachineAtom } from "@/state";
 
 // types
 import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain";
 
-type ResolveEmpHackActorInput = {
-  readonly empNukedLetters: OverdriveHacks["empNukedLetters"];
-};
-type ResolveSonarHackActorInput = {
-  readonly sonarReveals: OverdriveHacks["sonarReveals"];
-};
+interface ApplyEmpHackActorArgs {
+  input: { readonly empNukedLetters: OverdriveHacks["empNukedLetters"] };
+  signal: AbortSignal;
+}
+
+interface ApplySonarHackActorArgs {
+  input: { readonly sonarReveals: OverdriveHacks["sonarReveals"] };
+  signal: AbortSignal;
+}
 
 // constants
 import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
-const applyEmpHackActor = fromPromise(async ({ input, signal }: { input: ResolveEmpHackActorInput; signal: AbortSignal }) =>
+const applyEmpHackActor = fromPromise(async ({ input, signal }: ApplyEmpHackActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
@@ -49,7 +54,7 @@ const applyEmpHackActor = fromPromise(async ({ input, signal }: { input: Resolve
   )
 );
 
-const applySonarHackActor = fromPromise(async ({ input, signal }: { input: ResolveSonarHackActorInput; signal: AbortSignal }) =>
+const applySonarHackActor = fromPromise(async ({ input, signal }: ApplySonarHackActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
@@ -76,6 +81,28 @@ const applySonarHackActor = fromPromise(async ({ input, signal }: { input: Resol
   )
 );
 
+const applyOverrideHackActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+  RuntimeClient.runPromise(
+    Effect.gen(function* () {
+      // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
+      const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("override"));
+      if (!canApplyHack) return Option.none();
+
+      const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+
+      const { fetchOverride } = yield* RpcOverdriveHacksClient;
+      const theOverride = yield* fetchOverride({ theSecretWord, solutionsLanguage });
+
+      // Charge the player's run score for the hack, if applicable
+      if (theOverride) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
+
+      return Option.some(theOverride);
+    }),
+    { signal }
+  )
+);
+
 export const overdriveHacksMachine = setup({
   types: {} as {
     context: OverdriveHacks;
@@ -95,6 +122,10 @@ export const overdriveHacksMachine = setup({
       assertEvent(event, "hack.useRequested");
       return event.overdriveHackId === "sonar";
     },
+    isOverrideHackRequested: ({ event }) => {
+      assertEvent(event, "hack.useRequested");
+      return event.overdriveHackId === "override";
+    },
   },
   actions: {
     applyEmpHack: assign(
@@ -107,6 +138,13 @@ export const overdriveHacksMachine = setup({
         ({ ...context, sonarReveals: [...context.sonarReveals, ...params.sonarReveals] }) as const satisfies OverdriveHacks
     ),
 
+    applyOverrideHack: assign(
+      ({ context }, params: { theOverride: OverdriveHacks["theOverride"] }) =>
+        ({ ...context, theOverride: params.theOverride }) as const satisfies OverdriveHacks
+    ),
+
+    onOverrideHackApplied: () => RuntimeClient.runPromise(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
+
     // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
     forwardKeyPress: ({ context, event }) => {
       assertEvent(event, "input.keyPressed");
@@ -116,7 +154,7 @@ export const overdriveHacksMachine = setup({
       RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },
   },
-  actors: { applyEmpHackActor, applySonarHackActor },
+  actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor },
 }).createMachine({
   id: "overdriveHacks",
   context: INITIAL_OVERDRIVE_HACKS,
@@ -144,6 +182,7 @@ export const overdriveHacksMachine = setup({
       always: [
         { guard: "isEmpHackRequested", target: "applyingEmpHack" },
         { guard: "isSonarHackRequested", target: "applyingSonarHack" },
+        { guard: "isOverrideHackRequested", target: "applyingOverrideHack" },
       ],
     },
 
@@ -172,6 +211,19 @@ export const overdriveHacksMachine = setup({
           actions: { type: "applySonarHack", params: ({ event }) => ({ sonarReveals: event.output.pipe(Option.toArray) }) },
         },
         onError: { target: "active" },
+      },
+    },
+
+    applyingOverrideHack: {
+      on: { "input.keyPressed": { actions: "forwardKeyPress" } },
+
+      invoke: {
+        src: "applyOverrideHackActor",
+        onDone: {
+          target: "active",
+          actions: [{ type: "applyOverrideHack", params: ({ event }) => ({ theOverride: event.output }) }, "onOverrideHackApplied"],
+        },
+        onError: { target: "active", actions: "onOverrideHackApplied" },
       },
     },
   },

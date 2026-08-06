@@ -4,7 +4,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
-import { formatDuration } from "@/features/game/domain";
+import { formatDuration } from "@/lib/formatters";
 
 // components
 import { InfoLine } from "@/ui/info-line";

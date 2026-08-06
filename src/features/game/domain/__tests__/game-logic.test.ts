@@ -1,7 +1,8 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, Option } from "effect";
 import { TestClock } from "effect/testing";
-import { calculateScore, formatDuration, computeKeypadState, calculatePotentialScore } from "..";
+import { calculateScore, computeKeypadState, calculatePotentialScore } from "..";
+import { formatDuration } from "@/lib/formatters";
 
 describe("gameLogic", () => {
   describe("calculateScore", () => {

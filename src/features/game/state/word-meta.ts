@@ -4,6 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { createActor } from "xstate";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
 import { inspect } from "@/machines/inspect";
+import { formatTextForTTS } from "@/lib/formatters";
 
 // types
 import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
@@ -48,18 +49,4 @@ export const wordMetaTheRiddleAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot
 export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinition));
 
 // The riddle text with Markdown stripped and whitespace collapsed for TTS
-export const wordMetaSanitizedRiddleAtom = Atom.make((get) => {
-  const riddleOutput = Option.getOrNull(get(wordMetaTheRiddleAtom));
-  if (!riddleOutput) return null;
-
-  return (
-    riddleOutput
-      // Strip any stray inline markdown characters (asterisks, underscores, backticks)
-      .replace(/[*_`]/g, "")
-      // Collapse all whitespace
-      .replace(/\s+/g, " ")
-      // Fix spacing before punctuation (TTS improvement)
-      .replace(/\s+([?.!,;:])/g, "$1")
-      .trim()
-  );
-});
+export const wordMetaSanitizedRiddleAtom = Atom.make((get) => get(wordMetaTheRiddleAtom).pipe(Option.map(formatTextForTTS), Option.getOrNull));

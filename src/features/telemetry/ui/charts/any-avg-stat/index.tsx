@@ -3,7 +3,7 @@ import { Duration } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { anyAvgStatAtom } from "@/features/telemetry/state";
-import { formatDuration } from "@/features/game/domain";
+import { formatDuration } from "@/lib/formatters";
 
 // components
 import { InfoLine } from "@/ui/info-line";
