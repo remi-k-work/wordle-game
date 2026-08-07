@@ -1,9 +1,11 @@
 // services, features, and other libraries
 import { Effect, Option } from "effect";
+import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { toastManager } from "@/ui/toastify";
+import { modalMachineAtom } from "@/state";
 
 // types
 import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain";
@@ -11,14 +13,15 @@ import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/feature
 // constants
 import { INITIAL_HIGH_SCORE_CONTEXT } from "@/features/high-score/domain";
 
-const top10HighScoresActor = fromPromise(async ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const { top10HighScores } = yield* RpcHighScoreClient;
-      return yield* top10HighScores(input.solutionsLanguage);
-    }),
-    { signal }
-  )
+const top10HighScoresActor = fromPromise(
+  async ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
+    RuntimeClient.runPromise(
+      Effect.gen(function* () {
+        const { top10HighScores } = yield* RpcHighScoreClient;
+        return yield* top10HighScores(input.solutionsLanguage);
+      }),
+      { signal }
+    )
 );
 
 const addHighScoreActor = fromPromise(async ({ input: { context }, signal }: { input: { context: HighScoreMachineContext }; signal: AbortSignal }) =>
@@ -75,8 +78,11 @@ export const highScoreMachine = setup({
     onSuccess: () => toastManager.add({ title: "Score Recorded", description: "Good luck on your next run!" }),
     onNoLongerQualified: () => toastManager.add({ type: "error", title: "Leaderboard Updated", description: "This score no longer qualifies for the Top 10." }),
     onFailure: () => toastManager.add({ type: "error", title: "Submission Failed", description: "Failed to save your score. Please try again later." }),
+
+    showHighScoreModal: () => RuntimeClient.runPromise(Atom.set(modalMachineAtom, { type: "opened", modalType: "high-score" })),
   },
   actors: { top10HighScoresActor, addHighScoreActor },
+  delays: { delay: 3000 },
 }).createMachine({
   id: "highScore",
   context: INITIAL_HIGH_SCORE_CONTEXT,
@@ -84,7 +90,9 @@ export const highScoreMachine = setup({
 
   states: {
     awaitingFinishedRun: {
-      on: { runFinished: { target: "checkingQualification", actions: "saveRunData" } },
+      on: {
+        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+      },
     },
 
     checkingQualification: {
@@ -104,7 +112,10 @@ export const highScoreMachine = setup({
     },
 
     enteringInitials: {
-      on: { initialsSubmitted: { target: "submitting", actions: "saveInitials" }, runFinished: { target: "checkingQualification", actions: "saveRunData" } },
+      on: {
+        initialsSubmitted: { target: "submitting", actions: "saveInitials" },
+        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+      },
     },
 
     submitting: {
@@ -123,11 +134,25 @@ export const highScoreMachine = setup({
       },
     },
 
-    success: { entry: "onSuccess", on: { runFinished: { target: "checkingQualification", actions: "saveRunData" } } },
+    success: {
+      entry: "onSuccess",
+
+      on: {
+        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+      },
+
+      after: {
+        delay: { target: "awaitingFinishedRun", actions: "showHighScoreModal" },
+      },
+    },
 
     failure: {
       entry: "onFailure",
-      on: { initialsSubmitted: { target: "submitting", actions: "saveInitials" }, runFinished: { target: "checkingQualification", actions: "saveRunData" } },
+
+      on: {
+        initialsSubmitted: { target: "submitting", actions: "saveInitials" },
+        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+      },
     },
   },
 });

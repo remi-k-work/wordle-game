@@ -1,8 +1,10 @@
 "use client";
 
+// react
+import { useEffect } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state";
@@ -43,6 +45,13 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
   const top10HighScores = useAtomValue(top10HighScoresAtom(solutionsLanguage));
   const newHighScoreId = useAtomValue(highScoreNewHighScoreIdAtom);
 
+  useEffect(() => {
+    if (top10HighScores.waiting || !newHighScoreId.valueOrUndefined) return;
+    const animationId = requestAnimationFrame(() => document.getElementById("newHighScoreRow")?.scrollIntoView({ behavior: "smooth", block: "center" }));
+
+    return () => cancelAnimationFrame(animationId);
+  }, [top10HighScores.waiting, newHighScoreId.valueOrUndefined]);
+
   return AsyncResult.builder(top10HighScores)
     .onInitialOrWaiting(() => <Top10HighScoresSkeleton />)
     .onFailure(() => <Top10HighScoresSkeleton />)
@@ -68,7 +77,8 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
             {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
               <MotionTableRow
                 key={id}
-                className={cn("odd:bg-surface-2", id === Option.getOrUndefined(newHighScoreId) && "animate-wiggle bg-accent odd:bg-accent")}
+                id={id === newHighScoreId.valueOrUndefined ? "newHighScoreRow" : undefined}
+                className={cn("odd:bg-surface-2", id === newHighScoreId.valueOrUndefined && "animate-wiggle bg-accent odd:bg-accent")}
                 variants={rowVariants}
               >
                 <TableCell>{index + 1}</TableCell>
