@@ -10,7 +10,7 @@ export function OverrideHackModal() {
   const modalMachineSnapshot = useAtomValue(modalMachineAtom);
 
   return (
-    <Modal isOpen={modalMachineSnapshot.matches("override-hack")} title="Override Hack">
+    <Modal isOpen={modalMachineSnapshot.matches("override-hack")} title="AI Override">
       <Content />
     </Modal>
   );

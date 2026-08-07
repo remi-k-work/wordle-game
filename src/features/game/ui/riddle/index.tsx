@@ -1,3 +1,6 @@
+// react
+import { useState } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
@@ -20,10 +23,13 @@ export function Riddle({ mode }: RiddleProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const isLoading = wordMetaMachineSnapshot.matches("loading");
 
+  // Controls whether the popover is open or not
+  const [isOpen, setIsOpen] = useState(false);
+
   if (mode === "voiceTest") return <Content mode="voiceTest" />;
 
   return (
-    <Popover.Root>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger openOnHover title="Riddle" className="button flex-none p-1 data-popup-open:bg-accent">
         {isLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
       </Popover.Trigger>
@@ -37,7 +43,7 @@ export function Riddle({ mode }: RiddleProps) {
               "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
             )}
           >
-            <Content mode="popover" />
+            <Content mode="popover" onGameFlowClicked={() => setIsOpen(false)} />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

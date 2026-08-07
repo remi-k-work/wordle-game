@@ -6,6 +6,7 @@ import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
 
 // components
 import { Button } from "@base-ui/react";
+import { GameFlowButton } from "@/features/game/ui/flow-button";
 
 // assets
 import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
@@ -13,9 +14,10 @@ import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
 // types
 interface ContentProps {
   mode: "popover" | "voiceTest";
+  onGameFlowClicked?: () => void;
 }
 
-export function Content({ mode }: ContentProps) {
+export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const sanitizedRiddle = useAtomValue(wordMetaSanitizedRiddleAtom);
   const speakRiddle = useSpeakRiddle();
@@ -29,7 +31,9 @@ export function Content({ mode }: ContentProps) {
       <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", (isAwaiting || isLoading) && "animate-pulse")}>
         {isAwaiting ? "Waiting for the secret word..." : isLoading ? "Thinking..." : (sanitizedRiddle ?? "Riddle unavailable. You are on your own!")}
       </p>
-      <Button className="button mx-auto mt-4" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedRiddle)}>
+
+      {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
+      <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedRiddle)}>
         <SpeakerWaveIcon className="size-11" />
         {mode === "voiceTest" ? "Test Voice" : "Speak Riddle"}
       </Button>
@@ -41,7 +45,8 @@ export function ContentSkeleton({ mode }: ContentProps) {
   return (
     <>
       <p className="mx-auto animate-pulse text-center text-lg leading-relaxed sm:text-xl lg:text-2xl">Thinking...</p>
-      <Button className="button mx-auto mt-4" disabled>
+
+      <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled>
         <SpeakerWaveIcon className="size-11" />
         {mode === "voiceTest" ? "Test Voice" : "Speak Riddle"}
       </Button>

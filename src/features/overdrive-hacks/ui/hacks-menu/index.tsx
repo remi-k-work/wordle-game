@@ -36,7 +36,7 @@ export function HacksMenu() {
 
   return (
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger openOnHover title="Lifeline" className="button flex-none p-1 data-popup-open:bg-accent">
+      <Popover.Trigger openOnHover title="Overdrive Hacks" className="button flex-none p-1 data-popup-open:bg-accent">
         <LifebuoyIcon className="size-11" />
       </Popover.Trigger>
       <Popover.Portal>
@@ -82,7 +82,7 @@ export function HacksMenu() {
                 }}
               >
                 <SparklesIcon className="size-11" />
-                <span className="justify-self-start">Override</span>
+                <span className="justify-self-start">AI Override</span>
                 <span className="rounded-md bg-tile-green px-3 py-2 font-sans text-text-2">Ready ↗</span>
               </Button>
             ) : (
@@ -94,7 +94,7 @@ export function HacksMenu() {
                 }}
               >
                 {isOverrideHackLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
-                <span className="justify-self-start">Override</span>
+                <span className="justify-self-start">AI Override</span>
                 <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{OVERDRIVE_HACK_COST("override").toLocaleString()} pts</span>
               </Button>
             )}
