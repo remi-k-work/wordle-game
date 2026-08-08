@@ -36,7 +36,7 @@ export const openingGuessesFrequencyQuery = (sql: SqlClient.SqlClient) => {
     FROM global_freq g
     FULL OUTER JOIN personal_freq p 
       ON g.word = p.word
-    ORDER BY CASE WHEN COALESCE(p.personal, 0) > 0 THEN 1 ELSE 0 END DESC, global DESC, personal DESC
+    ORDER BY CASE WHEN COALESCE(p.personal, 0) > 0 THEN 1 ELSE 0 END DESC, global DESC, personal DESC, word ASC
     LIMIT 15`,
   });
 

@@ -22,7 +22,7 @@ export class AnyCounterData extends Schema.Class<AnyCounterData>("AnyCounterData
 }) {}
 
 export class GuessDistributionData extends AnyCounterData.extend<GuessDistributionData>("GuessDistributionData")({
-  turn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
+  turn: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 })))),
   personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
   globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
 }) {}

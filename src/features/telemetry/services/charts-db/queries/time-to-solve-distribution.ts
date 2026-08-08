@@ -16,7 +16,7 @@ export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient) => {
         LATERAL jsonb_array_elements(metric_payload->'buckets') AS bucket
         WHERE metric_name = 'timeToSolve' 
           AND solutions_language = ${solutionsLanguage}
-        GROUP BY bucket->>0
+        GROUP BY join_boundary
       ),
       personal_histogram AS (
         SELECT 
@@ -27,7 +27,7 @@ export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient) => {
         WHERE metric_name = 'timeToSolve' 
           AND solutions_language = ${solutionsLanguage}
           AND session_id = ${sessionId}
-        GROUP BY bucket->>0
+        GROUP BY join_boundary
       )
       SELECT 
         NULLIF(COALESCE(g.join_boundary, p.join_boundary), -1) AS max_seconds,

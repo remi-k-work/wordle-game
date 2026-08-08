@@ -47,6 +47,7 @@
     "@effect/vitest": "^4.0.0-beta.102",
     "@statelyai/inspect": "^0.7.2",
     "@tailwindcss/postcss": "^4",
+    "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^26",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",

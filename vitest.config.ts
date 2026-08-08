@@ -6,5 +6,6 @@ export default defineConfig({
   },
   test: {
     include: ["src/**/*.test.ts"],
+    hookTimeout: 120_000,
   },
 });

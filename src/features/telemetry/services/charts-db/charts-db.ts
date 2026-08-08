@@ -37,7 +37,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
           global,
           personalPct,
           globalPct,
-        }));
+        })).filter((row) => row.turn !== null);
 
         // Decode against the strict schema, as recommended for final domain mapping
         return yield* Schema.decodeUnknownEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);

@@ -36,7 +36,7 @@ export const hardestWordsLeaderboardQuery = (sql: SqlClient.SqlClient) => {
         COALESCE(g.avg_guesses, 0) AS global_avg_guesses
       FROM global_difficulty g
       FULL OUTER JOIN personal_difficulty p ON g.word = p.word
-      ORDER BY COALESCE(g.avg_time, 0) DESC
+      ORDER BY COALESCE(g.avg_time, 0) DESC, word ASC
       LIMIT 15`,
   });
 

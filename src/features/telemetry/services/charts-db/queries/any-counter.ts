@@ -10,14 +10,14 @@ export const anyCounterQuery = (sql: SqlClient.SqlClient) => {
     execute: ({ counterName, sessionId, solutionsLanguage }) => sql`
       WITH global_counter AS (
         SELECT 
-          SUM((metric_payload->>'count')::numeric)::int AS global_total
+          SUM((metric_payload->>'count')::bigint)::int AS global_total
         FROM global_pulse
         WHERE metric_name = ${counterName}
           AND solutions_language = ${solutionsLanguage}
       ),
       personal_counter AS (
         SELECT 
-          SUM((metric_payload->>'count')::numeric)::int AS personal_total
+          SUM((metric_payload->>'count')::bigint)::int AS personal_total
         FROM global_pulse
         WHERE metric_name = ${counterName}
           AND solutions_language = ${solutionsLanguage}
