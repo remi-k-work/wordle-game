@@ -1,5 +1,5 @@
 // types
-import type { Tile } from ".";
+import type { TheSecretWord, Tile, WordChallenge } from ".";
 
 // constants
 import { SPEED_MULTIPLIER_CATEGORY_MAP } from ".";
@@ -8,7 +8,7 @@ import { SPEED_MULTIPLIER_CATEGORY_MAP } from ".";
 export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
 
 // Format the current guess word into an array of letter objects with color coding
-export const formatGuess = (theSecretWord: string, wordleGuess: string) => {
+export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChallenge["wordleGuesses"][number]) => {
   const secretChars = [...theSecretWord];
   const guessChars = [...wordleGuess];
 

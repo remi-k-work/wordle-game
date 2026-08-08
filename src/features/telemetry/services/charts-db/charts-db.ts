@@ -24,6 +24,14 @@ import {
 import { PgLive } from "@/lib/pg-live";
 
 export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
+  // Error-escalation policy (E5): every chart query escalates both SchemaError
+  // and SqlError to defects (Effect.die) — the query factories do this via
+  // Effect.tapError(Effect.logError) + Effect.catchTags({...}), and the
+  // histogram methods below do it via Effect.orDie after the strict schema
+  // decode. There is no per-chart graceful degradation; all failures become
+  // RPC 500s. This is intentional and uniform across every method here —
+  // telemetry charts are best-effort. Do NOT introduce per-chart catch
+  // branches that disagree with this policy.
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
 

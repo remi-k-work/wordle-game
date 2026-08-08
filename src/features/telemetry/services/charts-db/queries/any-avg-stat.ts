@@ -11,9 +11,9 @@ export const anyAvgStatQuery = (sql: SqlClient.SqlClient) => {
       statTable === "runWordEvent"
         ? sql`
       WITH global_avg AS (
-        SELECT ROUND(AVG(${sql(statColumn)}))::int AS global_avg
-        FROM run_word_event
-        WHERE solutions_language = ${solutionsLanguage}
+        SELECT ROUND(AVG(rwe.${sql(statColumn)}))::int AS global_avg
+        FROM run_word_event rwe
+        WHERE rwe.solutions_language = ${solutionsLanguage}
       ),
       personal_avg AS (
         SELECT ROUND(AVG(rwe.${sql(statColumn)}))::int AS personal_avg
@@ -29,15 +29,15 @@ export const anyAvgStatQuery = (sql: SqlClient.SqlClient) => {
       CROSS JOIN personal_avg p`
         : sql`
       WITH global_avg AS (
-        SELECT ROUND(AVG(${sql(statColumn)}))::int AS global_avg
-        FROM arcade_run_summary
-        WHERE solutions_language = ${solutionsLanguage}
+        SELECT ROUND(AVG(ars.${sql(statColumn)}))::int AS global_avg
+        FROM arcade_run_summary ars
+        WHERE ars.solutions_language = ${solutionsLanguage}
       ),
       personal_avg AS (
-        SELECT ROUND(AVG(${sql(statColumn)}))::int AS personal_avg
-        FROM arcade_run_summary
-        WHERE solutions_language = ${solutionsLanguage}
-          AND session_id = ${sessionId}
+        SELECT ROUND(AVG(ars.${sql(statColumn)}))::int AS personal_avg
+        FROM arcade_run_summary ars
+        WHERE ars.solutions_language = ${solutionsLanguage}
+          AND ars.session_id = ${sessionId}
       )
       SELECT
         COALESCE(p.personal_avg, 0) AS personal,

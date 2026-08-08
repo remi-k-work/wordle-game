@@ -2,7 +2,7 @@
 import { Array, DateTime, Duration, Option, pipe } from "effect";
 
 // types
-import type { Color } from ".";
+import type { Color, WordChallenge, WordScore } from ".";
 
 // constants
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from ".";
@@ -23,14 +23,15 @@ export const getSpeedMultiplier = (elapsedSeconds: number) =>
   );
 
 // Resolve the base score value per the turn in which the word is solved
-export const getBasePointsPerTurn = (currentTurn: number) => BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
+export const getBasePointsPerTurn = (currentTurn: WordChallenge["currentTurn"]) => BASE_POINTS_PER_TURN_MAP[currentTurn] ?? 0;
 
 // Calculate elapsed time in seconds, treating an unstarted timer as zero seconds
-export const getElapsedSeconds = (startTime: Option.Option<DateTime.Utc>, endTime: DateTime.Utc) =>
+export const getElapsedSeconds = (startTime: WordChallenge["startTime"], endTime: DateTime.Utc) =>
   Option.match(startTime, {
     onNone: () => 0,
     onSome: (startTime) => DateTime.distance(startTime, endTime).pipe(Duration.toSeconds),
   });
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
-export const potentialScoreAsPercentage = (potentialScore: number) => Math.max(0, Math.min(100, Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100));
+export const potentialScoreAsPercentage = (potentialScore: WordScore["wordScore"]) =>
+  Math.max(0, Math.min(100, Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100));
