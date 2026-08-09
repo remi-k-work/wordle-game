@@ -10,6 +10,8 @@ export * from "./best-run-trophy-card";
 export * from "./failed-words-frequency";
 export * from "./guess-distribution";
 export * from "./hardest-words-leaderboard";
+export * from "./make-histogram-distribution-query";
+export * from "./make-word-frequency-query";
 export * from "./opening-guesses-frequency";
 export * from "./run-death-reason-frequency";
 export * from "./time-to-solve-distribution";

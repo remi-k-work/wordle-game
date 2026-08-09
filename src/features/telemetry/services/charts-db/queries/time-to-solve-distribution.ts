@@ -1,43 +1,7 @@
 // services, features, and other libraries
-import { Effect } from "effect";
-import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { AnyChartArgs, TimeToSolveDistributionData } from "@/features/telemetry/services/charts-db";
+import { SqlClient } from "effect/unstable/sql";
+import { TimeToSolveDistributionData } from "@/features/telemetry/services/charts-db";
+import { makeHistogramDistributionQuery } from "./make-histogram-distribution-query";
 
-export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient) => {
-  const query = SqlSchema.findAll({
-    Request: AnyChartArgs,
-    Result: TimeToSolveDistributionData,
-    execute: ({ sessionId, solutionsLanguage }) => sql`
-      WITH global_histogram AS (
-        SELECT 
-          COALESCE((bucket->>0)::int, -1) AS join_boundary,
-          SUM((bucket->>1)::int)::int AS global_count
-        FROM global_pulse,
-        LATERAL jsonb_array_elements(metric_payload->'buckets') AS bucket
-        WHERE metric_name = 'timeToSolve' 
-          AND solutions_language = ${solutionsLanguage}
-        GROUP BY join_boundary
-      ),
-      personal_histogram AS (
-        SELECT 
-          COALESCE((bucket->>0)::int, -1) AS join_boundary,
-          SUM((bucket->>1)::int)::int AS personal_count
-        FROM global_pulse,
-        LATERAL jsonb_array_elements(metric_payload->'buckets') AS bucket
-        WHERE metric_name = 'timeToSolve' 
-          AND solutions_language = ${solutionsLanguage}
-          AND session_id = ${sessionId}
-        GROUP BY join_boundary
-      )
-      SELECT 
-        NULLIF(COALESCE(g.join_boundary, p.join_boundary), -1) AS max_seconds,
-        COALESCE(p.personal_count, 0) AS personal,
-        COALESCE(g.global_count, 0) AS global
-      FROM global_histogram g
-      FULL OUTER JOIN personal_histogram p 
-        ON g.join_boundary = p.join_boundary
-      ORDER BY max_seconds ASC NULLS LAST`,
-  });
-
-  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
-};
+export const timeToSolveDistributionQuery = (sql: SqlClient.SqlClient) =>
+  makeHistogramDistributionQuery(sql)({ metricName: "timeToSolve", bucketAlias: "max_seconds", Result: TimeToSolveDistributionData });
