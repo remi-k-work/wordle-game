@@ -4,7 +4,6 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { anyCounterAtom } from "@/features/telemetry/state";
 
 // components
-import { InfoLine } from "@/ui/info-line";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { StatCard, StatCardSkeleton } from "@/ui/stat-card";
 
@@ -25,26 +24,25 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
   return AsyncResult.builder(anyCounter)
     .onInitialOrWaiting(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
     .onFailure(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
-    .onSuccess((anyCounter) =>
-      anyCounter.length === 0 ? (
-        <>
-          <SectionHeader title={title} />
-          <InfoLine message="No counter data tracked yet!" />
-        </>
-      ) : (
-        <>
-          <SectionHeader title={title} />
-          <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
-            <StatCard Tag="header" variant="primary" title={personalHeader}>
-              {anyCounter[0].personal.toLocaleString()}
-            </StatCard>
-            <StatCard Tag="footer" variant="secondary" title="Global Total">
-              {anyCounter[0].global.toLocaleString()}
-            </StatCard>
-          </article>
-        </>
-      )
-    )
+    .onSuccess((anyCounter) => (
+      // B5: scalar shape — RPC returns a single { personal, global } object,
+      // not a 1-element array. The prior `length === 0` empty-state branch is
+      // dead: COALESCE in the SQL always materialises a row (counts 0/0 when
+      // no source rows match), and SqlSchema.findOne would fail the whole
+      // Effect if a row were ever missing — chart-rendering falls back to the
+      // onFailure skeleton in that (impossible) case.
+      <>
+        <SectionHeader title={title} />
+        <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
+          <StatCard Tag="header" variant="primary" title={personalHeader}>
+            {anyCounter.personal.toLocaleString()}
+          </StatCard>
+          <StatCard Tag="footer" variant="secondary" title="Global Total">
+            {anyCounter.global.toLocaleString()}
+          </StatCard>
+        </article>
+      </>
+    ))
     .render();
 }
 

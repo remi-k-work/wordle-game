@@ -88,35 +88,64 @@ const makeRequest = (sessionId: string): typeof AnyCounterArgs.Type =>
 const TestLayer = PgContainer.ClientLive;
 
 describe("any-counter e2e", () => {
-  it.layer(TestLayer, { timeout: "120 seconds" })("A7 ::bigint cast", (it) => {
-    it.effect("sums personal and global counts across Pl sessions and excludes En (A7 ::bigint cast)", () =>
+  it.layer(TestLayer, { timeout: "120 seconds" })("A7 ::bigint cast + A8 scalar subquery + B5 findOne", (it) => {
+    it.effect("sums personal and global counts across Pl sessions and excludes En", () =>
       Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
         yield* seedFixture;
 
-        const rows = yield* anyCounterQuery(sql)(makeRequest(SESSION_A));
+        const result = yield* anyCounterQuery(sql)(makeRequest(SESSION_A));
 
-        // findAll returns an Array; the CROSS JOIN of two scalar CTEs yields
-        // exactly one row. personal = session A (14 + 35 = 49); global = A + B
+        // A8: scalar subqueries (not CROSS JOIN) — the outer SELECT produces
+        // exactly one row. B5: SqlSchema.findOne returns the row directly (not
+        // an array). personal = session A (14 + 35 = 49); global = A + B
         // (49 + 3 = 52); the En row (count 5) is excluded by the language filter.
-        expect(rows.length).toBe(1);
-        expect(rows[0].personal).toBe(49);
-        expect(rows[0].global).toBe(52);
+        expect(result.personal).toBe(49);
+        expect(result.global).toBe(52);
       })
     );
 
-    it.effect("returns 0/0 when no rows match (COALESCE materialises the scalar row)", () =>
+    it.effect("returns 0 personal when the session matches no rows (global still aggregates matched rows)", () =>
       Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
         yield* seedFixture;
 
-        // A session with no validGuesses rows — both CTEs sum over an empty
-        // set; COALESCE(0) gives the single (0, 0) row.
-        const rows = yield* anyCounterQuery(sql)(makeRequest(SESSION_B.replace(/^04/, "ab")));
+        // A nonexistent Pl session — the personal scalar subquery hits nothing
+        // (SUM over empty -> NULL -> COALESCE -> 0), but the global subquery
+        // still aggregates the matched Pl rows (A + B = 52). COALESCE
+        // materialises the single (0, 52) row, so findOne succeeds
+        // (NoSuchElementError is unreachable, per the F3 comment).
+        const result = yield* anyCounterQuery(sql)(makeRequest(SESSION_B.replace(/^04/, "ab")));
 
-        expect(rows.length).toBe(1);
-        expect(rows[0].personal).toBe(0);
-        expect(rows[0].global).toBe(52);
+        expect(result.personal).toBe(0);
+        expect(result.global).toBe(52);
+      })
+    );
+
+    it.effect("findOne succeeds with the COALESCE-materialised scalar row when the session is unmatched", () =>
+      // B5 contract check: confirm findOne does not throw NoSuchElementError
+      // when the personal subquery matches nothing — COALESCE(NULL, 0) still
+      // materialises the single scalar row. The global subquery still sees the
+      // En fixture row (count=5) via the solutions_language filter, so global
+      // is 5 here — the contract under test is "findOne returns a row", not
+      // "(0, 0)" specifically.
+      Effect.gen(function* () {
+        const sql = yield* SqlClient.SqlClient;
+        yield* seedFixture;
+
+        // Unmatched session, En language. personal subquery: no rows for the
+        // zero-UUID session -> SUM -> NULL -> COALESCE -> 0. global subquery:
+        // filters En rows, finds the En fixture (count 5) -> 5.
+        const result = yield* anyCounterQuery(sql)(
+          Schema.decodeUnknownSync(AnyCounterArgs)({
+            sessionId: "00000000-0000-0000-0000-000000000000",
+            solutionsLanguage: "En",
+            counterName: "validGuesses",
+          })
+        );
+
+        expect(result.personal).toBe(0);
+        expect(result.global).toBe(5);
       })
     );
   });

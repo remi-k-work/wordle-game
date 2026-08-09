@@ -61,14 +61,18 @@ export class RpcTelemetry extends RpcGroup.make(
     success: Schema.Array(RunDeathReasonFrequencyData),
   }),
 
+  // B5: scalar shape — COALESCE always materialises exactly one row, so the
+  // wire response is a single `{ personal, global }` object (not a 1-element
+  // array). Matches `getBestRunTrophyCard`'s non-Array precedent for known
+  // cardinality. Backed by SqlSchema.findOne in the charts-db service.
   Rpc.make("getAnyCounter", {
     payload: AnyCounterArgs,
-    success: Schema.Array(AnyCounterData),
+    success: AnyCounterData,
   }),
 
   Rpc.make("getAnyAvgStat", {
     payload: AnyAvgStatArgs,
-    success: Schema.Array(AnyCounterData),
+    success: AnyCounterData,
   }),
 
   Rpc.make("getHardestWordsLeaderboard", {

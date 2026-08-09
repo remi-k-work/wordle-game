@@ -6,7 +6,6 @@ import { anyAvgStatAtom } from "@/features/telemetry/state";
 import { formatDuration } from "@/lib/formatters";
 
 // components
-import { InfoLine } from "@/ui/info-line";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { StatCard, StatCardSkeleton } from "@/ui/stat-card";
 
@@ -30,26 +29,25 @@ export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, titl
   return AsyncResult.builder(anyAvgStat)
     .onInitialOrWaiting(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
     .onFailure(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
-    .onSuccess((anyAvgStat) =>
-      anyAvgStat.length === 0 ? (
-        <>
-          <SectionHeader title={title} />
-          <InfoLine message="No stats data tracked yet!" />
-        </>
-      ) : (
-        <>
-          <SectionHeader title={title} />
-          <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
-            <StatCard Tag="header" variant="primary" title={personalHeader}>
-              {formatStatValue(anyAvgStat[0].personal)}
-            </StatCard>
-            <StatCard Tag="footer" variant="secondary" title="Global Average">
-              {formatStatValue(anyAvgStat[0].global)}
-            </StatCard>
-          </article>
-        </>
-      )
-    )
+    .onSuccess((anyAvgStat) => (
+      // B5: scalar shape — RPC returns a single { personal, global } object,
+      // not a 1-element array. The prior `length === 0` empty-state branch is
+      // dead: COALESCE in the SQL always materialises a row (averages as 0/0
+      // when no source rows match), and SqlSchema.findOne would fail the whole
+      // Effect if a row were ever missing — chart-rendering falls back to the
+      // onFailure skeleton in that (impossible) case.
+      <>
+        <SectionHeader title={title} />
+        <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
+          <StatCard Tag="header" variant="primary" title={personalHeader}>
+            {formatStatValue(anyAvgStat.personal)}
+          </StatCard>
+          <StatCard Tag="footer" variant="secondary" title="Global Average">
+            {formatStatValue(anyAvgStat.global)}
+          </StatCard>
+        </article>
+      </>
+    ))
     .render();
 }
 
