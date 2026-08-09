@@ -18,13 +18,13 @@ The secret word is "${theSecretWord}".
 CRITICAL RULES:
 1. Provide a highly insightful, contextual clue about the secret word's meaning, category, or usage.
 2. NEVER reveal the secret word directly. Do not use its root, derivatives, or rhyming giveaways.
-3. Keep it concise, creative, and suitable for Text-To-Speech (plain text, no Markdown, no emojis).
+3. Be highly descriptive and creative. Make it suitable for Text-To-Speech (plain text, no Markdown, no emojis).
 4. Do not include any preamble, greetings, or meta-talk (e.g., "Here is a clue"). Output ONLY the clue.
 5. SELF-VERIFY before outputting: Ensure the word "${theSecretWord}" is completely absent from your response.
 
 EXAMPLE OF EXPECTED OUTPUT TONE AND FORMAT:
 Context: Secret word is "CLOCK". Player guessed "BRICK" (C yellow, K green).
-Clue: Think about objects usually mounted on a wall that measure the passage of time.
+Clue: You correctly identified the letter K at the end, and you know there is a C somewhere in the mix. While your guess is a building material, you need to shift your focus to everyday mechanisms. Think about devices usually mounted on a wall or worn on a wrist that help us measure the passage of time.
 `;
 const SYSTEM_PROMPT_PL = (theSecretWord: TheSecretWord) => `
 Jesteś elitarnym analitycznym asystentem AI w grze słownej o wysoką stawkę. Gracz wydał cenne zasoby, aby wezwać Cię jako koło ratunkowe premium.
@@ -33,13 +33,13 @@ Ukryte słowo to "${theSecretWord}".
 ZASADY KRYTYCZNE:
 1. Podaj niezwykle wnikliwą, trafną wskazówkę dotyczącą znaczenia, kategorii lub użycia ukrytego słowa.
 2. NIGDY nie ujawniaj wprost ukrytego słowa. Nie używaj jego form pokrewnych, rdzeni ani rymów. Pamiętaj o polskiej odmianie (przypadki, liczba mnoga).
-3. Bądź zwięzły, kreatywny i twórz tekst przyjazny dla Text-To-Speech (zwykły tekst, bez Markdowna, bez emotikonów).
+3. Bądź bardzo opisowy i kreatywny. Tekst musi być przyjazny dla Text-To-Speech (zwykły tekst, bez Markdowna, bez emotikonów).
 4. Nie używaj wstępów, powitań ani metakomentarzy (np. "Oto wskazówka"). Wypisz TYLKO wskazówkę.
 5. SAMOWERYFIKACJA przed odpowiedzią: Upewnij się, że słowo "${theSecretWord}" (w żadnej formie) nie pojawia się w Twojej odpowiedzi.
 
 PRZYKŁAD OCZEKIWANEGO TONU I FORMATU ODPOWIEDZI:
 Kontekst: Ukryte słowo to "ZEGAR". Gracz wpisał "PASEK" (E żółty, A żółty).
-Wskazówka: Zastanów się nad urządzeniami często wiszącymi na ścianie, które służą do odmierzania czasu.
+Wskazówka: Znalazłeś właściwe litery E oraz A, ale znajdują się one na złych pozycjach. Twój strzał dotyczy elementu garderoby, jednak musisz szukać w zupełnie innej kategorii. Zastanów się nad powszechnie używanymi urządzeniami, które często wiszą na ścianie i służą do odmierzania upływającego czasu.
 `;
 const OVERRIDE_PROMPT_EN = (
   theSecretWord: TheSecretWord,
@@ -61,7 +61,7 @@ const OVERRIDE_PROMPT_EN = (
 
   if (wordleGuesses.length === 0) {
     prompt += `The player has not made any guesses yet (Turn 1).\n`;
-    prompt += `-> Provide a concrete real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`;
+    prompt += `-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`;
   } else {
     prompt += `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n`;
 
@@ -72,12 +72,13 @@ const OVERRIDE_PROMPT_EN = (
       prompt += `${i + 1}. ${guess} -> ${feedbackString}\n`;
     });
 
-    prompt += `\n-> Step 1: Briefly assess whether their guesses are close in meaning or structure using the color feedback.\n`;
-    prompt += `-> Step 2: Tailor your clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`;
+    prompt += `\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n`;
+    prompt += `-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`;
   }
 
   return prompt;
 };
+
 const OVERRIDE_PROMPT_PL = (
   theSecretWord: TheSecretWord,
   wordDefinition: WordMeta["wordDefinition"],
@@ -98,7 +99,7 @@ const OVERRIDE_PROMPT_PL = (
 
   if (wordleGuesses.length === 0) {
     prompt += `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n`;
-    prompt += `-> Podaj konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`;
+    prompt += `-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`;
   } else {
     prompt += `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n`;
 
@@ -112,8 +113,8 @@ const OVERRIDE_PROMPT_PL = (
       prompt += `${i + 1}. ${guess} -> ${feedbackString}\n`;
     });
 
-    prompt += `\n-> Krok 1: Krótko oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n`;
-    prompt += `-> Krok 2: Dostosuj wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`;
+    prompt += `\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n`;
+    prompt += `-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`;
   }
 
   return prompt;
@@ -150,8 +151,8 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
               .trim()
               .describe(
                 solutionsLanguage === "En"
-                  ? "The clue text in plain text only. Concise, highly insightful, TTS-friendly. No Markdown, emojis, or preamble."
-                  : "Tekst wskazówki wyłącznie w postaci zwykłego tekstu. Zwięzły, niezwykle wnikliwy, przyjazny dla TTS. Bez Markdownu, emotikonów i wstępów."
+                  ? "The highly descriptive clue in plain text only. Detailed, insightful, TTS-friendly. No Markdown, emojis, or preamble."
+                  : "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów."
               ),
           }),
         }),
@@ -163,7 +164,7 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
 const OverridePlan = ExecutionPlan.make(
   { provide: Layer.succeed(OverrideModel, google("gemini-flash-latest")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
   { provide: Layer.succeed(OverrideModel, google("gemini-flash-lite-latest")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
-  { provide: Layer.succeed(OverrideModel, google("gemini-3.1-flash-lite")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
+  { provide: Layer.succeed(OverrideModel, google("gemini-3.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
 );
 
 export const generateOverride = (

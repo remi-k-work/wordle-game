@@ -3,7 +3,7 @@ import { Config, Effect, Layer, Option } from "effect";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcOverdriveHacks } from "./requests";
-import { generateOverride } from "@/features/overdrive-hacks/domain";
+import { generateOverride } from "@/features/overdrive-hacks/domain/override2";
 
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverride: ({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage }) =>
