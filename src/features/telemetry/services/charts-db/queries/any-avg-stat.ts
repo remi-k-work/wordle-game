@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { AnyAvgStatArgs, AnyCounterData } from "@/features/telemetry/services/charts-db";
+import { AnyAvgStatArgs, AnyAvgStatData } from "@/features/telemetry/services/charts-db";
 
 export const anyAvgStatQuery = (sql: SqlClient.SqlClient) => {
   // A8: scalar subqueries (not CROSS JOIN) make single-row intent explicit —
