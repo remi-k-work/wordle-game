@@ -13,6 +13,11 @@ import { AnyChartArgs } from "@/features/telemetry/services/charts-db";
 // the Result row type from R["Type"], and a narrower bound (e.g. `unknown`)
 // widens the returned Effect to `Effect<unknown[]>`, breaking the caller type
 // contract. This is the idiomatic Effect-SQL generic-schema shape.
+//
+// C1: single-pass conditional aggregation replaces the two-CTE FULL OUTER JOIN.
+// Both passes expanded the same JSONB (metric_payload->'occurrences'); the
+// FILTER clause computes personal/global in one scan. Row-equality validated
+// against the existing e2e fixture.
 export const makeWordFrequencyQuery =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   <R extends Schema.ConstraintCodec<any>>(sql: SqlClient.SqlClient) =>
@@ -21,35 +26,20 @@ export const makeWordFrequencyQuery =
         Request: AnyChartArgs,
         Result: args.Result,
         execute: ({ sessionId, solutionsLanguage }) => sql`
-      WITH global_freq AS (
-        SELECT 
-          UPPER(kv.key) AS word, 
-          SUM(kv.value::int)::int AS global
-        FROM global_pulse,
-        LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
-        WHERE metric_name = ${args.metricName}
-          AND solutions_language = ${solutionsLanguage}
-        GROUP BY UPPER(kv.key)
-      ),
-      personal_freq AS (
-        SELECT 
-          UPPER(kv.key) AS word, 
-          SUM(kv.value::int)::int AS personal
-        FROM global_pulse,
-        LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
-        WHERE metric_name = ${args.metricName}
-          AND solutions_language = ${solutionsLanguage}
-          AND session_id = ${sessionId}
-        GROUP BY UPPER(kv.key)
-      )
-      SELECT 
-        COALESCE(g.word, p.word) AS word,
-        COALESCE(p.personal, 0) AS personal,
-        COALESCE(g.global, 0) AS global
-      FROM global_freq g
-      FULL OUTER JOIN personal_freq p 
-        ON g.word = p.word
-      ORDER BY CASE WHEN COALESCE(p.personal, 0) > 0 THEN 1 ELSE 0 END DESC, global DESC, personal DESC, word ASC
+      SELECT
+        UPPER(kv.key) AS word,
+        COALESCE(SUM(kv.value::int) FILTER (WHERE session_id = ${sessionId}), 0)::int AS personal,
+        SUM(kv.value::int)::int AS global
+      FROM global_pulse,
+      LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
+      WHERE metric_name = ${args.metricName}
+        AND solutions_language = ${solutionsLanguage}
+      GROUP BY UPPER(kv.key)
+      ORDER BY
+        CASE WHEN COALESCE(SUM(kv.value::int) FILTER (WHERE session_id = ${sessionId}), 0) > 0 THEN 1 ELSE 0 END DESC,
+        SUM(kv.value::int) DESC,
+        COALESCE(SUM(kv.value::int) FILTER (WHERE session_id = ${sessionId}), 0) DESC,
+        UPPER(kv.key) ASC
       LIMIT 15`,
       });
 

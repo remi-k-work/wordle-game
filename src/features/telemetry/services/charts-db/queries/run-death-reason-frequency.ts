@@ -8,34 +8,15 @@ export const runDeathReasonFrequencyQuery = (sql: SqlClient.SqlClient) => {
     Request: AnyChartArgs,
     Result: RunDeathReasonFrequencyData,
     execute: ({ sessionId, solutionsLanguage }) => sql`
-    WITH global_freq AS (
-      SELECT 
-        kv.key AS reason, 
-        SUM(kv.value::int)::int AS global
-      FROM global_pulse,
-      LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
-      WHERE metric_name = 'runDeathReason' 
-        AND solutions_language = ${solutionsLanguage}
-      GROUP BY kv.key
-    ),
-    personal_freq AS (
-      SELECT 
-        kv.key AS reason, 
-        SUM(kv.value::int)::int AS personal
-      FROM global_pulse,
-      LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
-      WHERE metric_name = 'runDeathReason' 
-        AND solutions_language = ${solutionsLanguage}
-        AND session_id = ${sessionId}
-      GROUP BY kv.key
-    )
-    SELECT 
-      COALESCE(g.reason, p.reason) AS reason,
-      COALESCE(p.personal, 0) AS personal,
-      COALESCE(g.global, 0) AS global
-    FROM global_freq g
-    FULL OUTER JOIN personal_freq p 
-      ON g.reason = p.reason
+    SELECT
+      kv.key AS reason,
+      COALESCE(SUM(kv.value::int) FILTER (WHERE session_id = ${sessionId}), 0)::int AS personal,
+      SUM(kv.value::int)::int AS global
+    FROM global_pulse,
+    LATERAL jsonb_each_text(metric_payload->'occurrences') AS kv(key, value)
+    WHERE metric_name = 'runDeathReason'
+      AND solutions_language = ${solutionsLanguage}
+    GROUP BY kv.key
     -- B4: alphabetical ordering is intentional. The consumer in
     -- ui/charts/frequencies/run-death-reason/index.tsx is a 2-slice PieChart
     -- keyed by the reason literal (Forfeit, Guesses); colour is mapped via
