@@ -5,25 +5,25 @@
       "source": "Effect-TS/skills",
       "sourceType": "github",
       "skillPath": "skills/effect-ts/SKILL.md",
-      "computedHash": "e9b5d97cab1c369b4ae7864f98b88f17f473d645ae2b04d33360cd6f712987f3"
+      "computedHash": "bb916f6d9c9b3fe8e30fd486f3c1b174a888177c4a3f7d665e1b6c71ba7bdeb7"
     },
     "motion-advanced": {
       "source": "affaan-m/everything-claude-code",
       "sourceType": "github",
       "skillPath": "skills/motion-advanced/SKILL.md",
-      "computedHash": "9262c4efc37ac56138ee4b3494e71d7cc8939e2446c357a1e1b9b9a21cc39dd2"
+      "computedHash": "38502b809de1d53e5c47ae65eafb7a70a6624ed25d578c403ca858c6fa25eb90"
     },
     "motion-foundations": {
       "source": "affaan-m/everything-claude-code",
       "sourceType": "github",
       "skillPath": "skills/motion-foundations/SKILL.md",
-      "computedHash": "42cc6fa240695c21e382ee90eb1b63911ad25a61bfa39edc88cc357e4b1eb233"
+      "computedHash": "f76298f3fcc5f20001c8e78cfa36384469c5a583cb25e8ce60a76d3912608d99"
     },
     "motion-patterns": {
       "source": "affaan-m/everything-claude-code",
       "sourceType": "github",
       "skillPath": "skills/motion-patterns/SKILL.md",
-      "computedHash": "a9ddb0f04b4d0bff27f19d61428d84d5e987594a80b737464197e9279372b2de"
+      "computedHash": "71d7279a0651e6cb95a0fe804c77cb7bfa88befba1cbd1c60c05d23feada4dcc"
     },
     "motion-ui": {
       "source": "affaan-m/everything-claude-code",
