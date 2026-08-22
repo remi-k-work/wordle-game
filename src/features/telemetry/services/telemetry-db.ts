@@ -2,7 +2,6 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
-import { PgLive } from "@/lib/pg-live";
 
 export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
   make: Effect.gen(function* () {
@@ -34,5 +33,5 @@ export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
     } as const;
   }),
 }) {
-  static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(PgLive));
+  static readonly layer = Layer.effect(this, this.make);
 }

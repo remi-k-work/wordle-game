@@ -5,6 +5,7 @@ import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcTelemetry } from "./requests";
 import { TelemetryDB } from "@/features/telemetry/services/telemetry-db";
 import { ChartsDB } from "@/features/telemetry/services/charts-db";
+import { PgLive } from "@/lib/pg-live";
 
 const RpcTelemetryLayer = RpcTelemetry.toLayer({
   addGlobalPulse: (payload) =>
@@ -84,7 +85,7 @@ const RpcTelemetryLayer = RpcTelemetry.toLayer({
       const chartsDB = yield* ChartsDB;
       return yield* chartsDB.getBestRunTrophyCard(payload);
     }),
-}).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer)));
+}).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer).pipe(Layer.provide(PgLive))));
 
 const RpcLayer = RpcServer.layerHttp({
   group: RpcTelemetry,

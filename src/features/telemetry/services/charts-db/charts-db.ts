@@ -21,7 +21,6 @@ import {
   TimeToSolveDistributionData,
   timeToSolveDistributionQuery,
 } from ".";
-import { PgLive } from "@/lib/pg-live";
 
 export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   // Error-escalation policy (E5): every chart query escalates both SchemaError
@@ -105,5 +104,5 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     } as const;
   }),
 }) {
-  static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(PgLive));
+  static readonly layer = Layer.effect(this, this.make);
 }
