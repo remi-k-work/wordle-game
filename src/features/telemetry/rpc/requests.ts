@@ -4,6 +4,7 @@ import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
 import {
   AnyAvgStatArgs,
+  AnyAvgStatData,
   AnyChartArgs,
   AnyCounterArgs,
   AnyCounterData,
@@ -72,7 +73,9 @@ export class RpcTelemetry extends RpcGroup.make(
 
   Rpc.make("getAnyAvgStat", {
     payload: AnyAvgStatArgs,
-    success: AnyCounterData,
+    // E3: dedicated Result schema (AnyAvgStatData), structurally identical to
+    // AnyCounterData — the wire shape `{ personal, global }` is unchanged.
+    success: AnyAvgStatData,
   }),
 
   Rpc.make("getHardestWordsLeaderboard", {

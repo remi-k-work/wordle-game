@@ -81,6 +81,11 @@ export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCard
 
 export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData>("BestRunTrophyCardData")({
   deathReason: Schema.Literals(["Forfeit", "Guesses"]),
+  // E4: "N/A" is the producer's sentinel for Forfeit runs (see
+  // telemetry/state/actions.ts:36 — `failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A"`).
+  // TheSecretWord requires exactly 5 characters (WORD_LENGTH = 5); "N/A" is 3 chars,
+  // so it cannot collide with a real secret word. Do NOT remove this union arm —
+  // it is load-bearing for Forfeit-run rendering.
   failedOnWord: Schema.Union([TheSecretWord, Schema.Literal("N/A")]),
   finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),

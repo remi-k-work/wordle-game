@@ -17,7 +17,7 @@ export const anyAvgStatQuery = (sql: SqlClient.SqlClient) => {
   // this contract).
   const query = SqlSchema.findOne({
     Request: AnyAvgStatArgs,
-    Result: AnyCounterData,
+    Result: AnyAvgStatData,
     execute: ({ statColumn, statTable, sessionId, solutionsLanguage }) =>
       statTable === "runWordEvent"
         ? sql`
