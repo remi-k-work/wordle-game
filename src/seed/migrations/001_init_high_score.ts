@@ -1,31 +1,31 @@
-DROP TABLE IF EXISTS high_score;
+import { Effect } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 
-CREATE TABLE high_score (
+const migration = Effect.gen(function* () {
+  const sql = yield* SqlClient.SqlClient;
+  yield* sql`
+-- high-score schema
+CREATE TABLE IF NOT EXISTS high_score (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-
   player_name CHAR(3) NOT NULL
     CONSTRAINT high_score_player_name_check
     CHECK (player_name ~ '^[A-Z]{3}$'),
-
   score INT NOT NULL
     CONSTRAINT high_score_score_check
     CHECK (score >= 0),
-
   streak INT NOT NULL
     CONSTRAINT high_score_streak_check
     CHECK (streak >= 0),
-
   solutions_lang VARCHAR(2) NOT NULL
     CONSTRAINT high_score_solutions_lang_check
     CHECK (solutions_lang IN ('En', 'Pl')),
-
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Optimized for language-filtered high score queries
-CREATE INDEX high_score_ranking_idx
+CREATE INDEX IF NOT EXISTS high_score_ranking_idx
   ON high_score (solutions_lang, score DESC, streak DESC);
 
+-- seed data (only runs once on first migration)
 INSERT INTO high_score (player_name, score, streak, solutions_lang)
 VALUES
   ('ACE', 4200, 18, 'En'),
@@ -37,4 +37,9 @@ VALUES
   ('KAI', 2400, 10, 'Pl'),
   ('ORB', 2100, 9, 'En'),
   ('VEX', 1800, 8, 'Pl'),
-  ('PIP', 1500, 7, 'En');
+  ('PIP', 1500, 7, 'En')
+ON CONFLICT DO NOTHING;
+`;
+});
+
+export default migration;
