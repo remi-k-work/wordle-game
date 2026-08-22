@@ -4,4 +4,8 @@ import { ArcadeStreakDistributionData } from "@/features/telemetry/services/char
 import { makeHistogramDistributionQuery } from "./make-histogram-distribution-query";
 
 export const arcadeStreakDistributionQuery = (sql: SqlClient.SqlClient) =>
-  makeHistogramDistributionQuery(sql)({ metricName: "arcadeRunLength", bucketAlias: "streak", Result: ArcadeStreakDistributionData });
+  makeHistogramDistributionQuery(sql)({
+    metricName: "arcadeRunLength",
+    bucketAlias: "streak",
+    Result: ArcadeStreakDistributionData,
+  });

@@ -17,22 +17,6 @@ export const runDeathReasonFrequencyQuery = (sql: SqlClient.SqlClient) => {
     WHERE metric_name = 'runDeathReason'
       AND solutions_language = ${solutionsLanguage}
     GROUP BY kv.key
-    -- B4: alphabetical ordering is intentional. The consumer in
-    -- ui/charts/frequencies/run-death-reason/index.tsx is a 2-slice PieChart
-    -- keyed by the reason literal (Forfeit, Guesses); colour is mapped via
-    -- the COLORS_PERSONAL/COLORS_GLOBAL lookups (order-independent), but
-    -- recharts renders slices clockwise from 12 o'clock in array order — so
-    -- alphabetical gives STABLE slice placement (Forfeit always at 12
-    -- o'clock) across page loads, regardless of count distribution. With
-    -- only two reasons, count-sorted ordering (global DESC, personal DESC,
-    -- reason ASC) adds no information density (both slices are always
-    -- rendered + labelled), and on the typical sample (Forfeit count >
-    -- Guesses count) alphabetical already leads with Forfeit — the only
-    -- observable difference would be a Guesses-leading player, whose slice
-    -- position would flip. Stable placement was deemed the higher-value UX
-    -- for a 2-slice pie. Do NOT switch to count-sorted without first
-    -- confirming the consumer still doesn't surface a "top reasons" ordering
-    -- preference.
     ORDER BY reason ASC`,
   });
 

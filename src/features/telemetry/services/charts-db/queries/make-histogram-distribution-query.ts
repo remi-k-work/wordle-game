@@ -4,21 +4,11 @@ import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyChartArgs } from "@/features/telemetry/services/charts-db";
 
-// Factory backing the histogram chart trio (timeToSolve + arcadeStreak +
-// guessDistribution, the last via the A3 sentinel unification). The three
-// queries are byte-identical except for `metricName`, the outer SELECT column
-// alias (`bucketAlias` — also used in `ORDER BY <alias> ASC NULLS LAST`), and
-// the `Result` schema — all three differ per call-site and are passed in here.
-// The sentinel `-1` pattern (A3) and `GROUP BY join_boundary` (A2) are baked
-// in. Pure SQL extraction; the `Result` schemas stay unchanged
-// (transformResultNames still produces the same camelCase fields — see E1).
-//
+// Factory backing timeToSolve, arcadeStreak, guessDistribution. All three
+// share the same query shape; metricName, bucketAlias, and Result schema
+// differ per call-site. A2/A3: sentinel -1 pattern + GROUP BY join_boundary
+// preserves trailing cumulative total row (NULLIF back to NULL).
 // C1: single-pass conditional aggregation replaces two-CTE FULL OUTER JOIN.
-// Both CTEs expanded the same JSONB (metric_payload->'buckets'); FILTER
-// computes personal/global in one scan. The sentinel `-1` bucket (trailing
-// cumulative total row) is preserved via GROUP BY COALESCE((bucket->>0)::int, -1)
-// and NULLIF back to NULL — validated against cumulativeToDistribution
-// fixture.
 export const makeHistogramDistributionQuery =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   <R extends Schema.ConstraintCodec<any>>(sql: SqlClient.SqlClient) =>

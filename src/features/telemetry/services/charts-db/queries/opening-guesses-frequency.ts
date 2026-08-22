@@ -4,4 +4,7 @@ import { OpeningGuessesFrequencyData } from "@/features/telemetry/services/chart
 import { makeWordFrequencyQuery } from "./make-word-frequency-query";
 
 export const openingGuessesFrequencyQuery = (sql: SqlClient.SqlClient) =>
-  makeWordFrequencyQuery(sql)({ metricName: "openingGuesses", Result: OpeningGuessesFrequencyData });
+  makeWordFrequencyQuery(sql)({
+    metricName: "openingGuesses",
+    Result: OpeningGuessesFrequencyData,
+  });

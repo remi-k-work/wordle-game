@@ -4,10 +4,6 @@ import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyCounterArgs, AnyCounterData } from "@/features/telemetry/services/charts-db";
 
 export const anyCounterQuery = (sql: SqlClient.SqlClient) => {
-  // C1+C4: single-pass conditional aggregation replaces two scalar CTEs.
-  // FILTER computes personal/global in one scan. COALESCE materialises the
-  // single scalar row (0, 0) when no rows match — findOne contract (B5)
-  // preserved. A7: ::bigint cast retained.
   const query = SqlSchema.findOne({
     Request: AnyCounterArgs,
     Result: AnyCounterData,

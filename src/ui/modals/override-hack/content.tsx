@@ -30,15 +30,18 @@ export function Content() {
             ? "Thinking..."
             : (sanitizedOverride ?? "Override unavailable. You are on your own! Please try again later.")}
       </p>
-      <Button className="button mx-auto mt-4" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedOverride)}>
-        <SpeakerWaveIcon className="size-11" />
-        Speak Override
-      </Button>
 
-      <Button tabIndex={-1} className="button mx-auto mt-8 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
-        <XCircleIcon className="size-11" />
-        Close
-      </Button>
+      <footer className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
+        <Button className="button" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedOverride)}>
+          <SpeakerWaveIcon className="size-11" />
+          Speak Override
+        </Button>
+
+        <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
+          <XCircleIcon className="size-11" />
+          Close
+        </Button>
+      </footer>
     </article>
   );
 }

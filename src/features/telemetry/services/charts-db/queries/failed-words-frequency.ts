@@ -4,4 +4,7 @@ import { FailedWordsFrequencyData } from "@/features/telemetry/services/charts-d
 import { makeWordFrequencyQuery } from "./make-word-frequency-query";
 
 export const failedWordsFrequencyQuery = (sql: SqlClient.SqlClient) =>
-  makeWordFrequencyQuery(sql)({ metricName: "failedWords", Result: FailedWordsFrequencyData });
+  makeWordFrequencyQuery(sql)({
+    metricName: "failedWords",
+    Result: FailedWordsFrequencyData,
+  });
