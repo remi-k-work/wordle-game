@@ -26,7 +26,7 @@ export default function Logo() {
       whileHover={{ rotate: -6, scale: motionTokens.scale.pop }}
       transition={springs.snappy}
     >
-      <LogoIcon className="size-13" />
+      <LogoIcon className="size-11 sm:size-13" />
     </MotionLink>
   );
 }
