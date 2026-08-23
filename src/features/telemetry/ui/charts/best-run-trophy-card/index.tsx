@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { msg, useMessages } from "gt-next";
 import { bestRunTrophyCardAtom } from "@/features/telemetry/state";
 
 // components
@@ -17,21 +18,22 @@ interface BestRunTrophyCardChartProps {
 export function BestRunTrophyCardChart({ solutionsLanguage }: BestRunTrophyCardChartProps) {
   const bestRunPersonal = useAtomValue(bestRunTrophyCardAtom({ whichBestRun: "personal", solutionsLanguage }));
   const bestRunGlobal = useAtomValue(bestRunTrophyCardAtom({ whichBestRun: "global", solutionsLanguage }));
+  const messages = useMessages();
 
   return (
     <>
-      <SectionHeader title="The best run trophy card" />
+      <SectionHeader title={messages(msg("The best run trophy card"))} />
       <article className="mb-8 grid grid-cols-1 grid-rows-7 gap-1 space-y-4 sm:grid-cols-2 sm:gap-2 sm:space-y-0">
         {AsyncResult.builder(bestRunPersonal)
-          .onInitialOrWaiting(() => <BestRunCardSkeleton Tag="header" variant="primary" title="Your Personal Best" />)
-          .onFailure(() => <BestRunCardSkeleton Tag="header" variant="primary" title="Your Personal Best" />)
-          .onSuccess((bestRunPersonal) => <BestRunCard Tag="header" variant="primary" title="Your Personal Best" bestRun={bestRunPersonal} />)
+          .onInitialOrWaiting(() => <BestRunCardSkeleton Tag="header" variant="primary" title={messages(msg("Your Personal Best"))} />)
+          .onFailure(() => <BestRunCardSkeleton Tag="header" variant="primary" title={messages(msg("Your Personal Best"))} />)
+          .onSuccess((bestRunPersonal) => <BestRunCard Tag="header" variant="primary" title={messages(msg("Your Personal Best"))} bestRun={bestRunPersonal} />)
           .render()}
 
         {AsyncResult.builder(bestRunGlobal)
-          .onInitialOrWaiting(() => <BestRunCardSkeleton Tag="footer" variant="secondary" title="Global Best" />)
-          .onFailure(() => <BestRunCardSkeleton Tag="footer" variant="secondary" title="Global Best" />)
-          .onSuccess((bestRunGlobal) => <BestRunCard Tag="footer" variant="secondary" title="Global Best" bestRun={bestRunGlobal} />)
+          .onInitialOrWaiting(() => <BestRunCardSkeleton Tag="footer" variant="secondary" title={messages(msg("Global Best"))} />)
+          .onFailure(() => <BestRunCardSkeleton Tag="footer" variant="secondary" title={messages(msg("Global Best"))} />)
+          .onSuccess((bestRunGlobal) => <BestRunCard Tag="footer" variant="secondary" title={messages(msg("Global Best"))} bestRun={bestRunGlobal} />)
           .render()}
       </article>
     </>
@@ -39,12 +41,14 @@ export function BestRunTrophyCardChart({ solutionsLanguage }: BestRunTrophyCardC
 }
 
 export function BestRunTrophyCardChartSkeleton() {
+  const messages = useMessages();
+
   return (
     <>
-      <SectionHeaderSkeleton title="The best run trophy card" />
+      <SectionHeaderSkeleton title={messages(msg("The best run trophy card"))} />
       <article className="mb-8 grid grid-cols-1 grid-rows-7 gap-1 space-y-4 sm:grid-cols-2 sm:gap-2 sm:space-y-0">
-        <BestRunCardSkeleton Tag="header" variant="primary" title="Your Personal Best" />
-        <BestRunCardSkeleton Tag="footer" variant="secondary" title="Global Best" />
+        <BestRunCardSkeleton Tag="header" variant="primary" title={messages(msg("Your Personal Best"))} />
+        <BestRunCardSkeleton Tag="footer" variant="secondary" title={messages(msg("Global Best"))} />
       </article>
     </>
   );

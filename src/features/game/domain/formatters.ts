@@ -4,7 +4,7 @@ import type { TheSecretWord, Tile, WordChallenge } from ".";
 // constants
 import { SPEED_MULTIPLIER_CATEGORY_MAP } from ".";
 
-// Maps a speed multiplier to a category of a player (e.g. "Speed Demon")
+// Maps a speed multiplier to a stable category identifier for UI presentation.
 export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
 
 // Format the current guess word into an array of letter objects with color coding

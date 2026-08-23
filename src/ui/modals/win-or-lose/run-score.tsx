@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
+import { useLocale } from "gt-next";
 import { useAtomValue } from "@effect/atom-react";
 import {
   runSessionBestRunScoreAtom,
@@ -15,6 +16,9 @@ import {
 } from "@/features/game/state";
 import { formatDuration } from "@/lib/formatters";
 
+// components
+import { T } from "gt-next";
+
 // assets
 import { ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
@@ -26,6 +30,7 @@ export function RunScore() {
   const activeStreak = useAtomValue(runSessionStreakAtom);
   const bestRunScore = useAtomValue(runSessionBestRunScoreAtom);
   const bestStreak = useAtomValue(runSessionBestStreakAtom);
+  const locale = useLocale();
 
   const [now, setNow] = useState(() => DateTime.makeUnsafe(Date.now()));
 
@@ -56,38 +61,48 @@ export function RunScore() {
   return (
     <section className="grid grid-cols-2 grid-rows-2 border">
       <div className="col-span-2 p-3">
-        <h3 className="max-w-none font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Duration</h3>
+        <h3 className="max-w-none font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+          <T>Run Duration</T>
+        </h3>
         <div className="flex items-center justify-center gap-1">
           <ClockIcon className="size-9" />
           <span className="font-sans text-4xl font-semibold wrap-anywhere tabular-nums">{formatDuration(runDuration)}</span>
         </div>
       </div>
       <div className="bg-surface-2 p-3">
-        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Run Score</h3>
+        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+          <T>Run Score</T>
+        </h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
           <TrophyIcon className="size-7" />
-          {summary.runScore.toLocaleString()}
+          {summary.runScore.toLocaleString(locale)}
         </span>
       </div>
       <div className="bg-surface-3 p-3">
-        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Streak</h3>
+        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+          <T>Streak</T>
+        </h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
           <FireIcon className="size-7" />
-          {summary.streak.toLocaleString()}
+          {summary.streak.toLocaleString(locale)}
         </span>
       </div>
       <div className="bg-surface-3 p-3">
-        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Best Run Score</h3>
+        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+          <T>Best Run Score</T>
+        </h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
           <TrophyIcon className="size-7" />
-          {bestRunScore.toLocaleString()}
+          {bestRunScore.toLocaleString(locale)}
         </span>
       </div>
       <div className="bg-surface-2 p-3">
-        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Best Streak</h3>
+        <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+          <T>Best Streak</T>
+        </h3>
         <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
           <FireIcon className="size-7" />
-          {bestStreak.toLocaleString()}
+          {bestStreak.toLocaleString(locale)}
         </span>
       </div>
     </section>

@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { useGT } from "gt-next";
 import { arcadeStreakDistributionAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
@@ -17,6 +18,7 @@ interface ArcadeStreakDistributionChartProps {
 
 export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStreakDistributionChartProps) {
   const arcadeStreakDistribution = useAtomValue(arcadeStreakDistributionAtom(solutionsLanguage));
+  const gt = useGT();
 
   return AsyncResult.builder(arcadeStreakDistribution)
     .onInitialOrWaiting(() => <ArcadeStreakDistributionChartSkeleton />)
@@ -24,19 +26,19 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
     .onSuccess((arcadeStreakDistribution) =>
       arcadeStreakDistribution.length === 0 ? (
         <>
-          <SectionHeader title="Streak before a loss" />
-          <InfoLine message="No streak data tracked yet!" />
+          <SectionHeader title={gt("Streak before a loss")} />
+          <InfoLine message={gt("No streak data tracked yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="Streak before a loss" />
+          <SectionHeader title={gt("Streak before a loss")} />
           <ComposedChart data={arcadeStreakDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
             <XAxis dataKey="streak" tickFormatter={(tick) => (tick === Infinity ? "14+" : `${tick}`)} stroke="var(--color-text-1)" />
 
             <Tooltip
-              formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Streak" : "Global Average"]}
+              formatter={(value, name) => [`${value}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")]}
               labelFormatter={(label) => (label === Infinity ? "Streak: 14+" : `Streak: ${label}`)}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
@@ -44,7 +46,7 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personalPct" ? "Your Streak" : "Global Average")}
+              formatter={(value) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average"))}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -58,9 +60,11 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
 }
 
 export function ArcadeStreakDistributionChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="Streak before a loss" />
+      <SectionHeaderSkeleton title={gt("Streak before a loss")} />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

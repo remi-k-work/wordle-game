@@ -7,6 +7,7 @@ import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChall
 import { Definition } from "./definition";
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
 import { RunScore } from "./run-score";
+import { T, Var } from "gt-next";
 
 export function YouWin() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
@@ -18,9 +19,15 @@ export function YouWin() {
 
   return (
     <article className="mx-auto max-w-prose space-y-4">
-      <p>
-        You found the solution in <b>{currentTurn - 1}</b> guesses 😄
-      </p>
+      <T>
+        <p>
+          You found the solution in{" "}
+          <b>
+            <Var>{currentTurn - 1}</Var>
+          </b>{" "}
+          guesses 😄
+        </p>
+      </T>
 
       <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord.value}</h2>
       <Definition />

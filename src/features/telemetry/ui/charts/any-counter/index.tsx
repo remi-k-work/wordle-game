@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { T, useLocale, useMessages } from "gt-next";
 import { anyCounterAtom } from "@/features/telemetry/state";
 
 // components
@@ -20,6 +21,8 @@ interface AnyCounterChartProps {
 
 export function AnyCounterChart({ counterName, solutionsLanguage, title, personalHeader }: AnyCounterChartProps) {
   const anyCounter = useAtomValue(anyCounterAtom({ counterName, solutionsLanguage }));
+  const locale = useLocale();
+  const messages = useMessages();
 
   return AsyncResult.builder(anyCounter)
     .onInitialOrWaiting(() => <AnyCounterChartSkeleton title={title} personalHeader={personalHeader} />)
@@ -32,13 +35,13 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
       // Effect if a row were ever missing — chart-rendering falls back to the
       // onFailure skeleton in that (impossible) case.
       <>
-        <SectionHeader title={title} />
+        <SectionHeader title={messages(title)} />
         <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
-          <StatCard Tag="header" variant="primary" title={personalHeader}>
-            {anyCounter.personal.toLocaleString()}
+          <StatCard Tag="header" variant="primary" title={messages(personalHeader)}>
+            {anyCounter.personal.toLocaleString(locale)}
           </StatCard>
-          <StatCard Tag="footer" variant="secondary" title="Global Total">
-            {anyCounter.global.toLocaleString()}
+          <StatCard Tag="footer" variant="secondary" title={<T>Global Total</T>}>
+            {anyCounter.global.toLocaleString(locale)}
           </StatCard>
         </article>
       </>
@@ -47,14 +50,16 @@ export function AnyCounterChart({ counterName, solutionsLanguage, title, persona
 }
 
 export function AnyCounterChartSkeleton({ title, personalHeader }: Pick<AnyCounterChartProps, "title" | "personalHeader">) {
+  const messages = useMessages();
+
   return (
     <>
-      <SectionHeaderSkeleton title={title} />
+      <SectionHeaderSkeleton title={messages(title)} />
       <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
-        <StatCard Tag="header" variant="primary" title={personalHeader}>
+        <StatCard Tag="header" variant="primary" title={messages(personalHeader)}>
           <StatCardSkeleton />
         </StatCard>
-        <StatCard Tag="footer" variant="secondary" title="Global Total">
+        <StatCard Tag="footer" variant="secondary" title={<T>Global Total</T>}>
           <StatCardSkeleton />
         </StatCard>
       </article>

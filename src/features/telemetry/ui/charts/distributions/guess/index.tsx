@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { useGT } from "gt-next";
 import { guessDistributionAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
@@ -17,6 +18,7 @@ interface GuessDistributionChartProps {
 
 export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionChartProps) {
   const guessDistribution = useAtomValue(guessDistributionAtom(solutionsLanguage));
+  const gt = useGT();
 
   return AsyncResult.builder(guessDistribution)
     .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)
@@ -24,27 +26,27 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
     .onSuccess((guessDistribution) =>
       guessDistribution.length === 0 ? (
         <>
-          <SectionHeader title="Guesses needed to win a game" />
-          <InfoLine message="No Guesses yet!" />
+          <SectionHeader title={gt("Guesses needed to win a game")} />
+          <InfoLine message={gt("No Guesses yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="Guesses needed to win a game" />
+          <SectionHeader title={gt("Guesses needed to win a game")} />
           <ComposedChart data={guessDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
-            <XAxis dataKey="turn" tickFormatter={(tick) => `Turn ${tick}`} stroke="var(--color-text-1)" />
+            <XAxis dataKey="turn" tickFormatter={(tick) => gt("Turn {turn}", { turn: tick })} stroke="var(--color-text-1)" />
 
             <Tooltip
-              formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Guesses" : "Global Average"]}
-              labelFormatter={(label) => `Turn: ${label}`}
+              formatter={(value, name) => [`${value}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")]}
+              labelFormatter={(label) => gt("Turn: {turn}", { turn: label })}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
               labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personalPct" ? "Your Guesses" : "Global Average")}
+              formatter={(value) => (value === "personalPct" ? gt("Your Guesses") : gt("Global Average"))}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -58,9 +60,11 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
 }
 
 export function GuessDistributionChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="Guesses needed to win a game" />
+      <SectionHeaderSkeleton title={gt("Guesses needed to win a game")} />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

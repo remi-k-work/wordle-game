@@ -4,12 +4,14 @@ import { useBrowseCharts } from "@/features/telemetry/hooks";
 
 // components
 import { Switch } from "@base-ui/react";
+import { useGT } from "gt-next";
 
 // assets
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 export function BrowseCharts() {
   const { sl, browseChartsMachineEvent } = useBrowseCharts();
+  const gt = useGT();
 
   return (
     <header className="my-8 flex justify-end bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
@@ -23,8 +25,8 @@ export function BrowseCharts() {
             "data-checked:bg-surface-3"
           )}
           name="browseChartsSl"
-          aria-label="browseChartsSl"
-          title="Switch Solutions Language"
+          aria-label={gt("Switch chart vocabulary language")}
+          title={gt("Switch chart vocabulary language")}
           checked={sl === "Pl"}
           onCheckedChange={(isPl) => browseChartsMachineEvent({ type: "slChanged", sl: isPl ? "Pl" : "En" })}
         >
@@ -37,6 +39,8 @@ export function BrowseCharts() {
 }
 
 export function BrowseChartsSkeleton() {
+  const gt = useGT();
+
   return (
     <header className="my-8 flex justify-end bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
       <label className="flex items-center gap-3">
@@ -49,8 +53,8 @@ export function BrowseChartsSkeleton() {
             "data-checked:bg-surface-3"
           )}
           name="browseChartsSl"
-          aria-label="browseChartsSl"
-          title="Switch Solutions Language"
+          aria-label={gt("Switch chart vocabulary language")}
+          title={gt("Switch chart vocabulary language")}
           checked={false}
           onCheckedChange={() => {}}
           disabled

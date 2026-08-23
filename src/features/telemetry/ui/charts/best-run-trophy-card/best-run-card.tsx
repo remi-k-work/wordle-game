@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { DateTime, Duration, Option } from "effect";
+import { useGT, useLocale } from "gt-next";
 import { formatDuration } from "@/lib/formatters";
 
 // components
@@ -26,6 +27,9 @@ const VARIANT_STYLES = {
 } as const;
 
 export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRunCardProps) {
+  const gt = useGT();
+  const locale = useLocale();
+
   return (
     <Tag
       className={cn(
@@ -37,12 +41,12 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
     >
       <h3 className="tracking-widest uppercase">{title}</h3>
       {Option.match(bestRun, {
-        onNone: () => <InfoLine className="row-span-6 font-normal" message="No completed runs yet!" />,
+        onNone: () => <InfoLine className="row-span-6 font-normal" message={gt("No completed runs yet!")} />,
         onSome: ({ deathReason, failedOnWord, finalScore, finalStreak, durationSeconds, createdAt }) => (
           <>
             <span className="flex items-center gap-1 text-3xl wrap-anywhere text-accent">
               <TrophyIcon className="size-9" />
-              {finalScore.toLocaleString()}
+              {finalScore.toLocaleString(locale)}
             </span>
             <span className="flex items-center gap-1 text-3xl wrap-anywhere text-destructive">
               <FireIcon className="size-9" />
@@ -52,11 +56,11 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
               <ClockIcon className="size-9" />
               {formatDuration(Duration.seconds(durationSeconds))}
             </span>
-            <h4 className="max-w-none place-self-end justify-self-center font-sans text-sm tracking-widest uppercase">Ended By</h4>
-            <span className="text-3xl wrap-anywhere">{deathReason === "Guesses" ? `Failed on ${failedOnWord}` : "Forfeit"}</span>
+            <h4 className="max-w-none place-self-end justify-self-center font-sans text-sm tracking-widest uppercase">{gt("Ended By")}</h4>
+            <span className="text-3xl wrap-anywhere">{deathReason === "Guesses" ? gt("Failed on {word}", { word: failedOnWord }) : gt("Forfeit")}</span>
             <span className="flex items-center gap-1 text-sm">
               <CalendarIcon className="size-6" />
-              {DateTime.formatLocal(createdAt, { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+              {DateTime.formatLocal(createdAt, { locale, day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
             </span>
           </>
         ),
@@ -66,6 +70,8 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
 }
 
 export function BestRunCardSkeleton({ Tag = "section", variant, title }: Omit<BestRunCardProps, "bestRun">) {
+  const gt = useGT();
+
   return (
     <Tag
       className={cn(
@@ -88,7 +94,7 @@ export function BestRunCardSkeleton({ Tag = "section", variant, title }: Omit<Be
         <ClockIcon className="size-9" />
         &nbsp;
       </span>
-      <h4 className="max-w-none place-self-end justify-self-center font-sans text-sm tracking-widest uppercase">Ended By</h4>
+      <h4 className="max-w-none place-self-end justify-self-center font-sans text-sm tracking-widest uppercase">{gt("Ended By")}</h4>
       <span className="text-3xl wrap-anywhere">&nbsp;</span>
       <span className="flex items-center gap-1 text-sm">
         <CalendarIcon className="size-6" />

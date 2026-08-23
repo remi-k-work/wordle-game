@@ -6,6 +6,7 @@ import { gameDataMachineAtom, gameFlowMachineAtom, wordChallengeMachineAtom } fr
 
 // components
 import { Button } from "@base-ui/react";
+import { T, useGT } from "gt-next";
 
 // assets
 import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
@@ -24,6 +25,7 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
   const gameFlowMachineSnapshot = useAtomValue(gameFlowMachineAtom);
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
+  const gt = useGT();
 
   if (
     wordChallengeMachineSnapshot.matches("awaitingGameData") ||
@@ -38,7 +40,7 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
     return (
       <Button
         className={cn("button", !keepText && "max-sm:p-1", className)}
-        title="Next Word"
+        title={gt("Next Word")}
         onClick={() => {
           gameFlowMachineEvent({ type: "word.nextRequested" });
           onClicked?.();
@@ -46,7 +48,13 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
         {...rest}
       >
         <ForwardIcon className="size-11" />
-        {keepText ? "Next Word" : <span className="hidden sm:block">Next Word</span>}
+        {keepText ? (
+          <T>Next Word</T>
+        ) : (
+          <span className="hidden sm:block">
+            <T>Next Word</T>
+          </span>
+        )}
       </Button>
     );
 
@@ -55,7 +63,7 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
     return (
       <Button
         className={cn("button", !keepText && "max-sm:p-1", className)}
-        title="Start New Run"
+        title={gt("Start New Run")}
         onClick={() => {
           gameFlowMachineEvent({ type: "run.startRequested" });
           onClicked?.();
@@ -63,7 +71,13 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
         {...rest}
       >
         <PuzzlePieceIcon className="size-11" />
-        {keepText ? "Start New Run" : <span className="hidden sm:block">Start New Run</span>}
+        {keepText ? (
+          <T>Start New Run</T>
+        ) : (
+          <span className="hidden sm:block">
+            <T>Start New Run</T>
+          </span>
+        )}
       </Button>
     );
 
@@ -71,7 +85,7 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
   return (
     <Button
       className={cn("button bg-destructive", !keepText && "max-sm:p-1", className)}
-      title="Forfeit Run"
+      title={gt("Forfeit Run")}
       onClick={() => {
         alertMachineEvent({ type: "opened", alertType: "forfeit-run" });
         onClicked?.();
@@ -79,7 +93,13 @@ export function GameFlowButton({ keepText = false, onClicked, className, ...rest
       {...rest}
     >
       <PowerIcon className="size-11" />
-      {keepText ? "Forfeit Run" : <span className="hidden sm:block">Forfeit Run</span>}
+      {keepText ? (
+        <T>Forfeit Run</T>
+      ) : (
+        <span className="hidden sm:block">
+          <T>Forfeit Run</T>
+        </span>
+      )}
     </Button>
   );
 }

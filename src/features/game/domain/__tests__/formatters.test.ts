@@ -69,9 +69,9 @@ describe("formatters", () => {
   });
 
   describe("speedMultiplierToCategory", () => {
-    it("returns correct categories", () => {
-      expect(speedMultiplierToCategory(1.5)).toBe("🚀 Speed Demon");
-      expect(speedMultiplierToCategory(0.8)).toBe("🐌 Slow Learner");
+    it("returns stable category identifiers", () => {
+      expect(speedMultiplierToCategory(1.5)).toBe("speed-demon");
+      expect(speedMultiplierToCategory(0.8)).toBe("slow-learner");
     });
   });
 });

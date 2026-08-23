@@ -10,6 +10,7 @@ import { modalMachineAtom } from "@/state";
 
 // components
 import { Button, Popover } from "@base-ui/react";
+import { T, Var, useGT, useLocale } from "gt-next";
 
 // assets
 import { SpinnerIcon } from "@/assets/icons";
@@ -33,10 +34,12 @@ export function HacksMenu() {
 
   // Controls whether the popover is open or not
   const [isOpen, setIsOpen] = useState(false);
+  const gt = useGT();
+  const locale = useLocale();
 
   return (
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger openOnHover title="Overdrive Hacks" className="button flex-none p-1 data-popup-open:bg-accent">
+      <Popover.Trigger openOnHover title={gt("Overdrive Hacks")} className="button flex-none p-1 data-popup-open:bg-accent">
         <LifebuoyIcon className="size-11" />
       </Popover.Trigger>
       <Popover.Portal>
@@ -59,7 +62,7 @@ export function HacksMenu() {
             >
               <LifebuoyIcon className="size-11" />
               <span className="justify-self-start">EMP</span>
-              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{OVERDRIVE_HACK_COST("emp").toLocaleString()} pts</span>
+              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2"><Var>-{OVERDRIVE_HACK_COST("emp").toLocaleString(locale)}</Var> <T>pts</T></span>
             </Button>
             <Button
               className="button grid grid-cols-[auto_1fr_1fr]"
@@ -70,8 +73,8 @@ export function HacksMenu() {
               }}
             >
               <LifebuoyIcon className="size-11" />
-              <span className="justify-self-start">Sonar</span>
-              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{OVERDRIVE_HACK_COST("sonar").toLocaleString()} pts</span>
+              <span className="justify-self-start"><T>Sonar</T></span>
+              <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2"><Var>-{OVERDRIVE_HACK_COST("sonar").toLocaleString(locale)}</Var> <T>pts</T></span>
             </Button>
             {isOverrideHackReady ? (
               <Button
@@ -82,8 +85,8 @@ export function HacksMenu() {
                 }}
               >
                 <SparklesIcon className="size-11" />
-                <span className="justify-self-start">AI Override</span>
-                <span className="rounded-md bg-tile-green px-3 py-2 font-sans text-text-2">Ready ↗</span>
+                <span className="justify-self-start"><T>AI Override</T></span>
+                <span className="rounded-md bg-tile-green px-3 py-2 font-sans text-text-2"><T>Ready ↗</T></span>
               </Button>
             ) : (
               <Button
@@ -94,8 +97,8 @@ export function HacksMenu() {
                 }}
               >
                 {isOverrideHackLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
-                <span className="justify-self-start">AI Override</span>
-                <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">-{OVERDRIVE_HACK_COST("override").toLocaleString()} pts</span>
+                <span className="justify-self-start"><T>AI Override</T></span>
+                <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2"><Var>-{OVERDRIVE_HACK_COST("override").toLocaleString(locale)}</Var> <T>pts</T></span>
               </Button>
             )}
           </Popover.Popup>

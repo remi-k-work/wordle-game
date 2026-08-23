@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 // components
 import { Button } from "@base-ui/react";
+import { useGT } from "gt-next";
 
 // assets
 import { PrevIcon } from "@/assets/icons";
@@ -16,6 +17,7 @@ interface PrevProps {
 
 export function Prev({ emblaApi }: PrevProps) {
   const [isDisabled, setIsDisabled] = useState(true);
+  const gt = useGT();
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -30,7 +32,7 @@ export function Prev({ emblaApi }: PrevProps) {
   }, [emblaApi]);
 
   return (
-    <Button className="button p-1" disabled={isDisabled} onClick={() => emblaApi?.scrollPrev()}>
+    <Button className="button p-1" title={gt("Previous chart")} aria-label={gt("Previous chart")} disabled={isDisabled} onClick={() => emblaApi?.scrollPrev()}>
       <PrevIcon className="size-11" />
     </Button>
   );

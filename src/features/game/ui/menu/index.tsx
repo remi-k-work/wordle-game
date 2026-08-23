@@ -8,6 +8,7 @@ import { modalMachineAtom } from "@/state";
 
 // components
 import { Button, Popover } from "@base-ui/react";
+import { T, useGT } from "gt-next";
 import { LangChanger } from "@/features/settings/ui/lang-changer";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 
@@ -16,13 +17,14 @@ import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "
 
 export function GameMenu() {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
+  const gt = useGT();
 
   // Controls whether the popover is open or not
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger openOnHover title="Menu" className="button flex-none p-1 data-popup-open:bg-accent">
+      <Popover.Trigger openOnHover title={gt("Menu")} className="button flex-none p-1 data-popup-open:bg-accent">
         <Bars3Icon className="size-11" />
       </Popover.Trigger>
       <Popover.Portal>
@@ -45,7 +47,7 @@ export function GameMenu() {
               }}
             >
               <SpeakerWaveIcon className="size-11" />
-              Voice Settings
+              <T>Voice Settings</T>
             </Button>
             <Button
               className="button"
@@ -55,7 +57,7 @@ export function GameMenu() {
               }}
             >
               <TrophyIcon className="size-11" />
-              High Score
+              <T>High Score</T>
             </Button>
             <Button
               className="button"
@@ -65,7 +67,7 @@ export function GameMenu() {
               }}
             >
               <QuestionMarkCircleIcon className="size-11" />
-              Help
+              <T>Help</T>
             </Button>
           </Popover.Popup>
         </Popover.Positioner>

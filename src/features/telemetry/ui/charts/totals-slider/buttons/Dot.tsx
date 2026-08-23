@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 // components
 import { Button } from "@base-ui/react";
+import { useGT } from "gt-next";
 
 // assets
 import { ViewfinderCircleIcon as ViewfinderCircleIconS } from "@heroicons/react/24/solid";
@@ -21,6 +22,7 @@ interface DotProps {
 
 export function Dot({ emblaApi, index }: DotProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const gt = useGT();
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -35,7 +37,7 @@ export function Dot({ emblaApi, index }: DotProps) {
   }, [emblaApi]);
 
   return (
-    <Button className={cn("button bg-secondary p-0", index === selectedIndex && "bg-accent")} onClick={() => emblaApi?.scrollTo(index)}>
+    <Button className={cn("button bg-secondary p-0", index === selectedIndex && "bg-accent")} title={gt("Go to chart {index}", { index: index + 1 })} aria-label={gt("Go to chart {index}", { index: index + 1 })} onClick={() => emblaApi?.scrollTo(index)}>
       {index === selectedIndex ? <ViewfinderCircleIconS className="size-11" /> : <ViewfinderCircleIconO className="size-11" />}
     </Button>
   );

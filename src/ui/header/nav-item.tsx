@@ -6,6 +6,7 @@ import Link from "next/link";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { useMessages } from "gt-next";
 
 // types
 import type { Route } from "next";
@@ -21,6 +22,7 @@ export interface NavItemProps {
 
 export default function NavItem({ href, match, title, icon, isExternal = false }: NavItemProps) {
   const pathname = usePathname();
+  const messages = useMessages();
 
   // Compile regex client-side
   const regex = new RegExp(match);
@@ -29,7 +31,7 @@ export default function NavItem({ href, match, title, icon, isExternal = false }
   return (
     <Link
       href={href}
-      title={title}
+      title={messages(title)}
       prefetch={!isExternal}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}

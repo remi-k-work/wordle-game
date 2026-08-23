@@ -9,6 +9,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state";
 import { motion } from "motion/react";
+import { T, useLocale } from "gt-next";
 
 // components
 import { InfoLine } from "@/ui/info-line";
@@ -44,6 +45,7 @@ const MotionTableRow = motion.create(TableRow);
 export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
   const top10HighScores = useAtomValue(top10HighScoresAtom(solutionsLanguage));
   const newHighScoreId = useAtomValue(highScoreNewHighScoreIdAtom);
+  const locale = useLocale();
 
   useEffect(() => {
     if (top10HighScores.waiting || !newHighScoreId.valueOrUndefined) return;
@@ -57,13 +59,13 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
     .onFailure(() => <Top10HighScoresSkeleton />)
     .onSuccess((top10HighScores) =>
       top10HighScores.length === 0 ? (
-        <InfoLine message="No High Scores yet!" />
+        <InfoLine message={<T>No High Scores yet!</T>} />
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-16">#</TableHead>
-              <TableHead className="w-32">Name</TableHead>
+              <TableHead className="w-32"><T>Name</T></TableHead>
               <TableHead className="w-32 bg-accent/30 text-accent">
                 <TrophyIcon className="mx-auto size-11" />
               </TableHead>
@@ -83,8 +85,8 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
               >
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{playerName}</TableCell>
-                <TableCell className="bg-accent/30">{score.toLocaleString()}</TableCell>
-                <TableCell className="bg-destructive/30">{streak.toLocaleString()}</TableCell>
+                <TableCell className="bg-accent/30">{score.toLocaleString(locale)}</TableCell>
+                <TableCell className="bg-destructive/30">{streak.toLocaleString(locale)}</TableCell>
                 <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
               </MotionTableRow>
             ))}
@@ -101,7 +103,7 @@ export function Top10HighScoresSkeleton() {
       <TableHeader>
         <TableRow>
           <TableHead className="w-16">#</TableHead>
-          <TableHead className="w-32">Name</TableHead>
+          <TableHead className="w-32"><T>Name</T></TableHead>
           <TableHead className="w-32 bg-accent/30 text-accent">
             <TrophyIcon className="mx-auto size-11" />
           </TableHead>

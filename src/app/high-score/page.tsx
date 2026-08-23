@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 // services, features, and other libraries
 import { Effect } from "effect";
+import { msg } from "gt-next";
 import { runPageMainOrNavigate, validatePageInputs } from "@/lib/helpers-effect";
 import { HighScorePage } from "@/features/high-score/domain";
 
@@ -56,7 +57,10 @@ async function PageContent({ params, searchParams }: PageProps<"/high-score">) {
 
   return (
     <article className="mx-auto w-full max-w-384">
-      <PageHeader title="High Score & Charts" description="The following section displays the top 10 scores, along with various informative game charts." />
+      <PageHeader
+        title={msg("High Score & Charts")}
+        description={msg("The following section displays the top 10 scores, along with various informative game charts.")}
+      />
       <BrowseCharts />
       <Top10HighScores solutionsLanguage={sl} />
       <BestRunTrophyCardChart solutionsLanguage={sl} />
@@ -71,8 +75,8 @@ function PageSkeleton() {
   return (
     <article className="mx-auto w-full max-w-384">
       <PageHeaderSkeleton
-        title="High Score & Charts"
-        description="The following section displays the top 10 scores, along with various informative game charts."
+        title={msg("High Score & Charts")}
+        description={msg("The following section displays the top 10 scores, along with various informative game charts.")}
       />
       <BrowseChartsSkeleton />
       <Top10HighScoresSkeleton />

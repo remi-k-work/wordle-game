@@ -5,6 +5,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaMachineAtom } from "@/features/game/state";
+import { useGT } from "gt-next";
 
 // components
 import { Button, Popover } from "@base-ui/react";
@@ -22,6 +23,7 @@ interface RiddleProps {
 export function Riddle({ mode }: RiddleProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const isLoading = wordMetaMachineSnapshot.matches("loading");
+  const gt = useGT();
 
   // Controls whether the popover is open or not
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +32,7 @@ export function Riddle({ mode }: RiddleProps) {
 
   return (
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger openOnHover title="Riddle" className="button flex-none p-1 data-popup-open:bg-accent">
+      <Popover.Trigger openOnHover title={gt("Riddle")} className="button flex-none p-1 data-popup-open:bg-accent">
         {isLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
       </Popover.Trigger>
       <Popover.Portal>

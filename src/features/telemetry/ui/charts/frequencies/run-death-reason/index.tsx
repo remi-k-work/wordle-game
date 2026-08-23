@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { T, useGT } from "gt-next";
 import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state";
 import { Tooltip, Legend, PieChart, Pie, Sector } from "recharts";
 
@@ -28,17 +29,18 @@ const CustomLegend = () => (
   <div className="flex flex-col items-center font-sans text-text-2">
     <div className="flex items-center gap-2">
       <div className="size-4 bg-(--color-primary)" />
-      Your Runs (Inner)
+      <T>Your Runs (Inner)</T>
     </div>
     <div className="flex items-center gap-2">
       <div className="size-4 bg-(--color-secondary)" />
-      Global Base (Outer)
+      <T>Global Base (Outer)</T>
     </div>
   </div>
 );
 
 export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReasonFrequencyChartProps) {
   const runDeathReasonFrequency = useAtomValue(runDeathReasonFrequencyAtom(solutionsLanguage));
+  const gt = useGT();
 
   return AsyncResult.builder(runDeathReasonFrequency)
     .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
@@ -46,15 +48,15 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
     .onSuccess((runDeathReasonFrequency) => {
       return runDeathReasonFrequency.length === 0 ? (
         <>
-          <SectionHeader title="Reasons why an arcade run ended" />
-          <InfoLine message="No frequency data tracked yet!" />
+          <SectionHeader title={gt("Reasons why an arcade run ended")} />
+          <InfoLine message={gt("No frequency data tracked yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="Reasons why an arcade run ended" />
+          <SectionHeader title={gt("Reasons why an arcade run ended")} />
           <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
             <Tooltip
-              formatter={(value, name) => [`${value} times`, name]}
+              formatter={(value, name) => [gt("{count} times", { count: value }), name]}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
               labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
@@ -82,9 +84,11 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
 }
 
 export function RunDeathReasonFrequencyChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="Reasons why an arcade run ended" />
+      <SectionHeaderSkeleton title={gt("Reasons why an arcade run ended")} />
       <div className="mx-auto size-86 w-full lg:size-172" />
     </>
   );

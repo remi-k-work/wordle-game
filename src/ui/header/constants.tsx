@@ -1,24 +1,25 @@
 // assets
 import { HomeModernIcon, PuzzlePieceIcon, TrophyIcon } from "@heroicons/react/24/outline";
+import { msg } from "gt-next";
 
 // constants
 export const NAV_ITEMS = [
   {
     href: "/",
     match: "^/(/.*)?$",
-    title: "Home",
+    title: msg("Home"),
     icon: <HomeModernIcon />,
   },
   {
     href: "/game",
     match: "^/game(/.*)?$",
-    title: "Game",
+    title: msg("Game"),
     icon: <PuzzlePieceIcon />,
   },
   {
     href: "/high-score",
     match: "^/high-score(/.*)?$",
-    title: "High Score",
+    title: msg("High Score"),
     icon: <TrophyIcon />,
   },
 ] as const;

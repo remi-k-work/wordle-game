@@ -1,6 +1,8 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { msg, useGT, useMessages } from "gt-next";
+import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/ui/speed-multiplier-category";
 import { timeToSolveDistributionAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
 
@@ -15,17 +17,16 @@ interface TimeToSolveDistributionChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-// A quick helper to map our boundaries to game speed labels
-const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) => {
-  if (maxSeconds === 30) return emojiOnly ? "🚀" : "🚀 Speed Demon";
-  if (maxSeconds === 60) return emojiOnly ? "⚡" : "⚡ Quick Thinker";
-  if (maxSeconds === 180) return emojiOnly ? "⏱️" : "⏱️ Average Pacer";
-  if (maxSeconds === Infinity) return emojiOnly ? "🐌" : "🐌 Slow Learner";
-  return emojiOnly ? "?" : "Unknown";
-};
-
 export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveDistributionChartProps) {
   const timeToSolveDistribution = useAtomValue(timeToSolveDistributionAtom(solutionsLanguage));
+  const gt = useGT();
+  const messages = useMessages();
+  const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) => {
+    const speedMultiplier = maxSecondsToSpeedMultiplier(maxSeconds);
+    if (speedMultiplier === undefined) return emojiOnly ? "?" : messages(msg("Unknown"));
+
+    return emojiOnly ? speedMultiplierToCategoryEmoji(speedMultiplier) : messages(speedMultiplierToCategoryMessage(speedMultiplier));
+  };
 
   return AsyncResult.builder(timeToSolveDistribution)
     .onInitialOrWaiting(() => <TimeToSolveDistributionChartSkeleton />)
@@ -33,19 +34,19 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
     .onSuccess((timeToSolveDistribution) =>
       timeToSolveDistribution.length === 0 ? (
         <>
-          <SectionHeader title="Time taken to solve a word" />
-          <InfoLine message="No speed data tracked yet!" />
+          <SectionHeader title={gt("Time taken to solve a word")} />
+          <InfoLine message={gt("No speed data tracked yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="Time taken to solve a word" />
+          <SectionHeader title={gt("Time taken to solve a word")} />
           <ComposedChart data={timeToSolveDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
             <CartesianGrid stroke="var(--color-surface-3)" />
 
             <XAxis dataKey="maxSeconds" tickFormatter={(tick) => formatSpeedCategory(tick, true)} stroke="var(--color-text-1)" fontSize={32} />
 
             <Tooltip
-              formatter={(value, name) => [`${value}%`, name === "personalPct" ? "Your Speed" : "Global Average"]}
+              formatter={(value, name) => [`${value}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")]}
               labelFormatter={(label) => formatSpeedCategory(label as number | null)}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
@@ -53,7 +54,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personalPct" ? "Your Speed" : "Global Average")}
+              formatter={(value) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average"))}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -67,9 +68,11 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
 }
 
 export function TimeToSolveDistributionChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="Time taken to solve a word" />
+      <SectionHeaderSkeleton title={gt("Time taken to solve a word")} />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

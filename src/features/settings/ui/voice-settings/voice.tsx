@@ -6,6 +6,7 @@ import { useSpeechVoices } from "@/hooks";
 
 // components
 import { Select } from "@base-ui/react";
+import { T, useGT } from "gt-next";
 
 // assets
 import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
@@ -14,6 +15,7 @@ export function Voice() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const voiceVoice = useAtomValue(gameSettingsVoiceVoiceAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
+  const gt = useGT();
 
   const targetLangPrefix = solutionsLanguage === "En" ? "en" : "pl";
 
@@ -21,7 +23,7 @@ export function Voice() {
   const voices = useSpeechVoices()
     .filter((voice) => voice.lang.toLowerCase().startsWith(targetLangPrefix))
     .map(({ default: isDefault, name, lang }) => ({
-      label: `${name} (${lang}) ${isDefault ? " — DEFAULT" : ""}`,
+      label: `${name} (${lang}) ${isDefault ? ` — ${gt("Default")}` : ""}`,
       value: name,
     }));
 
@@ -33,7 +35,7 @@ export function Voice() {
         value={voiceVoice}
         onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}
       >
-        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Voice</Select.Label>
+        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Voice</T></Select.Label>
         <Select.Trigger
           className={cn(
             "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
@@ -44,7 +46,7 @@ export function Voice() {
             "hover:not-data-disabled:bg-accent data-popup-open:bg-accent"
           )}
         >
-          <Select.Value className="data-placeholder:text-text-2/50" placeholder="Select Voice" />
+          <Select.Value className="data-placeholder:text-text-2/50" placeholder={gt("Select voice")} />
           <Select.Icon>
             <ChevronUpDownIcon className="size-11" />
           </Select.Icon>
@@ -104,10 +106,12 @@ export function Voice() {
 }
 
 export function VoiceSkeleton() {
+  const gt = useGT();
+
   return (
     <section>
       <Select.Root name="voiceVoice" items={[]} value={null} onValueChange={() => {}} disabled>
-        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Voice</Select.Label>
+        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Voice</T></Select.Label>
         <Select.Trigger
           className={cn(
             "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
@@ -118,7 +122,7 @@ export function VoiceSkeleton() {
             "hover:not-data-disabled:bg-accent data-popup-open:bg-accent"
           )}
         >
-          <Select.Value className="data-placeholder:text-text-2/50" placeholder="Select Voice" />
+          <Select.Value className="data-placeholder:text-text-2/50" placeholder={gt("Select voice")} />
           <Select.Icon>
             <ChevronUpDownIcon className="size-11" />
           </Select.Icon>

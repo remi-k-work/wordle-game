@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { motion } from "motion/react";
+import { T, useLocale } from "gt-next";
 import { wordChallengePotentialScoreAtom } from "@/features/game/state";
 import { potentialScoreAsPercentage } from "@/features/game/domain";
 import { useAnimatedCounter } from "@/hooks";
@@ -13,7 +14,8 @@ import { motionTokens, springs } from "@/lib/motion-tokens";
 
 export function PotentialScore() {
   const potentialScore = useAtomValue(wordChallengePotentialScoreAtom);
-  const potentialScoreRef = useAnimatedCounter(potentialScore);
+  const locale = useLocale();
+  const potentialScoreRef = useAnimatedCounter(potentialScore, (value) => Math.round(value).toLocaleString(locale));
 
   return (
     <motion.section
@@ -22,9 +24,11 @@ export function PotentialScore() {
       transition={springs.gentle}
       className="grid flex-1 place-items-center rounded-md border border-accent bg-surface-2 px-2 py-1"
     >
-      <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">Potential</h2>
+      <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">
+        <T>Potential</T>
+      </h2>
       <span ref={potentialScoreRef} className="font-semibold tabular-nums sm:text-lg">
-        {potentialScore.toLocaleString()}
+        {potentialScore.toLocaleString(locale)}
       </span>
       <Progress.Root className="grid w-full" value={potentialScoreAsPercentage(potentialScore)}>
         <Progress.Track className="h-2 overflow-hidden rounded-sm border bg-linear-to-r from-destructive via-tile-yellow to-tile-green">
@@ -38,7 +42,9 @@ export function PotentialScore() {
 export function PotentialScoreSkeleton() {
   return (
     <section className="grid flex-1 place-items-center rounded-md border border-accent bg-surface-2 px-2 py-1">
-      <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">Potential</h2>
+      <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">
+        <T>Potential</T>
+      </h2>
       <span className="font-semibold tabular-nums sm:text-lg">&nbsp;</span>
       <Progress.Root className="grid w-full" value={null}>
         <Progress.Track className="h-2 overflow-hidden rounded-sm border bg-linear-to-r from-destructive via-tile-yellow to-tile-green">

@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { useGT } from "gt-next";
 import { failedWordsFrequencyAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 
@@ -21,6 +22,7 @@ const BAR_HEIGHT_PX = 48;
 
 export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFrequencyChartProps) {
   const failedWordsFrequency = useAtomValue(failedWordsFrequencyAtom(solutionsLanguage));
+  const gt = useGT();
 
   return AsyncResult.builder(failedWordsFrequency)
     .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)
@@ -28,12 +30,12 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
     .onSuccess((failedWordsFrequency) =>
       failedWordsFrequency.length === 0 ? (
         <>
-          <SectionHeader title="Words that players failed to guess" />
-          <InfoLine message="No frequency data tracked yet!" />
+          <SectionHeader title={gt("Words that players failed to guess")} />
+          <InfoLine message={gt("No frequency data tracked yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="Words that players failed to guess" />
+          <SectionHeader title={gt("Words that players failed to guess")} />
           <BarChart
             data={failedWordsFrequency}
             responsive
@@ -47,7 +49,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
             <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
             <Tooltip
-              formatter={(value, name) => [`${value}`, name === "personal" ? "Your Misses" : "Global Misses"]}
+              formatter={(value, name) => [`${value}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")]}
               labelFormatter={(label) => `${label}`}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
@@ -55,7 +57,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personal" ? "Your Misses" : "Global Misses")}
+              formatter={(value) => (value === "personal" ? gt("Your Misses") : gt("Global Misses"))}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -69,9 +71,11 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
 }
 
 export function FailedWordsFrequencyChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="Words that players failed to guess" />
+      <SectionHeaderSkeleton title={gt("Words that players failed to guess")} />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

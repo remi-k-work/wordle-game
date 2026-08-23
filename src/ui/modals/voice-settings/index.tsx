@@ -5,12 +5,14 @@ import { modalMachineAtom } from "@/state";
 // components
 import { Modal } from "@/ui/modal";
 import { Content } from "./content";
+import { useGT } from "gt-next";
 
 export function VoiceSettingsModal() {
   const modalMachineSnapshot = useAtomValue(modalMachineAtom);
+  const gt = useGT();
 
   return (
-    <Modal isOpen={modalMachineSnapshot.matches("voice-settings")} title="Voice Settings">
+    <Modal isOpen={modalMachineSnapshot.matches("voice-settings")} title={gt("Voice Settings")}>
       <Content />
     </Modal>
   );

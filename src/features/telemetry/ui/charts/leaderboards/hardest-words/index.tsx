@@ -2,6 +2,7 @@
 import { Duration } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { useGT } from "gt-next";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 import { formatDuration } from "@/lib/formatters";
@@ -23,6 +24,7 @@ const BAR_HEIGHT_PX = 48;
 
 export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWordsLeaderboardChartProps) {
   const hardestWordsLeaderboard = useAtomValue(hardestWordsLeaderboardAtom(solutionsLanguage));
+  const gt = useGT();
 
   return AsyncResult.builder(hardestWordsLeaderboard)
     .onInitialOrWaiting(() => <HardestWordsLeaderboardChartSkeleton />)
@@ -30,12 +32,12 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
     .onSuccess((hardestWordsLeaderboard) =>
       hardestWordsLeaderboard.length === 0 ? (
         <>
-          <SectionHeader title="Hardest words by average solve time" />
-          <InfoLine message="No leaderboard data tracked yet!" />
+          <SectionHeader title={gt("Hardest words by average solve time")} />
+          <InfoLine message={gt("No leaderboard data tracked yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="Hardest words by average solve time" />
+          <SectionHeader title={gt("Hardest words by average solve time")} />
           <BarChart
             data={hardestWordsLeaderboard}
             responsive
@@ -51,7 +53,7 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
             <Tooltip
               formatter={(value, name) => {
                 const seconds = Number(value);
-                return [formatDuration(Duration.seconds(seconds)), name === "personalAvgTimeSeconds" ? "Your Average Time" : "Global Average Time"];
+                return [formatDuration(Duration.seconds(seconds)), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")];
               }}
               labelFormatter={(label, payload) => {
                 const row = payload?.[0]?.payload;
@@ -59,9 +61,9 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
                   <>
                     {label}
                     <br />
-                    <span className="font-mono font-normal">Global Average Guesses : {row?.globalAvgGuesses?.toFixed(1)}</span>
+                    <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses?.toFixed(1) ?? "—" })}</span>
                     <br />
-                    <span className="font-mono font-normal">Your Average Guesses : {row?.personalAvgGuesses?.toFixed(1)}</span>
+                    <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses?.toFixed(1) ?? "—" })}</span>
                   </>
                 );
               }}
@@ -71,7 +73,7 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personalAvgTimeSeconds" ? "Your Average Time" : "Global Average Time")}
+              formatter={(value) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time"))}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -85,9 +87,11 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
 }
 
 export function HardestWordsLeaderboardChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="Hardest words by average solve time" />
+      <SectionHeaderSkeleton title={gt("Hardest words by average solve time")} />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

@@ -4,6 +4,7 @@ import { modalMachineAtom } from "@/state";
 
 // components
 import { Button } from "@base-ui/react";
+import { T } from "gt-next";
 import { VoiceSettings } from "@/features/settings/ui/voice-settings";
 
 // assets
@@ -18,7 +19,7 @@ export function Content() {
 
       <Button tabIndex={-1} className="button mx-auto mt-8 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
         <XCircleIcon className="size-11" />
-        Close
+        <T>Close</T>
       </Button>
     </article>
   );

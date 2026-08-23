@@ -5,6 +5,7 @@ import { modalMachineAtom } from "@/state";
 
 // components
 import { Button } from "@base-ui/react";
+import { T, useGT } from "gt-next";
 import { Modal } from "@/ui/modal";
 import { YouWin } from "./you-win";
 import { Nevermind } from "./nevermind";
@@ -19,16 +20,17 @@ export function WinOrLoseModal() {
 
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
   const hasWon = wordChallengeMachineSnapshot.matches("wordWon");
+  const gt = useGT();
 
   return (
-    <Modal isOpen={modalMachineSnapshot.matches("status")} title={hasWon ? "You Win" : "Run Over"}>
+    <Modal isOpen={modalMachineSnapshot.matches("status")} title={hasWon ? gt("You Win") : gt("Run Over")}>
       {hasWon ? <YouWin /> : <Nevermind />}
 
       <section className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
         <GameFlowButton keepText tabIndex={-1} />
         <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
           <XCircleIcon className="size-11" />
-          Maybe Later
+          <T>Maybe Later</T>
         </Button>
       </section>
     </Modal>

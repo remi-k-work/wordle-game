@@ -5,6 +5,7 @@ import { alertMachineAtom } from "@/state";
 
 // components
 import { AlertDialog } from "@base-ui/react";
+import { T } from "gt-next";
 
 // assets
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
@@ -48,11 +49,11 @@ export function Alert({ isOpen = false, title, onOkayed, children }: AlertProps)
             <section className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
               <AlertDialog.Close className="button" onClick={() => alertMachineEvent({ type: "okayed", onOkayed })}>
                 <CheckCircleIcon className="size-11" />
-                OK
+                <T>OK</T>
               </AlertDialog.Close>
               <AlertDialog.Close className="button bg-secondary" onClick={() => alertMachineEvent({ type: "cancelled" })}>
                 <XCircleIcon className="size-11" />
-                Cancel
+                <T>Cancel</T>
               </AlertDialog.Close>
             </section>
           </AlertDialog.Popup>

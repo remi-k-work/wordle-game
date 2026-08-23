@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 // services, features, and other libraries
 import useEmblaCarousel from "embla-carousel-react";
+import { msg } from "gt-next";
 
 // components
 import { Slide } from "./slide";
@@ -37,111 +38,120 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
     <article className="grid grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-4 bg-surface-3 [grid-template-areas:'viewport_viewport''prevnext_dots']">
       <section ref={emblaRef} className="overflow-hidden select-none [grid-area:viewport]">
         <div className="-ms-4 flex touch-pan-y touch-pinch-zoom">
-          <Slide index={0} selectedIndex={selectedIndex} skeleton={<AnyCounterChartSkeleton title="Games played" personalHeader="Your Games" />}>
-            <AnyCounterChart counterName="gamesPlayed" solutionsLanguage={solutionsLanguage} title="Games played" personalHeader="Your Games" />
+          <Slide index={0} selectedIndex={selectedIndex} skeleton={<AnyCounterChartSkeleton title={msg("Games played")} personalHeader={msg("Your Games")} />}>
+            <AnyCounterChart counterName="gamesPlayed" solutionsLanguage={solutionsLanguage} title={msg("Games played")} personalHeader={msg("Your Games")} />
           </Slide>
-          <Slide index={1} selectedIndex={selectedIndex} skeleton={<AnyCounterChartSkeleton title="Arcade runs started" personalHeader="Your Runs" />}>
-            <AnyCounterChart counterName="runsStarted" solutionsLanguage={solutionsLanguage} title="Arcade runs started" personalHeader="Your Runs" />
+          <Slide
+            index={1}
+            selectedIndex={selectedIndex}
+            skeleton={<AnyCounterChartSkeleton title={msg("Arcade runs started")} personalHeader={msg("Your Runs")} />}
+          >
+            <AnyCounterChart
+              counterName="runsStarted"
+              solutionsLanguage={solutionsLanguage}
+              title={msg("Arcade runs started")}
+              personalHeader={msg("Your Runs")}
+            />
           </Slide>
           <Slide
             index={2}
             selectedIndex={selectedIndex}
-            skeleton={<AnyCounterChartSkeleton title="Games solved on the first guess" personalHeader="Your Perfect Games" />}
+            skeleton={<AnyCounterChartSkeleton title={msg("Games solved on the first guess")} personalHeader={msg("Your Perfect Games")} />}
           >
             <AnyCounterChart
               counterName="perfectGames"
               solutionsLanguage={solutionsLanguage}
-              title="Games solved on the first guess"
-              personalHeader="Your Perfect Games"
+              title={msg("Games solved on the first guess")}
+              personalHeader={msg("Your Perfect Games")}
             />
           </Slide>
           <Slide
             index={3}
             selectedIndex={selectedIndex}
-            skeleton={<AnyCounterChartSkeleton title="Invalid guesses (not in dictionary)" personalHeader="Your Invalid Guesses" />}
+            skeleton={<AnyCounterChartSkeleton title={msg("Invalid guesses (not in dictionary)")} personalHeader={msg("Your Invalid Guesses")} />}
           >
             <AnyCounterChart
               counterName="invalidGuesses"
               solutionsLanguage={solutionsLanguage}
-              title="Invalid guesses (not in dictionary)"
-              personalHeader="Your Invalid Guesses"
+              title={msg("Invalid guesses (not in dictionary)")}
+              personalHeader={msg("Your Invalid Guesses")}
             />
           </Slide>
           <Slide
             index={4}
             selectedIndex={selectedIndex}
-            skeleton={<AnyCounterChartSkeleton title="Valid guesses submitted" personalHeader="Your Valid Guesses" />}
+            skeleton={<AnyCounterChartSkeleton title={msg("Valid guesses submitted")} personalHeader={msg("Your Valid Guesses")} />}
           >
             <AnyCounterChart
               counterName="validGuesses"
               solutionsLanguage={solutionsLanguage}
-              title="Valid guesses submitted"
-              personalHeader="Your Valid Guesses"
+              title={msg("Valid guesses submitted")}
+              personalHeader={msg("Your Valid Guesses")}
             />
           </Slide>
           <Slide
             index={5}
             selectedIndex={selectedIndex}
-            skeleton={<AnyAvgStatChartSkeleton title="Average guesses to win" personalHeader="Your Average Guesses" />}
+            skeleton={<AnyAvgStatChartSkeleton title={msg("Average guesses to win")} personalHeader={msg("Your Average Guesses")} />}
           >
             <AnyAvgStatChart
               statColumn="guessedTurn"
               statTable="runWordEvent"
               solutionsLanguage={solutionsLanguage}
-              title="Average guesses to win"
-              personalHeader="Your Average Guesses"
+              title={msg("Average guesses to win")}
+              personalHeader={msg("Your Average Guesses")}
             />
           </Slide>
           <Slide
             index={6}
             selectedIndex={selectedIndex}
-            skeleton={<AnyAvgStatChartSkeleton title="Average time to solve a word" personalHeader="Your Average Time" />}
+            skeleton={<AnyAvgStatChartSkeleton title={msg("Average time to solve a word")} personalHeader={msg("Your Average Time")} />}
           >
             <AnyAvgStatChart
               statColumn="timeSeconds"
               statTable="runWordEvent"
               solutionsLanguage={solutionsLanguage}
-              title="Average time to solve a word"
-              personalHeader="Your Average Time"
+              title={msg("Average time to solve a word")}
+              personalHeader={msg("Your Average Time")}
             />
           </Slide>
           <Slide
             index={7}
             selectedIndex={selectedIndex}
-            skeleton={<AnyAvgStatChartSkeleton title="Average score per arcade run" personalHeader="Your Average Score" />}
+            skeleton={<AnyAvgStatChartSkeleton title={msg("Average score per arcade run")} personalHeader={msg("Your Average Score")} />}
           >
             <AnyAvgStatChart
               statColumn="finalScore"
               statTable="arcadeRunSummary"
               solutionsLanguage={solutionsLanguage}
-              title="Average score per arcade run"
-              personalHeader="Your Average Score"
+              title={msg("Average score per arcade run")}
+              personalHeader={msg("Your Average Score")}
             />
           </Slide>
           <Slide
             index={8}
             selectedIndex={selectedIndex}
-            skeleton={<AnyAvgStatChartSkeleton title="Average streak per arcade run" personalHeader="Your Average Streak" />}
+            skeleton={<AnyAvgStatChartSkeleton title={msg("Average streak per arcade run")} personalHeader={msg("Your Average Streak")} />}
           >
             <AnyAvgStatChart
               statColumn="finalStreak"
               statTable="arcadeRunSummary"
               solutionsLanguage={solutionsLanguage}
-              title="Average streak per arcade run"
-              personalHeader="Your Average Streak"
+              title={msg("Average streak per arcade run")}
+              personalHeader={msg("Your Average Streak")}
             />
           </Slide>
           <Slide
             index={9}
             selectedIndex={selectedIndex}
-            skeleton={<AnyAvgStatChartSkeleton title="Average run duration" personalHeader="Your Average Duration" />}
+            skeleton={<AnyAvgStatChartSkeleton title={msg("Average run duration")} personalHeader={msg("Your Average Duration")} />}
           >
             <AnyAvgStatChart
               statColumn="durationSeconds"
               statTable="arcadeRunSummary"
               solutionsLanguage={solutionsLanguage}
-              title="Average run duration"
-              personalHeader="Your Average Duration"
+              title={msg("Average run duration")}
+              personalHeader={msg("Your Average Duration")}
             />
           </Slide>
         </div>
@@ -165,34 +175,34 @@ export function TotalsSliderSkeleton() {
       <section className="overflow-hidden select-none [grid-area:viewport]">
         <div className="-ms-4 flex touch-pan-y touch-pinch-zoom">
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyCounterChartSkeleton title="Games played" personalHeader="Your Games" />
+            <AnyCounterChartSkeleton title={msg("Games played")} personalHeader={msg("Your Games")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyCounterChartSkeleton title="Arcade runs started" personalHeader="Your Runs" />
+            <AnyCounterChartSkeleton title={msg("Arcade runs started")} personalHeader={msg("Your Runs")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyCounterChartSkeleton title="Games solved on the first guess" personalHeader="Your Perfect Games" />
+            <AnyCounterChartSkeleton title={msg("Games solved on the first guess")} personalHeader={msg("Your Perfect Games")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyCounterChartSkeleton title="Invalid guesses (not in dictionary)" personalHeader="Your Invalid Guesses" />
+            <AnyCounterChartSkeleton title={msg("Invalid guesses (not in dictionary)")} personalHeader={msg("Your Invalid Guesses")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyCounterChartSkeleton title="Valid guesses submitted" personalHeader="Your Valid Guesses" />
+            <AnyCounterChartSkeleton title={msg("Valid guesses submitted")} personalHeader={msg("Your Valid Guesses")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyAvgStatChartSkeleton title="Average guesses to win" personalHeader="Your Average Guesses" />
+            <AnyAvgStatChartSkeleton title={msg("Average guesses to win")} personalHeader={msg("Your Average Guesses")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyAvgStatChartSkeleton title="Average time to solve a word" personalHeader="Your Average Time" />
+            <AnyAvgStatChartSkeleton title={msg("Average time to solve a word")} personalHeader={msg("Your Average Time")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyAvgStatChartSkeleton title="Average score per arcade run" personalHeader="Your Average Score" />
+            <AnyAvgStatChartSkeleton title={msg("Average score per arcade run")} personalHeader={msg("Your Average Score")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyAvgStatChartSkeleton title="Average streak per arcade run" personalHeader="Your Average Streak" />
+            <AnyAvgStatChartSkeleton title={msg("Average streak per arcade run")} personalHeader={msg("Your Average Streak")} />
           </div>
           <div className="min-w-0 shrink-0 grow-0 basis-full ps-4 [&>h2]:m-0 [&>h2]:mb-6 [&>h2]:max-w-none">
-            <AnyAvgStatChartSkeleton title="Average run duration" personalHeader="Your Average Duration" />
+            <AnyAvgStatChartSkeleton title={msg("Average run duration")} personalHeader={msg("Your Average Duration")} />
           </div>
         </div>
       </section>

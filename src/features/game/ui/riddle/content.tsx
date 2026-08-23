@@ -6,6 +6,7 @@ import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
 
 // components
 import { Button } from "@base-ui/react";
+import { T } from "gt-next";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 
 // assets
@@ -29,13 +30,19 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
   return (
     <>
       <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", (isAwaiting || isLoading) && "animate-pulse")}>
-        {isAwaiting ? "Waiting for the secret word..." : isLoading ? "Thinking..." : (sanitizedRiddle ?? "Riddle unavailable. You are on your own!")}
+        {isAwaiting ? (
+          <T>Waiting for the secret word...</T>
+        ) : isLoading ? (
+          <T>Thinking...</T>
+        ) : (
+          (sanitizedRiddle ?? <T>Riddle unavailable. You are on your own!</T>)
+        )}
       </p>
 
       {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
       <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedRiddle)}>
         <SpeakerWaveIcon className="size-11" />
-        {mode === "voiceTest" ? "Test Voice" : "Speak Riddle"}
+        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
       </Button>
     </>
   );
@@ -44,11 +51,13 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
 export function ContentSkeleton({ mode }: ContentProps) {
   return (
     <>
-      <p className="mx-auto animate-pulse text-center text-lg leading-relaxed sm:text-xl lg:text-2xl">Thinking...</p>
+      <p className="mx-auto animate-pulse text-center text-lg leading-relaxed sm:text-xl lg:text-2xl">
+        <T>Thinking...</T>
+      </p>
 
       <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled>
         <SpeakerWaveIcon className="size-11" />
-        {mode === "voiceTest" ? "Test Voice" : "Speak Riddle"}
+        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
       </Button>
     </>
   );

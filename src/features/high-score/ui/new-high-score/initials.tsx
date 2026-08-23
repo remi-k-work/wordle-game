@@ -7,6 +7,7 @@ import { highScoreMachineAtom } from "@/features/high-score/state";
 
 // components
 import { Button, Input } from "@base-ui/react";
+import { T } from "gt-next";
 
 // assets
 import { SpinnerIcon } from "@/assets/icons";
@@ -47,7 +48,7 @@ export function Initials() {
         onClick={() => highScoreMachineEvent({ type: "initialsSubmitted", playerName: sanitizedInitials })}
       >
         {isSubmitting ? <SpinnerIcon className="size-11" /> : <PaperAirplaneIcon className="size-11" />}
-        Submit
+        <T>Submit</T>
       </Button>
     </form>
   );

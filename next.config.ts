@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withGTConfig } from "gt-next/config";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
@@ -14,4 +15,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withGTConfig(nextConfig, {
+  runtimeUrl: null,
+  cacheUrl: null,
+  loadTranslationsPath: "./src/loadTranslations.ts",
+});

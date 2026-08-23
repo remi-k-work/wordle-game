@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { Duration } from "effect";
+import { T, useLocale, useMessages } from "gt-next";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { anyAvgStatAtom } from "@/features/telemetry/state";
@@ -24,7 +25,9 @@ interface AnyAvgStatChartProps {
 export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, title, personalHeader }: AnyAvgStatChartProps) {
   const anyAvgStat = useAtomValue(anyAvgStatAtom({ statColumn, statTable, solutionsLanguage }));
   const isDuration = statColumn === "timeSeconds" || statColumn === "durationSeconds";
-  const formatStatValue = (value: number) => (isDuration ? formatDuration(Duration.seconds(value)) : value.toLocaleString());
+  const locale = useLocale();
+  const messages = useMessages();
+  const formatStatValue = (value: number) => (isDuration ? formatDuration(Duration.seconds(value)) : value.toLocaleString(locale));
 
   return AsyncResult.builder(anyAvgStat)
     .onInitialOrWaiting(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
@@ -37,12 +40,12 @@ export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, titl
       // Effect if a row were ever missing — chart-rendering falls back to the
       // onFailure skeleton in that (impossible) case.
       <>
-        <SectionHeader title={title} />
+        <SectionHeader title={messages(title)} />
         <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
-          <StatCard Tag="header" variant="primary" title={personalHeader}>
+          <StatCard Tag="header" variant="primary" title={messages(personalHeader)}>
             {formatStatValue(anyAvgStat.personal)}
           </StatCard>
-          <StatCard Tag="footer" variant="secondary" title="Global Average">
+          <StatCard Tag="footer" variant="secondary" title={<T>Global Average</T>}>
             {formatStatValue(anyAvgStat.global)}
           </StatCard>
         </article>
@@ -52,14 +55,16 @@ export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, titl
 }
 
 export function AnyAvgStatChartSkeleton({ title, personalHeader }: Pick<AnyAvgStatChartProps, "title" | "personalHeader">) {
+  const messages = useMessages();
+
   return (
     <>
-      <SectionHeaderSkeleton title={title} />
+      <SectionHeaderSkeleton title={messages(title)} />
       <article className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:grid-rows-[1fr_1fr] sm:gap-6">
-        <StatCard Tag="header" variant="primary" title={personalHeader}>
+        <StatCard Tag="header" variant="primary" title={messages(personalHeader)}>
           <StatCardSkeleton />
         </StatCard>
-        <StatCard Tag="footer" variant="secondary" title="Global Average">
+        <StatCard Tag="footer" variant="secondary" title={<T>Global Average</T>}>
           <StatCardSkeleton />
         </StatCard>
       </article>

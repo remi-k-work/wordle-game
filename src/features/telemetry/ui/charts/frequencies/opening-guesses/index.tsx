@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
+import { useGT } from "gt-next";
 import { openingGuessesFrequencyAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
 
@@ -21,6 +22,7 @@ const BAR_HEIGHT_PX = 48;
 
 export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequencyChartProps) {
   const openingGuessesFrequency = useAtomValue(openingGuessesFrequencyAtom(solutionsLanguage));
+  const gt = useGT();
 
   return AsyncResult.builder(openingGuessesFrequency)
     .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
@@ -28,12 +30,12 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
     .onSuccess((openingGuessesFrequency) =>
       openingGuessesFrequency.length === 0 ? (
         <>
-          <SectionHeader title="First word guessed in a game" />
-          <InfoLine message="No frequency data tracked yet!" />
+          <SectionHeader title={gt("First word guessed in a game")} />
+          <InfoLine message={gt("No frequency data tracked yet!")} />
         </>
       ) : (
         <>
-          <SectionHeader title="First word guessed in a game" />
+          <SectionHeader title={gt("First word guessed in a game")} />
           <BarChart
             data={openingGuessesFrequency}
             responsive
@@ -47,7 +49,7 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
             <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
             <Tooltip
-              formatter={(value, name) => [`${value}`, name === "personal" ? "Your Guesses" : "Global Guesses"]}
+              formatter={(value, name) => [`${value}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")]}
               labelFormatter={(label) => `${label}`}
               cursor={{ fill: "var(--color-surface-2)" }}
               contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
@@ -55,7 +57,7 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
               itemStyle={{ color: "var(--color-text-2)" }}
             />
             <Legend
-              formatter={(value) => (value === "personal" ? "Your Guesses" : "Global Guesses")}
+              formatter={(value) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses"))}
               labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
             />
 
@@ -69,9 +71,11 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
 }
 
 export function OpeningGuessesFrequencyChartSkeleton() {
+  const gt = useGT();
+
   return (
     <>
-      <SectionHeaderSkeleton title="First word guessed in a game" />
+      <SectionHeaderSkeleton title={gt("First word guessed in a game")} />
       <div className="h-96 w-full lg:h-192" />
     </>
   );

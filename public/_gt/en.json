@@ -1,0 +1,328 @@
+{
+  "13b94927c36eb515": "Visit RemiForge Portfolio (opens in a new tab)",
+  "446efed3ef49208c": "RemiForge Portfolio",
+  "fbbcecb24848d298": "Built By",
+  "ff5e1681dc46514e": "Portfolio of Projects, Experiments & Contact",
+  "54c445b85760dea6": "Wordle, Unlocked. Welcome to Wordle Overdrive. Welcome to the Loop.",
+  "3622425bd27d8b6b": "The classic word game transformed into a continuous, high-stakes survival run. No daily limits. No safety nets. Decipher AI riddles and stack your streak. How long can you survive the wipeout risk?",
+  "6e1e7da50b5db595": "The Continuous Arcade Run (Accumulation vs. Wipeout)",
+  "592a26510b6218ac": "Bleeding Potential (Hunt Efficiently)",
+  "ad5ff1d28fd134c9": "Survival Tools (AI Riddles & Smart Keypad)",
+  "c81054b86b7f9357": "Wordle Overdrive",
+  "889194ed8d73357c": "Enter the Loop",
+  "7434f5923cd56e48": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "Forget guessing a single word and walking away. In ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": "Wordle Overdrive"
+      },
+      ", your points accumulate over a continuous stream of puzzles. Every victory Banks your hard-earned score into your ",
+      {
+        "t": "b",
+        "i": 3,
+        "c": "Total Run Score"
+      },
+      " and stacks your winning streak. The game loop maintains its fluidity—winning one word immediately launches you into the next challenge."
+    ]
+  },
+  "15943a363acc9ea4": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "But beware: the stakes have never been higher. A single failed word (failing to guess in 6 turns) triggers a total ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": "Wipeout"
+      },
+      ". Your active Run Score and Streak immediately reset to zero, leaving only your persistent ",
+      {
+        "t": "b",
+        "i": 3,
+        "c": "Best Run"
+      },
+      " high water mark as a ghost to chase."
+    ]
+  },
+  "807b2c7c3d2e6f66": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "In ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": "Wordle Overdrive"
+      },
+      ", finding the word is only half the battle. To survive the leaderboard, you must ",
+      {
+        "t": "b",
+        "i": 3,
+        "c": "Hunt Efficiently"
+      },
+      "."
+    ]
+  },
+  "e3713c0f506e908e": {
+    "t": "p",
+    "i": 1,
+    "c": "The scoring matrix has been completely overhauled to favor speed and precision. Every second you stall, your potential reward decays. Solve the riddle fast with minimal guesses, and your score skyrockets. Hesitate, and your points bleed away."
+  },
+  "01e8b417c679aba3": {
+    "t": "p",
+    "i": 1,
+    "c": "Try the simulator below to see exactly how your speed and precision dictate your final payout"
+  },
+  "e64341038eb68852": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "With an massive, uncapped vocabulary dictionary of over ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": "30,000"
+      },
+      " words, you are not left shooting entirely in the dark. At the start of every puzzle, an enigmatic AI master crafts a bespoke, one-sentence riddle giving you a thematic compass. This crucial context lets you make strategic, informed choices from your very first guess."
+    ]
+  },
+  "a14a430546eb6a6e": {
+    "t": "p",
+    "i": 1,
+    "c": "Combined with our dedicated Survival Keypad that dynamically vanishes incorrect grey letters as you play, you have all the tools you need to forge a legendary, high-scoring run. You can never waste a keystroke by accident again."
+  },
+  "857d90d7d423d952": "OK",
+  "d15d4ce9981708e9": "Cancel",
+  "2aca736e5e9af7c9": "High Score & Charts",
+  "60729b4d6f00d089": "The following section displays the top 10 scores, along with various informative game charts.",
+  "2ecf88ef9e8e4259": "Home",
+  "086afb1576e3f5d5": "Game",
+  "eb7014b1778db95f": "High Score",
+  "b2c68836166ddfd4": "Select website language",
+  "318cc27743114d65": "🚀 Speed Demon",
+  "7da555081047be27": "⚡ Quick Thinker",
+  "7f91a307baed5d6b": "⏱️ Average Pacer",
+  "46fd82928ca2ab07": "🐌 Slow Learner",
+  "a6fd277111c7cd66": "Unknown",
+  "5afb17be4f26d419": "Are you sure you want to give up?",
+  "8dc8c8525fa81d63": "Forfeit Run",
+  "711be1156ddc8f81": "Change theme",
+  "0c85bed543c47e31": "Light Mode",
+  "c31fcfd0d0f86a92": "Dark Mode",
+  "0cd798477a0df246": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "Welcome to ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": "Wordle Overdrive"
+      },
+      ", a daily word game where you have six tries to guess a five-letter word. The game is simple and addictive, but it can also be challenging."
+    ]
+  },
+  "a4e45153889cd6ad": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "The objective of ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": "Wordle Overdrive"
+      },
+      " is to guess the secret five-letter word in as few attempts as possible. Each guess is made by typing a five-letter word into the provided field. Upon entering each guess, the game will provide feedback on the correctness of the letters entered, indicating whether they are in the correct position or not. This feedback is provided through a color system:"
+    ]
+  },
+  "ca808accb3388572": "Indicates a correct letter in the correct position.",
+  "3e2d4db44dbdf772": "Indicates a correct letter in the incorrect position.",
+  "f532ea2acec57a39": "Indicates a letter that is not in the word.",
+  "f2c4527472c80e96": "*Tip: When using a PC, you can type your guesses right on the keyboard.",
+  "480646ceb98c7163": "Close",
+  "a952ce58214fcca1": "Help",
+  "6b0f4a0c7bc6e777": "Waiting for the override being requested...",
+  "ed4effb6b6da3e22": "Thinking...",
+  "1f10e0c169fecc92": "Override unavailable. You are on your own! Please try again later.",
+  "cd41a6cc29dc76ce": "Speak Override",
+  "f8fc30592e338956": "AI Override",
+  "9fc1042ae6191922": "Voice Settings",
+  "6a1d5fb21357ffad": "The secret word definition is unavailable.",
+  "c78f5e48443e1c30": "Speak Definition",
+  "6ce1e3addcff06d8": "You Win",
+  "2ee06193a2c7fa32": "Run Over",
+  "5621f9fcc1c11eab": "Maybe Later",
+  "58e664b476fbd606": "Better luck next time 😄",
+  "44d4c41e87b76d55": "Run Duration",
+  "3e83702694a286ac": "Run Score",
+  "8492e7098dece326": "Streak",
+  "4b65e5399dad717e": "Best Run Score",
+  "4f666ec8c851f44e": "Best Streak",
+  "0ae5819dd8f7a212": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "You found the solution in ",
+      {
+        "t": "b",
+        "i": 2,
+        "c": {
+          "i": 3,
+          "k": "_gt_value_3",
+          "v": "v"
+        }
+      },
+      " guesses 😄"
+    ]
+  },
+  "39720d22bfb9dd69": "Next Word",
+  "d9a0edd888e6f2f9": "Start New Run",
+  "a8ed3747134d6927": "Next Word",
+  "f0390a827424f510": "Start New Run",
+  "96c867f99f96f94e": "Forfeit Run",
+  "2a7216b1e497c21d": "Menu",
+  "7db9c1bc2f41e50e": "Voice Settings",
+  "2cce3e8fbef483b2": "High Score",
+  "437cb4b5ea2420b8": "Help",
+  "a9d1a52ef4747b78": "Potential",
+  "c2ef0d251b877f6f": "Waiting for the secret word...",
+  "b9110c09dd03f2c2": "Riddle unavailable. You are on your own!",
+  "c81d8f47b4b6cfb7": "Test Voice",
+  "00b98047b8b5b88f": "Speak Riddle",
+  "5cc4c378cd521532": "Riddle",
+  "4e87e902dffe3485": "Run",
+  "f2528cfbda87fe4b": "New High Score",
+  "d80851f21a14d4bf": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "You qualified for the Top 10.",
+      {
+        "t": "br",
+        "i": 2
+      },
+      "Enter your arcade initials:"
+    ]
+  },
+  "72e7894896456738": "Submit",
+  "2533fb5ddcbbb7ac": "Turn Guessed",
+  "8f531c658078b4a8": "Time Elapsed",
+  "51d74df80eb35e16": "Final Word Score",
+  "7714295437daf226": "Live Potential",
+  "1f44c07719663747": "Turn Guessed",
+  "50d60fc220f7baf7": "Base Points",
+  "1931944cdfb1275e": "Time Elapsed",
+  "8e99d2db224819e9": "Speed Multiplier",
+  "084624a23850a393": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "Final Word Score = Base Points (",
+      {
+        "t": "span",
+        "i": 2,
+        "c": {
+          "i": 3,
+          "k": "_gt_value_3",
+          "v": "v"
+        }
+      },
+      ") x Speed Multiplier (",
+      {
+        "t": "span",
+        "i": 4,
+        "c": {
+          "i": 5,
+          "k": "_gt_value_5",
+          "v": "v"
+        }
+      },
+      ")"
+    ]
+  },
+  "c718b9a07c5aa828": "No High Scores yet!",
+  "4614a422f1430cd7": "Name",
+  "526aaaa7a6595607": "Overdrive Hacks",
+  "ce41522f94f17449": "pts",
+  "cd5a76b62a222b90": "Sonar",
+  "67ffbaa538936c2e": "AI Override",
+  "07bdfb85bf6161fa": "Ready ↗",
+  "900280bdc9fc8bb0": "Switch game vocabulary language",
+  "2e823bfa41d08e84": "Game language",
+  "5d6be76645e9d062": "Pitch",
+  "22ec9124fb4d8ea5": "Rate",
+  "e40e6d4ec89b5365": "Default",
+  "2ca9244683f016d2": "Select voice",
+  "978d4257c3d14a12": "Voice",
+  "735b71b00e0b4413": "Volume",
+  "8a5fa71102195eb8": "Global Average",
+  "4ad638c7bbf14638": "Global Total",
+  "c7c20aff3fdd1717": "No completed runs yet!",
+  "a4ddd3aa54e8f4b9": "Ended By",
+  "580d5577c230efa7": "Failed on {word}",
+  "cd058c2ae38c67f9": "Forfeit",
+  "c875f6b62af253f6": "The best run trophy card",
+  "76f7eb7999c8d432": "Your Personal Best",
+  "f6fb6ba3659374b1": "Global Best",
+  "75a35b5d13ece559": "Switch chart vocabulary language",
+  "f610b37b6536a172": "Guesses to Win",
+  "d7f6ce757e01ae45": "Time to Solve",
+  "50044ced80b5cf8a": "First Words",
+  "31fcfebef8de4250": "Missed Words",
+  "8b970bae81c5b62b": "Run Deaths",
+  "39a228570957e11f": "Hardest Words",
+  "7c85c8523aee3460": "Games played",
+  "0a3c3d85ef1b2101": "Your Games",
+  "cfc3d48485f0b912": "Arcade runs started",
+  "cd73271c78911f13": "Your Runs",
+  "bb6d213d2aa6e6d2": "Games solved on the first guess",
+  "6d7bc4606d8c9d13": "Your Perfect Games",
+  "c0b162c9faa76601": "Invalid guesses (not in dictionary)",
+  "febbca9d439ffab0": "Your Invalid Guesses",
+  "d62cc79be64c9f9e": "Valid guesses submitted",
+  "0d5282d144a13f0a": "Your Valid Guesses",
+  "70eb3d889032e4f6": "Average guesses to win",
+  "7cd6f45feda9e231": "Your Average Guesses",
+  "302fad8f61d6729e": "Average time to solve a word",
+  "bcea8364ffa8cfc9": "Your Average Time",
+  "f3ef6b652ffa9311": "Average score per arcade run",
+  "f55b898d0bec833a": "Your Average Score",
+  "170d5e7334092f9f": "Average streak per arcade run",
+  "8c539ed08b411c2b": "Your Average Streak",
+  "888e11b99cd76f45": "Average run duration",
+  "f581b017085e7e14": "Your Average Duration",
+  "796595bb85177903": "Streak before a loss",
+  "1a80aa5780aeb07b": "No streak data tracked yet!",
+  "ff29e838cadf9be1": "Your Streak",
+  "2bba8993ac06819b": "Global Average",
+  "a8e88c38383ea2ee": "Guesses needed to win a game",
+  "47c5a5a1c2cef01e": "No Guesses yet!",
+  "8580e384365d6b46": "Turn {turn}",
+  "cc7075db27b85e4f": "Your Guesses",
+  "03fb3e4823ed2df7": "Turn: {turn}",
+  "4939b897b1396aec": "Time taken to solve a word",
+  "a717b476241f194f": "No speed data tracked yet!",
+  "7f1fe22021a422f3": "Your Speed",
+  "ef1b82cc5e4da1a2": "Words that players failed to guess",
+  "b5df7dab604e30cd": "No frequency data tracked yet!",
+  "9461e4ef65d030a0": "Your Misses",
+  "ef648cceee03fc70": "Global Misses",
+  "a848c0585e2526bc": "First word guessed in a game",
+  "de05d01f21e2187f": "Global Guesses",
+  "7f059461a3a5b888": "Reasons why an arcade run ended",
+  "d52a4288500decba": "{count} times",
+  "c465b9b7219f11d7": "Your Runs (Inner)",
+  "1ad0e62aa010f4e6": "Global Base (Outer)",
+  "30cdb4feea27e65c": "Hardest words by average solve time",
+  "cc7944afe8ed2c16": "No leaderboard data tracked yet!",
+  "51b0e64ebbd47ef9": "Global Average Time",
+  "4d61c3a115fb1b77": "Global Average Guesses: {count}",
+  "f727a3fd9d8f53fc": "Your Average Guesses: {count}",
+  "58512b24b2876207": "Go to chart {index}",
+  "7ed81fa910e1af90": "Next chart",
+  "f2167577e18d2846": "Previous chart"
+}

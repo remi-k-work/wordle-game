@@ -7,6 +7,7 @@ import { wordChallengeTheSecretWordAtom } from "@/features/game/state";
 import { Definition } from "./definition";
 import { RunScore } from "./run-score";
 import { NewHighScore } from "@/features/high-score/ui/new-high-score";
+import { T } from "gt-next";
 
 export function Nevermind() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
@@ -14,7 +15,9 @@ export function Nevermind() {
 
   return (
     <article className="mx-auto max-w-prose space-y-4">
-      <p>Better luck next time 😄</p>
+      <p>
+        <T>Better luck next time 😄</T>
+      </p>
 
       <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord.value}</h2>
       <Definition />

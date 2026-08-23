@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 interface StatCardProps {
   Tag?: "header" | "footer" | "section" | "div" | "article";
   variant: "primary" | "secondary";
-  title: string;
+  title: ReactNode;
   children: ReactNode;
 }
 

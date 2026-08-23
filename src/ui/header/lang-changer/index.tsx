@@ -1,34 +1,31 @@
 "use client";
 
 // services, features, and other libraries
-import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
-import { useGT } from "gt-next";
+import { useGT, useLocaleSelector } from "gt-next";
 
 // components
 import { Button } from "@base-ui/react";
 
 // assets
-import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // constants
 import { springs } from "@/lib/motion-tokens";
 
-const MotionMoonIcon = motion.create(MoonIcon);
-const MotionSunIcon = motion.create(SunIcon);
+const MotionPlFlagIcon = motion.create(PlFlagIcon);
+const MotionUsFlagIcon = motion.create(UsFlagIcon);
 
-export default function ThemeChanger() {
-  // Determine whether the current theme is dark or light
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
+export function LangChanger() {
   const gt = useGT();
+  const { locale, setLocale } = useLocaleSelector();
 
   return (
-    <Button className="button p-1" title={isDarkMode ? gt("Light Mode") : gt("Dark Mode")} onClick={() => setTheme(isDarkMode ? "light" : "dark")}>
+    <Button className="button p-1" title={gt("Select website language")} onClick={() => setLocale(locale === "en" ? "pl" : "en")}>
       <AnimatePresence mode="wait" initial={false}>
-        {isDarkMode ? (
-          <MotionSunIcon
-            key="light"
+        {locale === "en" ? (
+          <MotionUsFlagIcon
+            key="en"
             className="size-11"
             initial={{ opacity: 0, rotate: -90 }}
             animate={{ opacity: 1, rotate: 0 }}
@@ -36,8 +33,8 @@ export default function ThemeChanger() {
             transition={springs.snappy}
           />
         ) : (
-          <MotionMoonIcon
-            key="dark"
+          <MotionPlFlagIcon
+            key="pl"
             className="size-11"
             initial={{ opacity: 0, rotate: -90 }}
             animate={{ opacity: 1, rotate: 0 }}
@@ -46,6 +43,16 @@ export default function ThemeChanger() {
           />
         )}
       </AnimatePresence>
+    </Button>
+  );
+}
+
+export function LangChangerSkeleton() {
+  const gt = useGT();
+
+  return (
+    <Button className="button p-1" title={gt("Select website language")} disabled>
+      <div className="size-11 animate-pulse bg-accent" />
     </Button>
   );
 }

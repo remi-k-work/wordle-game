@@ -4,6 +4,7 @@ import { gameSettingsMachineAtom, gameSettingsVoicePitchAtom } from "@/features/
 
 // components
 import { Slider } from "@base-ui/react";
+import { T } from "gt-next";
 
 export function Pitch() {
   const voicePitch = useAtomValue(gameSettingsVoicePitchAtom);
@@ -20,7 +21,7 @@ export function Pitch() {
       value={voicePitch}
       onValueChange={(value) => gameSettingsMachineEvent({ type: "voicePitchChanged", voicePitch: value })}
     >
-      <Slider.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Pitch</Slider.Label>
+      <Slider.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Pitch</T></Slider.Label>
       <Slider.Control className="flex w-full touch-none items-center py-3 select-none">
         <Slider.Track className="h-6 w-full bg-linear-to-l from-destructive via-tile-yellow to-tile-green select-none">
           <Slider.Indicator className="bg-linear-to-b from-surface-1 via-surface-3 to-surface-1 opacity-75 select-none" />
@@ -34,7 +35,7 @@ export function Pitch() {
 export function PitchSkeleton() {
   return (
     <Slider.Root className="my-3 w-full" name="voicePitch" thumbAlignment="edge" min={0.5} max={1.5} step={0.1} value={1} onValueChange={() => {}} disabled>
-      <Slider.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">Pitch</Slider.Label>
+      <Slider.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Pitch</T></Slider.Label>
       <Slider.Control className="flex w-full touch-none items-center py-3 select-none">
         <Slider.Track className="h-6 w-full bg-linear-to-l from-destructive via-tile-yellow to-tile-green select-none">
           <Slider.Indicator className="bg-linear-to-b from-surface-1 via-surface-3 to-surface-1 opacity-75 select-none" />

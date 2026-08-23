@@ -8,8 +8,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 
 // types
+import type { ReactNode } from "react";
+
 interface InfoLineProps {
-  message?: string;
+  message?: ReactNode;
   className?: string;
 }
 
