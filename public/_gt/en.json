@@ -102,7 +102,6 @@
   "2ecf88ef9e8e4259": "Home",
   "086afb1576e3f5d5": "Game",
   "eb7014b1778db95f": "High Score",
-  "b2c68836166ddfd4": "Select website language",
   "318cc27743114d65": "🚀 Speed Demon",
   "7da555081047be27": "⚡ Quick Thinker",
   "7f91a307baed5d6b": "⏱️ Average Pacer",
@@ -110,7 +109,8 @@
   "a6fd277111c7cd66": "Unknown",
   "5afb17be4f26d419": "Are you sure you want to give up?",
   "8dc8c8525fa81d63": "Forfeit Run",
-  "711be1156ddc8f81": "Change theme",
+  "8b0b240158027911": "Select Website Language",
+  "aa53c6c320dffa99": "Change Theme",
   "0c85bed543c47e31": "Light Mode",
   "c31fcfd0d0f86a92": "Dark Mode",
   "0cd798477a0df246": {
@@ -162,11 +162,12 @@
   "8492e7098dece326": "Streak",
   "4b65e5399dad717e": "Best Run Score",
   "4f666ec8c851f44e": "Best Streak",
-  "0ae5819dd8f7a212": {
+  "1b9c241b333c9fb1": {
     "t": "p",
     "i": 1,
     "c": [
-      "You found the solution in ",
+      "You found the solution in",
+      " ",
       {
         "t": "b",
         "i": 2,
@@ -176,7 +177,8 @@
           "v": "v"
         }
       },
-      " guesses 😄"
+      " ",
+      "guesses 😄"
     ]
   },
   "39720d22bfb9dd69": "Next Word",
@@ -251,12 +253,12 @@
   "cd5a76b62a222b90": "Sonar",
   "67ffbaa538936c2e": "AI Override",
   "07bdfb85bf6161fa": "Ready ↗",
-  "900280bdc9fc8bb0": "Switch game vocabulary language",
-  "2e823bfa41d08e84": "Game language",
+  "fc585bc0cc4df1dd": "Switch Game Vocabulary Language",
+  "c3a8416624b89903": "Game Language",
   "5d6be76645e9d062": "Pitch",
   "22ec9124fb4d8ea5": "Rate",
   "e40e6d4ec89b5365": "Default",
-  "2ca9244683f016d2": "Select voice",
+  "73b73f9f315c5193": "Select Voice",
   "978d4257c3d14a12": "Voice",
   "735b71b00e0b4413": "Volume",
   "8a5fa71102195eb8": "Global Average",
@@ -268,7 +270,7 @@
   "c875f6b62af253f6": "The best run trophy card",
   "76f7eb7999c8d432": "Your Personal Best",
   "f6fb6ba3659374b1": "Global Best",
-  "75a35b5d13ece559": "Switch chart vocabulary language",
+  "d8e5a0b078cd2da5": "Switch Chart Vocabulary Language",
   "f610b37b6536a172": "Guesses to Win",
   "d7f6ce757e01ae45": "Time to Solve",
   "50044ced80b5cf8a": "First Words",
@@ -322,7 +324,7 @@
   "51b0e64ebbd47ef9": "Global Average Time",
   "4d61c3a115fb1b77": "Global Average Guesses: {count}",
   "f727a3fd9d8f53fc": "Your Average Guesses: {count}",
-  "58512b24b2876207": "Go to chart {index}",
-  "7ed81fa910e1af90": "Next chart",
-  "f2167577e18d2846": "Previous chart"
+  "33d9444695d2d4ff": "Go to Chart {index}",
+  "7b3cb2b2673af978": "Next Chart",
+  "15ca039e07626e69": "Previous Chart"
 }

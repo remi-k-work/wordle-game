@@ -32,7 +32,7 @@ export function Next({ emblaApi }: NextProps) {
   }, [emblaApi]);
 
   return (
-    <Button className="button p-1" title={gt("Next chart")} aria-label={gt("Next chart")} disabled={isDisabled} onClick={() => emblaApi?.scrollNext()}>
+    <Button className="button p-1" title={gt("Next Chart")} aria-label={gt("Next Chart")} disabled={isDisabled} onClick={() => emblaApi?.scrollNext()}>
       <NextIcon className="size-11" />
     </Button>
   );

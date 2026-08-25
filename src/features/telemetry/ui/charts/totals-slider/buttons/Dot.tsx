@@ -37,7 +37,12 @@ export function Dot({ emblaApi, index }: DotProps) {
   }, [emblaApi]);
 
   return (
-    <Button className={cn("button bg-secondary p-0", index === selectedIndex && "bg-accent")} title={gt("Go to chart {index}", { index: index + 1 })} aria-label={gt("Go to chart {index}", { index: index + 1 })} onClick={() => emblaApi?.scrollTo(index)}>
+    <Button
+      className={cn("button bg-secondary p-0", index === selectedIndex && "bg-accent")}
+      title={gt("Go to Chart {index}", { index: index + 1 })}
+      aria-label={gt("Go to Chart {index}", { index: index + 1 })}
+      onClick={() => emblaApi?.scrollTo(index)}
+    >
       {index === selectedIndex ? <ViewfinderCircleIconS className="size-11" /> : <ViewfinderCircleIconO className="size-11" />}
     </Button>
   );

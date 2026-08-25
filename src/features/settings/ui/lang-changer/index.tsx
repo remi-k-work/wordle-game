@@ -24,7 +24,7 @@ export function LangChanger({ keepText = false, onClicked }: LangChangerProps) {
   return (
     <Button
       className={cn("button", !keepText && "max-sm:p-1")}
-      title={gt("Switch game vocabulary language")}
+      title={gt("Switch Game Vocabulary Language")}
       onClick={() => {
         gameSettingsMachineEvent({ type: "solutionsLanguageToggled" });
         onClicked?.();
@@ -32,10 +32,10 @@ export function LangChanger({ keepText = false, onClicked }: LangChangerProps) {
     >
       {solutionsLanguage === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
       {keepText ? (
-        <T>Game language</T>
+        <T>Game Language</T>
       ) : (
         <span className="hidden sm:block">
-          <T>Game language</T>
+          <T>Game Language</T>
         </span>
       )}
     </Button>
@@ -46,13 +46,13 @@ export function LangChangerSkeleton({ keepText = false }: LangChangerProps) {
   const gt = useGT();
 
   return (
-    <Button className={cn("button", !keepText && "max-sm:p-1")} title={gt("Switch game vocabulary language")} disabled>
+    <Button className={cn("button", !keepText && "max-sm:p-1")} title={gt("Switch Game Vocabulary Language")} disabled>
       <div className="size-11 animate-pulse bg-accent" />
       {keepText ? (
-        <T>Game language</T>
+        <T>Game Language</T>
       ) : (
         <span className="hidden sm:block">
-          <T>Game language</T>
+          <T>Game Language</T>
         </span>
       )}
     </Button>

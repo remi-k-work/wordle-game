@@ -21,7 +21,7 @@ export function LangChanger() {
   const { locale, setLocale } = useLocaleSelector();
 
   return (
-    <Button className="button p-1" title={gt("Select website language")} onClick={() => setLocale(locale === "en" ? "pl" : "en")}>
+    <Button className="button p-1" title={gt("Select Website Language")} onClick={() => setLocale(locale === "en" ? "pl" : "en")}>
       <AnimatePresence mode="wait" initial={false}>
         {locale === "en" ? (
           <MotionUsFlagIcon
@@ -51,7 +51,7 @@ export function LangChangerSkeleton() {
   const gt = useGT();
 
   return (
-    <Button className="button p-1" title={gt("Select website language")} disabled>
+    <Button className="button p-1" title={gt("Select Website Language")} disabled>
       <div className="size-11 animate-pulse bg-accent" />
     </Button>
   );

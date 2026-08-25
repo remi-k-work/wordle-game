@@ -25,8 +25,8 @@ export function BrowseCharts() {
             "data-checked:bg-surface-3"
           )}
           name="browseChartsSl"
-          aria-label={gt("Switch chart vocabulary language")}
-          title={gt("Switch chart vocabulary language")}
+          aria-label={gt("Switch Chart Vocabulary Language")}
+          title={gt("Switch Chart Vocabulary Language")}
           checked={sl === "Pl"}
           onCheckedChange={(isPl) => browseChartsMachineEvent({ type: "slChanged", sl: isPl ? "Pl" : "En" })}
         >
@@ -53,8 +53,8 @@ export function BrowseChartsSkeleton() {
             "data-checked:bg-surface-3"
           )}
           name="browseChartsSl"
-          aria-label={gt("Switch chart vocabulary language")}
-          title={gt("Switch chart vocabulary language")}
+          aria-label={gt("Switch Chart Vocabulary Language")}
+          title={gt("Switch Chart Vocabulary Language")}
           checked={false}
           onCheckedChange={() => {}}
           disabled

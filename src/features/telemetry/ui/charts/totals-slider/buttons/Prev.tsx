@@ -32,7 +32,7 @@ export function Prev({ emblaApi }: PrevProps) {
   }, [emblaApi]);
 
   return (
-    <Button className="button p-1" title={gt("Previous chart")} aria-label={gt("Previous chart")} disabled={isDisabled} onClick={() => emblaApi?.scrollPrev()}>
+    <Button className="button p-1" title={gt("Previous Chart")} aria-label={gt("Previous Chart")} disabled={isDisabled} onClick={() => emblaApi?.scrollPrev()}>
       <PrevIcon className="size-11" />
     </Button>
   );

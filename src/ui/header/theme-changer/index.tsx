@@ -16,7 +16,7 @@ export function ThemeChangerSkeleton() {
   const gt = useGT();
 
   return (
-    <Button className="button p-1" title={gt("Change theme")} disabled>
+    <Button className="button p-1" title={gt("Change Theme")} disabled>
       <SunIcon className="size-11" />
     </Button>
   );
