@@ -46,6 +46,11 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
     .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
     .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
     .onSuccess((runDeathReasonFrequency) => {
+      const chartData = runDeathReasonFrequency.map((run) => ({
+        ...run,
+        displayReason: run.reason === "Forfeit" ? gt("Forfeit") : gt("Guesses"),
+      }));
+
       return runDeathReasonFrequency.length === 0 ? (
         <>
           <SectionHeader title={gt("Reasons why an arcade run ended")} />
@@ -54,7 +59,7 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
       ) : (
         <>
           <SectionHeader title={gt("Reasons why an arcade run ended")} />
-          <PieChart data={runDeathReasonFrequency} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
+          <PieChart data={chartData} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
             <Tooltip
               formatter={(value, name) => [gt("{count} times", { count: value }), name]}
               cursor={{ fill: "var(--color-surface-2)" }}
@@ -64,10 +69,10 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
             />
             <Legend content={<CustomLegend />} />
 
-            <Pie dataKey="personal" nameKey="reason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
+            <Pie dataKey="personal" nameKey="displayReason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
             <Pie
               dataKey="global"
-              nameKey="reason"
+              nameKey="displayReason"
               cx="50%"
               cy="50%"
               innerRadius="60%"

@@ -1,12 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "effect-ts": {
-      "source": "Effect-TS/skills",
-      "sourceType": "github",
-      "skillPath": "skills/effect-ts/SKILL.md",
-      "computedHash": "bb916f6d9c9b3fe8e30fd486f3c1b174a888177c4a3f7d665e1b6c71ba7bdeb7"
-    },
     "motion-advanced": {
       "source": "affaan-m/everything-claude-code",
       "sourceType": "github",

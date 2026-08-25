@@ -78,9 +78,9 @@ const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (th
 });
 
 const RiddlePlan = ExecutionPlan.make(
-  { provide: Layer.succeed(RiddleModel, google("gemini-flash-latest")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
-  { provide: Layer.succeed(RiddleModel, google("gemini-flash-lite-latest")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) },
-  { provide: Layer.succeed(RiddleModel, google("gemini-3.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("100 millis", 1.5) }
+  { provide: Layer.succeed(RiddleModel, google("gemini-3.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) },
+  { provide: Layer.succeed(RiddleModel, google("gemini-3.1-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) },
+  { provide: Layer.succeed(RiddleModel, google("gemini-2.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) }
 );
 
 export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
