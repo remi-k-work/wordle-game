@@ -70,6 +70,7 @@
     "protobufjs@7.6.5": true,
     "ssh2@1.17.0": true,
     "unrs-resolver@1.12.2": true,
-    "esbuild@0.28.2": true
+    "esbuild@0.27.7": true,
+    "tree-sitter-python@0.25.0": true
   }
 }
