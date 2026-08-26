@@ -30,7 +30,7 @@
     "@vercel/analytics": "^2.0.1",
     "ai": "^7.0.79",
     "clsx": "^2.1.1",
-    "effect": "^4.0.0-rc.111",
+    "effect": "^4.0.0-rc.112",
     "embla-carousel-react": "^8.6.0",
     "gt-next": "^11.1.15",
     "motion": "^13.1.1",
@@ -70,6 +70,7 @@
     "protobufjs@7.6.5": true,
     "ssh2@1.17.0": true,
     "unrs-resolver@1.12.2": true,
+    "tree-sitter-python@0.25.0": true,
     "esbuild@0.28.2": true
   }
 }
