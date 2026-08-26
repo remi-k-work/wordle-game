@@ -29,6 +29,29 @@ const COLOR_MAP = {
   "": "transparent",
 } as const satisfies Record<Color, string>;
 
+// EMP "electrical fry" exit — jitter, flicker, glow, and burn out
+const EMP_FRY_EXIT = {
+  x: [0, -8, 12, -14, 10, -7, 3, 0],
+  y: [0, 2, -3, 4, -2, 3, -1, 0],
+  scale: [1, 1.18, 0.96, 1.12, 0.82, 1.05, 0.35, 0],
+  opacity: [1, 0.25, 1, 0.15, 0.85, 0.35, 0.5, 0],
+  rotate: [0, -20, 28, -24, 18, -12, 6, 0],
+  boxShadow: [
+    "0 0 0px transparent",
+    "0 0 18px var(--color-destructive)",
+    "0 0 5px var(--color-destructive)",
+    "0 0 24px var(--color-destructive)",
+    "0 0 8px var(--color-destructive)",
+    "0 0 18px var(--color-destructive)",
+    "0 0 30px var(--color-destructive)",
+    "0 0 0px transparent",
+  ],
+  transition: {
+    duration: motionTokens.duration.crawl * 6,
+    ease: motionTokens.easing.sharp,
+  },
+};
+
 const MotionButton = motion.create(Button);
 
 export function Footer() {
@@ -59,7 +82,7 @@ export function Footer() {
             return (
               <MotionButton
                 key={key}
-                exit={{ opacity: 0, scale: 0, transition: { duration: motionTokens.duration.crawl, ease: motionTokens.easing.smooth } }}
+                exit={EMP_FRY_EXIT}
                 className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
                 style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
                 onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: key })}
