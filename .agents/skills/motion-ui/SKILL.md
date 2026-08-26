@@ -208,16 +208,16 @@ export function FadeIn() {
 
 #### Core Patterns
 
-| Scenario                                              | Pattern                                                           |
-| ----------------------------------------------------- | ----------------------------------------------------------------- |
-| Hover feedback                                        | `whileHover`                                                      |
-| Tap / press feedback                                  | `whileTap`                                                        |
-| Reveal on scroll                                      | `whileInView`                                                     |
-| Scroll-linked value                                   | `useScroll` + `useTransform`                                      |
-| Conditional mount/unmount                             | `AnimatePresence`                                                 |
-| Small layout shifts (single element, < ~300px change) | `layout` prop                                                     |
-| Large layout shifts or full-page reflows              | Avoid `layout`; use CSS transitions or page-level routing instead |
-| Complex, imperative sequences                         | `useAnimate`                                                      |
+| Scenario | Pattern |
+|---|---|
+| Hover feedback | `whileHover` |
+| Tap / press feedback | `whileTap` |
+| Reveal on scroll | `whileInView` |
+| Scroll-linked value | `useScroll` + `useTransform` |
+| Conditional mount/unmount | `AnimatePresence` |
+| Small layout shifts (single element, < ~300px change) | `layout` prop |
+| Large layout shifts or full-page reflows | Avoid `layout`; use CSS transitions or page-level routing instead |
+| Complex, imperative sequences | `useAnimate` |
 
 > **Why avoid `layout` on large containers?** Framer's layout animation uses `transform` to reconcile positions, but on elements that span the full viewport or trigger deep reflow, the measurement cost causes visible jank and CLS. Prefer CSS Grid/Flexbox transitions or coordinate with `layoutId` on specific child elements only.
 
@@ -230,11 +230,11 @@ export function FadeIn() {
 
 Always specify `mode` explicitly — the default (`"sync"`) runs enter and exit simultaneously, which causes visual overlap in most UI patterns.
 
-| `mode`             | When to use                                                                                                                     |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `"wait"`           | Exit completes before enter starts. Use for **modals, toasts, page transitions**.                                               |
-| `"sync"` (default) | Enter and exit overlap. Use only when overlap is intentional (e.g., crossfade carousels).                                       |
-| `"popLayout"`      | Exiting element is popped out of flow immediately; remaining items animate to fill. Use for **lists, tabs, dismissible cards**. |
+| `mode` | When to use |
+|---|---|
+| `"wait"` | Exit completes before enter starts. Use for **modals, toasts, page transitions**. |
+| `"sync"` (default) | Enter and exit overlap. Use only when overlap is intentional (e.g., crossfade carousels). |
+| `"popLayout"` | Exiting element is popped out of flow immediately; remaining items animate to fill. Use for **lists, tabs, dismissible cards**. |
 
 ```tsx
 // Modal — always use "wait"
