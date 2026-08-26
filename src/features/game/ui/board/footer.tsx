@@ -73,42 +73,42 @@ export function Footer() {
         <GameFlowButton />
       </section>
 
-      <section className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
-        {/* AnimatePresence handles elements being unmounted (removed from the array) */}
-        <AnimatePresence mode="sync">
-          {availableKeys.map((key) => {
-            const usedKeyColor = keypadColors[key];
+      <section className="grid grid-cols-2 gap-2 rounded-md bg-surface-3 p-1 [grid-template-areas:'pool_pool''back_enter'] md:grid-cols-[auto_1fr_auto] md:[grid-template-areas:'back_pool_enter']">
+        <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
+          <AnimatePresence mode="sync">
+            {availableKeys.map((key) => {
+              const usedKeyColor = keypadColors[key];
 
-            return (
-              <MotionButton
-                key={key}
-                exit={EMP_FRY_EXIT}
-                className="button basis-12 border-secondary p-0 font-sans text-xl leading-9"
-                style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
-                onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: key })}
-              >
-                {key}
-              </MotionButton>
-            );
-          })}
-
-          {/* Always include BACKSPACE and ENTER, and make sure they animate alongside the letters */}
-          <MotionButton
-            key="Backspace"
-            className="button basis-12 bg-secondary p-0"
-            onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: "BACKSPACE" })}
-          >
-            <BackspaceIcon className="size-7" />
-          </MotionButton>
-
-          <MotionButton
-            key="Enter"
-            className="button basis-12 bg-secondary p-0"
-            onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: "ENTER" })}
-          >
-            <PaperAirplaneIcon className="size-7" />
-          </MotionButton>
-        </AnimatePresence>
+              return (
+                <MotionButton
+                  key={key}
+                  exit={EMP_FRY_EXIT}
+                  className="button flex-initial basis-12 border-secondary p-0 font-sans text-xl leading-9"
+                  style={{ backgroundColor: usedKeyColor ? COLOR_MAP[usedKeyColor] : COLOR_MAP[""] }}
+                  onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: key })}
+                >
+                  {key}
+                </MotionButton>
+              );
+            })}
+          </AnimatePresence>
+        </div>
+        <MotionButton
+          key="Backspace"
+          tabIndex={-1}
+          className="button bg-destructive [grid-area:back] max-md:p-1"
+          onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: "BACKSPACE" })}
+        >
+          <BackspaceIcon className="size-9 md:size-11" />
+        </MotionButton>
+        <MotionButton
+          key="Enter"
+          tabIndex={-1}
+          className="button bg-secondary [grid-area:enter] max-md:p-1"
+          onClick={() => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: "ENTER" })}
+        >
+          <PaperAirplaneIcon className="size-9 md:size-11" />
+        </MotionButton>
       </section>
     </footer>
   );
@@ -124,17 +124,19 @@ export function FooterSkeleton() {
         <GameFlowButtonSkeleton />
       </section>
 
-      <section className="mx-auto flex max-w-3xl flex-wrap justify-center gap-1 rounded-md bg-surface-3 p-1">
-        {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].map((key) => (
-          <Button key={key} className="button basis-12 border-secondary bg-transparent p-0 font-sans text-xl leading-9" disabled>
-            {key}
-          </Button>
-        ))}
-        <Button className="button basis-12 bg-secondary p-0" disabled>
-          <BackspaceIcon className="size-7" />
+      <section className="grid grid-cols-2 gap-2 rounded-md bg-surface-3 p-1 [grid-template-areas:'pool_pool''back_enter'] md:grid-cols-[auto_1fr_auto] md:[grid-template-areas:'back_pool_enter']">
+        <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
+          {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"].map((key) => (
+            <Button key={key} className="button flex-initial basis-12 border-secondary bg-transparent p-0 font-sans text-xl leading-9" disabled>
+              {key}
+            </Button>
+          ))}
+        </div>
+        <Button className="button bg-destructive [grid-area:back] max-md:p-1" disabled>
+          <BackspaceIcon className="size-9 md:size-11" />
         </Button>
-        <Button className="button basis-12 bg-secondary p-0" disabled>
-          <PaperAirplaneIcon className="size-7" />
+        <Button className="button bg-secondary [grid-area:enter] max-md:p-1" disabled>
+          <PaperAirplaneIcon className="size-9 md:size-11" />
         </Button>
       </section>
     </footer>
