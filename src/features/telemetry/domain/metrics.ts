@@ -4,7 +4,7 @@ import { Metric } from "effect";
 // --- Histograms (Distributions) ---
 
 const guessesToWin = Metric.histogram("guessesToWin", {
-  boundaries: Metric.linearBoundaries({ start: 0, width: 1, count: 7 }), // 1, 2, 3, 4, 5, 6, null
+  boundaries: Metric.linearBoundaries({ start: 1, width: 1, count: 7 }), // 1, 2, 3, 4, 5, 6, null
   description: "Distribution of guesses needed to win a game.",
 });
 
@@ -14,7 +14,7 @@ const timeToSolve = Metric.histogram("timeToSolve", {
 });
 
 const arcadeRunLength = Metric.histogram("arcadeRunLength", {
-  boundaries: Metric.linearBoundaries({ start: -1, width: 1, count: 15 }), // 0, 1, 2, 3, 4, 5, ..., 13, null
+  boundaries: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, Infinity], // 0, 1, 2, ..., 13, null
   description: "Distribution of run lengths (streak) before a loss.",
 });
 
