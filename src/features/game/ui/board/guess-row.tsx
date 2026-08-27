@@ -1,7 +1,8 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
-import { wordChallengeCurrentTurnAtom } from "@/features/game/state";
+import { wordChallengeCurrentTurnAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
+import { overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state";
 
 // components
 import { GuessTile, GuessTileSkeleton } from "./guess-tile";
@@ -16,6 +17,8 @@ interface GuessRowProps {
 
 export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
+  const sonarReveals = useAtomValue(overdriveHacksSonarRevealsAtom);
+  const baseWordleGrid = useAtomValue(wordChallengeWordleGridAtom);
   const isCurrentTurn = rowIndex === currentTurn - 2;
 
   return (
@@ -34,9 +37,11 @@ export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
         ]
       )}
     >
-      {wordleGrid[rowIndex].map((tile, tileIndex) => (
-        <GuessTile key={tileIndex} tile={tile} />
-      ))}
+      {wordleGrid[rowIndex].map((tile, tileIndex) => {
+        const wasEmpty = baseWordleGrid[rowIndex][tileIndex].tileKey === "";
+        const isSonarReveal = wasEmpty && tile.tileKey !== "" && sonarReveals.some((reveal) => reveal.positions.includes(tileIndex));
+        return <GuessTile key={tileIndex + String(isSonarReveal)} tile={tile} isSonarReveal={isSonarReveal} />;
+      })}
     </div>
   );
 }

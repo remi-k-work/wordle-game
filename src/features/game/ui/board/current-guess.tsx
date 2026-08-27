@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { wordChallengeCurrentGuessWordAtom, wordChallengeMachineAtom } from "@/features/game/state";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksMachineAtom, overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state";
 
 // components
 import { GuessTile } from "./guess-tile";
@@ -20,6 +20,7 @@ export function CurrentGuess() {
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
   const currentGuessWord = useAtomValue(wordChallengeCurrentGuessWordAtom);
+  const sonarReveals = useAtomValue(overdriveHacksSonarRevealsAtom);
 
   // Single AbortController removes the keyup listener on unmount or re-run
   useEffect(() => {
@@ -34,14 +35,26 @@ export function CurrentGuess() {
 
   const finalGuessTiles: Tile[] = [
     ...currentGuessWord.split("").map<Tile>((tileKey) => ({ tileKey, color: (isInvalidGuess ? "red" : "") as Color })),
-    ...Array.from({ length: WORD_LENGTH - currentLength }, () => ({ tileKey: "", color: "" as Color })),
+    ...Array.from({ length: WORD_LENGTH - currentLength }, (_, i) => {
+      const position = currentLength + i;
+      const reveal = sonarReveals.find((candidate) => candidate.positions.includes(position));
+      return reveal ? ({ tileKey: reveal.vowel, color: "green" } as const satisfies Tile) : ({ tileKey: "", color: "" } as const satisfies Tile);
+    }),
   ];
 
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isInvalidGuess && "animate-pulse")}>
-      {finalGuessTiles.map((tile, tileIndex) => (
-        <GuessTile key={tileIndex} tile={tile} bounceAnim={tile.tileKey !== "" && tileIndex === currentLength - 1} />
-      ))}
+      {finalGuessTiles.map((tile, tileIndex) => {
+        const isSonarReveal = tileIndex >= currentLength && sonarReveals.some((reveal) => reveal.positions.includes(tileIndex));
+        return (
+          <GuessTile
+            key={tileIndex + String(isSonarReveal)}
+            tile={tile}
+            bounceAnim={tile.tileKey !== "" && tileIndex === currentLength - 1 && !isSonarReveal}
+            isSonarReveal={isSonarReveal}
+          />
+        );
+      })}
     </div>
   );
 }
