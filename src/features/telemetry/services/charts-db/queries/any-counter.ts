@@ -1,7 +1,7 @@
 // services, features, and other libraries
-import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyCounterArgs, AnyCounterData } from "@/features/telemetry/services/charts-db";
+import { dieOnDbFailure } from "@/lib/db";
 
 export const anyCounterQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findOne({
@@ -16,13 +16,5 @@ export const anyCounterQuery = (sql: SqlClient.SqlClient) => {
         AND solutions_language = ${solutionsLanguage}`,
   });
 
-  return (request: AnyCounterArgs) =>
-    query(request).pipe(
-      Effect.tapError(Effect.logError),
-      Effect.catchTags({
-        SchemaError: Effect.die,
-        SqlError: Effect.die,
-        NoSuchElementError: Effect.die,
-      })
-    );
+  return (request: AnyCounterArgs) => dieOnDbFailure(query(request));
 };

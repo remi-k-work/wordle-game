@@ -1,7 +1,7 @@
 // services, features, and other libraries
-import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { BestRunTrophyCardArgs, BestRunTrophyCardData } from "@/features/telemetry/services/charts-db";
+import { dieOnDbFailure } from "@/lib/db";
 
 export const bestRunTrophyCardQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findOneOption({
@@ -24,6 +24,5 @@ export const bestRunTrophyCardQuery = (sql: SqlClient.SqlClient) => {
     LIMIT 1`,
   });
 
-  return (request: BestRunTrophyCardArgs) =>
-    query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+  return (request: BestRunTrophyCardArgs) => dieOnDbFailure(query(request));
 };

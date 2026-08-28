@@ -4,6 +4,7 @@ import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { HighScore, AddHighScore } from "@/features/high-score/domain";
 import { SolutionsLanguage } from "@/features/game/domain";
 import { PgLive } from "@/lib/pg-live";
+import { dieOnDbFailure } from "@/lib/db";
 
 export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
   make: Effect.gen(function* () {
@@ -23,8 +24,7 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
     });
 
     return {
-      top10HighScores: (solutionsLanguage: SolutionsLanguage) =>
-        top10HighScores(solutionsLanguage).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
+      top10HighScores: (solutionsLanguage: SolutionsLanguage) => dieOnDbFailure(top10HighScores(solutionsLanguage)),
       addHighScore: (request: AddHighScore) =>
         sql
           .withTransaction(
@@ -33,17 +33,15 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
               yield* sql`LOCK TABLE high_score IN SHARE ROW EXCLUSIVE MODE`;
               const currentTop10 = yield* top10HighScores(request.solutionsLang);
               const tail = currentTop10.at(-1);
-              const qualifies = currentTop10.length < 10 || tail === undefined || request.score > tail.score || (request.score === tail.score && request.streak > tail.streak);
+              const qualifies =
+                currentTop10.length < 10 || tail === undefined || request.score > tail.score || (request.score === tail.score && request.streak > tail.streak);
               if (!qualifies) return Option.none();
 
               const { id } = yield* addHighScore(request);
               return Option.some(id);
             })
           )
-          .pipe(
-          Effect.tapError(Effect.logError),
-          Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die, NoSuchElementError: Effect.die })
-        ),
+          .pipe(dieOnDbFailure),
     } as const;
   }),
 }) {

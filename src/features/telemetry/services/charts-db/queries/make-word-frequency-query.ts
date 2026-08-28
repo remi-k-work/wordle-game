@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { Effect } from "effect";
 import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyChartArgs } from "@/features/telemetry/services/charts-db";
+import { dieOnDbFailure } from "@/lib/db";
 
 // Factory backing openingGuesses + failedWords. Both queries are identical
 // except for metricName and Result schema (passed per call-site).
@@ -34,6 +34,5 @@ export const makeWordFrequencyQuery =
       LIMIT 15`,
       });
 
-      return (request: AnyChartArgs) =>
-        query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+      return (request: AnyChartArgs) => dieOnDbFailure(query(request));
     };

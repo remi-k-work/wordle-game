@@ -1,7 +1,7 @@
 // services, features, and other libraries
-import { Effect } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyChartArgs, HardestWordsLeaderboardData } from "@/features/telemetry/services/charts-db";
+import { dieOnDbFailure } from "@/lib/db";
 
 export const hardestWordsLeaderboardQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findAll({
@@ -40,5 +40,5 @@ export const hardestWordsLeaderboardQuery = (sql: SqlClient.SqlClient) => {
     LIMIT 15`,
   });
 
-  return (request: AnyChartArgs) => query(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die }));
+  return (request: AnyChartArgs) => dieOnDbFailure(query(request));
 };

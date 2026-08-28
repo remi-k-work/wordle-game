@@ -2,6 +2,7 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
+import { dieOnDbFailure } from "@/lib/db";
 
 export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
   make: Effect.gen(function* () {
@@ -24,12 +25,9 @@ export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
     });
 
     return {
-      addGlobalPulse: (request: ReadonlyArray<AddGlobalPulse>) =>
-        addGlobalPulse(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
-      addArcadeRunSummary: (request: AddArcadeRunSummary) =>
-        addArcadeRunSummary(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
-      addRunWordEvent: (request: AddRunWordEvent) =>
-        addRunWordEvent(request).pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die })),
+      addGlobalPulse: (request: ReadonlyArray<AddGlobalPulse>) => dieOnDbFailure(addGlobalPulse(request)),
+      addArcadeRunSummary: (request: AddArcadeRunSummary) => dieOnDbFailure(addArcadeRunSummary(request)),
+      addRunWordEvent: (request: AddRunWordEvent) => dieOnDbFailure(addRunWordEvent(request)),
     } as const;
   }),
 }) {
