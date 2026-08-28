@@ -1,8 +1,7 @@
 // services, features, and other libraries
-import { Context, Effect, ExecutionPlan, Layer, Schedule } from "effect";
+import { Context, Effect } from "effect";
 import { generateText, Output } from "ai";
-import { google } from "@ai-sdk/google";
-import { AiSdkError } from "@/domain";
+import { AiSdkError, makeGeminiFallbackPlan } from "@/domain";
 import { z } from "zod";
 
 // types
@@ -77,11 +76,7 @@ const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (th
   }).pipe(Effect.map(({ output }) => output.riddle));
 });
 
-const RiddlePlan = ExecutionPlan.make(
-  { provide: Layer.succeed(RiddleModel, google("gemini-3.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) },
-  { provide: Layer.succeed(RiddleModel, google("gemini-3.1-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) },
-  { provide: Layer.succeed(RiddleModel, google("gemini-2.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) }
-);
+const RiddlePlan = makeGeminiFallbackPlan(RiddleModel);
 
 export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
   attemptRiddleWithModel(theSecretWord, solutionsLanguage).pipe(Effect.withExecutionPlan(RiddlePlan));

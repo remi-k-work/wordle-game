@@ -1,8 +1,7 @@
 // services, features, and other libraries
-import { Context, Effect, ExecutionPlan, Layer, Option, Schedule } from "effect";
+import { Context, Effect, Option } from "effect";
 import { generateText, Output } from "ai";
-import { google } from "@ai-sdk/google";
-import { AiSdkError } from "@/domain";
+import { AiSdkError, makeGeminiFallbackPlan } from "@/domain";
 import { z } from "zod";
 import { formatGuess } from "@/features/game/domain";
 
@@ -161,11 +160,7 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
   }).pipe(Effect.map(({ output }) => Option.some(output.clue)));
 });
 
-const OverridePlan = ExecutionPlan.make(
-  { provide: Layer.succeed(OverrideModel, google("gemini-3.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) },
-  { provide: Layer.succeed(OverrideModel, google("gemini-3.1-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) },
-  { provide: Layer.succeed(OverrideModel, google("gemini-2.5-flash-lite")), attempts: 2, schedule: Schedule.exponential("1 second", 2) }
-);
+const OverridePlan = makeGeminiFallbackPlan(OverrideModel);
 
 export const generateOverride = (
   theSecretWord: TheSecretWord,

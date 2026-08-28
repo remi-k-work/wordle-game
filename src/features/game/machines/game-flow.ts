@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assertEvent } from "xstate";
 import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
@@ -24,7 +24,7 @@ export const gameFlowMachine = setup({
   },
   actions: {
     startRun: () =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           yield* Atom.set(modalMachineAtom, { type: "closed" });
           yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
@@ -32,14 +32,14 @@ export const gameFlowMachine = setup({
         })
       ),
     requestNextWord: () =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           yield* Atom.set(modalMachineAtom, { type: "closed" });
           yield* Atom.set(gameDataMachineAtom, { type: "nextWordRequested" });
         })
       ),
     forfeitRun: ({ event }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           assertEvent(event, "run.forfeitConfirmed");
           yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge });
@@ -49,7 +49,7 @@ export const gameFlowMachine = setup({
         })
       ),
     bankWonWord: ({ event }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           assertEvent(event, "word.won");
           yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore });
@@ -58,7 +58,7 @@ export const gameFlowMachine = setup({
         })
       ),
     finishLostRun: () =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
           yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
@@ -66,7 +66,7 @@ export const gameFlowMachine = setup({
         })
       ),
     changeLanguage: ({ event }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           assertEvent(event, "language.changed");
           yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });

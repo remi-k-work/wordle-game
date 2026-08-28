@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameFlowMachineAtom } from "@/features/game/state";
 
@@ -50,7 +50,7 @@ export const gameSettingsMachine = setup({
 
     // Notify all the other machines about the solutions language change
     onSolutionsLanguageToggled: ({ context }) =>
-      RuntimeClient.runPromise(Atom.set(gameFlowMachineAtom, { type: "language.changed", solutionsLanguage: context.solutionsLanguage })),
+      runClientCommand(Atom.set(gameFlowMachineAtom, { type: "language.changed", solutionsLanguage: context.solutionsLanguage })),
   },
 }).createMachine({
   id: "gameSettings",

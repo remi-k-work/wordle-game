@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { toastManager } from "@/ui/toastify";
@@ -79,7 +79,7 @@ export const highScoreMachine = setup({
     onNoLongerQualified: () => toastManager.add({ type: "error", title: "Leaderboard Updated", description: "This score no longer qualifies for the Top 10." }),
     onFailure: () => toastManager.add({ type: "error", title: "Submission Failed", description: "Failed to save your score. Please try again later." }),
 
-    showHighScoreModal: () => RuntimeClient.runPromise(Atom.set(modalMachineAtom, { type: "opened", modalType: "high-score" })),
+    showHighScoreModal: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "high-score" })),
   },
   actors: { top10HighScoresActor, addHighScoreActor },
   delays: { delay: 3000 },

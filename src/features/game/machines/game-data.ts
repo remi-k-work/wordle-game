@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, HashSet, Option, Random } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
@@ -62,7 +62,7 @@ export const gameDataMachine = setup({
     saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
 
     onSecretWordSelected: (_, params: { theSecretWord: TheSecretWord }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           const theSecretWord = params.theSecretWord;
 
@@ -81,7 +81,7 @@ export const gameDataMachine = setup({
       ),
 
     // Notify the word challenge machine that game data is ready (no word yet — idle state)
-    onGameDataLoaded: ({ context }) => RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
+    onGameDataLoaded: ({ context }) => runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
   },
   actors: { onLoadingActor, selectSecretWordActor },
 }).createMachine({

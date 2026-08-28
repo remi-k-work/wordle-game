@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Layer, Logger, ManagedRuntime } from "effect";
+import { Effect, Layer, Logger, ManagedRuntime } from "effect";
 import { Atom, AtomRegistry, Reactivity } from "effect/unstable/reactivity";
 import { BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
@@ -33,3 +33,13 @@ const MainLayer = Layer.mergeAll(
 export const RuntimeTelemetryStarter = runtimeFactory(TelemetryStarterLayer);
 export const RuntimeAtom = runtimeFactory(MainLayer);
 export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: sharedMemoMap });
+
+// Runs an Effect from a fire-and-forget XState command action. Failures are logged but never
+// reject, so unhandled Promise rejections cannot escape the synchronous XState action contract.
+export const runClientCommand = (effect: Parameters<typeof RuntimeClient.runPromise>[0]): Promise<void> =>
+  RuntimeClient.runPromise(
+    effect.pipe(
+      Effect.asVoid,
+      Effect.catchCause((cause) => Effect.logError(`[CLIENT COMMAND FAILED]: ${cause}`))
+    )
+  );

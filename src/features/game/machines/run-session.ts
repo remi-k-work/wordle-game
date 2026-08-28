@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { DateTime, Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { highScoreMachineAtom } from "@/features/high-score/state";
@@ -67,10 +67,10 @@ export const runSessionMachine = setup({
       ({ context }) => ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession
     ),
 
-    clearFinishedRun: () => RuntimeClient.runPromise(Atom.set(runResultAtom, Option.none())),
+    clearFinishedRun: () => runClientCommand(Atom.set(runResultAtom, Option.none())),
 
     saveFinishedRun: ({ context }, params: { deathReason: RunDeathReason }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           const now = DateTime.makeUnsafe(Date.now());
           const runId = Option.getOrThrow(context.runId);
@@ -83,7 +83,7 @@ export const runSessionMachine = setup({
       ),
 
     // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-    trackStartedNewRun: () => RuntimeClient.runPromise(trackStartedNewRun),
+    trackStartedNewRun: () => runClientCommand(trackStartedNewRun),
 
     // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
     trackForfeitedRun: ({ context, event }) => {
@@ -92,12 +92,12 @@ export const runSessionMachine = setup({
       // Only track if there is an active run to forfeit
       if (Option.isNone(context.runId)) return;
 
-      RuntimeClient.runPromise(trackForfeitedRun(context, event.wordChallenge));
+      runClientCommand(trackForfeitedRun(context, event.wordChallenge));
     },
 
     // Notify high score machine that a run has finished
     onRunFinished: ({ context }) => {
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
           yield* Atom.set(highScoreMachineAtom, { type: "runFinished", runScore: context.runScore, streak: context.streak, solutionsLanguage });

@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { DateTime, Option, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
 import { gameFlowMachineAtom, runSessionMachineAtom } from "@/features/game/state";
@@ -107,14 +107,14 @@ export const wordChallengeMachine = setup({
         }) as const satisfies WordChallenge
     ),
     // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
-    trackInvalidGuessSubmitted: () => RuntimeClient.runPromise(trackInvalidGuessSubmitted),
+    trackInvalidGuessSubmitted: () => runClientCommand(trackInvalidGuessSubmitted),
 
     // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-    trackValidGuessSubmitted: ({ context }) => RuntimeClient.runPromise(trackValidGuessSubmitted(context)),
+    trackValidGuessSubmitted: ({ context }) => runClientCommand(trackValidGuessSubmitted(context)),
 
     // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
     trackWordWon: ({ context }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
           yield* trackWordWon(runSessionMachineContext, context);
@@ -122,7 +122,7 @@ export const wordChallengeMachine = setup({
       ),
 
     onWordWon: ({ context }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           const wordScore = Option.getOrThrow(context.wordScore);
           yield* Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore });
@@ -131,14 +131,14 @@ export const wordChallengeMachine = setup({
 
     // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
     trackWordLost: ({ context }) =>
-      RuntimeClient.runPromise(
+      runClientCommand(
         Effect.gen(function* () {
           const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
           yield* trackWordLost(runSessionMachineContext, context);
         })
       ),
 
-    onWordLost: () => RuntimeClient.runPromise(Atom.set(gameFlowMachineAtom, { type: "word.lost" })),
+    onWordLost: () => runClientCommand(Atom.set(gameFlowMachineAtom, { type: "word.lost" })),
   },
 }).createMachine({
   id: "wordChallenge",

@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, fromPromise, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
@@ -148,7 +148,7 @@ export const overdriveHacksMachine = setup({
         ({ ...context, theOverride: params.theOverride }) as const satisfies OverdriveHacks
     ),
 
-    onOverrideHackApplied: () => RuntimeClient.runPromise(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
+    onOverrideHackApplied: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
 
     // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
     forwardKeyPress: ({ context, event }) => {
@@ -156,7 +156,7 @@ export const overdriveHacksMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       if (context.empNukedLetters.includes(normalizedKey)) return;
 
-      RuntimeClient.runPromise(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
+      runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },
   },
   actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor },
