@@ -3,7 +3,7 @@ import { Config, Effect, Layer, Option } from "effect";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
-import { generateRiddle } from "@/features/game/domain/riddle2";
+import { generateRiddle } from "@/features/game/domain";
 
 // assets
 import solutionsEnJson from "@/assets/data/solutions-en.json";
