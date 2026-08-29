@@ -1,46 +1,10 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
-import { createActor } from "xstate";
 import { gameDataMachine } from "@/features/game/machines/game-data";
-import { inspect } from "@/machines/inspect";
-
-// types
-import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
-
-type GameDataMachineSnapshot = SnapshotFrom<typeof gameDataMachine>;
-type GameDataMachineEvent = EventFromLogic<typeof gameDataMachine>;
-type GameDataMachineActor = Actor<typeof gameDataMachine>;
-
-// Creates an Atom-owned XState actor reference
-const gameDataMachineActorAtom = Atom.make<GameDataMachineActor>((get) => {
-  const actor = createActor(gameDataMachine, { inspect });
-  actor.start();
-
-  get.addFinalizer(() => {
-    actor.stop();
-  });
-
-  return actor;
-}).pipe(Atom.keepAlive);
+import { createMachineAtom } from "@/lib/machine-atom";
 
 // The game data machine is now a living actor inside the effect atom
-export const gameDataMachineAtom = Atom.writable<GameDataMachineSnapshot, GameDataMachineEvent>(
-  (get) => {
-    const actor = get(gameDataMachineActorAtom);
-    const subscription = actor.subscribe((snapshot) => {
-      get.setSelf(snapshot);
-    });
-
-    get.addFinalizer(() => {
-      subscription.unsubscribe();
-    });
-
-    return actor.getSnapshot();
-  },
-  (ctx, event) => {
-    ctx.get(gameDataMachineActorAtom).send(event);
-  }
-).pipe(Atom.keepAlive);
+export const gameDataMachineAtom = createMachineAtom(gameDataMachine);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const gameDataSolutionsAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutions));

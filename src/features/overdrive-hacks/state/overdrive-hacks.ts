@@ -1,48 +1,20 @@
 // services, features, and other libraries
 import { Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { createActor } from "xstate";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
-import { inspect } from "@/machines/inspect";
+import { createMachineAtom } from "@/lib/machine-atom";
 import { formatTextForTTS } from "@/lib/formatters";
 
 // types
-import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
 import type { Color, Tile, WordleGrid } from "@/features/game/domain";
 import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
-
-type OverdriveHacksMachineSnapshot = SnapshotFrom<typeof overdriveHacksMachine>;
-type OverdriveHacksMachineEvent = EventFromLogic<typeof overdriveHacksMachine>;
-type OverdriveHacksMachineActor = Actor<typeof overdriveHacksMachine>;
 
 // constants
 import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
-// Creates an Atom-owned XState actor reference
-const overdriveHacksMachineActorAtom = Atom.make<OverdriveHacksMachineActor>((get) => {
-  const actor = createActor(overdriveHacksMachine, { inspect });
-  actor.start();
-  get.addFinalizer(() => actor.stop());
-  return actor;
-}).pipe(Atom.keepAlive);
-
 // The overdrive hacks machine is now a living actor inside the effect atom
-export const overdriveHacksMachineAtom = Atom.writable<OverdriveHacksMachineSnapshot, OverdriveHacksMachineEvent>(
-  (get) => {
-    const actor = get(overdriveHacksMachineActorAtom);
-    const subscription = actor.subscribe((snapshot) => get.setSelf(snapshot));
-
-    get.addFinalizer(() => {
-      subscription.unsubscribe();
-    });
-
-    return actor.getSnapshot();
-  },
-  (ctx, event) => {
-    ctx.get(overdriveHacksMachineActorAtom).send(event);
-  }
-).pipe(Atom.keepAlive);
+export const overdriveHacksMachineAtom = createMachineAtom(overdriveHacksMachine);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const overdriveHacksEmpNukedLettersAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.empNukedLetters));
