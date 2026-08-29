@@ -20,7 +20,7 @@
     "db:migrate": "tsx ./src/seed/run-migrations.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.55",
+    "@ai-sdk/google": "^4.0.57",
     "@base-ui/react": "^1.7.0",
     "@effect/atom-react": "^4.0.0-rc.112",
     "@effect/platform-browser": "^4.0.0-rc.112",
@@ -28,11 +28,11 @@
     "@effect/sql-pg": "^4.0.0-rc.112",
     "@heroicons/react": "^2.2.0",
     "@vercel/analytics": "^2.0.1",
-    "ai": "^7.0.83",
+    "ai": "^7.0.84",
     "clsx": "^2.1.1",
     "effect": "^4.0.0-rc.112",
     "embla-carousel-react": "^8.6.0",
-    "gt-next": "^11.1.16",
+    "gt-next": "^11.1.18",
     "motion": "^13.1.1",
     "next": "^16.3.3",
     "next-themes": "^0.4.6",
@@ -42,7 +42,7 @@
     "recharts": "^3.10.1",
     "tailwind-merge": "^3.6.0",
     "xstate": "^5.32.6",
-    "zod": "^4.4.3"
+    "zod": "^4.5.2"
   },
   "devDependencies": {
     "@effect/language-service": "^0.87.2",
@@ -57,7 +57,7 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "^16.3.3",
-    "gt": "^2.17.0",
+    "gt": "^2.17.2",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
