@@ -129,7 +129,7 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"],
   solutionsLanguage: SolutionsLanguage
-) {
+): Effect.fn.Return<Option.Option<string>, AiSdkError, LanguageModel> {
   const model = yield* OverrideModel;
 
   return yield* Effect.tryPromise({

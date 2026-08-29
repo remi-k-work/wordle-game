@@ -7,12 +7,19 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: Str.camelT
 export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: boolean | object) =>
   PgClient.layer({ ...pgConfig, url: databaseUrl, ssl, idleTimeout: "10 seconds", connectTimeout: "10 seconds" });
 
+// Resolves the connection options shared by the live client layer and the migration runner:
+// `ENV` drives SSL, `DATABASE_URL` is always read from the redacted config.
+export const connectConfig = Effect.gen(function* () {
+  const env = yield* Config.literal("local", "ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
+  const ssl = env !== "local" ? { rejectUnauthorized: false } : false;
+  const databaseUrl = yield* Config.redacted("DATABASE_URL");
+
+  return { databaseUrl, ssl };
+});
+
 export const PgLive = Layer.unwrap(
   Effect.gen(function* () {
-    const env = yield* Config.literal("local", "ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
-    const ssl = env !== "local" ? { rejectUnauthorized: false } : false;
-    const databaseUrl = yield* Config.redacted("DATABASE_URL");
-
+    const { databaseUrl, ssl } = yield* connectConfig;
     return makePgClientLayer(databaseUrl, ssl);
   })
 ).pipe(Layer.orDie);
