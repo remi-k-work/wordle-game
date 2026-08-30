@@ -1,8 +1,6 @@
 // services, features, and other libraries
 import { Context, Effect } from "effect";
-import { generateText, Output } from "ai";
-import { AiSdkError, makeGeminiFallbackPlan } from "@/domain";
-import { z } from "zod";
+import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
 
 // types
 import type { SolutionsLanguage, TheSecretWord } from ".";
@@ -54,29 +52,16 @@ const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (
 ): Effect.fn.Return<string, AiSdkError, LanguageModel> {
   const model = yield* RiddleModel;
 
-  return yield* Effect.tryPromise({
-    try: () =>
-      generateText({
-        model,
-        temperature: 0.9,
-        instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN(theSecretWord) : SYSTEM_PROMPT_PL(theSecretWord),
-        prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN : RIDDLE_PROMPT_PL,
-        maxRetries: 0,
-        output: Output.object({
-          schema: z.object({
-            riddle: z
-              .string()
-              .trim()
-              .describe(
-                solutionsLanguage === "En"
-                  ? "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis."
-                  : "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów."
-              ),
-          }),
-        }),
-      }),
-    catch: (cause) => new AiSdkError({ message: `The attempt to generate a riddle using the "${model}" model was unsuccessful.`, cause }),
-  }).pipe(Effect.map(({ output }) => output.riddle));
+  return yield* generateSingleField(model, {
+    temperature: 0.9,
+    instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN(theSecretWord) : SYSTEM_PROMPT_PL(theSecretWord),
+    prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN : RIDDLE_PROMPT_PL,
+    fieldName: "riddle",
+    description:
+      solutionsLanguage === "En"
+        ? "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis."
+        : "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.",
+  });
 });
 
 const RiddlePlan = makeGeminiFallbackPlan(RiddleModel);

@@ -1,8 +1,6 @@
 // services, features, and other libraries
 import { Context, Effect, Option } from "effect";
-import { generateText, Output } from "ai";
-import { AiSdkError, makeGeminiFallbackPlan } from "@/domain";
-import { z } from "zod";
+import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
 import { formatGuess } from "@/features/game/domain";
 
 // types
@@ -132,32 +130,19 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
 ): Effect.fn.Return<Option.Option<string>, AiSdkError, LanguageModel> {
   const model = yield* OverrideModel;
 
-  return yield* Effect.tryPromise({
-    try: () =>
-      generateText({
-        model,
-        temperature: 0.5,
-        instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN(theSecretWord) : SYSTEM_PROMPT_PL(theSecretWord),
-        prompt:
-          solutionsLanguage === "En"
-            ? OVERRIDE_PROMPT_EN(theSecretWord, wordDefinition, theRiddle, wordleGuesses)
-            : OVERRIDE_PROMPT_PL(theSecretWord, wordDefinition, theRiddle, wordleGuesses),
-        maxRetries: 0,
-        output: Output.object({
-          schema: z.object({
-            clue: z
-              .string()
-              .trim()
-              .describe(
-                solutionsLanguage === "En"
-                  ? "The highly descriptive clue in plain text only. Detailed, insightful, TTS-friendly. No Markdown, emojis, or preamble."
-                  : "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów."
-              ),
-          }),
-        }),
-      }),
-    catch: (cause) => new AiSdkError({ message: `The attempt to generate an override using the "${model}" model was unsuccessful.`, cause }),
-  }).pipe(Effect.map(({ output }) => Option.some(output.clue)));
+  return yield* generateSingleField(model, {
+    temperature: 0.5,
+    instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN(theSecretWord) : SYSTEM_PROMPT_PL(theSecretWord),
+    prompt:
+      solutionsLanguage === "En"
+        ? OVERRIDE_PROMPT_EN(theSecretWord, wordDefinition, theRiddle, wordleGuesses)
+        : OVERRIDE_PROMPT_PL(theSecretWord, wordDefinition, theRiddle, wordleGuesses),
+    fieldName: "clue",
+    description:
+      solutionsLanguage === "En"
+        ? "The highly descriptive clue in plain text only. Detailed, insightful, TTS-friendly. No Markdown, emojis, or preamble."
+        : "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów.",
+  }).pipe(Effect.map((clue) => Option.some(clue)));
 });
 
 const OverridePlan = makeGeminiFallbackPlan(OverrideModel);

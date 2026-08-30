@@ -6,7 +6,7 @@ import { sessionIdAtom } from "@/features/player/state";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
 // types
-import type { RunSession, WordChallenge } from "@/features/game/domain";
+import type { RunDeathReason, RunSession, WordChallenge } from "@/features/game/domain";
 
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSession, wordChallenge: WordChallenge) {
@@ -23,11 +23,7 @@ export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSess
 });
 
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
-export const logRunCompleted = Effect.fn("logRunCompleted")(function* (
-  runSession: RunSession,
-  wordChallenge: WordChallenge,
-  deathReason: "Forfeit" | "Guesses"
-) {
+export const logRunCompleted = Effect.fn("logRunCompleted")(function* (runSession: RunSession, wordChallenge: WordChallenge, deathReason: RunDeathReason) {
   // Extract all the necessary attributes that will offer additional context for our span
   const runId = Option.getOrThrow(runSession.runId);
   const sessionId = yield* Atom.get(sessionIdAtom);

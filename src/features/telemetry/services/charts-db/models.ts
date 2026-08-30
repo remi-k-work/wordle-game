@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
+import { RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
 export class AnyChartArgs extends Schema.Class<AnyChartArgs>("AnyChartArgs")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
@@ -63,7 +63,7 @@ export class FailedWordsFrequencyData extends AnyCounterData.extend<FailedWordsF
 }) {}
 
 export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathReasonFrequencyData>("RunDeathReasonFrequencyData")({
-  reason: Schema.Literals(["Forfeit", "Guesses"]),
+  reason: RunDeathReason,
 }) {}
 
 export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData>("HardestWordsLeaderboardData")({
@@ -83,7 +83,7 @@ export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCard
 }) {}
 
 export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData>("BestRunTrophyCardData")({
-  deathReason: Schema.Literals(["Forfeit", "Guesses"]),
+  deathReason: RunDeathReason,
   // E4: "N/A" is the producer's sentinel for Forfeit runs (see
   // telemetry/state/actions.ts:36 — `failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A"`).
   // TheSecretWord requires exactly 5 characters (WORD_LENGTH = 5); "N/A" is 3 chars,
