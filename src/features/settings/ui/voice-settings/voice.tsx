@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceVoiceAtom } from "@/features/settings/state";
+import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks";
 
 // components
@@ -13,7 +13,7 @@ import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@h
 
 export function Voice() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
-  const voiceVoice = useAtomValue(gameSettingsVoiceVoiceAtom);
+  const voiceVoice = useAtomValue(gameSettingsVoiceAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
   const gt = useGT();
 

@@ -1,5 +1,6 @@
 // services, features, and other libraries
-import { Duration } from "effect";
+import { Duration, Option } from "effect";
+import { Atom } from "effect/unstable/reactivity";
 
 // Formats an Effect Duration into a human-readable HH:mm:ss string (also considers days)
 export const formatDuration = (duration: Duration.Duration) => {
@@ -10,6 +11,9 @@ export const formatDuration = (duration: Duration.Duration) => {
   if (hours > 0) return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   return `${pad(minutes)}:${pad(seconds)}`;
 };
+
+// Formats a whole number of seconds using formatDuration
+export const formatSeconds = (seconds: number) => formatDuration(Duration.seconds(seconds));
 
 // Returns the provided text with Markdown stripped and whitespace collapsed for TTS
 export const formatTextForTTS = (text: string) => {
@@ -24,3 +28,7 @@ export const formatTextForTTS = (text: string) => {
       .trim()
   );
 };
+
+// Maps an Option<string> atom to a string-or-null atom with TTS formatting applied
+export const sanitizedTextAtom = (baseAtom: Atom.Atom<Option.Option<string>>) =>
+  baseAtom.pipe(Atom.map((option) => Option.getOrNull(Option.map(option, formatTextForTTS))));

@@ -4,16 +4,10 @@
 import { useState } from "react";
 
 // services, features, and other libraries
-import { Duration } from "effect";
 import { T, Var, useGT, useLocale, useMessages } from "gt-next";
-import {
-  calculatePotentialScore,
-  getBasePointsPerTurn,
-  getSpeedMultiplier,
-  potentialScoreAsPercentage,
-} from "@/features/game/domain";
+import { calculatePotentialScore, getBasePointsPerTurn, getSpeedMultiplier, potentialScoreAsPercentage } from "@/features/game/domain";
 import { speedMultiplierToCategoryMessage } from "@/features/game/ui/speed-multiplier-category";
-import { formatDuration } from "@/lib/formatters";
+import { formatSeconds } from "@/lib/formatters";
 
 // components
 import { Progress, Slider } from "@base-ui/react";
@@ -40,7 +34,9 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
   return (
     <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
       <header className="grid place-items-center gap-3 rounded-md border border-accent bg-surface-1 p-3">
-        <h3 className="font-sans text-2xl font-semibold tracking-widest text-accent uppercase">{isReportingScore ? <T>Final Word Score</T> : <T>Live Potential</T>}</h3>
+        <h3 className="font-sans text-2xl font-semibold tracking-widest text-accent uppercase">
+          {isReportingScore ? <T>Final Word Score</T> : <T>Live Potential</T>}
+        </h3>
         <span className="text-3xl font-semibold tabular-nums sm:text-4xl">{potentialScore.toLocaleString(locale)}</span>
         <span className="text-xl font-semibold text-text-2 sm:text-2xl">{messages(speedMultiplierToCategoryMessage(speedMultiplier))}</span>
         <Progress.Root className="grid w-full" value={potentialScoreAsPercentage(potentialScore)}>
@@ -52,7 +48,9 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
 
       <div className="grid gap-3 sm:grid-cols-2">
         <section className="grid place-items-center bg-surface-1 p-3">
-          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Turn Guessed</T></h4>
+          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+            <T>Turn Guessed</T>
+          </h4>
           <span className="font-semibold tabular-nums sm:text-lg">{currentTurn}</span>
           <Slider.Root
             className="my-3 w-full"
@@ -73,13 +71,17 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
               </Slider.Track>
             </Slider.Control>
           </Slider.Root>
-          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Base Points</T></h4>
+          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+            <T>Base Points</T>
+          </h4>
           <span className="font-semibold tabular-nums sm:text-lg">{basePointsPerTurn.toLocaleString(locale)}</span>
         </section>
 
         <section className="grid place-items-center bg-surface-1 p-3">
-          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Time Elapsed</T></h4>
-          <span className="font-semibold tabular-nums sm:text-lg">{formatDuration(Duration.seconds(elapsedSeconds))}</span>
+          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+            <T>Time Elapsed</T>
+          </h4>
+          <span className="font-semibold tabular-nums sm:text-lg">{formatSeconds(elapsedSeconds)}</span>
 
           <Slider.Root
             className="my-3 w-full"
@@ -101,18 +103,28 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
               </Slider.Track>
             </Slider.Control>
           </Slider.Root>
-          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase"><T>Speed Multiplier</T></h4>
+          <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
+            <T>Speed Multiplier</T>
+          </h4>
           <span className="font-semibold tabular-nums sm:text-lg">{speedMultiplier}x</span>
         </section>
       </div>
 
       {!isReportingScore && (
         <footer className="mx-auto bg-surface-1 p-3 text-center text-lg sm:text-xl lg:text-2xl">
-          <T><p>
-            Final Word Score = Base Points (
-            <span className="inline-block min-w-[4ch] font-semibold text-text-2 tabular-nums"><Var>{basePointsPerTurn.toLocaleString(locale)}</Var></span>) x Speed Multiplier (
-            <span className="inline-block min-w-[3ch] font-semibold text-text-2 tabular-nums"><Var>{speedMultiplier}</Var></span>)
-          </p></T>
+          <T>
+            <p>
+              Final Word Score = Base Points (
+              <span className="inline-block min-w-[4ch] font-semibold text-text-2 tabular-nums">
+                <Var>{basePointsPerTurn.toLocaleString(locale)}</Var>
+              </span>
+              ) x Speed Multiplier (
+              <span className="inline-block min-w-[3ch] font-semibold text-text-2 tabular-nums">
+                <Var>{speedMultiplier}</Var>
+              </span>
+              )
+            </p>
+          </T>
         </footer>
       )}
     </article>

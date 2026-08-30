@@ -29,7 +29,7 @@ export const gameSettingsMachineAtom = createMachineAtom(gameSettingsMachine, {
 
 // Specialized selectors for granular state access and optimized re-renders
 export const gameSettingsSolutionsLanguageAtom = gameSettingsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutionsLanguage));
-export const gameSettingsVoiceVoiceAtom = gameSettingsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.voiceVoice));
+export const gameSettingsVoiceAtom = gameSettingsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.voiceVoice));
 export const gameSettingsVoiceVolumeAtom = gameSettingsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.voiceVolume));
 export const gameSettingsVoiceRateAtom = gameSettingsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.voiceRate));
 export const gameSettingsVoicePitchAtom = gameSettingsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.voicePitch));

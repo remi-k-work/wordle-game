@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { DateTime, Duration, Option } from "effect";
+import { DateTime, Option } from "effect";
 import { useGT, useLocale } from "gt-next";
-import { formatDuration } from "@/lib/formatters";
+import { formatSeconds } from "@/lib/formatters";
 
 // components
 import { InfoLine } from "@/ui/info-line";
@@ -54,7 +54,7 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
             </span>
             <span className="flex items-center gap-1 text-3xl wrap-anywhere">
               <ClockIcon className="size-9" />
-              {formatDuration(Duration.seconds(durationSeconds))}
+              {formatSeconds(durationSeconds)}
             </span>
             <h4 className="max-w-none place-self-end justify-self-center font-sans text-sm tracking-widest uppercase">{gt("Ended By")}</h4>
             <span className="text-3xl wrap-anywhere">{deathReason === "Guesses" ? gt("Failed on {word}", { word: failedOnWord }) : gt("Forfeit")}</span>

@@ -7,4 +7,4 @@ import { createMachineAtom } from "@/lib/machine-atom";
 export const browseChartsMachineAtom = createMachineAtom(browseChartsMachine);
 
 // Specialized selectors for granular state access and optimized re-renders
-export const browseChartsSlAtom = browseChartsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sl));
+export const browseChartsSolutionsLanguageAtom = browseChartsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sl));

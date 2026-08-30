@@ -7,14 +7,14 @@ import {
   gameSettingsSolutionsLanguageAtom,
   gameSettingsVoicePitchAtom,
   gameSettingsVoiceRateAtom,
-  gameSettingsVoiceVoiceAtom,
+  gameSettingsVoiceAtom,
   gameSettingsVoiceVolumeAtom,
 } from "@/features/settings/state";
 import { useSpeechVoices } from ".";
 
 export function useSpeakRiddle() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
-  const voiceVoice = useAtomValue(gameSettingsVoiceVoiceAtom);
+  const voiceVoice = useAtomValue(gameSettingsVoiceAtom);
   const voiceVolume = useAtomValue(gameSettingsVoiceVolumeAtom);
   const voiceRate = useAtomValue(gameSettingsVoiceRateAtom);
   const voicePitch = useAtomValue(gameSettingsVoicePitchAtom);

@@ -1,9 +1,10 @@
 // services, features, and other libraries
-import { Config, Effect, Layer, Option } from "effect";
+import { Effect, Layer, Option } from "effect";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
 import { generateRiddle } from "@/features/game/domain";
+import { readAiSwitch } from "@/lib/rpc";
 
 // assets
 import solutionsEnJson from "@/assets/data/solutions-en.json";
@@ -27,7 +28,7 @@ const RpcGameLayer = RpcGame.toLayer({
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
     Effect.gen(function* () {
       // Do not generate a riddle in the AI off mode to avoid rate limits and unnecessary token usage
-      const aiSwitch = yield* Config.literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
+      const aiSwitch = yield* readAiSwitch;
       if (aiSwitch === "off") return yield* Effect.sleep("5 seconds").pipe(Effect.as("No riddle available in the AI off mode."));
       return yield* generateRiddle(theSecretWord, solutionsLanguage);
     }).pipe(

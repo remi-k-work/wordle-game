@@ -1,11 +1,10 @@
 // services, features, and other libraries
-import { Duration } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state";
 import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
-import { formatDuration } from "@/lib/formatters";
+import { formatSeconds } from "@/lib/formatters";
 
 // components
 import { InfoLine } from "@/ui/info-line";
@@ -47,13 +46,13 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
           >
             <CartesianGrid stroke="var(--color-surface-3)" />
 
-            <XAxis type="number" stroke="var(--color-text-1)" tickFormatter={(value) => formatDuration(Duration.seconds(value))} />
+            <XAxis type="number" stroke="var(--color-text-1)" tickFormatter={(value) => formatSeconds(value)} />
             <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
             <Tooltip
               formatter={(value, name) => {
                 const seconds = Number(value);
-                return [formatDuration(Duration.seconds(seconds)), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")];
+                return [formatSeconds(seconds), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")];
               }}
               labelFormatter={(label, payload) => {
                 const row = payload?.[0]?.payload;

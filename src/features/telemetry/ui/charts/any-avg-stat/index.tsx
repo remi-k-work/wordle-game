@@ -1,10 +1,9 @@
 // services, features, and other libraries
-import { Duration } from "effect";
 import { T, useLocale, useMessages } from "gt-next";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { anyAvgStatAtom } from "@/features/telemetry/state";
-import { formatDuration } from "@/lib/formatters";
+import { formatSeconds } from "@/lib/formatters";
 
 // components
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
@@ -27,7 +26,7 @@ export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, titl
   const isDuration = statColumn === "timeSeconds" || statColumn === "durationSeconds";
   const locale = useLocale();
   const messages = useMessages();
-  const formatStatValue = (value: number) => (isDuration ? formatDuration(Duration.seconds(value)) : value.toLocaleString(locale));
+  const formatStatValue = (value: number) => (isDuration ? formatSeconds(value) : value.toLocaleString(locale));
 
   return AsyncResult.builder(anyAvgStat)
     .onInitialOrWaiting(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)

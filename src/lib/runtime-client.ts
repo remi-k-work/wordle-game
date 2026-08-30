@@ -14,15 +14,15 @@ import { sharedAtomRegistry } from "@/lib/atom-registry-provider";
 const sharedMemoMap = Layer.makeMemoMapUnsafe();
 const runtimeFactory = Atom.context({ memoMap: sharedMemoMap });
 
+const LoggerLayer = Logger.layer([Logger.consolePretty()]);
+
 // HubTracerLayer is a custom Effect Tracer that pushes ended spans into TelemetryHub's PubSub
 const TelemetryReadyLayer = Layer.mergeAll(HubTracerLayer, RpcTelemetryClient.layer).pipe(Layer.provideMerge(TelemetryHub.layer));
 const AtomReadyLayer = Layer.mergeAll(Layer.succeed(AtomRegistry.AtomRegistry, sharedAtomRegistry), Reactivity.layer, BrowserKeyValueStore.layerLocalStorage);
 
-const TelemetryStarterLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), TelemetryWorkerLayer, AtomReadyLayer).pipe(
-  Layer.provideMerge(TelemetryReadyLayer)
-);
+// Basis for every client-side runtime: console logging + all RPC clients + atoms + tracer/hub.
 const MainLayer = Layer.mergeAll(
-  Logger.layer([Logger.consolePretty()]),
+  LoggerLayer,
   RpcGameClient.layer,
   RpcHighScoreClient.layer,
   RpcOverdriveHacksClient.layer,
@@ -30,6 +30,11 @@ const MainLayer = Layer.mergeAll(
   AtomReadyLayer
 );
 
+// RuntimeTelemetryStarter additionally runs the telemetry worker so the app can start collecting
+// metrics (it is the runtime used to bootstrap/seed telemetry state).
+const TelemetryStarterLayer = Layer.mergeAll(LoggerLayer, TelemetryWorkerLayer, AtomReadyLayer).pipe(Layer.provideMerge(TelemetryReadyLayer));
+
+// RuntimeTelemetryStarter = runs the telemetry worker; RuntimeAtom = the standard app runtime.
 export const RuntimeTelemetryStarter = runtimeFactory(TelemetryStarterLayer);
 export const RuntimeAtom = runtimeFactory(MainLayer);
 export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: sharedMemoMap });

@@ -3,48 +3,14 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
-import { createActor } from "xstate";
 import { highScoreMachine } from "@/features/high-score/machines/high-score";
-import { inspect } from "@/machines/inspect";
+import { createMachineAtom } from "@/lib/machine-atom";
 
 // types
-import type { Actor, EventFromLogic, SnapshotFrom } from "xstate";
 import type { SolutionsLanguage } from "@/features/game/domain";
 
-type HighScoreMachineSnapshot = SnapshotFrom<typeof highScoreMachine>;
-type HighScoreMachineEvent = EventFromLogic<typeof highScoreMachine>;
-type HighScoreMachineActor = Actor<typeof highScoreMachine>;
-
-// Creates an Atom-owned XState actor reference
-const highScoreMachineActorAtom = Atom.make<HighScoreMachineActor>((get) => {
-  const actor = createActor(highScoreMachine, { inspect });
-  actor.start();
-
-  get.addFinalizer(() => {
-    actor.stop();
-  });
-
-  return actor;
-}).pipe(Atom.keepAlive);
-
 // The high score machine is now a living actor inside the effect atom
-export const highScoreMachineAtom = Atom.writable<HighScoreMachineSnapshot, HighScoreMachineEvent>(
-  (get) => {
-    const actor = get(highScoreMachineActorAtom);
-    const subscription = actor.subscribe((snapshot) => {
-      get.setSelf(snapshot);
-    });
-
-    get.addFinalizer(() => {
-      subscription.unsubscribe();
-    });
-
-    return actor.getSnapshot();
-  },
-  (ctx, event) => {
-    ctx.get(highScoreMachineActorAtom).send(event);
-  }
-).pipe(Atom.keepAlive);
+export const highScoreMachineAtom = createMachineAtom(highScoreMachine);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const highScorePlayerNameAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.playerName));

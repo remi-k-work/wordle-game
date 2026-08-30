@@ -1,10 +1,9 @@
 // services, features, and other libraries
-import { Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
 import { createMachineAtom } from "@/lib/machine-atom";
-import { formatTextForTTS } from "@/lib/formatters";
+import { sanitizedTextAtom } from "@/lib/formatters";
 
 // types
 import type { Color, Tile, WordleGrid } from "@/features/game/domain";
@@ -52,4 +51,4 @@ export const overdriveHacksCanApplyHackAtom = Atom.family((overdriveHackId: Over
 );
 
 // The override text with Markdown stripped and whitespace collapsed for TTS
-export const overdriveHacksSanitizedOverrideAtom = Atom.make((get) => get(overdriveHacksTheOverrideAtom).pipe(Option.map(formatTextForTTS), Option.getOrNull));
+export const overdriveHacksSanitizedOverrideAtom = sanitizedTextAtom(overdriveHacksTheOverrideAtom);

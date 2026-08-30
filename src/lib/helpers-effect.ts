@@ -53,28 +53,3 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
     return pageMainResult.success;
   }
 };
-
-// Execute the main effect for the component, handle known errors, and return the payload
-export const runComponentMain = async <A, E extends { _tag: string }>(componentMain: Effect.Effect<A, E, any>) => {
-  // Explicitly defer to request time (Effect uses Date.now() internally)
-  await connection();
-
-  // We wrap in Effect.result to catch failures gracefully
-  const componentMainResult = await RuntimeServer.runPromise(
-    componentMain.pipe(
-      Effect.tapError((error) => Effect.log(`[COMPONENT MAIN ERROR]: ${error}`)),
-      Effect.result
-    )
-  );
-
-  // Standardized error handling
-  if (Result.isFailure(componentMainResult)) {
-    const error = componentMainResult.failure;
-
-    // Allow the next.js error boundary to catch any unexpected errors
-    throw error;
-  } else {
-    // Return success result
-    return componentMainResult.success;
-  }
-};
