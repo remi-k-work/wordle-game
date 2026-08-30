@@ -2,14 +2,11 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import {
-  AnyAvgStatArgs,
   anyAvgStatQuery,
   AnyChartArgs,
-  AnyCounterArgs,
   anyCounterQuery,
   ArcadeStreakDistributionData,
   arcadeStreakDistributionQuery,
-  BestRunTrophyCardArgs,
   bestRunTrophyCardQuery,
   cumulativeToDistribution,
   failedWordsFrequencyQuery,
@@ -91,16 +88,16 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const getBestRunTrophyCard = bestRunTrophyCardQuery(sql);
 
     return {
-      getGuessDistribution: (request: AnyChartArgs) => getGuessDistribution(request),
-      getTimeToSolveDistribution: (request: AnyChartArgs) => getTimeToSolveDistribution(request),
-      getArcadeStreakDistribution: (request: AnyChartArgs) => getArcadeStreakDistribution(request),
-      getOpeningGuessesFrequency: (request: AnyChartArgs) => getOpeningGuessesFrequency(request),
-      getFailedWordsFrequency: (request: AnyChartArgs) => getFailedWordsFrequency(request),
-      getRunDeathReasonFrequency: (request: AnyChartArgs) => getRunDeathReasonFrequency(request),
-      getAnyCounter: (request: AnyCounterArgs) => getAnyCounter(request),
-      getAnyAvgStat: (request: AnyAvgStatArgs) => getAnyAvgStat(request),
-      getHardestWordsLeaderboard: (request: AnyChartArgs) => getHardestWordsLeaderboard(request),
-      getBestRunTrophyCard: (request: BestRunTrophyCardArgs) => getBestRunTrophyCard(request),
+      getGuessDistribution,
+      getTimeToSolveDistribution,
+      getArcadeStreakDistribution,
+      getOpeningGuessesFrequency,
+      getFailedWordsFrequency,
+      getRunDeathReasonFrequency,
+      getAnyCounter,
+      getAnyAvgStat,
+      getHardestWordsLeaderboard,
+      getBestRunTrophyCard,
     } as const;
   }),
 }) {

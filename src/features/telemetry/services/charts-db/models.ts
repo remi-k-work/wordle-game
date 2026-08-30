@@ -33,22 +33,25 @@ export class AnyCounterData extends Schema.Class<AnyCounterData>("AnyCounterData
 // by every other *Data schema in this file.
 export class AnyAvgStatData extends AnyCounterData.extend<AnyAvgStatData>("AnyAvgStatData")({}) {}
 
+// Shared 0-100 percentage field used by every distribution chart
+const Pct = Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))));
+
 export class GuessDistributionData extends AnyCounterData.extend<GuessDistributionData>("GuessDistributionData")({
   turn: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 })))),
-  personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
-  globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
+  personalPct: Pct,
+  globalPct: Pct,
 }) {}
 
 export class TimeToSolveDistributionData extends AnyCounterData.extend<TimeToSolveDistributionData>("TimeToSolveDistributionData")({
   maxSeconds: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
-  personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
-  globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
+  personalPct: Pct,
+  globalPct: Pct,
 }) {}
 
 export class ArcadeStreakDistributionData extends AnyCounterData.extend<ArcadeStreakDistributionData>("ArcadeStreakDistributionData")({
   streak: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
-  personalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
-  globalPct: Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 })))),
+  personalPct: Pct,
+  globalPct: Pct,
 }) {}
 
 export class OpeningGuessesFrequencyData extends AnyCounterData.extend<OpeningGuessesFrequencyData>("OpeningGuessesFrequencyData")({
