@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { HighScore, AddHighScore } from "@/features/high-score/domain";
+import { HighScore, AddHighScore, beatsTop10Tail } from "@/features/high-score/domain";
 import { SolutionsLanguage } from "@/features/game/domain";
 import { PgLive } from "@/lib/pg-live";
 import { dieOnDbFailure } from "@/lib/db";
@@ -32,9 +32,7 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
               // Serialize qualification and insertion so two simultaneous submissions cannot both claim the same final slot.
               yield* sql`LOCK TABLE high_score IN SHARE ROW EXCLUSIVE MODE`;
               const currentTop10 = yield* top10HighScores(request.solutionsLang);
-              const tail = currentTop10.at(-1);
-              const qualifies =
-                currentTop10.length < 10 || tail === undefined || request.score > tail.score || (request.score === tail.score && request.streak > tail.streak);
+              const qualifies = currentTop10.length < 10 || beatsTop10Tail(currentTop10, request.score, request.streak);
               if (!qualifies) return Option.none();
 
               const { id } = yield* addHighScore(request);

@@ -1,10 +1,10 @@
 // services, features, and other libraries
-import { Context, Effect, Option } from "effect";
+import { Context, Effect, Match, Option } from "effect";
 import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
 import { formatGuess } from "@/features/game/domain";
 
 // types
-import type { SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
+import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
 import type { LanguageModel } from "ai";
 
 // constants
@@ -101,12 +101,18 @@ const OVERRIDE_PROMPT_PL = (
     prompt += `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n`;
 
     // Map English domain colors to Polish for the prompt context
-    const colorToPl: Record<string, string> = { green: "zielony", yellow: "żółty", grey: "szary" };
+    const colorToPl = (color: Color) =>
+      Match.value(color).pipe(
+        Match.when("green", () => "zielony"),
+        Match.when("yellow", () => "żółty"),
+        Match.when("grey", () => "szary"),
+        Match.orElse((s) => s)
+      );
 
     // Dynamically calculate the feedback colors using formatGuess
     wordleGuesses.forEach((guess, i) => {
       const tiles = formatGuess(theSecretWord, guess);
-      const feedbackString = tiles.map((t) => `${t.tileKey} ${colorToPl[t.color] ?? t.color}`).join(", ");
+      const feedbackString = tiles.map((t) => `${t.tileKey} ${colorToPl(t.color)}`).join(", ");
       prompt += `${i + 1}. ${guess} -> ${feedbackString}\n`;
     });
 

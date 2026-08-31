@@ -4,6 +4,9 @@ import { useCallback } from "react";
 // next
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
+// services, features, and other libraries
+import { Match } from "effect";
+
 // types
 import type { Route } from "next";
 
@@ -27,15 +30,17 @@ interface NavigateFn {
 // Merges `paramsToSet` into the current search params, handling array values (joined with `,`), empty-string deletion, and numeric coercion
 function applyParams(params: URLSearchParams, paramsToSet: QueryParams): void {
   for (const [key, value] of Object.entries(paramsToSet)) {
-    if (Array.isArray(value)) {
-      if (value.length > 0) params.set(key, value.join(","));
-      else params.delete(key);
-    } else if (typeof value === "string") {
-      if (value.trim().length > 0) params.set(key, value);
-      else params.delete(key);
-    } else {
-      params.set(key, String(value));
-    }
+    Match.value(value).pipe(
+      Match.when(Array.isArray, (arr) => {
+        if (arr.length > 0) params.set(key, arr.join(","));
+        else params.delete(key);
+      }),
+      Match.when(Match.string, (str) => {
+        if (str.trim().length > 0) params.set(key, str);
+        else params.delete(key);
+      }),
+      Match.orElse((other) => params.set(key, String(other)))
+    );
   }
 }
 
