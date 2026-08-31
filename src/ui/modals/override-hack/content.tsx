@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Option } from "effect";
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { overdriveHacksMachineAtom, overdriveHacksSanitizedOverrideAtom } from "@/features/overdrive-hacks/state";
@@ -14,13 +15,13 @@ import { SpeakerWaveIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 export function Content() {
   const overdriveHacksMachineSnapshot = useAtomValue(overdriveHacksMachineAtom);
-  const sanitizedOverride = useAtomValue(overdriveHacksSanitizedOverrideAtom);
+  const sanitizedOverride = Option.fromNullOr(useAtomValue(overdriveHacksSanitizedOverrideAtom));
   const speakRiddle = useSpeakRiddle();
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   const isAwaiting = overdriveHacksMachineSnapshot.matches("idle");
   const isLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
-  const canSpeak = sanitizedOverride !== null && !isAwaiting && !isLoading;
+  const canSpeak = Option.isSome(sanitizedOverride) && !isAwaiting && !isLoading;
 
   return (
     <article className="mx-auto max-w-prose space-y-9">
@@ -30,12 +31,16 @@ export function Content() {
         ) : isLoading ? (
           <T>Thinking...</T>
         ) : (
-          (sanitizedOverride ?? <T>Override unavailable. You are on your own! Please try again later.</T>)
+          Option.getOrElse(sanitizedOverride, () => <T>Override unavailable. You are on your own! Please try again later.</T>)
         )}
       </p>
 
       <footer className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
-        <Button className="button" disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedOverride)}>
+        <Button
+          className="button"
+          disabled={!canSpeak}
+          onClick={() => Option.match(sanitizedOverride, { onNone: () => {}, onSome: (text) => speakRiddle(text) })}
+        >
           <SpeakerWaveIcon className="size-11" />
           <T>Speak Override</T>
         </Button>
