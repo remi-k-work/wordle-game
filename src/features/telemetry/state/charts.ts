@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -8,6 +8,9 @@ import { sessionIdAtom } from "@/features/player/state";
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
 import type { AnyAvgStatArgs, AnyCounterArgs, BestRunTrophyCardArgs } from "@/features/telemetry/services/charts-db";
+
+// Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
+const nullToInfinity = (value: number | null) => Option.getOrElse(Option.fromNullOr(value), () => Infinity);
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   RuntimeAtom.atom(
@@ -27,7 +30,7 @@ export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: Solut
 
       const { getTimeToSolveDistribution } = yield* RpcTelemetryClient;
       return yield* getTimeToSolveDistribution({ sessionId, solutionsLanguage }).pipe(
-        Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: row.maxSeconds === null ? Infinity : row.maxSeconds })))
+        Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) })))
       );
     })
   ).pipe(Atom.setIdleTTL("5 minutes"))
@@ -40,7 +43,7 @@ export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: Solu
 
       const { getArcadeStreakDistribution } = yield* RpcTelemetryClient;
       return yield* getArcadeStreakDistribution({ sessionId, solutionsLanguage }).pipe(
-        Effect.map((data) => data.map((row) => ({ ...row, streak: row.streak === null ? Infinity : row.streak })))
+        Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) })))
       );
     })
   ).pipe(Atom.setIdleTTL("5 minutes"))

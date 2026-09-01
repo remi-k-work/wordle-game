@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger, FileSystem } from "effect";
+import { Effect, HashSet, Layer, Logger, FileSystem } from "effect";
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
 
 // constants
@@ -21,15 +21,15 @@ const main = Effect.gen(function* () {
   const solutions: string[] = JSON.parse(solutionsRaw);
   const definitions: Record<string, string> = JSON.parse(definitionsRaw);
 
-  // Convert solutions into an uppercase Set for O(1) lookups
-  const solutionsSet = new Set(solutions.map((w) => w.toUpperCase()));
+  // Convert solutions into an uppercase HashSet for O(1) lookups
+  const solutionsSet = HashSet.fromIterable(solutions.map((w) => w.toUpperCase()));
   const cleanDefinitions: Record<string, string> = {};
   let removalCount = 0;
 
   // Perform the intersection cleanup
   for (const [word, definition] of Object.entries(definitions)) {
     const upperWord = word.toUpperCase();
-    if (solutionsSet.has(upperWord)) {
+    if (HashSet.has(solutionsSet, upperWord)) {
       cleanDefinitions[upperWord] = definition;
     } else {
       removalCount++;

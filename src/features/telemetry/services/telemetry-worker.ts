@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe } from "effect";
+import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Ref, Schedule, Schema, pipe } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain";
@@ -81,7 +81,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     // --- Stream 2: Metrics (Native Snapshot Loop) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
     const metricProcessor = Effect.gen(function* () {
-      let prevSnapshots: ReadonlyArray<Metric.Metric.Snapshot> = [];
+      const prevSnapshots = yield* Ref.make<ReadonlyArray<Metric.Metric.Snapshot>>([]);
 
       yield* Effect.repeat(
         Effect.gen(function* () {
@@ -89,9 +89,9 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
           const currSnapshots = yield* Metric.snapshot;
 
           // Effect v4 handles structural equality for snapshots (including Maps in Frequencies)
-          if (!Equal.equals(currSnapshots, prevSnapshots)) {
+          if (!Equal.equals(currSnapshots, yield* Ref.get(prevSnapshots))) {
             yield* processMetrics(currSnapshots);
-            prevSnapshots = currSnapshots;
+            yield* Ref.set(prevSnapshots, currSnapshots);
           }
         }),
         Schedule.spaced(Duration.seconds(10))
