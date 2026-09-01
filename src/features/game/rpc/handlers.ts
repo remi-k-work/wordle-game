@@ -1,10 +1,9 @@
 // services, features, and other libraries
 import { Effect, Layer, Option } from "effect";
-import { matchLanguage } from "@/features/game/domain";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
-import { generateRiddle } from "@/features/game/domain";
+import { generateRiddle, matchLanguage } from "@/features/game/domain";
 import { readAiSwitch } from "@/lib/rpc";
 
 // assets

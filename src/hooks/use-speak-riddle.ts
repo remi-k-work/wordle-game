@@ -3,7 +3,6 @@ import { useCallback } from "react";
 
 // services, features, and other libraries
 import { Option } from "effect";
-import { matchLanguage } from "@/features/game/domain";
 import { useAtomValue } from "@effect/atom-react";
 import {
   gameSettingsSolutionsLanguageAtom,
@@ -13,6 +12,7 @@ import {
   gameSettingsVoiceVolumeAtom,
 } from "@/features/settings/state";
 import { useSpeechVoices } from ".";
+import { matchLanguage } from "@/features/game/domain";
 
 export function useSpeakRiddle() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);

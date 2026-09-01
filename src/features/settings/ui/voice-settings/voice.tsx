@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { matchLanguage } from "@/features/game/domain";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks";
+import { matchLanguage } from "@/features/game/domain";
 
 // components
 import { Select } from "@base-ui/react";
