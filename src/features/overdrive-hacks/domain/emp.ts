@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Array, Option, Random, pipe } from "effect";
+import { Effect, Array, HashMap, Option, Random, pipe } from "effect";
 import { computeKeypadState } from "@/features/game/domain";
 
 // types
@@ -22,10 +22,12 @@ export const computeEmpCandidates = (
     // Exclude letters already nuked by previous EMP activations
     Array.filter((letter) => !empNukedLetters.includes(letter)),
     // Exclude letters the player has already discovered through guessing (green/yellow from keypad)
-    Array.filter((letter) => {
-      const color = computeKeypadState(theSecretWord, wordleGuesses)[letter];
-      return color === undefined || color === "";
-    })
+    Array.filter((letter) =>
+      Option.match(HashMap.get(computeKeypadState(theSecretWord, wordleGuesses), letter), {
+        onNone: () => true,
+        onSome: (color) => color === "",
+      })
+    )
   );
 
 // EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation

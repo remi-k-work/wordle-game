@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, DateTime, pipe } from "effect";
+import { Array, DateTime, HashMap, Option, pipe } from "effect";
 import { formatGuess, getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrongerColor } from ".";
 
 // types
@@ -29,18 +29,23 @@ export function calculatePotentialScore(
   startTimeOrSeconds: WordChallenge["startTime"] | number,
   now?: DateTime.Utc
 ) {
-  const elapsedSeconds = typeof startTimeOrSeconds === "number" ? startTimeOrSeconds : getElapsedSeconds(startTimeOrSeconds, now!);
+  const elapsedSeconds =
+    typeof startTimeOrSeconds === "number"
+      ? startTimeOrSeconds
+      : getElapsedSeconds(
+          startTimeOrSeconds,
+          Option.getOrElse(Option.fromNullishOr(now), () => DateTime.makeUnsafe(Date.now()))
+        );
   return Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds));
 }
 
 // Compute the final keypad state by reducing all guesses and picking the strongest colors
-// "undefined" variant matters so downstream code can distinguish "never guessed"
+// "undefined" variant matters so downstream code can distinguish "never guessed" — modeled as absent key in HashMap
 export const computeKeypadState = (theSecretWord: TheSecretWord, wordleGuesses: WordChallenge["wordleGuesses"]) =>
   pipe(
     wordleGuesses,
     Array.flatMap((guess) => formatGuess(theSecretWord, guess)),
-    Array.reduce({} as Record<string, Color | undefined>, (acc, { tileKey, color }) => {
-      acc[tileKey] = pickStrongerColor(acc[tileKey], color);
-      return acc;
-    })
+    Array.reduce(HashMap.empty<string, Color>(), (acc: HashMap.HashMap<string, Color>, { tileKey, color }: { tileKey: string; color: Color }) =>
+      HashMap.set(acc, tileKey, pickStrongerColor(Option.getOrNull(HashMap.get(acc, tileKey)) ?? undefined, color))
+    )
   );

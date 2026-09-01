@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Array, Option, Random, pipe } from "effect";
+import { Effect, Array, HashMap, Option, Random, pipe } from "effect";
 import { computeKeypadState } from "@/features/game/domain";
 
 // types
@@ -20,10 +20,12 @@ export const computeSonarCandidates = (
     // Exclude vowels already revealed by previous sonar activations
     Array.filter((vowel) => !alreadyRevealedLetters.includes(vowel)),
     // Keep vowels the player hasn't positively identified yet (untouched or only greyed-out guesses)
-    Array.filter((vowel) => {
-      const color = computeKeypadState(theSecretWord, wordleGuesses)[vowel];
-      return color === undefined || color === "" || color === "grey";
-    })
+    Array.filter((vowel) =>
+      Option.match(HashMap.get(computeKeypadState(theSecretWord, wordleGuesses), vowel), {
+        onNone: () => true,
+        onSome: (color) => color === "" || color === "grey",
+      })
+    )
   );
 
 export const calculateSonarTarget = (

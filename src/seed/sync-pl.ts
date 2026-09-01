@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, HashSet, Layer, Logger, FileSystem } from "effect";
+import { Array, Effect, HashMap, HashSet, Layer, Logger, pipe, FileSystem } from "effect";
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
 
 // constants
@@ -23,18 +23,18 @@ const main = Effect.gen(function* () {
 
   // Convert solutions into an uppercase HashSet for O(1) lookups
   const solutionsSet = HashSet.fromIterable(solutions.map((w) => w.toUpperCase()));
-  const cleanDefinitions: Record<string, string> = {};
-  let removalCount = 0;
 
-  // Perform the intersection cleanup
-  for (const [word, definition] of Object.entries(definitions)) {
-    const upperWord = word.toUpperCase();
-    if (HashSet.has(solutionsSet, upperWord)) {
-      cleanDefinitions[upperWord] = definition;
-    } else {
-      removalCount++;
-    }
-  }
+  // Perform the intersection cleanup functionally — HashMap for absent-key safety, no mutation
+  const { clean: cleanMap, removed: removalCount } = pipe(
+    Object.entries(definitions),
+    Array.reduce({ clean: HashMap.empty<string, string>(), removed: 0 }, (acc, [word, definition]) => {
+      const upperWord = word.toUpperCase();
+      return HashSet.has(solutionsSet, upperWord)
+        ? { clean: HashMap.set(acc.clean, upperWord, definition), removed: acc.removed }
+        : { clean: acc.clean, removed: acc.removed + 1 };
+    })
+  );
+  const cleanDefinitions = Object.fromEntries(HashMap.toEntries(cleanMap)) as Record<string, string>;
 
   // Early return if nothing needs pruning
   if (removalCount === 0) {

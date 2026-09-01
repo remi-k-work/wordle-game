@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, DateTime, Option, pipe } from "effect";
+import { Array, DateTime, HashMap, Option, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState, formatGuess } from "@/features/game/domain";
@@ -47,7 +47,7 @@ export const wordChallengeWordleGridAtom = Atom.make((get) =>
 // Current coloring state of the keypad keys based solely on genuine guess history
 export const wordChallengeKeypadColorsAtom = Atom.make((get) =>
   Option.match(get(wordChallengeTheSecretWordAtom), {
-    onNone: () => ({}) as Record<string, Color | undefined>,
+    onNone: () => HashMap.empty<string, Color>(),
     onSome: (theSecretWord) => computeKeypadState(theSecretWord, get(wordChallengeWordleGuessesAtom)),
   })
 );

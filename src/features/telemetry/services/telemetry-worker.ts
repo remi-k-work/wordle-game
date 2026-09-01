@@ -42,17 +42,29 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         if (spanBatch.length === 0) return;
         yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
 
-        for (const { name, attributes } of spanBatch) {
-          // Convert the attributes map to a plain object for schema decoding and validation
-          const attributesObject = Object.fromEntries(attributes);
+        yield* Effect.forEach(spanBatch, ({ name, attributes }) =>
+          Effect.gen(function* () {
+            // Convert the attributes map to a plain object for schema decoding and validation
+            const attributesObject = Object.fromEntries(attributes);
 
-          yield* pipe(
-            Match.value(name),
-            Match.when("logWordWon", () => Effect.asVoid(addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributesObject)))),
-            Match.when("logRunCompleted", () => Effect.asVoid(addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributesObject)))),
-            Match.orElse(() => Effect.void)
-          );
-        }
+            yield* pipe(
+              Match.value(name),
+              Match.when("logWordWon", () =>
+                Effect.gen(function* () {
+                  const data = yield* Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject).pipe(Effect.orDie);
+                  yield* addRunWordEvent(data);
+                }).pipe(Effect.asVoid)
+              ),
+              Match.when("logRunCompleted", () =>
+                Effect.gen(function* () {
+                  const data = yield* Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject).pipe(Effect.orDie);
+                  yield* addArcadeRunSummary(data);
+                }).pipe(Effect.asVoid)
+              ),
+              Match.orElse(() => Effect.void)
+            );
+          })
+        );
       });
 
     const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>
@@ -60,18 +72,20 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         if (snapshots.length === 0) return;
         yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
-        const globalPulseRecords: AddGlobalPulse[] = [];
-        for (const { id: metricName, attributes, state: metricPayload } of snapshots) {
-          const sessionId = Schema.decodeUnknownSync(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]);
-          const solutionsLanguage = Schema.decodeUnknownSync(SolutionsLanguage)(attributes?.["solutionsLanguage"]);
-          globalPulseRecords.push({
-            sessionId,
-            instanceId,
-            solutionsLanguage,
-            metricName,
-            metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
-          });
-        }
+        const globalPulseRecords: AddGlobalPulse[] = yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state: metricPayload }) =>
+          Effect.gen(function* () {
+            const sessionId = yield* Schema.decodeUnknownEffect(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]).pipe(Effect.orDie);
+            const solutionsLanguage = yield* Schema.decodeUnknownEffect(SolutionsLanguage)(attributes?.["solutionsLanguage"]).pipe(Effect.orDie);
+            return {
+              sessionId,
+              instanceId,
+              solutionsLanguage,
+              metricName,
+              metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
+            } as const satisfies AddGlobalPulse;
+          })
+        );
+
         if (globalPulseRecords.length > 0) yield* addGlobalPulse(globalPulseRecords);
       });
 

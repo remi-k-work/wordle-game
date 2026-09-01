@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Option } from "effect";
+import { HashMap, Option } from "effect";
 import { motion, AnimatePresence } from "motion/react";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameDataKeypadAtom } from "@/features/game/state";
@@ -62,7 +62,7 @@ export function Footer() {
   if (Option.isNone(gameDataKeypad)) return <FooterSkeleton />;
 
   // Dynamically filter out the grey keys
-  const availableKeys = gameDataKeypad.value.filter((key) => keypadColors[key] !== "grey");
+  const availableKeys = gameDataKeypad.value.filter((key) => Option.getOrElse(HashMap.get(keypadColors, key), () => "" as Color) !== "grey");
 
   return (
     <footer className="grid gap-1">
@@ -77,7 +77,7 @@ export function Footer() {
         <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
           <AnimatePresence mode="sync">
             {availableKeys.map((key) => {
-              const usedKeyColor = keypadColors[key];
+              const usedKeyColor = Option.getOrNull(HashMap.get(keypadColors, key));
 
               return (
                 <MotionButton

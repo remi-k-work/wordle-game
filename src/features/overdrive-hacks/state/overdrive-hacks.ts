@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Array, HashMap, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
@@ -20,11 +21,12 @@ export const overdriveHacksEmpNukedLettersAtom = overdriveHacksMachineAtom.pipe(
 export const overdriveHacksSonarRevealsAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sonarReveals));
 export const overdriveHacksTheOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverride));
 
-export const overdriveHacksKeypadColorsAtom = Atom.make((get) => {
-  const colors = { ...get(wordChallengeKeypadColorsAtom) } as Record<string, Color | undefined>;
-  for (const letter of get(overdriveHacksEmpNukedLettersAtom)) colors[letter] = "grey";
-  return colors;
-});
+export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
+  pipe(
+    get(overdriveHacksEmpNukedLettersAtom),
+    Array.reduce(get(wordChallengeKeypadColorsAtom), (acc, letter) => HashMap.set(acc, letter, "grey" as Color))
+  )
+);
 
 // Projection for completed rows. Sonar state remains separate from player guesses;
 // the current-guess component can use the same reveal selector when it gains final visuals.

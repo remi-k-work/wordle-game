@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime, Option, Effect } from "effect";
+import { DateTime, HashMap, Option, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -51,7 +51,7 @@ export const wordChallengeMachine = setup({
       // Prevent typing letters already ruled out by genuine guesses
       const theSecretWord = Option.getOrThrow(context.theSecretWord);
       const keypadState = computeKeypadState(theSecretWord, context.wordleGuesses);
-      if (keypadState[normalizedKey] === "grey") return false;
+      if (Option.getOrElse(HashMap.get(keypadState, normalizedKey), () => "" as const) === "grey") return false;
       return true;
     },
   },
