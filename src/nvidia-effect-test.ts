@@ -126,9 +126,7 @@ const makeNvidiaLayer = (testModel: TestModel, apiKey: Redacted.Redacted<string>
       temperature: testModel.temperature,
       top_p: testModel.top_p,
       max_tokens: testModel.max_tokens,
-      ...(testModel.chat_template_kwargs !== undefined
-        ? { chat_template_kwargs: testModel.chat_template_kwargs }
-        : {}),
+      ...(testModel.chat_template_kwargs !== undefined ? { chat_template_kwargs: testModel.chat_template_kwargs } : {}),
     },
   });
   return Layer.provide(modelLayer, clientLayer);
@@ -371,7 +369,7 @@ const main = Effect.gen(function* () {
   }
 
   const fullPass = Object.entries(allResults)
-    .filter(([_, r]) => r.generateText.success && r.generateObjectRiddle.success && r.generateObjectClue.success)
+    .filter(([, r]) => r.generateText.success && r.generateObjectRiddle.success && r.generateObjectClue.success)
     .map(([m]) => m);
 
   yield* Effect.log(`\n${"=".repeat(60)}`);
