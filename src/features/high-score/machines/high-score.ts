@@ -11,7 +11,7 @@ import { modalMachineAtom } from "@/state";
 import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain";
 
 // constants
-import { INITIAL_HIGH_SCORE_CONTEXT } from "@/features/high-score/domain";
+import { INITIAL_HIGH_SCORE_CONTEXT, beatsTop10Tail } from "@/features/high-score/domain";
 
 const top10HighScoresActor = fromPromise(
   async ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
@@ -48,16 +48,9 @@ export const highScoreMachine = setup({
   },
   guards: {
     // Determine if the current run qualifies for the high score
-    qualifiesForHighScore: ({ context }, params: { top10HighScores: ReadonlyArray<HighScore> }) => {
-      // If there are fewer than 10 entries, any score qualifies
-      if (params.top10HighScores.length < 10) return true;
-
-      // Get the 10th entry (the lowest score in the top 10)
-      const tail = params.top10HighScores.at(-1)!;
-
-      // Qualification rule (score must be higher than the 10th place score, or if tied, streak must be higher than the 10th place streak)
-      return context.runScore > tail.score || (context.runScore === tail.score && context.streak > tail.streak);
-    },
+    qualifiesForHighScore: ({ context }, params: { top10HighScores: ReadonlyArray<HighScore> }) =>
+      // If there are fewer than 10 entries, any score qualifies; otherwise it must beat the 10th-place entry
+      params.top10HighScores.length < 10 || beatsTop10Tail(params.top10HighScores, context.runScore, context.streak),
   },
   actions: {
     saveRunData: assign(({ event }) => {

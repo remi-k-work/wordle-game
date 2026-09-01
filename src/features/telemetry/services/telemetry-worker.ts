@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Stream, Duration, Equal, Metric, Schedule, Schema } from "effect";
+import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Ref, Schedule, Schema, pipe } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain";
@@ -8,13 +8,23 @@ import { SolutionsLanguage } from "@/features/game/domain";
 // types
 import type { Tracer } from "effect";
 
-const normalizeMetricPayload = (payload: Metric.Metric.Snapshot["state"]) => {
-  if ("occurrences" in payload) return { occurrences: Object.fromEntries(payload.occurrences) };
-  if ("incremental" in payload) return { ...payload, count: typeof payload.count === "bigint" ? payload.count.toString() : payload.count };
-  if ("value" in payload) return { value: typeof payload.value === "bigint" ? payload.value.toString() : payload.value };
-
-  return payload;
-};
+const normalizeMetricPayload = (payload: Metric.Metric.Snapshot["state"]) =>
+  pipe(
+    Match.value(payload),
+    Match.when(
+      (state): state is Metric.FrequencyState => "occurrences" in state,
+      ({ occurrences }) => ({ occurrences: Object.fromEntries(occurrences) })
+    ),
+    Match.when(
+      (state): state is Metric.CounterState<number | bigint> => "incremental" in state,
+      (state) => ({ ...state, count: typeof state.count === "bigint" ? state.count.toString() : state.count })
+    ),
+    Match.when(
+      (state): state is Metric.GaugeState<number | bigint> => "value" in state,
+      (state) => ({ value: typeof state.value === "bigint" ? state.value.toString() : state.value })
+    ),
+    Match.orElse((state) => state)
+  );
 
 // TelemetryWorkerLayer is a background service that consumes telemetry data from the Hub
 export const TelemetryWorkerLayer = Layer.effectDiscard(
@@ -36,8 +46,12 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
           // Convert the attributes map to a plain object for schema decoding and validation
           const attributesObject = Object.fromEntries(attributes);
 
-          if (name === "logWordWon") yield* addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributesObject));
-          else if (name === "logRunCompleted") yield* addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributesObject));
+          yield* pipe(
+            Match.value(name),
+            Match.when("logWordWon", () => Effect.asVoid(addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributesObject)))),
+            Match.when("logRunCompleted", () => Effect.asVoid(addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributesObject)))),
+            Match.orElse(() => Effect.void)
+          );
         }
       });
 
@@ -67,7 +81,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     // --- Stream 2: Metrics (Native Snapshot Loop) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
     const metricProcessor = Effect.gen(function* () {
-      let prevSnapshots: ReadonlyArray<Metric.Metric.Snapshot> = [];
+      const prevSnapshots = yield* Ref.make<ReadonlyArray<Metric.Metric.Snapshot>>([]);
 
       yield* Effect.repeat(
         Effect.gen(function* () {
@@ -75,9 +89,9 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
           const currSnapshots = yield* Metric.snapshot;
 
           // Effect v4 handles structural equality for snapshots (including Maps in Frequencies)
-          if (!Equal.equals(currSnapshots, prevSnapshots)) {
+          if (!Equal.equals(currSnapshots, yield* Ref.get(prevSnapshots))) {
             yield* processMetrics(currSnapshots);
-            prevSnapshots = currSnapshots;
+            yield* Ref.set(prevSnapshots, currSnapshots);
           }
         }),
         Schedule.spaced(Duration.seconds(10))

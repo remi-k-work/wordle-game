@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, HashSet, Option, Random } from "effect";
+import { Array, Effect, HashSet, Option, Random } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
@@ -43,7 +43,7 @@ const selectSecretWordActor = fromPromise(async ({ input, signal }: { input: { s
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const randomIndex = yield* Random.nextIntBetween(0, input.solutions.length);
-      return input.solutions[randomIndex].toUpperCase();
+      return Option.getOrThrow(Array.get(input.solutions, randomIndex)).toUpperCase();
     }),
     { signal }
   )

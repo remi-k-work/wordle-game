@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaMachineAtom, wordMetaSanitizedRiddleAtom } from "@/features/game/state";
 import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
@@ -20,12 +21,12 @@ interface ContentProps {
 
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
-  const sanitizedRiddle = useAtomValue(wordMetaSanitizedRiddleAtom);
+  const sanitizedRiddle = Option.fromNullOr(useAtomValue(wordMetaSanitizedRiddleAtom));
   const speakRiddle = useSpeakRiddle();
 
   const isAwaiting = wordMetaMachineSnapshot.matches("awaitingTheSecretWord");
   const isLoading = wordMetaMachineSnapshot.matches("loading");
-  const canSpeak = sanitizedRiddle !== null && !isAwaiting && !isLoading;
+  const canSpeak = Option.isSome(sanitizedRiddle) && !isAwaiting && !isLoading;
 
   return (
     <>
@@ -35,12 +36,16 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
         ) : isLoading ? (
           <T>Thinking...</T>
         ) : (
-          (sanitizedRiddle ?? <T>Riddle unavailable. You are on your own!</T>)
+          Option.getOrElse(sanitizedRiddle, () => <T>Riddle unavailable. You are on your own!</T>)
         )}
       </p>
 
       {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
-      <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled={!canSpeak} onClick={() => canSpeak && speakRiddle(sanitizedRiddle)}>
+      <Button
+        className={cn("button mx-auto", mode === "voiceTest" && "mt-4")}
+        disabled={!canSpeak}
+        onClick={() => Option.match(sanitizedRiddle, { onNone: () => {}, onSome: (text) => speakRiddle(text) })}
+      >
         <SpeakerWaveIcon className="size-11" />
         {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
       </Button>

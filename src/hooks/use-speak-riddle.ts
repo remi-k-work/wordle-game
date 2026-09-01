@@ -2,6 +2,7 @@
 import { useCallback } from "react";
 
 // services, features, and other libraries
+import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import {
   gameSettingsSolutionsLanguageAtom,
@@ -55,17 +56,25 @@ export function useSpeakRiddle() {
       // Last-resort, any voice we can find
       const fallback = voices[0];
 
-      const selectedVoice = exactByName ?? defaultInLang ?? anyInLang ?? fallback ?? null;
+      const selectedVoice = Option.firstSomeOf([
+        Option.fromNullishOr(exactByName),
+        Option.fromNullishOr(defaultInLang),
+        Option.fromNullishOr(anyInLang),
+        Option.fromNullishOr(fallback),
+      ]);
 
       // Set the voice and language appropriately
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
+      Option.match(selectedVoice, {
+        onSome: (voice) => {
+          utterance.voice = voice;
 
-        // CRITICAL FOR ANDROID: Sync lang directly from the voice object
-        utterance.lang = selectedVoice.lang;
-      } else {
-        utterance.lang = solutionsLanguage === "En" ? "en-US" : "pl-PL";
-      }
+          // CRITICAL FOR ANDROID: Sync lang directly from the voice object
+          utterance.lang = voice.lang;
+        },
+        onNone: () => {
+          utterance.lang = solutionsLanguage === "En" ? "en-US" : "pl-PL";
+        },
+      });
 
       // Set volume, rate, and pitch according to our voice settings
       utterance.volume = voiceVolume;

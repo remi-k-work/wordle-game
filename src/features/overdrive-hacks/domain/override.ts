@@ -1,10 +1,10 @@
 // services, features, and other libraries
-import { Context, Effect, Option } from "effect";
+import { Context, Effect, Match, Option } from "effect";
 import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
 import { formatGuess } from "@/features/game/domain";
 
 // types
-import type { SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
+import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
 import type { LanguageModel } from "ai";
 
 // constants
@@ -44,36 +44,42 @@ const OVERRIDE_PROMPT_EN = (
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"]
 ) => {
-  let prompt = `Craft the override clue now based on the following context:\n\n`;
+  const chunks: string[] = [`Craft the override clue now based on the following context:\n\n`];
 
-  if (Option.isSome(wordDefinition)) {
-    prompt += `Official dictionary meaning for reference: "${wordDefinition.value}".\n`;
-    prompt += `-> Use this to understand the exact context, but DO NOT copy it verbatim.\n\n`;
-  }
+  chunks.push(
+    Option.match(wordDefinition, {
+      onSome: (value) =>
+        `Official dictionary meaning for reference: "${value}".\n-> Use this to understand the exact context, but DO NOT copy it verbatim.\n\n`,
+      onNone: () => "",
+    })
+  );
 
-  if (Option.isSome(theRiddle)) {
-    prompt += `The player already has this cryptic riddle: "${theRiddle.value}".\n`;
-    prompt += `-> Provide a useful delta. Do not repeat the same imagery, phrasing, or tropes.\n\n`;
-  }
+  chunks.push(
+    Option.match(theRiddle, {
+      onSome: (value) =>
+        `The player already has this cryptic riddle: "${value}".\n-> Provide a useful delta. Do not repeat the same imagery, phrasing, or tropes.\n\n`,
+      onNone: () => "",
+    })
+  );
 
   if (wordleGuesses.length === 0) {
-    prompt += `The player has not made any guesses yet (Turn 1).\n`;
-    prompt += `-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`;
+    chunks.push(
+      `The player has not made any guesses yet (Turn 1).\n-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`
+    );
   } else {
-    prompt += `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n`;
-
-    // Dynamically calculate the feedback colors using formatGuess
-    wordleGuesses.forEach((guess, i) => {
-      const tiles = formatGuess(theSecretWord, guess);
-      const feedbackString = tiles.map((t) => `${t.tileKey} ${t.color}`).join(", ");
-      prompt += `${i + 1}. ${guess} -> ${feedbackString}\n`;
+    const feedbackLines = wordleGuesses.map((guess, i) => {
+      const feedbackString = formatGuess(theSecretWord, guess)
+        .map((t) => `${t.tileKey} ${t.color}`)
+        .join(", ");
+      return `${i + 1}. ${guess} -> ${feedbackString}\n`;
     });
 
-    prompt += `\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n`;
-    prompt += `-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`;
+    chunks.push(
+      `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n${feedbackLines.join("")}\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`
+    );
   }
 
-  return prompt;
+  return chunks.join("");
 };
 
 const OVERRIDE_PROMPT_PL = (
@@ -82,39 +88,51 @@ const OVERRIDE_PROMPT_PL = (
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"]
 ) => {
-  let prompt = `Stwórz wskazówkę ratunkową teraz, w oparciu o poniższy kontekst:\n\n`;
+  const chunks: string[] = [`Stwórz wskazówkę ratunkową teraz, w oparciu o poniższy kontekst:\n\n`];
 
-  if (Option.isSome(wordDefinition)) {
-    prompt += `Oficjalna definicja słownikowa do wglądu: "${wordDefinition.value}".\n`;
-    prompt += `-> Użyj jej, aby zrozumieć dokładny kontekst, ale NIE kopiuj jej dosłownie.\n\n`;
-  }
+  chunks.push(
+    Option.match(wordDefinition, {
+      onSome: (value) =>
+        `Oficjalna definicja słownikowa do wglądu: "${value}".\n-> Użyj jej, aby zrozumieć dokładny kontekst, ale NIE kopiuj jej dosłownie.\n\n`,
+      onNone: () => "",
+    })
+  );
 
-  if (Option.isSome(theRiddle)) {
-    prompt += `Gracz dysponuje już tą zagadką: "${theRiddle.value}".\n`;
-    prompt += `-> Zapewnij nową wartość. Nie powtarzaj tych samych skojarzeń, sformułowań ani motywów.\n\n`;
-  }
+  chunks.push(
+    Option.match(theRiddle, {
+      onSome: (value) =>
+        `Gracz dysponuje już tą zagadką: "${value}".\n-> Zapewnij nową wartość. Nie powtarzaj tych samych skojarzeń, sformułowań ani motywów.\n\n`,
+      onNone: () => "",
+    })
+  );
 
   if (wordleGuesses.length === 0) {
-    prompt += `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n`;
-    prompt += `-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`;
+    chunks.push(
+      `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`
+    );
   } else {
-    prompt += `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n`;
-
     // Map English domain colors to Polish for the prompt context
-    const colorToPl: Record<string, string> = { green: "zielony", yellow: "żółty", grey: "szary" };
+    const colorToPl = (color: Color) =>
+      Match.value(color).pipe(
+        Match.when("green", () => "zielony"),
+        Match.when("yellow", () => "żółty"),
+        Match.when("grey", () => "szary"),
+        Match.orElse((s) => s)
+      );
 
-    // Dynamically calculate the feedback colors using formatGuess
-    wordleGuesses.forEach((guess, i) => {
-      const tiles = formatGuess(theSecretWord, guess);
-      const feedbackString = tiles.map((t) => `${t.tileKey} ${colorToPl[t.color] ?? t.color}`).join(", ");
-      prompt += `${i + 1}. ${guess} -> ${feedbackString}\n`;
+    const feedbackLines = wordleGuesses.map((guess, i) => {
+      const feedbackString = formatGuess(theSecretWord, guess)
+        .map((t) => `${t.tileKey} ${colorToPl(t.color)}`)
+        .join(", ");
+      return `${i + 1}. ${guess} -> ${feedbackString}\n`;
     });
 
-    prompt += `\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n`;
-    prompt += `-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`;
+    chunks.push(
+      `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n${feedbackLines.join("")}\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`
+    );
   }
 
-  return prompt;
+  return chunks.join("");
 };
 
 // Override model as a typed dependency (a service)

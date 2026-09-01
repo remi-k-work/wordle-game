@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger, FileSystem } from "effect";
+import { Array, Effect, Layer, Logger, FileSystem } from "effect";
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
 
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer);
@@ -21,7 +21,7 @@ const main = Effect.gen(function* () {
     .filter((word) => word.length === 5);
 
   // Deduplicate (just in case the raw file has duplicates)
-  const uniqueWords = Array.from(new Set(validWords));
+  const uniqueWords = Array.dedupe(validWords);
 
   yield* Effect.log(`Found ${uniqueWords.length} valid 5-letter words. Saving...`);
 

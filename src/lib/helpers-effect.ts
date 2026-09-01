@@ -5,7 +5,7 @@ import { connection } from "next/server";
 import { notFound, unauthorized } from "next/navigation";
 
 // services, features, and other libraries
-import { Effect, Result, Schema } from "effect";
+import { Effect, Match, Result, Schema, pipe } from "effect";
 import { RuntimeServer } from "./runtime-server";
 import { InvalidPageInputsError } from "@/domain";
 
@@ -37,19 +37,20 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
     )
   );
 
-  // Standardized error handling
-  if (Result.isFailure(pageMainResult)) {
-    const error = pageMainResult.failure;
-
-    if (error._tag === "InvalidPageInputsError") notFound();
-    if (error._tag === "ItemNotFoundError") notFound();
-    if (error._tag === "UnauthorizedAccessError") unauthorized();
-    if (error._tag === "BetterAuthApiError") unauthorized();
-
-    // Allow the next.js error boundary to catch any unexpected errors
-    throw error;
-  } else {
-    // Return success result
-    return pageMainResult.success;
-  }
+  // Standardized error handling: dispatch known error tags to the matching
+  // navigation helpers, and re-throw anything unexpected for the error boundary.
+  // The onFailure branch never returns — known errors `notFound()`/`unauthorized()`,
+  // unknown errors re-throw for the error boundary.
+  return Result.match(pageMainResult, {
+    onFailure: (error): never =>
+      pipe(
+        Match.value(error._tag),
+        Match.whenOr("InvalidPageInputsError", "ItemNotFoundError", () => notFound()),
+        Match.whenOr("UnauthorizedAccessError", "BetterAuthApiError", () => unauthorized()),
+        Match.orElse(() => {
+          throw error;
+        })
+      ),
+    onSuccess: (result) => result,
+  });
 };
