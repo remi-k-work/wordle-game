@@ -1,5 +1,18 @@
 // services, features, and other libraries
-import { Array, Effect, HashMap, HashSet, pipe, FileSystem } from "effect";
+import { Array, Effect, FileSystem, HashMap, HashSet, pipe, Schema } from "effect";
+
+class SeedJsonParseError extends Schema.TaggedError<SeedJsonParseError>()("SeedJsonParseError", {
+  file: Schema.String,
+  cause: Schema.Defect(),
+}) {}
+
+const SolutionsSchema = Schema.Array(Schema.String);
+const DefinitionsSchema = Schema.Record(Schema.String, Schema.String);
+
+// fromJsonString combines JSON.parse + schema decoding (and JSON.stringify + encoding on the way back)
+// — single source of truth per https://www.effect.solutions/data-modeling#json-encoding-decoding
+const SolutionsFromJson = Schema.fromJsonString(SolutionsSchema);
+const DefinitionsFromJson = Schema.fromJsonString(DefinitionsSchema, { space: 2 });
 
 export const makeSync = (solutionsPath: string, definitionsPath: string) =>
   Effect.gen(function* () {
@@ -11,15 +24,15 @@ export const makeSync = (solutionsPath: string, definitionsPath: string) =>
     const solutionsRaw = yield* fs.readFileString(solutionsPath, "utf8");
     const definitionsRaw = yield* fs.readFileString(definitionsPath, "utf8");
 
-    // Parse strings to operational data structures via Effect error channel (no unchecked throw)
-    const solutions = yield* Effect.try({
-      try: () => JSON.parse(solutionsRaw) as string[],
-      catch: (cause) => new Error(`Failed to parse ${solutionsPath}`, { cause }),
-    }).pipe(Effect.orDie);
-    const definitions = yield* Effect.try({
-      try: () => JSON.parse(definitionsRaw) as Record<string, string>,
-      catch: (cause) => new Error(`Failed to parse ${definitionsPath}`, { cause }),
-    }).pipe(Effect.orDie);
+    // Parse + validate in one step via fromJsonString (no `as` cast, no global Error in failure channel)
+    const solutions = yield* Schema.decodeUnknownEffect(SolutionsFromJson)(solutionsRaw).pipe(
+      Effect.mapError((cause) => new SeedJsonParseError({ file: solutionsPath, cause })),
+      Effect.orDie
+    );
+    const definitions = yield* Schema.decodeUnknownEffect(DefinitionsFromJson)(definitionsRaw).pipe(
+      Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })),
+      Effect.orDie
+    );
 
     // Convert solutions into an uppercase HashSet for O(1) lookups
     const solutionsSet = HashSet.fromIterable(solutions.map((w) => w.toUpperCase()));
@@ -43,8 +56,12 @@ export const makeSync = (solutionsPath: string, definitionsPath: string) =>
 
     yield* Effect.log(`🧹 Found ${removalCount} phantom words inside definitions. Pruning...`);
 
-    // Persist the clean dictionary back to file
-    yield* fs.writeFileString(definitionsPath, JSON.stringify(cleanDefinitions, null, 2));
+    // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
+    const cleanJson = yield* Schema.encodeEffect(DefinitionsFromJson)(cleanDefinitions).pipe(
+      Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })),
+      Effect.orDie
+    );
+    yield* fs.writeFileString(definitionsPath, cleanJson);
 
     yield* Effect.log(`✨ Sync complete! Solutions: ${solutions.length} | Synchronized Definitions: ${Object.keys(cleanDefinitions).length}`);
   });

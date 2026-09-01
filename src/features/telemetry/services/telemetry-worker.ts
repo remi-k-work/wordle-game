@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Ref, Schedule, Schema, pipe } from "effect";
+import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain";
@@ -92,25 +92,14 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     // --- Stream 1: Spans ---
     const spanProcessor = Stream.fromPubSub(spanPubSub).pipe(Stream.groupedWithin(50, Duration.seconds(5)), Stream.runForEach(processSpanBatch));
 
-    // --- Stream 2: Metrics (Native Snapshot Loop) ---
+    // --- Stream 2: Metrics (Native Snapshot Loop via Stream) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
-    const metricProcessor = Effect.gen(function* () {
-      const prevSnapshots = yield* Ref.make<ReadonlyArray<Metric.Metric.Snapshot>>([]);
-
-      yield* Effect.repeat(
-        Effect.gen(function* () {
-          // Take a snapshot of all metrics
-          const currSnapshots = yield* Metric.snapshot;
-
-          // Effect v4 handles structural equality for snapshots (including Maps in Frequencies)
-          if (!Equal.equals(currSnapshots, yield* Ref.get(prevSnapshots))) {
-            yield* processMetrics(currSnapshots);
-            yield* Ref.set(prevSnapshots, currSnapshots);
-          }
-        }),
-        Schedule.spaced(Duration.seconds(10))
-      );
-    });
+    // Declarative Stream alignment with spanProcessor: poll every 10s, dedup via Equal.equals, no Ref
+    const metricProcessor = pipe(
+      Stream.fromEffectSchedule(Metric.snapshot, Schedule.spaced(Duration.seconds(10))),
+      Stream.changesWith((a, b) => Equal.equals(a, b)),
+      Stream.runForEach((snapshots) => processMetrics(snapshots ?? []))
+    );
 
     // Run both processors in the background (Detach from parent scope)
     yield* Effect.forkScoped(spanProcessor);

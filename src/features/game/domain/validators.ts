@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, HashSet, Match } from "effect";
+import { Array, HashSet, Match, String } from "effect";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -26,13 +26,28 @@ export const isGuessKeyValid = (pressedKey: string) =>
     Match.orElse(() => false)
   );
 
-// Accept or reject the submitted guess purely based on domain rules (we use && for instant short-circuiting)
+// Accept or reject the submitted guess — Effect/Match exhaustive on domain rules
 export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[], dictionary: HashSet.HashSet<string>) =>
-  // Is this not the final turn?
-  currentTurn <= MAX_TURNS &&
-  // Make sure the term is exactly 5 characters long
-  currentGuessWord.length === WORD_LENGTH &&
-  // Do not allow duplicate words
-  !Array.contains(wordleGuesses, currentGuessWord) &&
-  // Ensure the word exists in the dictionary
-  HashSet.has(dictionary, currentGuessWord);
+  Match.value({ currentGuessWord, currentTurn, wordleGuesses, dictionary }).pipe(
+    // Past the final turn → reject
+    Match.when(
+      ({ currentTurn }) => currentTurn > MAX_TURNS,
+      () => false
+    ),
+    // Wrong word length (Effect String.length, not raw .length)
+    Match.when(
+      ({ currentGuessWord }) => String.length(currentGuessWord) !== WORD_LENGTH,
+      () => false
+    ),
+    // Duplicate word already guessed
+    Match.when(
+      ({ currentGuessWord, wordleGuesses }) => Array.contains(wordleGuesses, currentGuessWord),
+      () => false
+    ),
+    // Not in dictionary
+    Match.when(
+      ({ currentGuessWord, dictionary }) => !HashSet.has(dictionary, currentGuessWord),
+      () => false
+    ),
+    Match.orElse(() => true)
+  );

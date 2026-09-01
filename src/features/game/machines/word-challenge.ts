@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, DateTime, HashMap, Option, Effect } from "effect";
+import { Array, DateTime, HashMap, Match, Option, String, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -77,10 +77,19 @@ export const wordChallengeMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       return {
         ...context,
-        currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
+        currentGuessWord: Match.value(context.currentGuessWord).pipe(
+          Match.when(
+            (w) => String.length(w) < WORD_LENGTH,
+            (w) => w + normalizedKey
+          ),
+          Match.orElse((w) => w)
+        ),
 
         // Lazily assign startTime on the very first letter typed
-        startTime: Option.isNone(context.startTime) ? Option.some(DateTime.makeUnsafe(Date.now())) : context.startTime,
+        startTime: Option.match(context.startTime, {
+          onNone: () => Option.some(DateTime.makeUnsafe(Date.now())),
+          onSome: () => context.startTime,
+        }),
       } as const satisfies WordChallenge;
     }),
 
