@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, DateTime, Duration, Option } from "effect";
+import { Effect, DateTime, Duration, HashMap, Option } from "effect";
 import { TestClock } from "effect/testing";
 import { calculateScore, computeKeypadState, calculatePotentialScore } from "..";
 import { formatDuration } from "@/lib/formatters";
@@ -79,10 +79,10 @@ describe("gameLogic", () => {
       const keypad = computeKeypadState("APPLE", ["AMPLE", "PAPER"]);
       // AMPLE -> A:green, M:grey, P:green, L:green, E:green
       // PAPER -> P:green, A:yellow, P:green, E:green, R:grey
-      expect(keypad["A"]).toBe("green"); // yellow in PAPER, but green in AMPLE
-      expect(keypad["M"]).toBe("grey");
-      expect(keypad["P"]).toBe("green");
-      expect(keypad["R"]).toBe("grey");
+      expect(Option.getOrNull(HashMap.get(keypad, "A"))).toBe("green"); // yellow in PAPER, but green in AMPLE
+      expect(Option.getOrNull(HashMap.get(keypad, "M"))).toBe("grey");
+      expect(Option.getOrNull(HashMap.get(keypad, "P"))).toBe("green");
+      expect(Option.getOrNull(HashMap.get(keypad, "R"))).toBe("grey");
     });
   });
 

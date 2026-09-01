@@ -8,10 +8,11 @@ import type { Color, WordChallenge, WordScore } from ".";
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from ".";
 
 // Pick the color with the higher priority
-export const pickStrongerColor = (a: Color | undefined, b: Color) => {
-  if (!a) return b;
-  return COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a;
-};
+export const pickStrongerColor = (a: Color | undefined, b: Color) =>
+  Option.match(Option.fromNullishOr(a), {
+    onNone: () => b,
+    onSome: (a) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a),
+  });
 
 // Establish the speed multiplier based on the time it took
 export const getSpeedMultiplier = (elapsedSeconds: number) =>

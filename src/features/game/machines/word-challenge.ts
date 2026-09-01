@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime, Option, Effect } from "effect";
+import { Array, DateTime, HashMap, Match, Option, String, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -27,7 +27,7 @@ export const wordChallengeMachine = setup({
     isValidWord: ({ context }) => canSubmitGuess(context.currentGuessWord, context.currentTurn, context.wordleGuesses, Option.getOrThrow(context.dictionary)),
 
     // Do we have a winner? When the player correctly guesses the secret word, we have a winner
-    isGameWon: ({ context }) => Option.getOrThrow(context.theSecretWord) === context.wordleGuesses.at(-1),
+    isGameWon: ({ context }) => Option.getOrThrow(context.theSecretWord) === Option.getOrElse(Array.last(context.wordleGuesses), () => "" as const),
 
     // Do we have a loser? When the player runs out of turns, we have a loser
     isGameLost: ({ context }) => context.currentTurn > MAX_TURNS,
@@ -51,7 +51,7 @@ export const wordChallengeMachine = setup({
       // Prevent typing letters already ruled out by genuine guesses
       const theSecretWord = Option.getOrThrow(context.theSecretWord);
       const keypadState = computeKeypadState(theSecretWord, context.wordleGuesses);
-      if (keypadState[normalizedKey] === "grey") return false;
+      if (Option.getOrElse(HashMap.get(keypadState, normalizedKey), () => "" as const) === "grey") return false;
       return true;
     },
   },
@@ -77,10 +77,19 @@ export const wordChallengeMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       return {
         ...context,
-        currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
+        currentGuessWord: Match.value(context.currentGuessWord).pipe(
+          Match.when(
+            (w) => String.length(w) < WORD_LENGTH,
+            (w) => w + normalizedKey
+          ),
+          Match.orElse((w) => w)
+        ),
 
         // Lazily assign startTime on the very first letter typed
-        startTime: Option.isNone(context.startTime) ? Option.some(DateTime.makeUnsafe(Date.now())) : context.startTime,
+        startTime: Option.match(context.startTime, {
+          onNone: () => Option.some(DateTime.makeUnsafe(Date.now())),
+          onSome: () => context.startTime,
+        }),
       } as const satisfies WordChallenge;
     }),
 

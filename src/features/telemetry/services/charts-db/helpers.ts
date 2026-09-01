@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array } from "effect";
+import { Array, Option, pipe } from "effect";
 
 // Telemetry stores histograms in cumulative form because they are easy to
 // aggregate in SQL. This helper converts cumulative buckets back into a
@@ -27,8 +27,16 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
   rows: readonly T[],
   mapResult: (row: T, discretePersonal: number, discreteGlobal: number, personalPct: number, globalPct: number) => TResult
 ): TResult[] => {
-  const totalPersonal = rows.length > 0 ? rows[rows.length - 1].personal : 0;
-  const totalGlobal = rows.length > 0 ? rows[rows.length - 1].global : 0;
+  const totalPersonal = pipe(
+    Array.last(rows),
+    Option.map((row) => row.personal),
+    Option.getOrElse(() => 0)
+  );
+  const totalGlobal = pipe(
+    Array.last(rows),
+    Option.map((row) => row.global),
+    Option.getOrElse(() => 0)
+  );
 
   return Array.mapAccum(rows, { personal: 0, global: 0 }, (prev, row) => {
     const discretePersonal = row.personal - prev.personal;

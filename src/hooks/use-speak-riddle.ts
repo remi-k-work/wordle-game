@@ -3,6 +3,7 @@ import { useCallback } from "react";
 
 // services, features, and other libraries
 import { Option } from "effect";
+import { matchLanguage } from "@/features/game/domain";
 import { useAtomValue } from "@effect/atom-react";
 import {
   gameSettingsSolutionsLanguageAtom,
@@ -41,7 +42,7 @@ export function useSpeakRiddle() {
       const utterance = new SpeechSynthesisUtterance(trimmed);
 
       // Find the specific voice object using Kimi's safer fallback chain
-      const targetLangPrefix = solutionsLanguage === "En" ? "en" : "pl";
+      const targetLangPrefix = matchLanguage(solutionsLanguage, "en", "pl");
       const matchingLangs = voices.filter((voice) => voice.lang.toLowerCase().startsWith(targetLangPrefix));
 
       // A previously stored voice name still wins
@@ -72,7 +73,7 @@ export function useSpeakRiddle() {
           utterance.lang = voice.lang;
         },
         onNone: () => {
-          utterance.lang = solutionsLanguage === "En" ? "en-US" : "pl-PL";
+          utterance.lang = matchLanguage(solutionsLanguage, "en-US", "pl-PL");
         },
       });
 

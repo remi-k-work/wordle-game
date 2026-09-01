@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Ref, Schedule, Schema, pipe } from "effect";
+import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain";
@@ -42,17 +42,29 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         if (spanBatch.length === 0) return;
         yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
 
-        for (const { name, attributes } of spanBatch) {
-          // Convert the attributes map to a plain object for schema decoding and validation
-          const attributesObject = Object.fromEntries(attributes);
+        yield* Effect.forEach(spanBatch, ({ name, attributes }) =>
+          Effect.gen(function* () {
+            // Convert the attributes map to a plain object for schema decoding and validation
+            const attributesObject = Object.fromEntries(attributes);
 
-          yield* pipe(
-            Match.value(name),
-            Match.when("logWordWon", () => Effect.asVoid(addRunWordEvent(Schema.decodeUnknownSync(AddRunWordEvent)(attributesObject)))),
-            Match.when("logRunCompleted", () => Effect.asVoid(addArcadeRunSummary(Schema.decodeUnknownSync(AddArcadeRunSummary)(attributesObject)))),
-            Match.orElse(() => Effect.void)
-          );
-        }
+            yield* pipe(
+              Match.value(name),
+              Match.when("logWordWon", () =>
+                Effect.gen(function* () {
+                  const data = yield* Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject).pipe(Effect.orDie);
+                  yield* addRunWordEvent(data);
+                }).pipe(Effect.asVoid)
+              ),
+              Match.when("logRunCompleted", () =>
+                Effect.gen(function* () {
+                  const data = yield* Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject).pipe(Effect.orDie);
+                  yield* addArcadeRunSummary(data);
+                }).pipe(Effect.asVoid)
+              ),
+              Match.orElse(() => Effect.void)
+            );
+          })
+        );
       });
 
     const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>
@@ -60,43 +72,34 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         if (snapshots.length === 0) return;
         yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
-        const globalPulseRecords: AddGlobalPulse[] = [];
-        for (const { id: metricName, attributes, state: metricPayload } of snapshots) {
-          const sessionId = Schema.decodeUnknownSync(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]);
-          const solutionsLanguage = Schema.decodeUnknownSync(SolutionsLanguage)(attributes?.["solutionsLanguage"]);
-          globalPulseRecords.push({
-            sessionId,
-            instanceId,
-            solutionsLanguage,
-            metricName,
-            metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
-          });
-        }
+        const globalPulseRecords: AddGlobalPulse[] = yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state: metricPayload }) =>
+          Effect.gen(function* () {
+            const sessionId = yield* Schema.decodeUnknownEffect(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]).pipe(Effect.orDie);
+            const solutionsLanguage = yield* Schema.decodeUnknownEffect(SolutionsLanguage)(attributes?.["solutionsLanguage"]).pipe(Effect.orDie);
+            return {
+              sessionId,
+              instanceId,
+              solutionsLanguage,
+              metricName,
+              metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
+            } as const satisfies AddGlobalPulse;
+          })
+        );
+
         if (globalPulseRecords.length > 0) yield* addGlobalPulse(globalPulseRecords);
       });
 
     // --- Stream 1: Spans ---
     const spanProcessor = Stream.fromPubSub(spanPubSub).pipe(Stream.groupedWithin(50, Duration.seconds(5)), Stream.runForEach(processSpanBatch));
 
-    // --- Stream 2: Metrics (Native Snapshot Loop) ---
+    // --- Stream 2: Metrics (Native Snapshot Loop via Stream) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
-    const metricProcessor = Effect.gen(function* () {
-      const prevSnapshots = yield* Ref.make<ReadonlyArray<Metric.Metric.Snapshot>>([]);
-
-      yield* Effect.repeat(
-        Effect.gen(function* () {
-          // Take a snapshot of all metrics
-          const currSnapshots = yield* Metric.snapshot;
-
-          // Effect v4 handles structural equality for snapshots (including Maps in Frequencies)
-          if (!Equal.equals(currSnapshots, yield* Ref.get(prevSnapshots))) {
-            yield* processMetrics(currSnapshots);
-            yield* Ref.set(prevSnapshots, currSnapshots);
-          }
-        }),
-        Schedule.spaced(Duration.seconds(10))
-      );
-    });
+    // Declarative Stream alignment with spanProcessor: poll every 10s, dedup via Equal.equals, no Ref
+    const metricProcessor = pipe(
+      Stream.fromEffectSchedule(Metric.snapshot, Schedule.spaced(Duration.seconds(10))),
+      Stream.changesWith((a, b) => Equal.equals(a, b)),
+      Stream.runForEach((snapshots) => processMetrics(snapshots ?? []))
+    );
 
     // Run both processors in the background (Detach from parent scope)
     yield* Effect.forkScoped(spanProcessor);

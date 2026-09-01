@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { Effect, Layer, Option } from "effect";
+import { matchLanguage } from "@/features/game/domain";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
@@ -21,9 +22,9 @@ const DEFINITIONS_EN = definitionsEnJson as Record<string, string | null>;
 const DEFINITIONS_PL = definitionsPlJson as Record<string, string | null>;
 
 const RpcGameLayer = RpcGame.toLayer({
-  fetchSolutions: ({ solutionsLanguage }) => Effect.succeed(solutionsLanguage === "En" ? solutionsEnJson : solutionsPlJson),
-  fetchDictionary: ({ solutionsLanguage }) => Effect.succeed(solutionsLanguage === "En" ? dictionaryEnJson : dictionaryPlJson),
-  fetchKeypad: ({ solutionsLanguage }) => Effect.succeed(solutionsLanguage === "En" ? keypadEnJson : keypadPlJson),
+  fetchSolutions: ({ solutionsLanguage }) => Effect.succeed(matchLanguage(solutionsLanguage, solutionsEnJson, solutionsPlJson)),
+  fetchDictionary: ({ solutionsLanguage }) => Effect.succeed(matchLanguage(solutionsLanguage, dictionaryEnJson, dictionaryPlJson)),
+  fetchKeypad: ({ solutionsLanguage }) => Effect.succeed(matchLanguage(solutionsLanguage, keypadEnJson, keypadPlJson)),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
     Effect.gen(function* () {
@@ -37,7 +38,7 @@ const RpcGameLayer = RpcGame.toLayer({
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
-    Effect.succeed(Option.fromNullishOr(solutionsLanguage === "En" ? DEFINITIONS_EN[theSecretWord] : DEFINITIONS_PL[theSecretWord])),
+    Effect.succeed(Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord]))),
 });
 
 const RpcLayer = RpcServer.layerHttp({
