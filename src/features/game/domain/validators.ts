@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { HashSet, Match } from "effect";
+import { Array, HashSet, Match } from "effect";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -33,6 +33,6 @@ export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wo
   // Make sure the term is exactly 5 characters long
   currentGuessWord.length === WORD_LENGTH &&
   // Do not allow duplicate words
-  !wordleGuesses.includes(currentGuessWord) &&
+  !Array.contains(wordleGuesses, currentGuessWord) &&
   // Ensure the word exists in the dictionary
   HashSet.has(dictionary, currentGuessWord);

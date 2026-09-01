@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime, HashMap, Option, Effect } from "effect";
+import { Array, DateTime, HashMap, Option, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -27,7 +27,7 @@ export const wordChallengeMachine = setup({
     isValidWord: ({ context }) => canSubmitGuess(context.currentGuessWord, context.currentTurn, context.wordleGuesses, Option.getOrThrow(context.dictionary)),
 
     // Do we have a winner? When the player correctly guesses the secret word, we have a winner
-    isGameWon: ({ context }) => Option.getOrThrow(context.theSecretWord) === context.wordleGuesses.at(-1),
+    isGameWon: ({ context }) => Option.getOrThrow(context.theSecretWord) === Option.getOrElse(Array.last(context.wordleGuesses), () => "" as const),
 
     // Do we have a loser? When the player runs out of turns, we have a loser
     isGameLost: ({ context }) => context.currentTurn > MAX_TURNS,

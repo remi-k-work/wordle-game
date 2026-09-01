@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Match } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
@@ -30,7 +31,11 @@ export function LangChanger({ keepText = false, onClicked }: LangChangerProps) {
         onClicked?.();
       }}
     >
-      {solutionsLanguage === "En" ? <UsFlagIcon className="size-11" /> : <PlFlagIcon className="size-11" />}
+      {Match.value(solutionsLanguage).pipe(
+        Match.when("En", () => <UsFlagIcon className="size-11" />),
+        Match.when("Pl", () => <PlFlagIcon className="size-11" />),
+        Match.exhaustive
+      )}
       {keepText ? (
         <T>Game Language</T>
       ) : (

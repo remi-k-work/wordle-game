@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Context, Effect, Match, Option } from "effect";
 import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
-import { formatGuess } from "@/features/game/domain";
+import { formatGuess, matchLanguage } from "@/features/game/domain";
 
 // types
 import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
@@ -38,49 +38,41 @@ PRZYKŁAD OCZEKIWANEGO TONU I FORMATU ODPOWIEDZI:
 Kontekst: Ukryte słowo to "ZEGAR". Gracz wpisał "PASEK" (E żółty, A żółty).
 Wskazówka: Znalazłeś właściwe litery E oraz A, ale znajdują się one na złych pozycjach. Twój strzał dotyczy elementu garderoby, jednak musisz szukać w zupełnie innej kategorii. Zastanów się nad powszechnie używanymi urządzeniami, które często wiszą na ścianie i służą do odmierzania upływającego czasu.
 `;
+
+const buildFeedbackLines = (
+  wordleGuesses: WordChallenge["wordleGuesses"],
+  theSecretWord: TheSecretWord,
+  colorToString: (color: Color) => string = (color) => color
+) =>
+  wordleGuesses.map((guess, i) => {
+    const feedbackString = formatGuess(theSecretWord, guess)
+      .map((t) => `${t.tileKey} ${colorToString(t.color)}`)
+      .join(", ");
+    return `${i + 1}. ${guess} -> ${feedbackString}\n`;
+  });
+
 const OVERRIDE_PROMPT_EN = (
   theSecretWord: TheSecretWord,
   wordDefinition: WordMeta["wordDefinition"],
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"]
-) => {
-  const chunks: string[] = [`Craft the override clue now based on the following context:\n\n`];
-
-  chunks.push(
+) =>
+  [
+    `Craft the override clue now based on the following context:\n\n`,
     Option.match(wordDefinition, {
       onSome: (value) =>
         `Official dictionary meaning for reference: "${value}".\n-> Use this to understand the exact context, but DO NOT copy it verbatim.\n\n`,
       onNone: () => "",
-    })
-  );
-
-  chunks.push(
+    }),
     Option.match(theRiddle, {
       onSome: (value) =>
         `The player already has this cryptic riddle: "${value}".\n-> Provide a useful delta. Do not repeat the same imagery, phrasing, or tropes.\n\n`,
       onNone: () => "",
-    })
-  );
-
-  if (wordleGuesses.length === 0) {
-    chunks.push(
-      `The player has not made any guesses yet (Turn 1).\n-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`
-    );
-  } else {
-    const feedbackLines = wordleGuesses.map((guess, i) => {
-      const feedbackString = formatGuess(theSecretWord, guess)
-        .map((t) => `${t.tileKey} ${t.color}`)
-        .join(", ");
-      return `${i + 1}. ${guess} -> ${feedbackString}\n`;
-    });
-
-    chunks.push(
-      `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n${feedbackLines.join("")}\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`
-    );
-  }
-
-  return chunks.join("");
-};
+    }),
+    wordleGuesses.length === 0
+      ? `The player has not made any guesses yet (Turn 1).\n-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`
+      : `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n${buildFeedbackLines(wordleGuesses, theSecretWord).join("")}\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`,
+  ].join("");
 
 const OVERRIDE_PROMPT_PL = (
   theSecretWord: TheSecretWord,
@@ -88,51 +80,31 @@ const OVERRIDE_PROMPT_PL = (
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"]
 ) => {
-  const chunks: string[] = [`Stwórz wskazówkę ratunkową teraz, w oparciu o poniższy kontekst:\n\n`];
+  // Map English domain colors to Polish for the prompt context
+  const colorToPl = (color: Color) =>
+    Match.value(color).pipe(
+      Match.when("green", () => "zielony"),
+      Match.when("yellow", () => "żółty"),
+      Match.when("grey", () => "szary"),
+      Match.orElse((s) => s)
+    );
 
-  chunks.push(
+  return [
+    `Stwórz wskazówkę ratunkową teraz, w oparciu o poniższy kontekst:\n\n`,
     Option.match(wordDefinition, {
       onSome: (value) =>
         `Oficjalna definicja słownikowa do wglądu: "${value}".\n-> Użyj jej, aby zrozumieć dokładny kontekst, ale NIE kopiuj jej dosłownie.\n\n`,
       onNone: () => "",
-    })
-  );
-
-  chunks.push(
+    }),
     Option.match(theRiddle, {
       onSome: (value) =>
         `Gracz dysponuje już tą zagadką: "${value}".\n-> Zapewnij nową wartość. Nie powtarzaj tych samych skojarzeń, sformułowań ani motywów.\n\n`,
       onNone: () => "",
-    })
-  );
-
-  if (wordleGuesses.length === 0) {
-    chunks.push(
-      `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`
-    );
-  } else {
-    // Map English domain colors to Polish for the prompt context
-    const colorToPl = (color: Color) =>
-      Match.value(color).pipe(
-        Match.when("green", () => "zielony"),
-        Match.when("yellow", () => "żółty"),
-        Match.when("grey", () => "szary"),
-        Match.orElse((s) => s)
-      );
-
-    const feedbackLines = wordleGuesses.map((guess, i) => {
-      const feedbackString = formatGuess(theSecretWord, guess)
-        .map((t) => `${t.tileKey} ${colorToPl(t.color)}`)
-        .join(", ");
-      return `${i + 1}. ${guess} -> ${feedbackString}\n`;
-    });
-
-    chunks.push(
-      `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n${feedbackLines.join("")}\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`
-    );
-  }
-
-  return chunks.join("");
+    }),
+    wordleGuesses.length === 0
+      ? `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`
+      : `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n${buildFeedbackLines(wordleGuesses, theSecretWord, colorToPl).join("")}\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`,
+  ].join("");
 };
 
 // Override model as a typed dependency (a service)
@@ -150,16 +122,18 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
 
   return yield* generateSingleField(model, {
     temperature: 0.5,
-    instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN(theSecretWord) : SYSTEM_PROMPT_PL(theSecretWord),
-    prompt:
-      solutionsLanguage === "En"
-        ? OVERRIDE_PROMPT_EN(theSecretWord, wordDefinition, theRiddle, wordleGuesses)
-        : OVERRIDE_PROMPT_PL(theSecretWord, wordDefinition, theRiddle, wordleGuesses),
+    instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
+    prompt: matchLanguage(
+      solutionsLanguage,
+      OVERRIDE_PROMPT_EN(theSecretWord, wordDefinition, theRiddle, wordleGuesses),
+      OVERRIDE_PROMPT_PL(theSecretWord, wordDefinition, theRiddle, wordleGuesses)
+    ),
     fieldName: "clue",
-    description:
-      solutionsLanguage === "En"
-        ? "The highly descriptive clue in plain text only. Detailed, insightful, TTS-friendly. No Markdown, emojis, or preamble."
-        : "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów.",
+    description: matchLanguage(
+      solutionsLanguage,
+      "The highly descriptive clue in plain text only. Detailed, insightful, TTS-friendly. No Markdown, emojis, or preamble.",
+      "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów."
+    ),
   }).pipe(Effect.map((clue) => Option.some(clue)));
 });
 

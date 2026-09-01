@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { Context, Effect } from "effect";
+import { matchLanguage } from ".";
 import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
 
 // types
@@ -54,13 +55,14 @@ const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (
 
   return yield* generateSingleField(model, {
     temperature: 0.9,
-    instructions: solutionsLanguage === "En" ? SYSTEM_PROMPT_EN(theSecretWord) : SYSTEM_PROMPT_PL(theSecretWord),
-    prompt: solutionsLanguage === "En" ? RIDDLE_PROMPT_EN : RIDDLE_PROMPT_PL,
+    instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
+    prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
     fieldName: "riddle",
-    description:
-      solutionsLanguage === "En"
-        ? "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis."
-        : "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.",
+    description: matchLanguage(
+      solutionsLanguage,
+      "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.",
+      "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów."
+    ),
   });
 });
 

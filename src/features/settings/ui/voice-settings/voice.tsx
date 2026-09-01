@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { matchLanguage } from "@/features/game/domain";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state";
 import { useSpeechVoices } from "@/hooks";
@@ -17,7 +18,7 @@ export function Voice() {
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
   const gt = useGT();
 
-  const targetLangPrefix = solutionsLanguage === "En" ? "en" : "pl";
+  const targetLangPrefix = matchLanguage(solutionsLanguage, "en", "pl");
 
   // Filter voices by current language and ALWAYS store the actual name, never null
   const voices = useSpeechVoices()

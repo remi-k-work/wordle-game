@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Match } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state";
@@ -65,7 +66,9 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-16">#</TableHead>
-              <TableHead className="w-32"><T>Name</T></TableHead>
+              <TableHead className="w-32">
+                <T>Name</T>
+              </TableHead>
               <TableHead className="w-32 bg-accent/30 text-accent">
                 <TrophyIcon className="mx-auto size-11" />
               </TableHead>
@@ -87,7 +90,13 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
                 <TableCell>{playerName}</TableCell>
                 <TableCell className="bg-accent/30">{score.toLocaleString(locale)}</TableCell>
                 <TableCell className="bg-destructive/30">{streak.toLocaleString(locale)}</TableCell>
-                <TableCell>{solutionsLang === "En" ? <UsFlagIcon className="mx-auto size-11" /> : <PlFlagIcon className="mx-auto size-11" />}</TableCell>
+                <TableCell>
+                  {Match.value(solutionsLang).pipe(
+                    Match.when("En", () => <UsFlagIcon className="mx-auto size-11" />),
+                    Match.when("Pl", () => <PlFlagIcon className="mx-auto size-11" />),
+                    Match.exhaustive
+                  )}
+                </TableCell>
               </MotionTableRow>
             ))}
           </MotionTableBody>
@@ -103,7 +112,9 @@ export function Top10HighScoresSkeleton() {
       <TableHeader>
         <TableRow>
           <TableHead className="w-16">#</TableHead>
-          <TableHead className="w-32"><T>Name</T></TableHead>
+          <TableHead className="w-32">
+            <T>Name</T>
+          </TableHead>
           <TableHead className="w-32 bg-accent/30 text-accent">
             <TrophyIcon className="mx-auto size-11" />
           </TableHead>

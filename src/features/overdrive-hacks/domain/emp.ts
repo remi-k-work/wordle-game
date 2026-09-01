@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Array, HashMap, Option, Random, pipe } from "effect";
+import { Effect, Array, HashMap, HashSet, Option, Random, pipe } from "effect";
 import { computeKeypadState } from "@/features/game/domain";
 
 // types
@@ -14,13 +14,15 @@ export const computeEmpCandidates = (
   wordleGuesses: ReadonlyArray<TheSecretWord>,
   keypad: Keypad,
   empNukedLetters: ReadonlyArray<string>
-) =>
-  pipe(
+) => {
+  const empNukedSet = HashSet.fromIterable(empNukedLetters);
+
+  return pipe(
     keypad,
     // Exclude letters that are anywhere in the secret word
     Array.filter((letter) => !theSecretWord.includes(letter)),
     // Exclude letters already nuked by previous EMP activations
-    Array.filter((letter) => !empNukedLetters.includes(letter)),
+    Array.filter((letter) => !HashSet.has(empNukedSet, letter)),
     // Exclude letters the player has already discovered through guessing (green/yellow from keypad)
     Array.filter((letter) =>
       Option.match(HashMap.get(computeKeypadState(theSecretWord, wordleGuesses), letter), {
@@ -29,6 +31,7 @@ export const computeEmpCandidates = (
       })
     )
   );
+};
 
 // EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation
 export const calculateEmpTargets = (
