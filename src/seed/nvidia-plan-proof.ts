@@ -31,7 +31,6 @@ CRITICAL RULES:
 `;
 
 const NvidiaClientWithHttp = Layer.provide(makeNvidiaClientLayer(), NodeHttpClient.layerUndici);
-
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, NvidiaClientWithHttp);
 
 const main = Effect.gen(function* () {
@@ -66,4 +65,5 @@ const main = Effect.gen(function* () {
   }
 }).pipe(Effect.provide(MainLayer));
 
+// Use NodeRuntime.runMain for graceful teardown on CTRL+C
 NodeRuntime.runMain(main);

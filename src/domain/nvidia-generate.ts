@@ -1,10 +1,7 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
 import { AiError, LanguageModel, Prompt } from "effect/unstable/ai";
-
-// domain
-import { AiProviderError } from "./errors";
-import { makeNvidiaFallbackPlan } from "./nvidia-plan";
+import { AiProviderError, makeNvidiaFallbackPlan } from ".";
 
 interface GenerateSingleFieldOptions {
   readonly temperature: number;

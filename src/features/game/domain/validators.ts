@@ -1,5 +1,8 @@
 // services, features, and other libraries
-import { Array, HashSet, Match, String } from "effect";
+import { Array, HashSet, Match, Option, String } from "effect";
+
+// types
+import type { WordChallenge } from ".";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -27,7 +30,12 @@ export const isGuessKeyValid = (pressedKey: string) =>
   );
 
 // Accept or reject the submitted guess — Effect/Match exhaustive on domain rules
-export const canSubmitGuess = (currentGuessWord: string, currentTurn: number, wordleGuesses: readonly string[], dictionary: HashSet.HashSet<string>) =>
+export const canSubmitGuess = (
+  currentGuessWord: WordChallenge["currentGuessWord"],
+  currentTurn: WordChallenge["currentTurn"],
+  wordleGuesses: WordChallenge["wordleGuesses"],
+  dictionary: Option.Option.Value<WordChallenge["dictionary"]>
+) =>
   Match.value({ currentGuessWord, currentTurn, wordleGuesses, dictionary }).pipe(
     // Past the final turn → reject
     Match.when(

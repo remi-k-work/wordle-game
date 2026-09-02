@@ -1,11 +1,9 @@
 // services, features, and other libraries
-import { Context, Effect } from "effect";
-import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
+import { generateNvidiaSingleField } from "@/domain";
 import { matchLanguage } from ".";
 
 // types
 import type { SolutionsLanguage, TheSecretWord } from ".";
-import type { LanguageModel } from "ai";
 
 // constants
 const SYSTEM_PROMPT_EN = (theSecretWord: TheSecretWord) => `
@@ -43,17 +41,8 @@ Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój r
 const RIDDLE_PROMPT_EN = "Craft the riddle now.";
 const RIDDLE_PROMPT_PL = "Stwórz zagadkę teraz.";
 
-// Riddle model as a typed dependency (a service)
-const RiddleModel = Context.Service<LanguageModel>("RiddleModel");
-
-// Attempt to generate a riddle using the provided model
-const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (
-  theSecretWord: TheSecretWord,
-  solutionsLanguage: SolutionsLanguage
-): Effect.fn.Return<string, AiSdkError, LanguageModel> {
-  const model = yield* RiddleModel;
-
-  return yield* generateSingleField(model, {
+export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
+  generateNvidiaSingleField({
     temperature: 0.9,
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
     prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
@@ -64,9 +53,3 @@ const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (
       "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów."
     ),
   });
-});
-
-const RiddlePlan = makeGeminiFallbackPlan(RiddleModel);
-
-export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
-  attemptRiddleWithModel(theSecretWord, solutionsLanguage).pipe(Effect.withExecutionPlan(RiddlePlan));
