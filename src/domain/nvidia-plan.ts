@@ -15,35 +15,34 @@ type ModelConfig = {
   readonly [x: string]: unknown;
 };
 
-// NVIDIA NIM (OpenAI-compatible) models verified working on the free dev key
-// during the Effect-v4 experimentation sweep. The nemotron models use NVIDIA's
-// reasoning `chat_template_kwargs`; the OpenAI reasoning model does not.
-const SHARED_CONFIG: ModelConfig = {
+// NVIDIA NIM (OpenAI-compatible) models verified on the free dev key via the
+// Effect-v4 quality matrices. `enable_thinking: false` is required to stay
+// inside Vercel's `maxDuration=60` — thinking:true adds 500-900 hidden tokens
+// and pushes TTFT to 20-45s, causing 504 gateway timeouts on non-streaming
+// `LanguageModel.generateObject`. Tuned max_tokens: 256 (riddle) / 512 (clue)
+// keeps outputs TTS-friendly and fast (1-4s when routed).
+const SHARED_CONFIG_BASE: ModelConfig = {
   top_p: 0.95,
-  max_tokens: 1024,
-  chat_template_kwargs: { enable_thinking: true },
+  chat_template_kwargs: { enable_thinking: false },
 };
 
 const step = (model: string, config: ModelConfig, attempts: number) => ({
   provide: OpenAiLanguageModel.model(model, config),
   attempts,
-  schedule: Schedule.exponential("1 second", 2),
+  schedule: Schedule.exponential("300 millis", 2),
 });
 
-// Builds the NVIDIA fallback ladder (fastest primary → heaviest last resort) for
-// the Effect `LanguageModel` service. This is the Effect-AI native counterpart to
-// `makeGeminiFallbackPlan`, exercising `Effect.withExecutionPlan` instead of the
-// AI SDK's provider list, and is the target shape for the full migration away
-// from the AI SDK + Zod.
-//
-// `temperature` is caller-supplied because the riddle (creative, high) and the
-// override clue (precise, lower) intentionally sample differently. Everything
-// else is a shared, verified NVIDIA NIM default.
-export const makeNvidiaFallbackPlan = (temperature: number) =>
+// Builds the NVIDIA fallback ladder for the Effect `LanguageModel` service.
+// This is the Effect-AI native counterpart to `makeGeminiFallbackPlan` via
+// `Effect.withExecutionPlan`. Ladder is super-120B (primary, faster + best
+// Polish) → ultra-550B (fallback). `temperature` and `maxTokens` are
+// caller-supplied because riddle (creative 0.9 / 256) and override clue
+// (precise 0.5 / 512) intentionally sample differently. `attempts:1` + tight
+// schedule avoids burning the 60s Vercel budget before the next step.
+export const makeNvidiaFallbackPlan = (options: { temperature: number; maxTokens: number }) =>
   ExecutionPlan.make(
-    step("nvidia/nemotron-3-ultra-550b-a55b", { ...SHARED_CONFIG, temperature }, 2),
-    step("nvidia/nemotron-3-super-120b-a12b", { ...SHARED_CONFIG, temperature }, 2),
-    step("openai/gpt-oss-120b", { temperature, top_p: 1, max_tokens: 1024 }, 2)
+    step("nvidia/nemotron-3-super-120b-a12b", { ...SHARED_CONFIG_BASE, temperature: options.temperature, max_tokens: options.maxTokens }, 1),
+    step("nvidia/nemotron-3-ultra-550b-a55b", { ...SHARED_CONFIG_BASE, temperature: options.temperature, max_tokens: options.maxTokens }, 1)
   );
 
 // The NVIDIA client layer, backed by the OpenAI-compatible endpoint. Callers must
