@@ -5,7 +5,7 @@ import { google } from "@ai-sdk/google";
 // types
 import type { LanguageModel } from "ai";
 
-// Builds a single fallback step for a Gemini flash model (2 attempts with exponential backoff)
+// Builds a single fallback step for the specified model
 const step = (modelKey: Context.Service<LanguageModel, LanguageModel>, model: string) => ({
   provide: Layer.succeed(modelKey, google(model)),
   attempts: 2,

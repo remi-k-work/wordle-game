@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { Array, DateTime, Duration, Option, pipe } from "effect";
+import { Array, DateTime, Duration, Match, Option, pipe } from "effect";
 
 // types
-import type { Color, WordChallenge, WordScore } from ".";
+import type { Color, SolutionsLanguage, WordChallenge, WordScore } from ".";
 
 // constants
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from ".";
@@ -36,3 +36,10 @@ export const getElapsedSeconds = (startTime: WordChallenge["startTime"], endTime
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
 export const potentialScoreAsPercentage = (potentialScore: WordScore["wordScore"]) =>
   Math.max(0, Math.min(100, Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100));
+
+export const matchLanguage = <T>(language: SolutionsLanguage, en: T, pl: T): T =>
+  Match.value(language).pipe(
+    Match.when("En", () => en),
+    Match.when("Pl", () => pl),
+    Match.exhaustive
+  ) as T;

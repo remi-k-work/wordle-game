@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Match, Schema } from "effect";
+import { Schema } from "effect";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from ".";
@@ -17,13 +17,6 @@ export type Keypad = typeof Keypad.Type;
 
 export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isMinLength(WORD_LENGTH)), Schema.check(Schema.isMaxLength(WORD_LENGTH)));
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
-
-export const matchLanguage = <T>(language: SolutionsLanguage, en: T, pl: T): T =>
-  Match.value(language).pipe(
-    Match.when("En", () => en),
-    Match.when("Pl", () => pl),
-    Match.exhaustive
-  ) as T;
 
 export const TheRiddle = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
 export const WordDefinition = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));

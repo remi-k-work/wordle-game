@@ -20,24 +20,11 @@ interface GenerateSingleFieldOptions {
 // Shared by the riddle and override generators so their AI-call plumbing cannot
 // drift apart; the model, prompts, and instructions stay language/content-specific
 // at each call site. The caller supplies an already-resolved LanguageModel.
-export const generateSingleField = (model: LanguageModel, options: GenerateSingleFieldOptions): Effect.Effect<string, AiSdkError, never> =>
+export const generateSingleField = (model: LanguageModel, { temperature, instructions, prompt, fieldName, description }: GenerateSingleFieldOptions) =>
   Effect.tryPromise({
-    try: () =>
-      generateText({
-        model,
-        temperature: options.temperature,
-        instructions: options.instructions,
-        prompt: options.prompt,
-        maxRetries: 0,
-        output: Output.object({
-          schema: z.object({
-            [options.fieldName]: z.string().trim().describe(options.description),
-          }),
-        }),
-      }),
-    catch: (cause) =>
-      new AiSdkError({
-        message: `The attempt to generate output using the "${model}" model was unsuccessful.`,
-        cause,
-      }),
-  }).pipe(Effect.map(({ output }) => output[options.fieldName as keyof typeof output] as string));
+    try: () => {
+      const schema = z.object({ [fieldName]: z.string().trim().describe(description) });
+      return generateText({ model, temperature, instructions, prompt, maxRetries: 0, output: Output.object({ schema }) });
+    },
+    catch: (cause) => new AiSdkError({ message: `The attempt to generate output using the "${model}" model was unsuccessful.`, cause }),
+  }).pipe(Effect.map(({ output }) => output[fieldName]));
