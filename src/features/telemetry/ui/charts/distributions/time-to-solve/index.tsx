@@ -4,11 +4,12 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { msg, useGT, useMessages } from "gt-next";
 import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/ui/speed-multiplier-category";
 import { timeToSolveDistributionAtom } from "@/features/telemetry/state";
-import { Bar, XAxis, CartesianGrid, Tooltip, Legend, ComposedChart, Line } from "recharts";
+import { XAxis, ComposedChart } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/info-line";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -41,25 +42,18 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
         <>
           <SectionHeader title={gt("Time taken to solve a word")} />
           <ComposedChart data={timeToSolveDistribution} responsive className="h-96 w-full **:outline-none **:select-none lg:h-192">
-            <CartesianGrid stroke="var(--color-surface-3)" />
+            <ChartGrid />
 
             <XAxis dataKey="maxSeconds" tickFormatter={(tick) => formatSpeedCategory(tick, true)} stroke="var(--color-text-1)" fontSize={32} />
 
-            <Tooltip
+            <ChartTooltip
               formatter={(value, name) => [`${value}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")]}
               labelFormatter={(label) => formatSpeedCategory(label as number | null)}
-              cursor={{ fill: "var(--color-surface-2)" }}
-              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-              itemStyle={{ color: "var(--color-text-2)" }}
             />
-            <Legend
-              formatter={(value) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average"))}
-              labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
-            />
+            <ChartLegend formatter={(value) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average"))} />
 
-            <Bar dataKey="personalPct" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[9, 9, 0, 0]} />
-            <Line type="monotone" dataKey="globalPct" stroke="var(--color-secondary)" strokeWidth={4} />
+            <PersonalPctBar />
+            <GlobalPctLine />
           </ComposedChart>
         </>
       )

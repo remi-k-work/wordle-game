@@ -3,12 +3,13 @@ import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state";
-import { Bar, XAxis, CartesianGrid, Tooltip, Legend, BarChart, YAxis } from "recharts";
+import { Bar, XAxis, BarChart, YAxis } from "recharts";
 import { formatSeconds } from "@/lib/formatters";
 
 // components
 import { InfoLine } from "@/ui/info-line";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { ChartGrid, ChartLegend, ChartTooltip } from "@/features/telemetry/ui/charts/chartCommon";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -44,12 +45,12 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
             className="w-full **:outline-none **:select-none"
             style={{ height: `${CHART_PADDING_PX + hardestWordsLeaderboard.length * BAR_HEIGHT_PX}px` }}
           >
-            <CartesianGrid stroke="var(--color-surface-3)" />
+            <ChartGrid />
 
             <XAxis type="number" stroke="var(--color-text-1)" tickFormatter={(value) => formatSeconds(value)} />
             <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
-            <Tooltip
+            <ChartTooltip
               formatter={(value, name) => {
                 const seconds = Number(value);
                 return [formatSeconds(seconds), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")];
@@ -66,15 +67,8 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
                   </>
                 );
               }}
-              cursor={{ fill: "var(--color-surface-2)" }}
-              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-              itemStyle={{ color: "var(--color-text-2)" }}
             />
-            <Legend
-              formatter={(value) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time"))}
-              labelStyle={{ fontFamily: "var(--font-sans)", color: "var(--color-text-2)" }}
-            />
+            <ChartLegend formatter={(value) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time"))} />
 
             <Bar dataKey="personalAvgTimeSeconds" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
             <Bar dataKey="globalAvgTimeSeconds" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />

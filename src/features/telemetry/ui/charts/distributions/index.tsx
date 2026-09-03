@@ -21,9 +21,15 @@ export function DistributionCharts({ solutionsLanguage }: DistributionChartsProp
   return (
     <Tabs.Root className="@container my-8 w-full" defaultValue="guesses">
       <Tabs.List className="relative z-1 -mb-px flex w-[100cqw] scrollbar-none gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-        <ChartTab value="guesses"><T>Guesses to Win</T></ChartTab>
-        <ChartTab value="time"><T>Time to Solve</T></ChartTab>
-        <ChartTab value="streak"><T>Streak</T></ChartTab>
+        <ChartTab value="guesses">
+          <T>Guesses to Win</T>
+        </ChartTab>
+        <ChartTab value="time">
+          <T>Time to Solve</T>
+        </ChartTab>
+        <ChartTab value="streak">
+          <T>Streak</T>
+        </ChartTab>
         <Tabs.Indicator
           className={cn(
             "absolute top-0 left-0 -z-1 h-full w-(--active-tab-width) border-x border-t bg-surface-1",

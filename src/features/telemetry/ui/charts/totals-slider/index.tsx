@@ -1,9 +1,7 @@
-// react
-import { useEffect, useState } from "react";
-
 // services, features, and other libraries
 import useEmblaCarousel from "embla-carousel-react";
 import { msg } from "gt-next";
+import { useEmblaSelect } from "./hooks";
 
 // components
 import { Slide } from "./slide";
@@ -12,7 +10,6 @@ import { AnyAvgStatChart, AnyAvgStatChartSkeleton, AnyCounterChart, AnyCounterCh
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
-import type { EmblaCarouselType } from "embla-carousel";
 
 interface TotalsSliderProps {
   solutionsLanguage: SolutionsLanguage;
@@ -20,19 +17,7 @@ interface TotalsSliderProps {
 
 export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    const onSelect = (emblaApi: EmblaCarouselType) => setSelectedIndex(emblaApi.selectedScrollSnap());
-
-    onSelect(emblaApi);
-    emblaApi.on("reInit", onSelect).on("select", onSelect);
-
-    return () => {
-      emblaApi.off("reInit", onSelect).off("select", onSelect);
-    };
-  }, [emblaApi]);
+  const { selectedIndex, canScrollPrev, canScrollNext } = useEmblaSelect(emblaApi);
 
   return (
     <article className="grid grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-4 bg-surface-3 [grid-template-areas:'viewport_viewport''prevnext_dots']">
@@ -157,12 +142,12 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
         </div>
       </section>
       <header className="flex items-center gap-4 p-2 [grid-area:prevnext]">
-        <Prev emblaApi={emblaApi} />
-        <Next emblaApi={emblaApi} />
+        <Prev onPrev={() => emblaApi?.scrollPrev()} disabled={!canScrollPrev} />
+        <Next onNext={() => emblaApi?.scrollNext()} disabled={!canScrollNext} />
       </header>
       <footer className="flex flex-wrap items-center justify-end gap-1 p-2 [grid-area:dots]">
         {emblaApi?.scrollSnapList().map((_, index) => (
-          <Dot key={index} emblaApi={emblaApi} index={index} />
+          <Dot key={index} index={index} selected={index === selectedIndex} onSelect={() => emblaApi?.scrollTo(index)} />
         ))}
       </footer>
     </article>

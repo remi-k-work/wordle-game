@@ -22,10 +22,18 @@ export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
   return (
     <Tabs.Root className="@container my-8 w-full" defaultValue="firstWords">
       <Tabs.List className="relative z-1 -mb-px flex w-[100cqw] scrollbar-none gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-        <ChartTab value="firstWords"><T>First Words</T></ChartTab>
-        <ChartTab value="missedWords"><T>Missed Words</T></ChartTab>
-        <ChartTab value="runDeaths"><T>Run Deaths</T></ChartTab>
-        <ChartTab value="hardestWords"><T>Hardest Words</T></ChartTab>
+        <ChartTab value="firstWords">
+          <T>First Words</T>
+        </ChartTab>
+        <ChartTab value="missedWords">
+          <T>Missed Words</T>
+        </ChartTab>
+        <ChartTab value="runDeaths">
+          <T>Run Deaths</T>
+        </ChartTab>
+        <ChartTab value="hardestWords">
+          <T>Hardest Words</T>
+        </ChartTab>
         <Tabs.Indicator
           className={cn(
             "absolute top-0 left-0 -z-1 h-full w-(--active-tab-width) border-x border-t bg-surface-1",

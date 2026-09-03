@@ -1,5 +1,5 @@
 // react
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 // services, features, and other libraries
 import { useAtom } from "@effect/atom-react";
@@ -17,14 +17,10 @@ export function Initials() {
   const [highScoreMachineSnapshot, highScoreMachineEvent] = useAtom(highScoreMachineAtom);
   const [initials, setInitials] = useState("");
 
-  const sanitizedInitials = useMemo(
-    () =>
-      initials
-        .toUpperCase()
-        .replace(/[^A-Z]/g, "")
-        .slice(0, 3),
-    [initials]
-  );
+  const sanitizedInitials = initials
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 3);
 
   const canSubmit = sanitizedInitials.length === 3 && !highScoreMachineSnapshot.matches("submitting");
   const isSubmitting = highScoreMachineSnapshot.matches("submitting");

@@ -3,11 +3,12 @@ import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { T, useGT } from "gt-next";
 import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state";
-import { Tooltip, Legend, PieChart, Pie, Sector } from "recharts";
+import { Legend, PieChart, Pie, Sector } from "recharts";
 
 // components
 import { InfoLine } from "@/ui/info-line";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { ChartTooltip } from "@/features/telemetry/ui/charts/chartCommon";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -60,13 +61,7 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
         <>
           <SectionHeader title={gt("Reasons why an arcade run ended")} />
           <PieChart data={chartData} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
-            <Tooltip
-              formatter={(value, name) => [gt("{count} times", { count: value }), name]}
-              cursor={{ fill: "var(--color-surface-2)" }}
-              contentStyle={{ backgroundColor: "var(--color-surface-1)" }}
-              labelStyle={{ fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" }}
-              itemStyle={{ color: "var(--color-text-2)" }}
-            />
+            <ChartTooltip formatter={(value, name) => [gt("{count} times", { count: value }), name]} />
             <Legend content={<CustomLegend />} />
 
             <Pie dataKey="personal" nameKey="displayReason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
