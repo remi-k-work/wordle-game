@@ -22,6 +22,33 @@ import { T } from "gt-next";
 // assets
 import { ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
+// types
+import type { ComponentType, ReactNode } from "react";
+
+function RunStat({
+  label,
+  bg,
+  Icon,
+  iconClassName,
+  children,
+}: {
+  label: ReactNode;
+  bg: string;
+  Icon: ComponentType<{ className?: string }>;
+  iconClassName: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className={bg}>
+      <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">{label}</h3>
+      <span className={`flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere ${iconClassName}`}>
+        <Icon className="size-7" />
+        {children}
+      </span>
+    </div>
+  );
+}
+
 export function RunScore() {
   const runResult = useAtomValue(runResultAtom);
   const activeRunId = useAtomValue(runSessionRunIdAtom);
@@ -35,15 +62,16 @@ export function RunScore() {
   const [now, setNow] = useState(() => DateTime.makeUnsafe(Date.now()));
 
   useEffect(() => {
-    // If we do not have an active run, time freezes
-    if (Option.isNone(activeRunId)) return;
+    // Freeze the clock when there is no active run, or when the run already
+    // finished (the modal then shows the final result, not a live timer).
+    if (Option.isNone(activeRunId) || Option.isSome(runResult)) return;
 
     const interval = setInterval(() => {
       setNow(DateTime.makeUnsafe(Date.now()));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeRunId]);
+  }, [activeRunId, runResult]);
 
   const summary = Option.match(runResult, {
     onSome: ({ createdAt, finishedAt, runScore, streak }) => Option.some({ createdAt, finishedAt, runScore, streak }),
@@ -73,42 +101,18 @@ export function RunScore() {
               <span className="font-sans text-4xl font-semibold wrap-anywhere tabular-nums">{formatDuration(runDuration)}</span>
             </div>
           </div>
-          <div className="bg-surface-2 p-3">
-            <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
-              <T>Run Score</T>
-            </h3>
-            <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
-              <TrophyIcon className="size-7" />
-              {runScore.toLocaleString(locale)}
-            </span>
-          </div>
-          <div className="bg-surface-3 p-3">
-            <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
-              <T>Streak</T>
-            </h3>
-            <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
-              <FireIcon className="size-7" />
-              {streak.toLocaleString(locale)}
-            </span>
-          </div>
-          <div className="bg-surface-3 p-3">
-            <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
-              <T>Best Run Score</T>
-            </h3>
-            <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-accent">
-              <TrophyIcon className="size-7" />
-              {bestRunScore.toLocaleString(locale)}
-            </span>
-          </div>
-          <div className="bg-surface-2 p-3">
-            <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
-              <T>Best Streak</T>
-            </h3>
-            <span className="flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere text-destructive">
-              <FireIcon className="size-7" />
-              {bestStreak.toLocaleString(locale)}
-            </span>
-          </div>
+          <RunStat label={<T>Run Score</T>} bg="bg-surface-2 p-3" Icon={TrophyIcon} iconClassName="text-accent">
+            {runScore.toLocaleString(locale)}
+          </RunStat>
+          <RunStat label={<T>Streak</T>} bg="bg-surface-3 p-3" Icon={FireIcon} iconClassName="text-destructive">
+            {streak.toLocaleString(locale)}
+          </RunStat>
+          <RunStat label={<T>Best Run Score</T>} bg="bg-surface-3 p-3" Icon={TrophyIcon} iconClassName="text-accent">
+            {bestRunScore.toLocaleString(locale)}
+          </RunStat>
+          <RunStat label={<T>Best Streak</T>} bg="bg-surface-2 p-3" Icon={FireIcon} iconClassName="text-destructive">
+            {bestStreak.toLocaleString(locale)}
+          </RunStat>
         </section>
       );
     },

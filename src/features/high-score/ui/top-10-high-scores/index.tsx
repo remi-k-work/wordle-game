@@ -43,6 +43,26 @@ const rowVariants = {
 const MotionTableBody = motion.create(TableBody);
 const MotionTableRow = motion.create(TableRow);
 
+function Top10TableHeader() {
+  return (
+    <TableHeader>
+      <TableRow>
+        <TableHead className="w-16">#</TableHead>
+        <TableHead className="w-32">
+          <T>Name</T>
+        </TableHead>
+        <TableHead className="w-32 bg-accent/30 text-accent">
+          <TrophyIcon className="mx-auto size-11" />
+        </TableHead>
+        <TableHead className="w-24 bg-destructive/30 text-destructive">
+          <FireIcon className="mx-auto size-11" />
+        </TableHead>
+        <TableHead className="w-24">&nbsp;</TableHead>
+      </TableRow>
+    </TableHeader>
+  );
+}
+
 export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
   const top10HighScores = useAtomValue(top10HighScoresAtom(solutionsLanguage));
   const newHighScoreId = useAtomValue(highScoreNewHighScoreIdAtom);
@@ -63,21 +83,7 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
         <InfoLine message={<T>No High Scores yet!</T>} />
       ) : (
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-16">#</TableHead>
-              <TableHead className="w-32">
-                <T>Name</T>
-              </TableHead>
-              <TableHead className="w-32 bg-accent/30 text-accent">
-                <TrophyIcon className="mx-auto size-11" />
-              </TableHead>
-              <TableHead className="w-24 bg-destructive/30 text-destructive">
-                <FireIcon className="mx-auto size-11" />
-              </TableHead>
-              <TableHead className="w-24">&nbsp;</TableHead>
-            </TableRow>
-          </TableHeader>
+          <Top10TableHeader />
           <MotionTableBody variants={containerVariants} initial="hidden" animate="visible">
             {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
               <MotionTableRow
@@ -109,21 +115,7 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
 export function Top10HighScoresSkeleton() {
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-16">#</TableHead>
-          <TableHead className="w-32">
-            <T>Name</T>
-          </TableHead>
-          <TableHead className="w-32 bg-accent/30 text-accent">
-            <TrophyIcon className="mx-auto size-11" />
-          </TableHead>
-          <TableHead className="w-24 bg-destructive/30 text-destructive">
-            <FireIcon className="mx-auto size-11" />
-          </TableHead>
-          <TableHead className="w-24">&nbsp;</TableHead>
-        </TableRow>
-      </TableHeader>
+      <Top10TableHeader />
       <TableBody>
         {[...Array(10)].map((_, index: number) => (
           <TableRow key={index} className="odd:bg-surface-2">

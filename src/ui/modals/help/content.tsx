@@ -2,20 +2,15 @@
 import Image from "next/image";
 
 // services, features, and other libraries
-import { useAtomSet } from "@effect/atom-react";
-import { modalMachineAtom } from "@/state";
+import { T } from "gt-next";
 
 // components
-import { Button } from "@base-ui/react";
-import { T } from "gt-next";
+import { CloseModalButton } from "@/ui/modal-close-button";
 
 // assets
 import hero from "@/assets/hero.webp";
-import { XCircleIcon } from "@heroicons/react/24/outline";
 
 export function Content() {
-  const modalMachineEvent = useAtomSet(modalMachineAtom);
-
   return (
     <article className="mx-auto max-w-prose space-y-9">
       <Image src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
@@ -53,10 +48,7 @@ export function Content() {
         <T>*Tip: When using a PC, you can type your guesses right on the keyboard.</T>
       </footer>
 
-      <Button tabIndex={-1} className="button mx-auto mt-8 bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
-        <XCircleIcon className="size-11" />
-        <T>Close</T>
-      </Button>
+      <CloseModalButton />
     </article>
   );
 }

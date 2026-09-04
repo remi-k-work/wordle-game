@@ -5,11 +5,8 @@ import { wordMetaSanitizedDefinitionAtom } from "@/features/game/state";
 import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
 
 // components
-import { Button } from "@base-ui/react";
 import { T } from "gt-next";
-
-// assets
-import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
+import { SpeakButton } from "@/ui/speak-button";
 
 export function Definition() {
   const sanitizedDefinition = Option.fromNullOr(useAtomValue(wordMetaSanitizedDefinitionAtom));
@@ -26,14 +23,13 @@ export function Definition() {
         ))}{" "}
         📖
       </p>
-      <Button
+      <SpeakButton
         className="button mx-auto mt-4"
         disabled={!canSpeak}
         onClick={() => Option.match(sanitizedDefinition, { onNone: () => {}, onSome: (text) => speakRiddle(text) })}
       >
-        <SpeakerWaveIcon className="size-11" />
         <T>Speak Definition</T>
-      </Button>
+      </SpeakButton>
     </>
   );
 }

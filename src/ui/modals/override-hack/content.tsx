@@ -1,23 +1,22 @@
 // services, features, and other libraries
 import { Option } from "effect";
 import { cn } from "@/lib/utils";
-import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { useAtomValue } from "@effect/atom-react";
 import { overdriveHacksMachineAtom, overdriveHacksSanitizedOverrideAtom } from "@/features/overdrive-hacks/state";
-import { modalMachineAtom } from "@/state";
 import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
 
 // components
-import { Button } from "@base-ui/react";
 import { T } from "gt-next";
+import { CloseModalButton } from "@/ui/modal-close-button";
+import { SpeakButton } from "@/ui/speak-button";
 
-// assets
-import { SpeakerWaveIcon, XCircleIcon } from "@heroicons/react/24/outline";
+// constants
+import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
 export function Content() {
   const overdriveHacksMachineSnapshot = useAtomValue(overdriveHacksMachineAtom);
   const sanitizedOverride = Option.fromNullOr(useAtomValue(overdriveHacksSanitizedOverrideAtom));
   const speakRiddle = useSpeakRiddle();
-  const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   const isAwaiting = overdriveHacksMachineSnapshot.matches("idle");
   const isLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
@@ -35,20 +34,16 @@ export function Content() {
         )}
       </p>
 
-      <footer className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
-        <Button
+      <footer className={DIALOG_FOOTER_CLASSES}>
+        <SpeakButton
           className="button"
           disabled={!canSpeak}
           onClick={() => Option.match(sanitizedOverride, { onNone: () => {}, onSome: (text) => speakRiddle(text) })}
         >
-          <SpeakerWaveIcon className="size-11" />
           <T>Speak Override</T>
-        </Button>
+        </SpeakButton>
 
-        <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
-          <XCircleIcon className="size-11" />
-          <T>Close</T>
-        </Button>
+        <CloseModalButton />
       </footer>
     </article>
   );

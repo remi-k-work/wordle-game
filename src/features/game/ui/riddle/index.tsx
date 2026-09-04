@@ -1,14 +1,14 @@
 // react
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 // services, features, and other libraries
-import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaMachineAtom } from "@/features/game/state";
 import { useGT } from "gt-next";
 
 // components
-import { Button, Popover } from "@base-ui/react";
+import { Button } from "@base-ui/react";
+import { GamePopover } from "@/ui/game-popover";
 import { Content, ContentSkeleton } from "./content";
 
 // assets
@@ -21,35 +21,29 @@ interface RiddleProps {
 }
 
 export function Riddle({ mode }: RiddleProps) {
+  if (mode === "voiceTest") return <Content mode="voiceTest" />;
+  return <RiddlePopover />;
+}
+
+function RiddlePopover() {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const isLoading = wordMetaMachineSnapshot.matches("loading");
   const gt = useGT();
 
   // Controls whether the popover is open or not
   const [isOpen, setIsOpen] = useState(false);
-
-  if (mode === "voiceTest") return <Content mode="voiceTest" />;
+  const close = useCallback(() => setIsOpen(false), []);
 
   return (
-    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger openOnHover title={gt("Riddle")} className="button flex-none p-1 data-popup-open:bg-accent">
-        {isLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner sideOffset={8}>
-          <Popover.Popup
-            className={cn(
-              "grid max-w-[90dvw] gap-3 rounded-md bg-surface-2 p-3 shadow-sm",
-              "transition duration-300 ease-in-out",
-              "origin-(--transform-origin)",
-              "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
-            )}
-          >
-            <Content mode="popover" onGameFlowClicked={() => setIsOpen(false)} />
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <GamePopover
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      title={gt("Riddle")}
+      trigger={isLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
+      wide
+    >
+      <Content mode="popover" onGameFlowClicked={close} />
+    </GamePopover>
   );
 }
 

@@ -38,10 +38,10 @@ export function GlobalPctLine() {
 }
 
 // The personal/global bars used by the horizontal frequency/leaderboard charts.
-export function PersonalBar() {
-  return <Bar dataKey="personal" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />;
+export function PersonalBar({ dataKey = "personal" }: { dataKey?: string }) {
+  return <Bar dataKey={dataKey} stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />;
 }
 
-export function GlobalBar() {
-  return <Bar dataKey="global" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />;
+export function GlobalBar({ dataKey = "global" }: { dataKey?: string }) {
+  return <Bar dataKey={dataKey} stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />;
 }

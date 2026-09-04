@@ -1,5 +1,4 @@
 // services, features, and other libraries
-import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state";
 
@@ -16,33 +15,19 @@ interface ModalProps {
   children: ReactNode;
 }
 
+// constants
+import { DIALOG_BACKDROP_CLASSES, DIALOG_POPUP_CLASSES, DIALOG_TITLE_CLASSES, DIALOG_VIEWPORT_CLASSES } from "@/ui/dialog-chrome";
+
 export function Modal({ isOpen = false, title, children }: ModalProps) {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && modalMachineEvent({ type: "closed" })}>
       <Dialog.Portal>
-        <Dialog.Backdrop
-          className={cn(
-            "fixed inset-0 bg-black opacity-75",
-            "transition-opacity duration-300 ease-in-out",
-            "data-ending-style:opacity-0 data-starting-style:opacity-0",
-            "supports-[-webkit-touch-callout:none]:absolute"
-          )}
-        />
-        <Dialog.Viewport className="fixed inset-0 flex items-center justify-center overflow-hidden">
-          <Dialog.Popup
-            className={cn(
-              "relative max-h-[80dvh] w-[90dvw] max-w-3xl overflow-auto bg-surface-1 p-3 text-center text-text-1",
-              "transition duration-300 ease-in-out",
-              "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
-            )}
-          >
-            <RevealTitle
-              className="mb-5 max-w-none bg-linear-to-r from-surface-1 via-surface-3 to-surface-1 p-2 font-sans text-4xl tracking-widest text-text-2 uppercase"
-              title={title}
-              unit="char"
-            />
+        <Dialog.Backdrop className={DIALOG_BACKDROP_CLASSES} />
+        <Dialog.Viewport className={DIALOG_VIEWPORT_CLASSES}>
+          <Dialog.Popup className={DIALOG_POPUP_CLASSES}>
+            <RevealTitle className={DIALOG_TITLE_CLASSES} title={title} unit="char" />
             {children}
           </Dialog.Popup>
         </Dialog.Viewport>

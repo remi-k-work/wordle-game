@@ -4,8 +4,8 @@ import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeTheSecretWordAtom } from "@/features/game/state";
 
 // components
-import { Definition } from "./definition";
 import { RunScore } from "./run-score";
+import { SecretWordReveal } from "./secret-word";
 import { NewHighScore } from "@/features/high-score/ui/new-high-score";
 import { T } from "gt-next";
 
@@ -19,8 +19,7 @@ export function Nevermind() {
         <T>Better luck next time 😄</T>
       </p>
 
-      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord.value}</h2>
-      <Definition />
+      <SecretWordReveal secretWord={theSecretWord.value} />
 
       <RunScore />
       <NewHighScore />

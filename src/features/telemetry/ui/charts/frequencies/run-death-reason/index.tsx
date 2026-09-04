@@ -1,3 +1,6 @@
+// react
+import { useCallback, useMemo } from "react";
+
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
@@ -6,8 +9,8 @@ import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state";
 import { Legend, PieChart, Pie, Sector } from "recharts";
 
 // components
-import { InfoLine } from "@/ui/info-line";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { DistributionEmpty } from "@/features/telemetry/ui/charts/distribution-shell";
 import { ChartTooltip } from "@/features/telemetry/ui/charts/chartCommon";
 
 // types
@@ -43,44 +46,72 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
   const runDeathReasonFrequency = useAtomValue(runDeathReasonFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
+  const tooltipFormatter = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any, name: any) => [gt("{count} times", { count: value }), name ?? ""] as const,
+    [gt]
+  );
+
   return AsyncResult.builder(runDeathReasonFrequency)
     .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
     .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
-    .onSuccess((runDeathReasonFrequency) => {
-      const chartData = runDeathReasonFrequency.map((run) => ({
+    .onSuccess((runDeathReasonFrequency) => (
+      <RunDeathReasonChartBody
+        runDeathReasonFrequency={runDeathReasonFrequency}
+        tooltipFormatter={tooltipFormatter}
+        title={gt("Reasons why an arcade run ended")}
+        emptyMessage={gt("No frequency data tracked yet!")}
+      />
+    ))
+    .render();
+}
+
+function RunDeathReasonChartBody({
+  runDeathReasonFrequency,
+  tooltipFormatter,
+  title,
+  emptyMessage,
+}: {
+  runDeathReasonFrequency: ReadonlyArray<{ reason: "Forfeit" | "Guesses"; personal: number; global: number }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tooltipFormatter: (value: any, name: any) => readonly [string, string];
+  title: string;
+  emptyMessage: string;
+}) {
+  const gt = useGT();
+  const chartData = useMemo(
+    () =>
+      runDeathReasonFrequency.map((run) => ({
         ...run,
         displayReason: run.reason === "Forfeit" ? gt("Forfeit") : gt("Guesses"),
-      }));
+      })),
+    [runDeathReasonFrequency, gt]
+  );
 
-      return runDeathReasonFrequency.length === 0 ? (
-        <>
-          <SectionHeader title={gt("Reasons why an arcade run ended")} />
-          <InfoLine message={gt("No frequency data tracked yet!")} />
-        </>
-      ) : (
-        <>
-          <SectionHeader title={gt("Reasons why an arcade run ended")} />
-          <PieChart data={chartData} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
-            <ChartTooltip formatter={(value, name) => [gt("{count} times", { count: value }), name]} />
-            <Legend content={<CustomLegend />} />
+  if (runDeathReasonFrequency.length === 0) return <DistributionEmpty title={title} message={emptyMessage} />;
 
-            <Pie dataKey="personal" nameKey="displayReason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
-            <Pie
-              dataKey="global"
-              nameKey="displayReason"
-              cx="50%"
-              cy="50%"
-              innerRadius="60%"
-              outerRadius="80%"
-              stroke="var(--color-accent)"
-              shape={PieSliceGlobal}
-              label
-            />
-          </PieChart>
-        </>
-      );
-    })
-    .render();
+  return (
+    <>
+      <SectionHeader title={title} />
+      <PieChart data={chartData} responsive className="mx-auto size-86 **:outline-none **:select-none lg:size-172">
+        <ChartTooltip formatter={tooltipFormatter} />
+        <Legend content={<CustomLegend />} />
+
+        <Pie dataKey="personal" nameKey="displayReason" cx="50%" cy="50%" outerRadius="50%" stroke="var(--color-accent)" shape={PieSlicePersonal} label />
+        <Pie
+          dataKey="global"
+          nameKey="displayReason"
+          cx="50%"
+          cy="50%"
+          innerRadius="60%"
+          outerRadius="80%"
+          stroke="var(--color-accent)"
+          shape={PieSliceGlobal}
+          label
+        />
+      </PieChart>
+    </>
+  );
 }
 
 export function RunDeathReasonFrequencyChartSkeleton() {

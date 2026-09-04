@@ -1,15 +1,17 @@
+// react
+import { useCallback } from "react";
+
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state";
-import { Bar, XAxis, BarChart, YAxis } from "recharts";
+import { XAxis, YAxis } from "recharts";
 import { formatSeconds } from "@/lib/formatters";
 
 // components
-import { InfoLine } from "@/ui/info-line";
-import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
-import { ChartGrid, ChartLegend, ChartTooltip } from "@/features/telemetry/ui/charts/chartCommon";
+import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";
+import { HorizontalBarEmpty, HorizontalBarFrame, HorizontalBarSkeleton } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -18,62 +20,60 @@ interface HardestWordsLeaderboardChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-// constants
-const CHART_PADDING_PX = 96;
-const BAR_HEIGHT_PX = 48;
-
 export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWordsLeaderboardChartProps) {
   const hardestWordsLeaderboard = useAtomValue(hardestWordsLeaderboardAtom(solutionsLanguage));
   const gt = useGT();
+
+  const tickFormatter = useCallback((value: number) => formatSeconds(value), []);
+  const tooltipFormatter = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any, name: any) => {
+      const seconds = Number(value);
+      return [formatSeconds(seconds), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")] as const;
+    },
+    [gt]
+  );
+  const tooltipLabelFormatter = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (label: any, payload: any) => {
+      const row = payload?.[0]?.payload;
+      return (
+        <>
+          {label}
+          <br />
+          <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses?.toFixed(1) ?? "—" })}</span>
+          <br />
+          <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses?.toFixed(1) ?? "—" })}</span>
+        </>
+      );
+    },
+    [gt]
+  );
+  const legendFormatter = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")),
+    [gt]
+  );
 
   return AsyncResult.builder(hardestWordsLeaderboard)
     .onInitialOrWaiting(() => <HardestWordsLeaderboardChartSkeleton />)
     .onFailure(() => <HardestWordsLeaderboardChartSkeleton />)
     .onSuccess((hardestWordsLeaderboard) =>
       hardestWordsLeaderboard.length === 0 ? (
-        <>
-          <SectionHeader title={gt("Hardest words by average solve time")} />
-          <InfoLine message={gt("No leaderboard data tracked yet!")} />
-        </>
+        <HorizontalBarEmpty title={gt("Hardest words by average solve time")} message={gt("No leaderboard data tracked yet!")} />
       ) : (
-        <>
-          <SectionHeader title={gt("Hardest words by average solve time")} />
-          <BarChart
-            data={hardestWordsLeaderboard}
-            responsive
-            layout="vertical"
-            className="w-full **:outline-none **:select-none"
-            style={{ height: `${CHART_PADDING_PX + hardestWordsLeaderboard.length * BAR_HEIGHT_PX}px` }}
-          >
-            <ChartGrid />
+        <HorizontalBarFrame title={gt("Hardest words by average solve time")} data={hardestWordsLeaderboard}>
+          <ChartGrid />
 
-            <XAxis type="number" stroke="var(--color-text-1)" tickFormatter={(value) => formatSeconds(value)} />
-            <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
+          <XAxis type="number" stroke="var(--color-text-1)" tickFormatter={tickFormatter} />
+          <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
-            <ChartTooltip
-              formatter={(value, name) => {
-                const seconds = Number(value);
-                return [formatSeconds(seconds), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")];
-              }}
-              labelFormatter={(label, payload) => {
-                const row = payload?.[0]?.payload;
-                return (
-                  <>
-                    {label}
-                    <br />
-                    <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses?.toFixed(1) ?? "—" })}</span>
-                    <br />
-                    <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses?.toFixed(1) ?? "—" })}</span>
-                  </>
-                );
-              }}
-            />
-            <ChartLegend formatter={(value) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time"))} />
+          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
+          <ChartLegend formatter={legendFormatter} />
 
-            <Bar dataKey="personalAvgTimeSeconds" stroke="var(--color-accent)" fill="var(--color-primary)" radius={[0, 9, 9, 0]} />
-            <Bar dataKey="globalAvgTimeSeconds" stroke="var(--color-accent)" fill="var(--color-secondary)" radius={[0, 9, 9, 0]} />
-          </BarChart>
-        </>
+          <PersonalBar dataKey="personalAvgTimeSeconds" />
+          <GlobalBar dataKey="globalAvgTimeSeconds" />
+        </HorizontalBarFrame>
       )
     )
     .render();
@@ -82,10 +82,5 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
 export function HardestWordsLeaderboardChartSkeleton() {
   const gt = useGT();
 
-  return (
-    <>
-      <SectionHeaderSkeleton title={gt("Hardest words by average solve time")} />
-      <div className="h-96 w-full lg:h-192" />
-    </>
-  );
+  return <HorizontalBarSkeleton title={gt("Hardest words by average solve time")} />;
 }

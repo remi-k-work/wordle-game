@@ -14,6 +14,9 @@ import { GameFlowButton } from "@/features/game/ui/flow-button";
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
+// constants
+import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
+
 export function WinOrLoseModal() {
   const [modalMachineSnapshot, modalMachineEvent] = useAtom(modalMachineAtom);
   const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
@@ -26,7 +29,7 @@ export function WinOrLoseModal() {
     <Modal isOpen={modalMachineSnapshot.matches("status")} title={hasWon ? gt("You Win") : gt("Run Over")}>
       {hasWon ? <YouWin /> : <Nevermind />}
 
-      <section className="mx-auto mt-6 flex max-w-prose flex-wrap items-center justify-around gap-4">
+      <section className={DIALOG_FOOTER_CLASSES}>
         <GameFlowButton keepText tabIndex={-1} />
         <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
           <XCircleIcon className="size-11" />

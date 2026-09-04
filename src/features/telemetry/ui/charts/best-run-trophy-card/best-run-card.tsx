@@ -12,6 +12,7 @@ import { CalendarIcon, ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/
 
 // types
 import type { BestRunTrophyCardData } from "@/features/telemetry/services/charts-db";
+import type { ReactNode } from "react";
 
 interface BestRunCardProps {
   Tag?: "header" | "footer" | "section" | "div" | "article";
@@ -26,10 +27,7 @@ const VARIANT_STYLES = {
   secondary: "border-secondary text-secondary",
 } as const;
 
-export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRunCardProps) {
-  const gt = useGT();
-  const locale = useLocale();
-
+function BestRunCardFrame({ Tag = "section", variant, title, children }: Pick<BestRunCardProps, "Tag" | "variant" | "title"> & { children: ReactNode }) {
   return (
     <Tag
       className={cn(
@@ -40,6 +38,17 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
       )}
     >
       <h3 className="tracking-widest uppercase">{title}</h3>
+      {children}
+    </Tag>
+  );
+}
+
+export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRunCardProps) {
+  const gt = useGT();
+  const locale = useLocale();
+
+  return (
+    <BestRunCardFrame Tag={Tag} variant={variant} title={title}>
       {Option.match(bestRun, {
         onNone: () => <InfoLine className="row-span-6 font-normal" message={gt("No completed runs yet!")} />,
         onSome: ({ deathReason, failedOnWord, finalScore, finalStreak, durationSeconds, createdAt }) => (
@@ -65,7 +74,7 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
           </>
         ),
       })}
-    </Tag>
+    </BestRunCardFrame>
   );
 }
 
@@ -73,15 +82,7 @@ export function BestRunCardSkeleton({ Tag = "section", variant, title }: Omit<Be
   const gt = useGT();
 
   return (
-    <Tag
-      className={cn(
-        "row-span-7 grid grid-rows-subgrid font-semibold",
-        "rounded-xl border-2 text-center",
-        "w-3/4 max-w-lg place-items-center justify-self-center",
-        VARIANT_STYLES[variant]
-      )}
-    >
-      <h3 className="tracking-widest uppercase">{title}</h3>
+    <BestRunCardFrame Tag={Tag} variant={variant} title={title}>
       <span className="flex items-center gap-1 text-3xl wrap-anywhere text-accent">
         <TrophyIcon className="size-9" />
         &nbsp;
@@ -100,6 +101,6 @@ export function BestRunCardSkeleton({ Tag = "section", variant, title }: Omit<Be
         <CalendarIcon className="size-6" />
         &nbsp;
       </span>
-    </Tag>
+    </BestRunCardFrame>
   );
 }

@@ -1,19 +1,26 @@
 // react
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 // services, features, and other libraries
-import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state";
 
 // components
-import { Button, Popover } from "@base-ui/react";
+import { Button } from "@base-ui/react";
 import { T, useGT } from "gt-next";
+import { GamePopover } from "@/ui/game-popover";
 import { LangChanger } from "@/features/settings/ui/lang-changer";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 
 // assets
 import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "@heroicons/react/24/outline";
+
+// constants
+const MENU_MODALS = [
+  { modalType: "voice-settings", label: <T>Voice Settings</T>, Icon: SpeakerWaveIcon },
+  { modalType: "high-score", label: <T>High Score</T>, Icon: TrophyIcon },
+  { modalType: "help", label: <T>Help</T>, Icon: QuestionMarkCircleIcon },
+] as const;
 
 export function GameMenu() {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
@@ -21,58 +28,26 @@ export function GameMenu() {
 
   // Controls whether the popover is open or not
   const [isOpen, setIsOpen] = useState(false);
+  const close = useCallback(() => setIsOpen(false), []);
 
   return (
-    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Popover.Trigger openOnHover title={gt("Menu")} className="button flex-none p-1 data-popup-open:bg-accent">
-        <Bars3Icon className="size-11" />
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Positioner sideOffset={8}>
-          <Popover.Popup
-            className={cn(
-              "grid gap-3 rounded-md bg-surface-2 p-3 shadow-sm",
-              "transition duration-300 ease-in-out",
-              "origin-(--transform-origin)",
-              "data-ending-style:scale-90 data-ending-style:opacity-0 data-starting-style:scale-90 data-starting-style:opacity-0"
-            )}
-          >
-            <LangChanger keepText onClicked={() => setIsOpen(false)} />
-            <GameFlowButton keepText onClicked={() => setIsOpen(false)} />
-            <Button
-              className="button"
-              onClick={() => {
-                modalMachineEvent({ type: "opened", modalType: "voice-settings" });
-                setIsOpen(false);
-              }}
-            >
-              <SpeakerWaveIcon className="size-11" />
-              <T>Voice Settings</T>
-            </Button>
-            <Button
-              className="button"
-              onClick={() => {
-                modalMachineEvent({ type: "opened", modalType: "high-score" });
-                setIsOpen(false);
-              }}
-            >
-              <TrophyIcon className="size-11" />
-              <T>High Score</T>
-            </Button>
-            <Button
-              className="button"
-              onClick={() => {
-                modalMachineEvent({ type: "opened", modalType: "help" });
-                setIsOpen(false);
-              }}
-            >
-              <QuestionMarkCircleIcon className="size-11" />
-              <T>Help</T>
-            </Button>
-          </Popover.Popup>
-        </Popover.Positioner>
-      </Popover.Portal>
-    </Popover.Root>
+    <GamePopover open={isOpen} onOpenChange={setIsOpen} title={gt("Menu")} trigger={<Bars3Icon className="size-11" />}>
+      <LangChanger keepText onClicked={close} />
+      <GameFlowButton keepText onClicked={close} />
+      {MENU_MODALS.map(({ modalType, label, Icon }) => (
+        <Button
+          key={modalType}
+          className="button"
+          onClick={() => {
+            modalMachineEvent({ type: "opened", modalType });
+            close();
+          }}
+        >
+          <Icon className="size-11" />
+          {label}
+        </Button>
+      ))}
+    </GamePopover>
   );
 }
 

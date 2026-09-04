@@ -1,12 +1,15 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { Match } from "effect";
+import { useAtomSet } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state";
-import { gameDataMachineAtom, gameFlowMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { gameFlowMachineAtom } from "@/features/game/state";
+import { useGameFlowVariant } from "@/features/game/hooks";
 
 // components
 import { Button } from "@base-ui/react";
 import { T, useGT } from "gt-next";
+import { FlowShell } from "./flow-shell";
 
 // assets
 import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
@@ -19,92 +22,60 @@ interface GameFlowButtonProps extends ComponentPropsWithoutRef<typeof Button> {
   onClicked?: () => void;
 }
 
-export function GameFlowButton({ keepText = false, onClicked, className, ...rest }: GameFlowButtonProps) {
-  const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
-  const gameDataMachineSnapshot = useAtomValue(gameDataMachineAtom);
-  const gameFlowMachineSnapshot = useAtomValue(gameFlowMachineAtom);
+export function GameFlowButton({ className, keepText = false, onClicked, ...rest }: GameFlowButtonProps) {
+  const variant = useGameFlowVariant();
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
   const gt = useGT();
 
-  if (
-    wordChallengeMachineSnapshot.matches("awaitingGameData") ||
-    gameDataMachineSnapshot.matches("loading") ||
-    gameDataMachineSnapshot.matches("selectingWord")
-  )
-    return <GameFlowButtonSkeleton keepText={keepText} className={className} {...rest} />;
-  if (gameFlowMachineSnapshot.matches("starting")) return <GameFlowButtonSkeleton keepText={keepText} className={className} {...rest} />;
-
-  // "Next Word" button (won a word, OR returning to an active run with no current puzzle)
-  if (gameFlowMachineSnapshot.matches("betweenWords"))
-    return (
-      <Button
-        className={cn("button", !keepText && "max-sm:p-1", className)}
+  return Match.value(variant).pipe(
+    Match.when("skeleton", () => <GameFlowButtonSkeleton {...rest} />),
+    Match.when("next", () => (
+      <FlowShell
+        className={className}
+        keepText={keepText}
         title={gt("Next Word")}
+        icon={<ForwardIcon className="size-11" />}
+        label={<T>Next Word</T>}
         onClick={() => {
           gameFlowMachineEvent({ type: "word.nextRequested" });
           onClicked?.();
         }}
         {...rest}
-      >
-        <ForwardIcon className="size-11" />
-        {keepText ? (
-          <T>Next Word</T>
-        ) : (
-          <span className="hidden sm:block">
-            <T>Next Word</T>
-          </span>
-        )}
-      </Button>
-    );
-
-  // "Start New Run" button (lost, forfeited, or idle with no active run)
-  if (gameFlowMachineSnapshot.matches("ready"))
-    return (
-      <Button
-        className={cn("button", !keepText && "max-sm:p-1", className)}
+      />
+    )),
+    Match.when("start", () => (
+      <FlowShell
+        className={className}
+        keepText={keepText}
         title={gt("Start New Run")}
+        icon={<PuzzlePieceIcon className="size-11" />}
+        label={<T>Start New Run</T>}
         onClick={() => {
           gameFlowMachineEvent({ type: "run.startRequested" });
           onClicked?.();
         }}
         {...rest}
-      >
-        <PuzzlePieceIcon className="size-11" />
-        {keepText ? (
-          <T>Start New Run</T>
-        ) : (
-          <span className="hidden sm:block">
-            <T>Start New Run</T>
-          </span>
-        )}
-      </Button>
-    );
-
-  // "Forfeit Run" button (default — puzzle in progress)
-  return (
-    <Button
-      className={cn("button bg-destructive", !keepText && "max-sm:p-1", className)}
-      title={gt("Forfeit Run")}
-      onClick={() => {
-        alertMachineEvent({ type: "opened", alertType: "forfeit-run" });
-        onClicked?.();
-      }}
-      {...rest}
-    >
-      <PowerIcon className="size-11" />
-      {keepText ? (
-        <T>Forfeit Run</T>
-      ) : (
-        <span className="hidden sm:block">
-          <T>Forfeit Run</T>
-        </span>
-      )}
-    </Button>
+      />
+    )),
+    Match.orElse(() => (
+      <FlowShell
+        className={cn("bg-destructive", className)}
+        keepText={keepText}
+        title={gt("Forfeit Run")}
+        icon={<PowerIcon className="size-11" />}
+        label={<T>Forfeit Run</T>}
+        onClick={() => {
+          alertMachineEvent({ type: "opened", alertType: "forfeit-run" });
+          onClicked?.();
+        }}
+        {...rest}
+      />
+    ))
   );
 }
 
-export function GameFlowButtonSkeleton({ keepText = false, className, ...rest }: GameFlowButtonProps) {
+export function GameFlowButtonSkeleton({ className, keepText = false, ...rest }: GameFlowButtonProps) {
   return (
     <Button className={cn("button", !keepText && "max-sm:p-1", className)} disabled {...rest}>
       &nbsp;

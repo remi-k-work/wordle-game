@@ -15,6 +15,9 @@ interface GuessRowProps {
   rowIndex: number;
 }
 
+// constants
+import { FLIP_STAGGER_CLASSES } from "./constants";
+
 export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const sonarReveals = useAtomValue(overdriveHacksSonarRevealsAtom);
@@ -22,21 +25,7 @@ export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const isCurrentTurn = rowIndex === currentTurn - 2;
 
   return (
-    <div
-      className={cn(
-        "grid grid-cols-5 grid-rows-1 gap-1",
-        isCurrentTurn && [
-          // Reset backgrounds for children before animation fully executes
-          "[&>div]:bg-transparent",
-          // Apply staggered animation delays
-          "[&>div:nth-child(1)]:animate-flip [&>div:nth-child(1)]:[animation-delay:0s]",
-          "[&>div:nth-child(2)]:animate-flip [&>div:nth-child(2)]:[animation-delay:0.2s]",
-          "[&>div:nth-child(3)]:animate-flip [&>div:nth-child(3)]:[animation-delay:0.4s]",
-          "[&>div:nth-child(4)]:animate-flip [&>div:nth-child(4)]:[animation-delay:0.6s]",
-          "[&>div:nth-child(5)]:animate-flip [&>div:nth-child(5)]:[animation-delay:0.8s]",
-        ]
-      )}
-    >
+    <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isCurrentTurn && FLIP_STAGGER_CLASSES)}>
       {wordleGrid[rowIndex].map((tile, tileIndex) => {
         const wasEmpty = baseWordleGrid[rowIndex][tileIndex].tileKey === "";
         const isSonarReveal = wasEmpty && tile.tileKey !== "" && sonarReveals.some((reveal) => reveal.positions.includes(tileIndex));

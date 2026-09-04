@@ -1,14 +1,16 @@
+// react
+import { useCallback } from "react";
+
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
 import { openingGuessesFrequencyAtom } from "@/features/telemetry/state";
-import { XAxis, BarChart, YAxis } from "recharts";
+import { XAxis, YAxis } from "recharts";
 
 // components
-import { InfoLine } from "@/ui/info-line";
-import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";
+import { HorizontalBarEmpty, HorizontalBarFrame, HorizontalBarSkeleton } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";
@@ -17,48 +19,39 @@ interface OpeningGuessesFrequencyChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-// constants
-const CHART_PADDING_PX = 96;
-const BAR_HEIGHT_PX = 48;
-
 export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuessesFrequencyChartProps) {
   const openingGuessesFrequency = useAtomValue(openingGuessesFrequencyAtom(solutionsLanguage));
   const gt = useGT();
+
+  const tooltipFormatter = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (value: any, name: any) => [`${value}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")] as const,
+    [gt]
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tooltipLabelFormatter = useCallback((label: any) => `${label}`, []);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const legendFormatter = useCallback((value: any) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses")), [gt]);
 
   return AsyncResult.builder(openingGuessesFrequency)
     .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
     .onFailure(() => <OpeningGuessesFrequencyChartSkeleton />)
     .onSuccess((openingGuessesFrequency) =>
       openingGuessesFrequency.length === 0 ? (
-        <>
-          <SectionHeader title={gt("First word guessed in a game")} />
-          <InfoLine message={gt("No frequency data tracked yet!")} />
-        </>
+        <HorizontalBarEmpty title={gt("First word guessed in a game")} message={gt("No frequency data tracked yet!")} />
       ) : (
-        <>
-          <SectionHeader title={gt("First word guessed in a game")} />
-          <BarChart
-            data={openingGuessesFrequency}
-            responsive
-            layout="vertical"
-            className="w-full **:outline-none **:select-none"
-            style={{ height: `${CHART_PADDING_PX + openingGuessesFrequency.length * BAR_HEIGHT_PX}px` }}
-          >
-            <ChartGrid />
+        <HorizontalBarFrame title={gt("First word guessed in a game")} data={openingGuessesFrequency}>
+          <ChartGrid />
 
-            <XAxis type="number" stroke="var(--color-text-1)" />
-            <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
+          <XAxis type="number" stroke="var(--color-text-1)" />
+          <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
 
-            <ChartTooltip
-              formatter={(value, name) => [`${value}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")]}
-              labelFormatter={(label) => `${label}`}
-            />
-            <ChartLegend formatter={(value) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses"))} />
+          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
+          <ChartLegend formatter={legendFormatter} />
 
-            <PersonalBar />
-            <GlobalBar />
-          </BarChart>
-        </>
+          <PersonalBar />
+          <GlobalBar />
+        </HorizontalBarFrame>
       )
     )
     .render();
@@ -67,10 +60,5 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
 export function OpeningGuessesFrequencyChartSkeleton() {
   const gt = useGT();
 
-  return (
-    <>
-      <SectionHeaderSkeleton title={gt("First word guessed in a game")} />
-      <div className="h-96 w-full lg:h-192" />
-    </>
-  );
+  return <HorizontalBarSkeleton title={gt("First word guessed in a game")} />;
 }

@@ -4,9 +4,9 @@ import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChallengeWordScoreAtom } from "@/features/game/state";
 
 // components
-import { Definition } from "./definition";
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
 import { RunScore } from "./run-score";
+import { SecretWordReveal } from "./secret-word";
 import { T, Var } from "gt-next";
 
 export function YouWin() {
@@ -29,8 +29,7 @@ export function YouWin() {
         </p>
       </T>
 
-      <h2 className="text-4xl font-semibold text-destructive uppercase">{theSecretWord.value}</h2>
-      <Definition />
+      <SecretWordReveal secretWord={theSecretWord.value} />
 
       <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={timeSeconds} />
       <RunScore />
