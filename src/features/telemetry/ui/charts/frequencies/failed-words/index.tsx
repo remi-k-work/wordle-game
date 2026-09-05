@@ -24,14 +24,11 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
   const gt = useGT();
 
   const tooltipFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any, name: any) => [`${value}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")] as const,
+    (value: unknown, name: unknown) => [`${value}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")] as const,
     [gt]
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tooltipLabelFormatter = useCallback((label: any) => `${label}`, []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const legendFormatter = useCallback((value: any) => (value === "personal" ? gt("Your Misses") : gt("Global Misses")), [gt]);
+  const tooltipLabelFormatter = useCallback((label: unknown) => `${label}`, []);
+  const legendFormatter = useCallback((value: unknown) => (value === "personal" ? gt("Your Misses") : gt("Global Misses")), [gt]);
 
   return AsyncResult.builder(failedWordsFrequency)
     .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)

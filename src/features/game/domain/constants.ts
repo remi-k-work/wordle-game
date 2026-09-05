@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { Option } from "effect";
+import { msg } from "gt-next";
 
 // types
 import type { Color, GameData, RunSession, WordChallenge, WordMeta } from ".";
@@ -29,6 +30,20 @@ export const SPEED_MULTIPLIER_CATEGORY_MAP = {
   1.0: "average-pacer",
   0.8: "slow-learner",
 } as const as Readonly<Record<number, string>>;
+
+export const SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP = {
+  "speed-demon": msg("🚀 Speed Demon"),
+  "quick-thinker": msg("⚡ Quick Thinker"),
+  "average-pacer": msg("⏱️ Average Pacer"),
+  "slow-learner": msg("🐌 Slow Learner"),
+} as const;
+
+export const SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP = {
+  "speed-demon": "🚀",
+  "quick-thinker": "⚡",
+  "average-pacer": "⏱️",
+  "slow-learner": "🐌",
+} as const;
 
 export const INITIAL_GAME_DATA = {
   solutions: Option.none(),

@@ -2,10 +2,10 @@
 import { CartesianGrid, Legend, Tooltip, Bar, Line } from "recharts";
 
 // types
-import type { ComponentProps } from "react";
+import type { ComponentPropsWithoutRef } from "react";
 
-type TooltipProps = ComponentProps<typeof Tooltip>;
-type LegendProps = ComponentProps<typeof Legend>;
+type TooltipProps = ComponentPropsWithoutRef<typeof Tooltip>;
+type LegendProps = ComponentPropsWithoutRef<typeof Legend>;
 
 // Shared styling for the telemetry charts. Centralising these ensures the
 // tooltip/legend/grid/bar styling stays consistent across every chart and

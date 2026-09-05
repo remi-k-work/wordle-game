@@ -25,14 +25,11 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
 
   const tickFormatter = useCallback((tick: number) => (tick === Infinity ? "14+" : `${tick}`), []);
   const tooltipFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any, name: any) => [`${value}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const,
+    (value: unknown, name: unknown) => [`${value}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const,
     [gt]
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tooltipLabelFormatter = useCallback((label: any) => (label === Infinity ? "Streak: 14+" : `Streak: ${label}`), []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const legendFormatter = useCallback((value: any) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average")), [gt]);
+  const tooltipLabelFormatter = useCallback((label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${label}`), []);
+  const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average")), [gt]);
 
   return AsyncResult.builder(arcadeStreakDistribution)
     .onInitialOrWaiting(() => <ArcadeStreakDistributionChartSkeleton />)

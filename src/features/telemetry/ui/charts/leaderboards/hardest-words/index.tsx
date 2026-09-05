@@ -26,16 +26,13 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
 
   const tickFormatter = useCallback((value: number) => formatSeconds(value), []);
   const tooltipFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any, name: any) => {
-      const seconds = Number(value);
-      return [formatSeconds(seconds), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")] as const;
-    },
+    (value: unknown, name: unknown) =>
+      [formatSeconds(Number(value)), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")] as const,
     [gt]
   );
   const tooltipLabelFormatter = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (label: any, payload: any) => {
+    (label: unknown, payload: any) => {
       const row = payload?.[0]?.payload;
       return (
         <>
@@ -49,11 +46,7 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
     },
     [gt]
   );
-  const legendFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")),
-    [gt]
-  );
+  const legendFormatter = useCallback((value: unknown) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")), [gt]);
 
   return AsyncResult.builder(hardestWordsLeaderboard)
     .onInitialOrWaiting(() => <HardestWordsLeaderboardChartSkeleton />)

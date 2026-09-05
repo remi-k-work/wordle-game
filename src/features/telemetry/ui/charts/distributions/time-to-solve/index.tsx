@@ -5,9 +5,9 @@ import { useCallback } from "react";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { msg, useGT, useMessages } from "gt-next";
-import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/ui/speed-multiplier-category";
 import { timeToSolveDistributionAtom } from "@/features/telemetry/state";
 import { XAxis } from "recharts";
+import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain";
 
 // components
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
@@ -24,6 +24,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
   const timeToSolveDistribution = useAtomValue(timeToSolveDistributionAtom(solutionsLanguage));
   const gt = useGT();
   const messages = useMessages();
+
   const formatSpeedCategory = useCallback(
     (maxSeconds: number | null, emojiOnly: boolean = false) => {
       const speedMultiplier = maxSecondsToSpeedMultiplier(maxSeconds);
@@ -35,14 +36,11 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
   );
   const tickFormatter = useCallback((tick: number | null) => formatSpeedCategory(tick, true), [formatSpeedCategory]);
   const tooltipFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any, name: any) => [`${value}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const,
+    (value: unknown, name: unknown) => [`${value}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const,
     [gt]
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tooltipLabelFormatter = useCallback((label: any) => formatSpeedCategory(label as number | null), [formatSpeedCategory]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const legendFormatter = useCallback((value: any) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average")), [gt]);
+  const tooltipLabelFormatter = useCallback((label: unknown) => formatSpeedCategory(label as number | null), [formatSpeedCategory]);
+  const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average")), [gt]);
 
   return AsyncResult.builder(timeToSolveDistribution)
     .onInitialOrWaiting(() => <TimeToSolveDistributionChartSkeleton />)

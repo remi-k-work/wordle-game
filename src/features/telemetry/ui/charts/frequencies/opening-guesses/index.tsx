@@ -24,14 +24,11 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
   const gt = useGT();
 
   const tooltipFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any, name: any) => [`${value}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")] as const,
+    (value: unknown, name: unknown) => [`${value}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")] as const,
     [gt]
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tooltipLabelFormatter = useCallback((label: any) => `${label}`, []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const legendFormatter = useCallback((value: any) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses")), [gt]);
+  const tooltipLabelFormatter = useCallback((label: unknown) => `${label}`, []);
+  const legendFormatter = useCallback((value: unknown) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses")), [gt]);
 
   return AsyncResult.builder(openingGuessesFrequency)
     .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)

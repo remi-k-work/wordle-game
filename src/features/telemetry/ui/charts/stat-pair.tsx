@@ -34,7 +34,7 @@ export function StatPair({ title, personalHeader, personal, globalTitle, global 
   );
 }
 
-export function StatPairSkeleton({ title, personalHeader, globalTitle }: Pick<StatPairProps, "title" | "personalHeader"> & { globalTitle?: ReactNode }) {
+export function StatPairSkeleton({ title, personalHeader, globalTitle }: Pick<StatPairProps, "title" | "personalHeader" | "globalTitle">) {
   const messages = useMessages();
 
   return (

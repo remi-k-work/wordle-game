@@ -6,19 +6,17 @@ import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 // types
 import type { ReactNode } from "react";
 
-// constants
-export const HORIZONTAL_CHART_PADDING_PX = 96;
-export const HORIZONTAL_BAR_HEIGHT_PX = 48;
-
-export function horizontalChartHeight(rowCount: number): string {
-  return `${HORIZONTAL_CHART_PADDING_PX + rowCount * HORIZONTAL_BAR_HEIGHT_PX}px`;
-}
-
 interface HorizontalBarFrameProps {
   title: string;
   data: ReadonlyArray<unknown>;
   children: ReactNode;
 }
+
+// constants
+export const HORIZONTAL_CHART_PADDING_PX = 96;
+export const HORIZONTAL_BAR_HEIGHT_PX = 48;
+
+const horizontalChartHeight = (rowCount: number) => `${HORIZONTAL_CHART_PADDING_PX + rowCount * HORIZONTAL_BAR_HEIGHT_PX}px`;
 
 // Shared SectionHeader + vertical BarChart wrapper for the horizontal
 // frequency/leaderboard charts. Series and formatters stay per-chart.

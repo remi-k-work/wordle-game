@@ -9,8 +9,8 @@ import { useEmblaSelect } from "./hooks";
 // components
 import { Slide, SLIDE_CLASS } from "./slide";
 import { Dot, DotSkeleton, Next, NextSkeleton, Prev, PrevSkeleton } from "./buttons";
-import { AnyAvgStatChart, AnyAvgStatChartSkeleton } from "../any-avg-stat";
-import { AnyCounterChart, AnyCounterChartSkeleton } from "../any-counter";
+import { AnyAvgStatChart, AnyAvgStatChartSkeleton } from "@/features/telemetry/ui/charts/any-avg-stat";
+import { AnyCounterChart, AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts/any-counter";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";

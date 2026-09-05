@@ -25,14 +25,11 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
 
   const tickFormatter = useCallback((tick: number) => gt("Turn {turn}", { turn: tick }), [gt]);
   const tooltipFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (value: any, name: any) => [`${value}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const,
+    (value: unknown, name: unknown) => [`${value}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const,
     [gt]
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const tooltipLabelFormatter = useCallback((label: any) => gt("Turn: {turn}", { turn: label }), [gt]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const legendFormatter = useCallback((value: any) => (value === "personalPct" ? gt("Your Guesses") : gt("Global Average")), [gt]);
+  const tooltipLabelFormatter = useCallback((label: unknown) => gt("Turn: {turn}", { turn: label }), [gt]);
+  const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Guesses") : gt("Global Average")), [gt]);
 
   return AsyncResult.builder(guessDistribution)
     .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)

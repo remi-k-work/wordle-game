@@ -14,10 +14,10 @@ import { T, useLocale } from "gt-next";
 
 // components
 import { InfoLine } from "@/ui/info-line";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/ui/table";
+import { Top10TableHeader } from "./top-10-table-header";
 
 // assets
-import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
@@ -42,26 +42,6 @@ const rowVariants = {
 
 const MotionTableBody = motion.create(TableBody);
 const MotionTableRow = motion.create(TableRow);
-
-function Top10TableHeader() {
-  return (
-    <TableHeader>
-      <TableRow>
-        <TableHead className="w-16">#</TableHead>
-        <TableHead className="w-32">
-          <T>Name</T>
-        </TableHead>
-        <TableHead className="w-32 bg-accent/30 text-accent">
-          <TrophyIcon className="mx-auto size-11" />
-        </TableHead>
-        <TableHead className="w-24 bg-destructive/30 text-destructive">
-          <FireIcon className="mx-auto size-11" />
-        </TableHead>
-        <TableHead className="w-24">&nbsp;</TableHead>
-      </TableRow>
-    </TableHeader>
-  );
-}
 
 export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
   const top10HighScores = useAtomValue(top10HighScoresAtom(solutionsLanguage));
