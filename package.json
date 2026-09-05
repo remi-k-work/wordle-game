@@ -18,7 +18,8 @@
     "seed-dic-en": "tsx ./src/seed/dictionary-en.ts",
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts",
     "db:migrate": "tsx ./src/seed/run-migrations.ts",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "prepare": "effect-tsgo patch --typescript --no-oxlint"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.57",
@@ -36,7 +37,7 @@
     "embla-carousel-react": "^8.6.0",
     "gt-next": "^11.1.18",
     "motion": "^13.1.1",
-    "next": "^16.3.3",
+    "next": "^16.3.4",
     "next-themes": "^0.4.6",
     "pg": "^8.23.0",
     "react": "^19.2.8",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@effect/language-service": "^0.87.2",
+    "@effect/tsgo": "0.41.0",
     "@effect/vitest": "^4.0.0-rc.112",
     "@statelyai/inspect": "^0.7.2",
     "@tailwindcss/postcss": "^4",
@@ -57,15 +59,15 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
-    "eslint": "^9",
-    "eslint-config-next": "^16.3.3",
+    "eslint": "^10.10.0",
+    "eslint-config-next": "^16.3.4",
     "gt": "^2.17.2",
     "patch-package": "^8.0.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
-    "typescript": "^6",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   },
   "allowScripts": {

@@ -1,8 +1,9 @@
 {
-    "js/ts.tsdk.path": "./node_modules/typescript/lib",
+    "js/ts.tsdk.path": "./node_modules/typescript/bin",
     "js/ts.tsdk.promptToUseWorkspaceVersion": true,
     "json.schemaDownload.trustedDomains": {
         "https://opencode.ai": true,
         "https://models.dev": true
-    }
+    },
+    "js/ts.experimental.useTsgo": true
 }
