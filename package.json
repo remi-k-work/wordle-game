@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "oxlint",
     "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
     "seed-sol-en": "tsx ./src/seed/solutions-en.ts",
@@ -19,7 +19,7 @@
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts",
     "db:migrate": "tsx ./src/seed/run-migrations.ts",
     "postinstall": "patch-package",
-    "prepare": "effect-tsgo patch --typescript --no-oxlint"
+    "prepare": "effect-tsgo patch --typescript --oxlint"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.57",
@@ -59,9 +59,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
-    "eslint": "^10.10.0",
-    "eslint-config-next": "^16.3.4",
     "gt": "^2.17.2",
+    "oxlint": "1.81.0",
+    "oxlint-tsgolint": "7.0.2001",
     "patch-package": "^8.0.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",

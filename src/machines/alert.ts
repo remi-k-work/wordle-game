@@ -17,7 +17,7 @@ export const alertMachine = setup({
     okayed: {
       target: ".closed",
       actions: ({ event }) => {
-        event.onOkayed();
+        void event.onOkayed();
       },
     },
     cancelled: ".closed",

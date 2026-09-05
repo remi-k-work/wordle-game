@@ -20,9 +20,23 @@ Unlike traditional clones, Wordle Overdrive treats individual puzzles as steppin
 
 ## 🛠️ Architecture & Tech Stack
 
+* `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `nextjs`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins as the successor to `eslint-config-next`.
+* `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
+* `npm test` — Vitest.
+
+Notes: Next.js documents ESLint/Biome but not Oxlint, so the lint layer here is standalone. Two rules from the old setup have no Oxlint equivalent and were dropped: `react/prop-types` (moot on React 19 + TypeScript) and `import/resolver` TypeScript module-resolution (`tsc` remains the backstop for unresolved imports).
+
 This repository serves as a showcase for production-grade functional programming in TypeScript and modern reactive state architecture.
 
 * **Framework:** Next.js (App Router) for lightning-fast server rendering and robust asset optimization.
 * **State & Logic Control:** Driven by **Effect & Atoms**. The entire game lifecycle avoids messy asynchronous side effects by utilizing explicit, type-safe functional generators (`yield*`) to coordinate game states, long-term session banking, and error boundaries.
 * **AI Orchestration:** Seamless integration with Gemini models to handle high-speed, cost-efficient riddle compilation out of the box.
 * **Styling:** Custom, highly scannable Dark and Light mode UI systems engineered entirely around fluid, modern `oklch` color gamuts.
+
+## 🧪 Development
+
+* `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `nextjs`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins as the successor to `eslint-config-next`.
+* `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
+* `npm test` — Vitest.
+
+Notes: Next.js documents ESLint/Biome but not Oxlint, so the lint layer here is standalone. Two rules from the old setup have no Oxlint equivalent and were dropped: `react/prop-types` (moot on React 19 + TypeScript) and `import/resolver` TypeScript module-resolution (`tsc` remains the backstop for unresolved imports).

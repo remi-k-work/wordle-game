@@ -23,7 +23,7 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
   const gt = useGT();
 
   const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown): readonly [string, string] => [gt("{count} times", { count: value }), String(name) ?? ""] as const,
+    (value: unknown, name: unknown): readonly [string, string] => [gt("{count} times", { count: value }), String(name)] as const,
     [gt]
   );
 

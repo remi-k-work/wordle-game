@@ -133,16 +133,19 @@ export const overdriveHacksMachine = setup({
     },
   },
   actions: {
+    // @ts-expect-error XState inference breaks due to circular module dependency
     applyEmpHack: assign(
       ({ context }, params: { empNukedLetters: OverdriveHacks["empNukedLetters"] }) =>
         ({ ...context, empNukedLetters: [...context.empNukedLetters, ...params.empNukedLetters] }) as const satisfies OverdriveHacks
     ),
 
+    // @ts-expect-error XState inference breaks due to circular module dependency
     applySonarHack: assign(
       ({ context }, params: { sonarReveals: OverdriveHacks["sonarReveals"] }) =>
         ({ ...context, sonarReveals: [...context.sonarReveals, ...params.sonarReveals] }) as const satisfies OverdriveHacks
     ),
 
+    // @ts-expect-error XState inference breaks due to circular module dependency
     applyOverrideHack: assign(
       ({ context }, params: { theOverride: OverdriveHacks["theOverride"] }) =>
         ({ ...context, theOverride: params.theOverride }) as const satisfies OverdriveHacks
@@ -156,7 +159,7 @@ export const overdriveHacksMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       if (context.empNukedLetters.includes(normalizedKey)) return;
 
-      runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
+      void runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },
   },
   actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor },

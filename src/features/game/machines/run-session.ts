@@ -92,12 +92,12 @@ export const runSessionMachine = setup({
       // Only track if there is an active run to forfeit
       if (Option.isNone(context.runId)) return;
 
-      runClientCommand(trackForfeitedRun(context, event.wordChallenge));
+      void runClientCommand(trackForfeitedRun(context, event.wordChallenge));
     },
 
     // Notify high score machine that a run has finished
     onRunFinished: ({ context }) => {
-      runClientCommand(
+      void runClientCommand(
         Effect.gen(function* () {
           const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
           yield* Atom.set(highScoreMachineAtom, { type: "runFinished", runScore: context.runScore, streak: context.streak, solutionsLanguage });

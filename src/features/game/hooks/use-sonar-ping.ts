@@ -36,7 +36,7 @@ export function useSonarPing(isEnabled: boolean) {
       stopPulse = () => controls.stop();
     };
 
-    playSequence();
+    void playSequence();
 
     return () => {
       isMounted = false;

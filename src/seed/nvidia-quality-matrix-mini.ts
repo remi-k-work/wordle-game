@@ -257,7 +257,7 @@ const checkOutput = (text: string, secret: string, kind: "riddle" | "clue"): Cal
   // Strict PL declension: /lustr/i captures lustro/lustra/lustrze/lustrem/luster/lustrami incl. lustrzany
   const noLeak =
     kind === "riddle" || kind === "clue" ? (secret === SECRET_PL ? !/lustr/i.test(text) : !lower.includes(secretLower)) : !lower.includes(secretLower);
-  const hasMarkdown = /(\*\*|__|\#{1,6}\s|```|`[^`]+`|<[^>]+>)/.test(text);
+  const hasMarkdown = /(\*\*|__|#{1,6}\s|```|`[^`]+`|<[^>]+>)/.test(text);
   const hasEmoji = /\p{Emoji}/u.test(text);
   const ttsPass = !hasMarkdown && !hasEmoji;
   const endsWithQuestion = text.trim().endsWith("?");
