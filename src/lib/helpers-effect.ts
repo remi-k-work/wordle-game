@@ -32,7 +32,7 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
   // We wrap in Effect.result to catch failures gracefully
   const pageMainResult = await RuntimeServer.runPromise(
     pageMain.pipe(
-      Effect.tapError((error) => Effect.log(`[PAGE MAIN ERROR]: ${error}`)),
+      Effect.tapError((error) => Effect.log("[PAGE MAIN ERROR]:", error)),
       Effect.result
     )
   );

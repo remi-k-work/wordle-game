@@ -37,9 +37,6 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     // Generate the unique identifier for this specific browser session/tab load
     // This lives in the closure of the worker and remains constant until the page reloads
-    // NOTE: intentionally `crypto.randomUUID()` rather than the Effect `Random` module —
-    // this Layer is composed into `Atom.context(...)` in runtime-client.ts, so any new
-    // service requirement would break that composition for zero practical benefit here.
     const instanceId = crypto.randomUUID();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
@@ -87,7 +84,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
               instanceId,
               solutionsLanguage,
               metricName,
-              metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
+              metricPayload: normalizeMetricPayload(metricPayload),
             } as const satisfies AddGlobalPulse;
           }).pipe(Effect.orDie)
         );

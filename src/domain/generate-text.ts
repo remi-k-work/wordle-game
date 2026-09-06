@@ -26,5 +26,9 @@ export const generateSingleField = (model: LanguageModel, { temperature, instruc
       const schema = z.object({ [fieldName]: z.string().trim().describe(description) });
       return generateText({ model, temperature, instructions, prompt, maxRetries: 0, output: Output.object({ schema }) });
     },
-    catch: (cause) => new AiSdkError({ message: `The attempt to generate output using the "${model}" model was unsuccessful.`, cause }),
+    catch: (cause) =>
+      new AiSdkError({
+        message: `The attempt to generate output using the "${typeof model === "string" ? model : model.modelId}" model was unsuccessful.`,
+        cause,
+      }),
   }).pipe(Effect.map(({ output }) => output[fieldName]));

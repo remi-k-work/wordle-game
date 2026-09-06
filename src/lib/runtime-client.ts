@@ -45,6 +45,6 @@ export const runClientCommand = (effect: Parameters<typeof RuntimeClient.runProm
   RuntimeClient.runPromise(
     effect.pipe(
       Effect.asVoid,
-      Effect.catchCause((cause) => Effect.logError(`[CLIENT COMMAND FAILED]: ${cause}`))
+      Effect.catchCause((cause) => Effect.logError("[CLIENT COMMAND FAILED]:", cause))
     )
   );

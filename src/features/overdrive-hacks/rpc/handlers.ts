@@ -5,7 +5,7 @@ import { NodeHttpClient } from "@effect/platform-node";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcOverdriveHacks } from "./requests";
 import { generateOverride } from "@/features/overdrive-hacks/domain";
-import { makeNvidiaClientLayer } from "@/domain";
+import { NvidiaClientLayer } from "@/domain";
 import { readAiSwitch } from "@/lib/rpc";
 
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
@@ -21,7 +21,7 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
     ),
 });
 
-const NvidiaClientWithHttp = makeNvidiaClientLayer().pipe(Layer.provide(NodeHttpClient.layerUndici));
+const NvidiaClientWithHttp = NvidiaClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
 const RpcOverdriveHacksLayerWithNvidia = RpcOverdriveHacksLayer.pipe(Layer.provide(NvidiaClientWithHttp));
 
 const RpcLayer = RpcServer.layerHttp({

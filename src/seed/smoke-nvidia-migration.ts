@@ -3,11 +3,11 @@ import "dotenv/config";
 // services, features, and other libraries
 import { Effect, Layer, Logger, Option } from "effect";
 import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node";
-import { makeNvidiaClientLayer } from "@/domain";
+import { NvidiaClientLayer } from "@/domain";
 import { generateRiddle } from "@/features/game/domain/riddle2";
 import { generateOverride } from "@/features/overdrive-hacks/domain/override2";
 
-const NvidiaClientWithHttp = makeNvidiaClientLayer().pipe(Layer.provide(NodeHttpClient.layerUndici));
+const NvidiaClientWithHttp = NvidiaClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, NvidiaClientWithHttp);
 
 const main = Effect.gen(function* () {

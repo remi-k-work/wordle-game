@@ -3,7 +3,7 @@ import "dotenv/config";
 // services, features, and other libraries
 import { Effect, Layer, Logger } from "effect";
 import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node";
-import { generateNvidiaSingleField, makeNvidiaClientLayer } from "@/domain";
+import { generateNvidiaSingleField, NvidiaClientLayer } from "@/domain";
 
 // constants
 const RIDDLE_INSTRUCTIONS_EN = `
@@ -40,7 +40,7 @@ Kontekst: Ukryte słowo to "LUSTRO"
 Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój ruch, lecz nie mam własnego umysłu. Czym jestem?
 `;
 
-const NvidiaClientWithHttp = Layer.provide(makeNvidiaClientLayer(), NodeHttpClient.layerUndici);
+const NvidiaClientWithHttp = Layer.provide(NvidiaClientLayer, NodeHttpClient.layerUndici);
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, NvidiaClientWithHttp);
 
 const main = Effect.gen(function* () {

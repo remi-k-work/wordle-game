@@ -20,9 +20,8 @@ export const makeNvidiaFallbackPlan = (config: typeof OpenAiLanguageModel.Config
   );
 
 // The NVIDIA client layer, backed by the OpenAI-compatible endpoint
-export const makeNvidiaClientLayer = () =>
-  Layer.unwrap(
-    Config.redacted("NVIDIA_API_KEY").pipe(
-      Effect.map((apiKey) => Layer.effect(OpenAiClient.OpenAiClient, OpenAiClient.make({ apiUrl: NVIDIA_BASE_URL, apiKey })))
-    )
-  );
+export const NvidiaClientLayer = Layer.unwrap(
+  Config.redacted("NVIDIA_API_KEY").pipe(
+    Effect.map((apiKey) => Layer.effect(OpenAiClient.OpenAiClient, OpenAiClient.make({ apiUrl: NVIDIA_BASE_URL, apiKey })))
+  )
+);

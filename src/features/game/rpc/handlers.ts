@@ -5,7 +5,7 @@ import { NodeHttpClient } from "@effect/platform-node";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
 import { generateRiddle, matchLanguage } from "@/features/game/domain";
-import { makeNvidiaClientLayer } from "@/domain";
+import { NvidiaClientLayer } from "@/domain";
 import { readAiSwitch } from "@/lib/rpc";
 
 // assets
@@ -42,7 +42,7 @@ const RpcGameLayer = RpcGame.toLayer({
     Effect.succeed(Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord]))),
 });
 
-const NvidiaClientWithHttp = makeNvidiaClientLayer().pipe(Layer.provide(NodeHttpClient.layerUndici));
+const NvidiaClientWithHttp = NvidiaClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
 const RpcGameLayerWithNvidia = RpcGameLayer.pipe(Layer.provide(NvidiaClientWithHttp));
 
 const RpcLayer = RpcServer.layerHttp({
