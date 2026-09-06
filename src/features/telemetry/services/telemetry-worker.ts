@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/crypto-random-uuid-in-effect
+
 // services, features, and other libraries
 import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
@@ -37,6 +39,11 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     // Generate the unique identifier for this specific browser session/tab load
     // This lives in the closure of the worker and remains constant until the page reloads
+    // NOTE: intentionally `crypto.randomUUID()` — Effect's `Random` has no UUID API
+    // and is a seeded PRNG (not cryptographically secure), while the `Crypto`
+    // service would need an explicit layer plus error handling for the same
+    // underlying WebCrypto entropy. This Layer also feeds `Atom.context(...)`,
+    // so a new service requirement would break that composition.
     const instanceId = crypto.randomUUID();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds

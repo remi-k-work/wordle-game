@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/global-date typescript/no-misused-spread
+
 // services, features, and other libraries
 import { Array, DateTime, HashMap, Match, Option, String, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
@@ -86,6 +88,7 @@ export const wordChallengeMachine = setup({
         ),
 
         // Lazily assign startTime on the very first letter typed
+        // NOTE: `assign` is synchronous — `DateTime.now` (an Effect) is unavailable here.
         startTime: Option.match(context.startTime, {
           onNone: () => Option.some(DateTime.makeUnsafe(Date.now())),
           onSome: () => context.startTime,
@@ -108,6 +111,7 @@ export const wordChallengeMachine = setup({
     ),
 
     // Calculates the player's word score based on the turn they won on and how long it took them
+    // NOTE: `assign` is synchronous — `DateTime.now` (an Effect) is unavailable here.
     calculateScore: assign(
       ({ context }) =>
         ({

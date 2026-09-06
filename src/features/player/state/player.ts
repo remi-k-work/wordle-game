@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/crypto-random-uuid
+
 // services, features, and other libraries
 import { Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
@@ -5,6 +7,9 @@ import { RuntimeTelemetryStarter } from "@/lib/runtime-client";
 import { PlayerSession } from "@/features/player/domain";
 
 // Persistent storage for uniquely identifying the player in the local browser
+// NOTE: intentionally `crypto.randomUUID()` — the KVS `defaultValue` is a sync
+// thunk with no Effect runtime, and Effect's `Random` has no UUID API (seeded
+// PRNG, not cryptographically secure) in any case.
 export const playerSessionAtom = Atom.kvs({
   runtime: RuntimeTelemetryStarter,
   key: "@wordle/playerSession",

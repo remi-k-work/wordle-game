@@ -39,9 +39,15 @@ export const RuntimeTelemetryStarter = runtimeFactory(TelemetryStarterLayer);
 export const RuntimeAtom = runtimeFactory(MainLayer);
 export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: sharedMemoMap });
 
+// The services a client command may require: exactly what RuntimeClient provides.
+// This keeps the requirements channel precise (service identifiers only) instead of
+// widening it through `Parameters<typeof runPromise>[0]`, whose unresolved
+// generics collapse the error channel to `unknown`.
+type ClientCommandServices = Layer.Success<typeof MainLayer>;
+
 // Runs an Effect from a fire-and-forget XState command action. Failures are logged but never
 // reject, so unhandled Promise rejections cannot escape the synchronous XState action contract.
-export const runClientCommand = (effect: Parameters<typeof RuntimeClient.runPromise>[0]): Promise<void> =>
+export const runClientCommand = <A, E>(effect: Effect.Effect<A, E, ClientCommandServices>): Promise<void> =>
   RuntimeClient.runPromise(
     effect.pipe(
       Effect.asVoid,

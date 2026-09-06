@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/crypto-random-uuid effecttsgo/global-date typescript/no-misused-spread
+
 // services, features, and other libraries
 import { DateTime, Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
@@ -29,6 +31,9 @@ export const runSessionMachine = setup({
   guards: { hasActiveRun: ({ context }) => Option.isSome(context.runId) },
   actions: {
     // Start a new arcade run, wiping previous run stats but preserving historical "best" stats
+    // NOTE: `assign` is synchronous, so `Clock`/`DateTime.now` (Effects) and the
+    // `Crypto` service are unavailable here — `crypto.randomUUID()`/`Date.now()`
+    // are the correct tools. Effect's `Random` has no UUID API regardless.
     startNewRun: assign(
       ({ context }) =>
         ({

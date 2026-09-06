@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/global-date effecttsgo/global-timers
+
 // react
 import { useEffect, useState } from "react";
 
@@ -18,36 +20,10 @@ import { formatDuration } from "@/lib/formatters";
 
 // components
 import { T } from "gt-next";
+import { RunStat } from "./run-stat";
 
 // assets
 import { ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
-
-// types
-import type { ComponentType, ReactNode } from "react";
-
-function RunStat({
-  label,
-  bg,
-  Icon,
-  iconClassName,
-  children,
-}: {
-  label: ReactNode;
-  bg: string;
-  Icon: ComponentType<{ className?: string }>;
-  iconClassName: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className={bg}>
-      <h3 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">{label}</h3>
-      <span className={`flex items-center justify-center gap-1 text-3xl font-semibold wrap-anywhere ${iconClassName}`}>
-        <Icon className="size-7" />
-        {children}
-      </span>
-    </div>
-  );
-}
 
 export function RunScore() {
   const runResult = useAtomValue(runResultAtom);
@@ -59,6 +35,9 @@ export function RunScore() {
   const bestStreak = useAtomValue(runSessionBestStreakAtom);
   const locale = useLocale();
 
+  // NOTE: React state initializer + interval callback are synchronous contexts —
+  // `DateTime.now` (an Effect) and `Schedule` are unavailable here. `Date.now()`
+  // with the canonical `useEffect` cleanup below is the idiomatic React pattern.
   const [now, setNow] = useState(() => DateTime.makeUnsafe(Date.now()));
 
   useEffect(() => {
