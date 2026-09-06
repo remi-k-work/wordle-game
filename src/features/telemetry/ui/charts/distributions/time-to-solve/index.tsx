@@ -36,7 +36,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
   );
   const tickFormatter = useCallback((tick: number | null) => formatSpeedCategory(tick, true), [formatSpeedCategory]);
   const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${value}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const,
+    (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const,
     [gt]
   );
   const tooltipLabelFormatter = useCallback((label: unknown) => formatSpeedCategory(label as number | null), [formatSpeedCategory]);

@@ -92,8 +92,8 @@ const seedFixture = Effect.gen(function* () {
   }
 });
 
-const makeRequest = (sessionId: string, whichBestRun: "personal" | "global"): typeof BestRunTrophyCardArgs.Type =>
-  Schema.decodeUnknownSync(BestRunTrophyCardArgs)({ sessionId, solutionsLanguage: "Pl", whichBestRun });
+const makeRequest = (sessionId: string, whichBestRun: "personal" | "global"): BestRunTrophyCardArgs =>
+  Schema.decodeSync(BestRunTrophyCardArgs)({ sessionId, solutionsLanguage: "Pl", whichBestRun });
 
 const TestLayer = PgContainer.ClientLive;
 
@@ -144,13 +144,12 @@ describe("best-run-trophy-card e2e", () => {
 
         // Request for En language but we only seeded Pl runs in this test (the EN fixture row exists,
         // but to keep the test self-contained we query for a language with no rows at all)
-        const result = yield* bestRunTrophyCardQuery(sql)(
-          Schema.decodeUnknownSync(BestRunTrophyCardArgs)({
-            sessionId: "00000000-0000-0000-0000-000000000000",
-            solutionsLanguage: "En",
-            whichBestRun: "global",
-          })
-        );
+        const request = yield* Schema.decodeEffect(BestRunTrophyCardArgs)({
+          sessionId: "00000000-0000-0000-0000-000000000000",
+          solutionsLanguage: "En",
+          whichBestRun: "global",
+        });
+        const result = yield* bestRunTrophyCardQuery(sql)(request);
 
         // The EN fixture row in FIXTURE_ROWS has score 1000 — wait, it DOES exist.
         // Let's use a completely unseeded language? Schema only allows "En" | "Pl".

@@ -24,10 +24,10 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
   const gt = useGT();
 
   const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${value}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")] as const,
+    (value: unknown, name: unknown) => [`${String(value)}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")] as const,
     [gt]
   );
-  const tooltipLabelFormatter = useCallback((label: unknown) => `${label}`, []);
+  const tooltipLabelFormatter = useCallback((label: unknown) => String(label), []);
   const legendFormatter = useCallback((value: unknown) => (value === "personal" ? gt("Your Misses") : gt("Global Misses")), [gt]);
 
   return AsyncResult.builder(failedWordsFrequency)

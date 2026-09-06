@@ -59,9 +59,9 @@ export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathR
 export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData>("HardestWordsLeaderboardData")({
   word: TheSecretWord,
   personalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  personalAvgGuesses: Schema.NumberFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
+  personalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
   globalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  globalAvgGuesses: Schema.NumberFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
+  globalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
 }) {}
 
 export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCardArgs>("BestRunTrophyCardArgs")({

@@ -67,7 +67,7 @@ export class RunResult extends Schema.Class<RunResult>("RunResult")({
 export class WordScore extends Schema.Class<WordScore>("WordScore")({
   wordScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   basePointsPerTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  speedMultiplier: Schema.Number.check(Schema.isGreaterThanOrEqualTo(0)),
+  speedMultiplier: Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0)),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 

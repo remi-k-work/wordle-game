@@ -44,7 +44,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         })).filter((row) => row.turn !== null);
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeUnknownEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
+        return yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
       });
 
     const getTimeToSolveDistribution = (request: AnyChartArgs) =>
@@ -60,7 +60,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         }));
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeUnknownEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(Effect.orDie);
+        return yield* Schema.decodeEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(Effect.orDie);
       });
 
     const getArcadeStreakDistribution = (request: AnyChartArgs) =>
@@ -76,7 +76,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         }));
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeUnknownEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(Effect.orDie);
+        return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(Effect.orDie);
       });
 
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);

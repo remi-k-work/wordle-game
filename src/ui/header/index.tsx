@@ -22,8 +22,8 @@ export function Header() {
   );
 }
 
-// This new async component contains the dynamic logic
-async function HeaderContent() {
+// This component contains the dynamic logic
+function HeaderContent() {
   return (
     <header className={cn("z-10 flex items-center gap-4 bg-linear-to-b from-surface-1 via-surface-3 to-transparent p-2", "lg:sticky lg:top-0")}>
       <Logo />

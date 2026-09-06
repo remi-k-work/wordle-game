@@ -12,7 +12,7 @@ import type { TheSecretWord, WordMeta } from "@/features/game/domain";
 // constants
 import { INITIAL_WORD_META } from "@/features/game/domain";
 
-const onLoadingActor = fromPromise(async ({ input: { theSecretWord }, signal }: { input: { theSecretWord: TheSecretWord }; signal: AbortSignal }) =>
+const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: { input: { theSecretWord: TheSecretWord }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);

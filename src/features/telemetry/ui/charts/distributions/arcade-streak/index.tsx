@@ -25,10 +25,10 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
 
   const tickFormatter = useCallback((tick: number) => (tick === Infinity ? "14+" : `${tick}`), []);
   const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${value}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const,
+    (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const,
     [gt]
   );
-  const tooltipLabelFormatter = useCallback((label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${label}`), []);
+  const tooltipLabelFormatter = useCallback((label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${String(label)}`), []);
   const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average")), [gt]);
 
   return AsyncResult.builder(arcadeStreakDistribution)

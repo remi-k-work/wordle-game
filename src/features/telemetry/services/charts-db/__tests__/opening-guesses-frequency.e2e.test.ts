@@ -73,8 +73,8 @@ const seedFixture = Effect.gen(function* () {
   }
 });
 
-const makeRequest = (sessionId: string): typeof AnyChartArgs.Type =>
-  Schema.decodeUnknownSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
+const makeRequest = (sessionId: string): AnyChartArgs =>
+  Schema.decodeSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
 
 const TestLayer = PgContainer.ClientLive;
 

@@ -25,7 +25,7 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
 
   const tickFormatter = useCallback((tick: number) => gt("Turn {turn}", { turn: tick }), [gt]);
   const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${value}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const,
+    (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const,
     [gt]
   );
   const tooltipLabelFormatter = useCallback((label: unknown) => gt("Turn: {turn}", { turn: label }), [gt]);

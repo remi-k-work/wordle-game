@@ -82,8 +82,8 @@ const seedFixture = Effect.gen(function* () {
 });
 
 // SqlSchema validates the Request via Schema — build it through the schema.
-const makeRequest = (sessionId: string): typeof AnyCounterArgs.Type =>
-  Schema.decodeUnknownSync(AnyCounterArgs)({ sessionId, solutionsLanguage: "Pl", counterName: "validGuesses" });
+const makeRequest = (sessionId: string): AnyCounterArgs =>
+  Schema.decodeSync(AnyCounterArgs)({ sessionId, solutionsLanguage: "Pl", counterName: "validGuesses" });
 
 const TestLayer = PgContainer.ClientLive;
 
@@ -136,13 +136,12 @@ describe("any-counter e2e", () => {
         // Unmatched session, En language. personal subquery: no rows for the
         // zero-UUID session -> SUM -> NULL -> COALESCE -> 0. global subquery:
         // filters En rows, finds the En fixture (count 5) -> 5.
-        const result = yield* anyCounterQuery(sql)(
-          Schema.decodeUnknownSync(AnyCounterArgs)({
-            sessionId: "00000000-0000-0000-0000-000000000000",
-            solutionsLanguage: "En",
-            counterName: "validGuesses",
-          })
-        );
+        const request = yield* Schema.decodeEffect(AnyCounterArgs)({
+          sessionId: "00000000-0000-0000-0000-000000000000",
+          solutionsLanguage: "En",
+          counterName: "validGuesses",
+        });
+        const result = yield* anyCounterQuery(sql)(request);
 
         expect(result.personal).toBe(0);
         expect(result.global).toBe(5);

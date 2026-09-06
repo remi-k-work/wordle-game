@@ -120,8 +120,8 @@ const makeRequest = (
   sessionId: string,
   statColumn: "guessedTurn" | "finalScore",
   statTable: "runWordEvent" | "arcadeRunSummary"
-): typeof AnyAvgStatArgs.Type =>
-  Schema.decodeUnknownSync(AnyAvgStatArgs)({
+): AnyAvgStatArgs =>
+  Schema.decodeSync(AnyAvgStatArgs)({
     sessionId,
     solutionsLanguage: "Pl",
     statColumn,
@@ -175,14 +175,13 @@ describe("any-avg-stat e2e", () => {
         const sql = yield* SqlClient.SqlClient;
         yield* seedFixture;
 
-        const result = yield* anyAvgStatQuery(sql)(
-          Schema.decodeUnknownSync(AnyAvgStatArgs)({
-            sessionId: "00000000-0000-0000-0000-000000000000",
-            solutionsLanguage: "En",
-            statColumn: "finalScore",
-            statTable: "arcadeRunSummary",
-          })
-        );
+        const request = yield* Schema.decodeEffect(AnyAvgStatArgs)({
+          sessionId: "00000000-0000-0000-0000-000000000000",
+          solutionsLanguage: "En",
+          statColumn: "finalScore",
+          statTable: "arcadeRunSummary",
+        });
+        const result = yield* anyAvgStatQuery(sql)(request);
 
         expect(result.personal).toBe(0);
         expect(result.global).toBe(50);

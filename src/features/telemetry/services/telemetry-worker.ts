@@ -26,6 +26,9 @@ const normalizeMetricPayload = (payload: Metric.Metric.Snapshot["state"]) =>
     Match.orElse((state) => state)
   );
 
+// Session-id attribute schema, hoisted to module scope so it isn't rebuilt on every metric pulse
+const SessionIdSchema = Schema.Trim.check(Schema.isUUID());
+
 // TelemetryWorkerLayer is a background service that consumes telemetry data from the Hub
 export const TelemetryWorkerLayer = Layer.effectDiscard(
   Effect.gen(function* () {
@@ -34,6 +37,9 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     // Generate the unique identifier for this specific browser session/tab load
     // This lives in the closure of the worker and remains constant until the page reloads
+    // NOTE: intentionally `crypto.randomUUID()` rather than the Effect `Random` module —
+    // this Layer is composed into `Atom.context(...)` in runtime-client.ts, so any new
+    // service requirement would break that composition for zero practical benefit here.
     const instanceId = crypto.randomUUID();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
@@ -74,8 +80,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
         const globalPulseRecords: AddGlobalPulse[] = yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state: metricPayload }) =>
           Effect.gen(function* () {
-            const sessionId = yield* Schema.decodeUnknownEffect(Schema.Trim.check(Schema.isUUID()))(attributes?.["sessionId"]).pipe(Effect.orDie);
-            const solutionsLanguage = yield* Schema.decodeUnknownEffect(SolutionsLanguage)(attributes?.["solutionsLanguage"]).pipe(Effect.orDie);
+            const sessionId = yield* Schema.decodeUnknownEffect(SessionIdSchema)(attributes?.["sessionId"]);
+            const solutionsLanguage = yield* Schema.decodeUnknownEffect(SolutionsLanguage)(attributes?.["solutionsLanguage"]);
             return {
               sessionId,
               instanceId,
@@ -83,7 +89,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
               metricName,
               metricPayload: JSON.stringify(normalizeMetricPayload(metricPayload)),
             } as const satisfies AddGlobalPulse;
-          })
+          }).pipe(Effect.orDie)
         );
 
         if (globalPulseRecords.length > 0) yield* addGlobalPulse(globalPulseRecords);

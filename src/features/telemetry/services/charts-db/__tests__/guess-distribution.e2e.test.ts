@@ -76,7 +76,7 @@ const seedFixture = Effect.gen(function* () {
 
 // SqlSchema validates the Request via Schema — a plain object fails the
 // class's encode step, so build the request through the schema first.
-const makeRequest = (sessionId: string): typeof AnyChartArgs.Type => Schema.decodeUnknownSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
+const makeRequest = (sessionId: string): AnyChartArgs => Schema.decodeSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
 
 // Build the same layer the production service uses, but backed by the test
 // container instead of PgLive. guessDistributionQuery only needs SqlClient.
@@ -139,7 +139,7 @@ describe("guess-distribution e2e", () => {
           globalPct,
         })).filter((row) => row.turn !== null);
 
-        const decoded = yield* Schema.decodeUnknownEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
+        const decoded = yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
 
         // NULL row hidden — only 6 turn rows reach the UI.
         expect(decoded.length).toBe(6);

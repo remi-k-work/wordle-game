@@ -34,7 +34,7 @@ interface ApplySonarHackActorArgs {
 // constants
 import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
-const applyEmpHackActor = fromPromise(async ({ input, signal }: ApplyEmpHackActorArgs) =>
+const applyEmpHackActor = fromPromise(({ input, signal }: ApplyEmpHackActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
@@ -56,7 +56,7 @@ const applyEmpHackActor = fromPromise(async ({ input, signal }: ApplyEmpHackActo
   )
 );
 
-const applySonarHackActor = fromPromise(async ({ input, signal }: ApplySonarHackActorArgs) =>
+const applySonarHackActor = fromPromise(({ input, signal }: ApplySonarHackActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
@@ -83,7 +83,7 @@ const applySonarHackActor = fromPromise(async ({ input, signal }: ApplySonarHack
   )
 );
 
-const applyOverrideHackActor = fromPromise(async ({ signal }: { signal: AbortSignal }) =>
+const applyOverrideHackActor = fromPromise(({ signal }: { signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)

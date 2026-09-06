@@ -72,7 +72,7 @@ export const runSessionMachine = setup({
     saveFinishedRun: ({ context }, params: { deathReason: RunDeathReason }) =>
       runClientCommand(
         Effect.gen(function* () {
-          const now = DateTime.makeUnsafe(Date.now());
+          const now = yield* DateTime.now;
           const runId = Option.getOrThrow(context.runId);
           const createdAt = Option.getOrElse(context.createdAt, () => now);
           yield* Atom.set(

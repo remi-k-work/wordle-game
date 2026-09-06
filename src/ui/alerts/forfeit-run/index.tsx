@@ -19,8 +19,8 @@ export function ForfeitRunAlert() {
     <Alert
       isOpen={alertMachineSnapshot.matches("forfeit-run")}
       title={gt("Forfeit Run")}
-      onOkayed={async () =>
-        await runClientCommand(
+      onOkayed={() =>
+        runClientCommand(
           Effect.gen(function* () {
             const wordChallenge = (yield* Atom.get(wordChallengeMachineAtom)).context;
             yield* Atom.set(gameFlowMachineAtom, { type: "run.forfeitConfirmed", wordChallenge });

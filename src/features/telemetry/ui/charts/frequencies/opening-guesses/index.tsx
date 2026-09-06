@@ -24,10 +24,10 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
   const gt = useGT();
 
   const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${value}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")] as const,
+    (value: unknown, name: unknown) => [`${String(value)}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")] as const,
     [gt]
   );
-  const tooltipLabelFormatter = useCallback((label: unknown) => `${label}`, []);
+  const tooltipLabelFormatter = useCallback((label: unknown) => String(label), []);
   const legendFormatter = useCallback((value: unknown) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses")), [gt]);
 
   return AsyncResult.builder(openingGuessesFrequency)

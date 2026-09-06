@@ -126,4 +126,4 @@ export const generateOverride = (
       "The highly descriptive clue in plain text only. Detailed, insightful, TTS-friendly. No Markdown, emojis, or preamble.",
       "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów."
     ),
-  }).pipe(Effect.map((clue) => Option.some(clue)));
+  }).pipe(Effect.asSome);

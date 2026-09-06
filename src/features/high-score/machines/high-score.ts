@@ -14,7 +14,7 @@ import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/feature
 import { INITIAL_HIGH_SCORE_CONTEXT, beatsTop10Tail } from "@/features/high-score/domain";
 
 const top10HighScoresActor = fromPromise(
-  async ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
+  ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
     RuntimeClient.runPromise(
       Effect.gen(function* () {
         const { top10HighScores } = yield* RpcHighScoreClient;
@@ -24,7 +24,7 @@ const top10HighScoresActor = fromPromise(
     )
 );
 
-const addHighScoreActor = fromPromise(async ({ input: { context }, signal }: { input: { context: HighScoreMachineContext }; signal: AbortSignal }) =>
+const addHighScoreActor = fromPromise(({ input: { context }, signal }: { input: { context: HighScoreMachineContext }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const { addHighScore } = yield* RpcHighScoreClient;

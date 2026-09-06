@@ -15,7 +15,7 @@ import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game
 import { INITIAL_GAME_DATA } from "@/features/game/domain";
 
 // Load the needed game data and create the dictionary of valid words
-const onLoadingActor = fromPromise(async ({ input, signal }: { input: { solutionsLanguage?: SolutionsLanguage }; signal: AbortSignal }) =>
+const onLoadingActor = fromPromise(({ input, signal }: { input: { solutionsLanguage?: SolutionsLanguage }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const solutionsLanguage = input.solutionsLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
@@ -39,7 +39,7 @@ const onLoadingActor = fromPromise(async ({ input, signal }: { input: { solution
   )
 );
 
-const selectSecretWordActor = fromPromise(async ({ input, signal }: { input: { solutions: ReadonlyArray<string> }; signal: AbortSignal }) =>
+const selectSecretWordActor = fromPromise(({ input, signal }: { input: { solutions: ReadonlyArray<string> }; signal: AbortSignal }) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const randomIndex = yield* Random.nextIntBetween(0, input.solutions.length);
