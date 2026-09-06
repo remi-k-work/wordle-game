@@ -25,11 +25,11 @@ export const makeSync = (solutionsPath: string, definitionsPath: string) =>
     const definitionsRaw = yield* fs.readFileString(definitionsPath, "utf8");
 
     // Parse + validate in one step via fromJsonString (no `as` cast, no global Error in failure channel)
-    const solutions = yield* Schema.decodeUnknownEffect(SolutionsFromJson)(solutionsRaw).pipe(
+    const solutions = yield* Schema.decodeEffect(SolutionsFromJson)(solutionsRaw).pipe(
       Effect.mapError((cause) => new SeedJsonParseError({ file: solutionsPath, cause })),
       Effect.orDie
     );
-    const definitions = yield* Schema.decodeUnknownEffect(DefinitionsFromJson)(definitionsRaw).pipe(
+    const definitions = yield* Schema.decodeEffect(DefinitionsFromJson)(definitionsRaw).pipe(
       Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })),
       Effect.orDie
     );
@@ -47,7 +47,7 @@ export const makeSync = (solutionsPath: string, definitionsPath: string) =>
           : { clean: acc.clean, removed: acc.removed + 1 };
       })
     );
-    const cleanDefinitions = Object.fromEntries(HashMap.toEntries(cleanMap)) as Record<string, string>;
+    const cleanDefinitions = Object.fromEntries(HashMap.toEntries(cleanMap));
 
     // Early return if nothing needs pruning
     if (removalCount === 0) {
