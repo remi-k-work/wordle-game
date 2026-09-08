@@ -1,7 +1,5 @@
-// oxlint-disable effecttsgo/crypto-random-uuid-in-effect
-
 // services, features, and other libraries
-import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe } from "effect";
+import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe, Crypto } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain";
@@ -31,6 +29,9 @@ const normalizeMetricPayload = (payload: Metric.Metric.Snapshot["state"]) =>
 // Session-id attribute schema, hoisted to module scope so it isn't rebuilt on every metric pulse
 const SessionIdSchema = Schema.Trim.check(Schema.isUUID());
 
+// fromJsonString combines JSON.parse + schema decoding (and JSON.stringify + encoding on the way back)
+const MetricPayloadFormJson = Schema.fromJsonString(Schema.Unknown);
+
 // TelemetryWorkerLayer is a background service that consumes telemetry data from the Hub
 export const TelemetryWorkerLayer = Layer.effectDiscard(
   Effect.gen(function* () {
@@ -39,12 +40,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     // Generate the unique identifier for this specific browser session/tab load
     // This lives in the closure of the worker and remains constant until the page reloads
-    // NOTE: intentionally `crypto.randomUUID()` — Effect's `Random` has no UUID API
-    // and is a seeded PRNG (not cryptographically secure), while the `Crypto`
-    // service would need an explicit layer plus error handling for the same
-    // underlying WebCrypto entropy. This Layer also feeds `Atom.context(...)`,
-    // so a new service requirement would break that composition.
-    const instanceId = crypto.randomUUID();
+    const crypto = yield* Crypto.Crypto;
+    const instanceId = yield* crypto.randomUUIDv4;
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
     const processSpanBatch = (spanBatch: ReadonlyArray<Tracer.Span>) =>
@@ -82,17 +79,15 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         if (snapshots.length === 0) return;
         yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
-        const globalPulseRecords: AddGlobalPulse[] = yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state: metricPayload }) =>
+        const globalPulseRecords: AddGlobalPulse[] = yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state }) =>
           Effect.gen(function* () {
             const sessionId = yield* Schema.decodeUnknownEffect(SessionIdSchema)(attributes?.["sessionId"]);
             const solutionsLanguage = yield* Schema.decodeUnknownEffect(SolutionsLanguage)(attributes?.["solutionsLanguage"]);
-            return {
-              sessionId,
-              instanceId,
-              solutionsLanguage,
-              metricName,
-              metricPayload: normalizeMetricPayload(metricPayload),
-            } as const satisfies AddGlobalPulse;
+
+            // We need to stringify the metric payload in order for equals to work (for stream deduping)
+            const metricPayload = yield* Schema.encodeEffect(MetricPayloadFormJson)(normalizeMetricPayload(state));
+
+            return { sessionId, instanceId, solutionsLanguage, metricName, metricPayload } as const satisfies AddGlobalPulse;
           }).pipe(Effect.orDie)
         );
 

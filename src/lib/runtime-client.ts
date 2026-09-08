@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Layer, Logger, ManagedRuntime } from "effect";
 import { Atom, AtomRegistry, Reactivity } from "effect/unstable/reactivity";
-import { BrowserKeyValueStore } from "@effect/platform-browser";
+import { BrowserCrypto, BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -17,7 +17,7 @@ const runtimeFactory = Atom.context({ memoMap: sharedMemoMap });
 const LoggerLayer = Logger.layer([Logger.consolePretty()]);
 
 // HubTracerLayer is a custom Effect Tracer that pushes ended spans into TelemetryHub's PubSub
-const TelemetryReadyLayer = Layer.mergeAll(HubTracerLayer, RpcTelemetryClient.layer).pipe(Layer.provideMerge(TelemetryHub.layer));
+const TelemetryReadyLayer = Layer.mergeAll(HubTracerLayer, RpcTelemetryClient.layer, BrowserCrypto.layer).pipe(Layer.provideMerge(TelemetryHub.layer));
 const AtomReadyLayer = Layer.mergeAll(Layer.succeed(AtomRegistry.AtomRegistry, sharedAtomRegistry), Reactivity.layer, BrowserKeyValueStore.layerLocalStorage);
 
 // Basis for every client-side runtime: console logging + all RPC clients + atoms + tracer/hub.

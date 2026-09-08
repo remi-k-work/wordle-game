@@ -7,11 +7,4 @@ import { Effect } from "effect";
 // silently degrading. Keeping the policy here prevents the per-call-site duplicated
 // `tapError(...) + catchTags({...})` chain from drifting.
 export const dieOnDbFailure = <A, E extends { _tag: string }, R>(effect: Effect.Effect<A, E, R>) =>
-  effect.pipe(
-    Effect.tapError(Effect.logError),
-    Effect.catchTags({
-      SchemaError: Effect.die,
-      SqlError: Effect.die,
-      NoSuchElementError: Effect.die,
-    })
-  );
+  effect.pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die, NoSuchElementError: Effect.die }));
