@@ -43,7 +43,6 @@ const RIDDLE_PROMPT_PL = "Stwórz zagadkę teraz.";
 
 export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
   generateNvidiaSingleField({
-    temperature: 0.9,
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
     prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
     fieldName: "riddle",

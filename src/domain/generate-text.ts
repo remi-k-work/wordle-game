@@ -15,11 +15,7 @@ interface GenerateSingleFieldOptions {
   readonly description: string;
 }
 
-// Runs a single `generateText` call producing exactly one string field (trimmed,
-// with a TTS-friendly description), mapping any failure into a typed AiSdkError.
-// Shared by the riddle and override generators so their AI-call plumbing cannot
-// drift apart; the model, prompts, and instructions stay language/content-specific
-// at each call site. The caller supplies an already-resolved LanguageModel.
+// Runs a single `generateText` call producing exactly one string field (trimmed, with a TTS-friendly description)
 export const generateSingleField = (model: LanguageModel, { temperature, instructions, prompt, fieldName, description }: GenerateSingleFieldOptions) =>
   Effect.tryPromise({
     try: () => {

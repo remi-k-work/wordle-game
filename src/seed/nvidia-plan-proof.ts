@@ -47,23 +47,27 @@ const main = Effect.gen(function* () {
   yield* Effect.log("Proving Effect-v4 AI + NVIDIA NIM `ExecutionPlan` fallback end-to-end...\n");
 
   const riddleEn = yield* generateNvidiaSingleField({
-    temperature: 1,
     instructions: RIDDLE_INSTRUCTIONS_EN,
     prompt: "Craft the riddle now.",
     fieldName: "riddle",
     description: "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.",
-  }).pipe(Effect.tapError(Effect.logError));
+  }).pipe(
+    Effect.tapError(Effect.logError),
+    Effect.orElseSucceed(() => "Riddle unavailable. You are on your own!")
+  );
 
   yield* Effect.log(`${riddleEn}\n`);
   yield* Effect.log("**********************\n");
 
   const riddlePl = yield* generateNvidiaSingleField({
-    temperature: 1,
     instructions: RIDDLE_INSTRUCTIONS_PL,
     prompt: "Stwórz zagadkę teraz.",
     fieldName: "riddle",
     description: "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.",
-  }).pipe(Effect.tapError(Effect.logError));
+  }).pipe(
+    Effect.tapError(Effect.logError),
+    Effect.orElseSucceed(() => "Riddle unavailable. You are on your own!")
+  );
 
   yield* Effect.log(`${riddlePl}\n`);
   yield* Effect.log("**********************\n");

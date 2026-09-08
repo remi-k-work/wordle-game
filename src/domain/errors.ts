@@ -8,9 +8,7 @@ export class AiSdkError extends Schema.TaggedError<AiSdkError>()("AiSdkError", {
   cause: Schema.optionalKey(Schema.Defect()),
 }) {}
 
-// Define a domain error for the Effect-based AI providers (the migration target
-// for dropping the AI SDK). It wraps Effect's `AiError.AiErrorReason` so callers
-// can still introspect provider-level failures without depending on the AI SDK.
+// Define a domain error for the Effect-based AI providers
 export class AiProviderError extends Schema.TaggedError<AiProviderError>()("AiProviderError", {
   reason: AiError.AiErrorReason,
 }) {

@@ -18,13 +18,12 @@
     "seed-dic-en": "tsx ./src/seed/dictionary-en.ts",
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts",
     "db:migrate": "tsx ./src/seed/run-migrations.ts",
-    "postinstall": "patch-package",
     "prepare": "effect-tsgo patch --typescript --oxlint"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.64",
     "@base-ui/react": "^1.8.0",
-    "@effect/ai-openai-compat": "^4.0.0-rc.112",
+    "@effect/ai-openrouter": "^4.0.0-rc.112",
     "@effect/atom-react": "^4.0.0-rc.112",
     "@effect/platform-browser": "^4.0.0-rc.112",
     "@effect/platform-node": "^4.0.0-rc.112",
@@ -62,7 +61,6 @@
     "gt": "^2.20.0",
     "oxlint": "1.81.0",
     "oxlint-tsgolint": "7.0.2001",
-    "patch-package": "^8.0.1",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",

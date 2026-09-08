@@ -113,7 +113,6 @@ export const generateOverride = (
   solutionsLanguage: SolutionsLanguage
 ) =>
   generateNvidiaSingleField({
-    temperature: 0.5,
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
     prompt: matchLanguage(
       solutionsLanguage,
