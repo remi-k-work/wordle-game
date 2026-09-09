@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/unstable/ai";
-import { AiProviderError, makeNvidiaFallbackPlan } from ".";
+import { AiProviderError, makeFallbackPlan2 } from ".";
 
 // types
 interface GenerateSingleFieldOptions {
@@ -12,7 +12,7 @@ interface GenerateSingleFieldOptions {
 }
 
 // Raw single-field generation against whichever `LanguageModel` is in scope
-export const generateNvidiaSingleField = Effect.fn("generateNvidiaSingleField")(
+export const generateSingleField2 = Effect.fn("generateSingleField2")(
   function* ({ instructions, fieldName, description, ...options }: GenerateSingleFieldOptions) {
     const languageModel = yield* LanguageModel.LanguageModel;
     const modelName = yield* Model.ModelName;
@@ -28,7 +28,7 @@ export const generateNvidiaSingleField = Effect.fn("generateNvidiaSingleField")(
       Effect.tapError(() => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful.`))
     );
   },
-  Effect.withExecutionPlan(makeNvidiaFallbackPlan),
+  Effect.withExecutionPlan(makeFallbackPlan2),
   Effect.mapError((error) => {
     if (AiError.isAiError(error)) return AiProviderError.fromAiError(error);
     return new AiProviderError({ reason: new AiError.UnknownError({ description: String((error as Error)?.message ?? error) }) });

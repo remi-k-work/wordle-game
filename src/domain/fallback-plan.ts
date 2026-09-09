@@ -14,5 +14,5 @@ const step = (modelKey: Context.Service<LanguageModel, LanguageModel>, model: Go
 });
 
 // Builds the shared fallback ladder for any LanguageModel service
-export const makeGeminiFallbackPlan = (modelKey: Context.Service<LanguageModel, LanguageModel>) =>
+export const makeFallbackPlan = (modelKey: Context.Service<LanguageModel, LanguageModel>) =>
   ExecutionPlan.make(step(modelKey, "gemini-3.5-flash-lite"), step(modelKey, "gemini-3.1-flash-lite"), step(modelKey, "gemini-2.5-flash-lite"));

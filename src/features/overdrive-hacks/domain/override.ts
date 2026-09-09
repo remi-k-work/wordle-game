@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Context, Effect, Match, Option } from "effect";
-import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
+import { AiSdkError, generateSingleField, makeFallbackPlan } from "@/domain";
 import { formatGuess, matchLanguage } from "@/features/game/domain";
 
 // types
@@ -137,7 +137,7 @@ const attemptOverrideWithModel = Effect.fn("attemptOverrideWithModel")(function*
   }).pipe(Effect.asSome);
 });
 
-const OverridePlan = makeGeminiFallbackPlan(OverrideModel);
+const OverridePlan = makeFallbackPlan(OverrideModel);
 
 export const generateOverride = (
   theSecretWord: TheSecretWord,

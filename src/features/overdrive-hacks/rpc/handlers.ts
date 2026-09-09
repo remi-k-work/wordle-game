@@ -5,7 +5,7 @@ import { NodeHttpClient } from "@effect/platform-node";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcOverdriveHacks } from "./requests";
 import { generateOverride } from "@/features/overdrive-hacks/domain";
-import { NvidiaClientLayer } from "@/domain";
+import { OpenRouterClientLayer } from "@/domain";
 import { readAiSwitch } from "@/lib/rpc";
 
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
@@ -21,8 +21,8 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
     ),
 });
 
-const NvidiaClientWithHttp = NvidiaClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
-const RpcOverdriveHacksLayerWithNvidia = RpcOverdriveHacksLayer.pipe(Layer.provide(NvidiaClientWithHttp));
+const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
+const RpcOverdriveHacksLayerWithOpenRouter = RpcOverdriveHacksLayer.pipe(Layer.provide(OpenRouterClientWithHttp));
 
 const RpcLayer = RpcServer.layerHttp({
   group: RpcOverdriveHacks,
@@ -30,6 +30,6 @@ const RpcLayer = RpcServer.layerHttp({
   protocol: "http",
   disableFatalDefects: true,
   disableTracing: true,
-}).pipe(Layer.provide(Layer.mergeAll(RpcOverdriveHacksLayerWithNvidia, RpcSerialization.layerJson, HttpServer.layerServices)));
+}).pipe(Layer.provide(Layer.mergeAll(RpcOverdriveHacksLayerWithOpenRouter, RpcSerialization.layerJson, HttpServer.layerServices)));
 
 export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });

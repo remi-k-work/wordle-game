@@ -5,7 +5,7 @@ import { NodeHttpClient } from "@effect/platform-node";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
 import { generateRiddle, matchLanguage } from "@/features/game/domain";
-import { NvidiaClientLayer } from "@/domain";
+import { OpenRouterClientLayer } from "@/domain";
 import { readAiSwitch } from "@/lib/rpc";
 
 // assets
@@ -42,8 +42,8 @@ const RpcGameLayer = RpcGame.toLayer({
     Effect.succeed(Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord]))),
 });
 
-const NvidiaClientWithHttp = NvidiaClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
-const RpcGameLayerWithNvidia = RpcGameLayer.pipe(Layer.provide(NvidiaClientWithHttp));
+const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
+const RpcGameLayerWithOpenRouter = RpcGameLayer.pipe(Layer.provide(OpenRouterClientWithHttp));
 
 const RpcLayer = RpcServer.layerHttp({
   group: RpcGame,
@@ -51,6 +51,6 @@ const RpcLayer = RpcServer.layerHttp({
   protocol: "http",
   disableFatalDefects: true,
   disableTracing: true,
-}).pipe(Layer.provide(Layer.mergeAll(RpcGameLayerWithNvidia, RpcSerialization.layerJson, HttpServer.layerServices)));
+}).pipe(Layer.provide(Layer.mergeAll(RpcGameLayerWithOpenRouter, RpcSerialization.layerJson, HttpServer.layerServices)));
 
 export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });

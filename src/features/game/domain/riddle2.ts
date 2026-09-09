@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { generateNvidiaSingleField } from "@/domain";
+import { generateSingleField2 } from "@/domain";
 import { matchLanguage } from ".";
 
 // types
@@ -42,7 +42,7 @@ const RIDDLE_PROMPT_EN = "Craft the riddle now.";
 const RIDDLE_PROMPT_PL = "Stwórz zagadkę teraz.";
 
 export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
-  generateNvidiaSingleField({
+  generateSingleField2({
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
     prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
     fieldName: "riddle",

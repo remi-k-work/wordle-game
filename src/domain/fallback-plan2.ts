@@ -10,13 +10,14 @@ const step = (model: string, config: typeof OpenRouterLanguageModel.Config.Servi
 });
 
 // Builds the shared fallback ladder for any LanguageModel service
-export const makeNvidiaFallbackPlan = ExecutionPlan.make(
+export const makeFallbackPlan2 = ExecutionPlan.make(
+  step("openrouter/auto", { strictJsonSchema: true, reasoning_effort: "none" }),
   step("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   step("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
-  step("openrouter/auto", { strictJsonSchema: true, reasoning_effort: "none" })
+  step("openrouter/free", { strictJsonSchema: true, reasoning_effort: "none" })
 );
 
-// The NVIDIA client layer, backed by the OpenAI-compatible endpoint
-export const NvidiaClientLayer = Layer.unwrap(
+// The OpenRouter client layer, backed by the OpenAI-compatible endpoint
+export const OpenRouterClientLayer = Layer.unwrap(
   Config.redacted("OPENROUTER_API_KEY").pipe(Effect.map((apiKey) => Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }))))
 );

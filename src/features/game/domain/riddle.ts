@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Context, Effect } from "effect";
-import { AiSdkError, generateSingleField, makeGeminiFallbackPlan } from "@/domain";
+import { AiSdkError, generateSingleField, makeFallbackPlan } from "@/domain";
 import { matchLanguage } from ".";
 
 // types
@@ -66,7 +66,7 @@ const attemptRiddleWithModel = Effect.fn("attemptRiddleWithModel")(function* (
   });
 });
 
-const RiddlePlan = makeGeminiFallbackPlan(RiddleModel);
+const RiddlePlan = makeFallbackPlan(RiddleModel);
 
 export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
   attemptRiddleWithModel(theSecretWord, solutionsLanguage).pipe(Effect.withExecutionPlan(RiddlePlan));

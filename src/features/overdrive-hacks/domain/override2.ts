@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Match, Option } from "effect";
-import { generateNvidiaSingleField } from "@/domain";
+import { generateSingleField2 } from "@/domain";
 import { formatGuess, matchLanguage } from "@/features/game/domain";
 
 // types
@@ -112,7 +112,7 @@ export const generateOverride = (
   wordleGuesses: WordChallenge["wordleGuesses"],
   solutionsLanguage: SolutionsLanguage
 ) =>
-  generateNvidiaSingleField({
+  generateSingleField2({
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
     prompt: matchLanguage(
       solutionsLanguage,

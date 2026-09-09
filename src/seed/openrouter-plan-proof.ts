@@ -3,7 +3,7 @@ import "dotenv/config";
 // services, features, and other libraries
 import { Effect, Layer, Logger } from "effect";
 import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node";
-import { generateNvidiaSingleField, NvidiaClientLayer } from "@/domain";
+import { generateSingleField2, OpenRouterClientLayer } from "@/domain";
 
 // constants
 const RIDDLE_INSTRUCTIONS_EN = `
@@ -40,13 +40,13 @@ Kontekst: Ukryte słowo to "LUSTRO"
 Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój ruch, lecz nie mam własnego umysłu. Czym jestem?
 `;
 
-const NvidiaClientWithHttp = Layer.provide(NvidiaClientLayer, NodeHttpClient.layerUndici);
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, NvidiaClientWithHttp);
+const OpenRouterClientWithHttp = Layer.provide(OpenRouterClientLayer, NodeHttpClient.layerUndici);
+const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, OpenRouterClientWithHttp);
 
 const main = Effect.gen(function* () {
-  yield* Effect.log("Proving Effect-v4 AI + NVIDIA NIM `ExecutionPlan` fallback end-to-end...\n");
+  yield* Effect.log("Proving Effect-v4 AI + OpenRouter `ExecutionPlan` fallback end-to-end...\n");
 
-  const riddleEn = yield* generateNvidiaSingleField({
+  const riddleEn = yield* generateSingleField2({
     instructions: RIDDLE_INSTRUCTIONS_EN,
     prompt: "Craft the riddle now.",
     fieldName: "riddle",
@@ -59,7 +59,7 @@ const main = Effect.gen(function* () {
   yield* Effect.log(`${riddleEn}\n`);
   yield* Effect.log("**********************\n");
 
-  const riddlePl = yield* generateNvidiaSingleField({
+  const riddlePl = yield* generateSingleField2({
     instructions: RIDDLE_INSTRUCTIONS_PL,
     prompt: "Stwórz zagadkę teraz.",
     fieldName: "riddle",
