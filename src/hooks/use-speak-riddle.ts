@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/global-console
+
 // react
 import { useCallback } from "react";
 

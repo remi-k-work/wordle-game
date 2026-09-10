@@ -2,8 +2,8 @@
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaMachineAtom, wordMetaSanitizedRiddleAtom } from "@/features/game/state";
-import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
+import { wordMetaMachineAtom, wordMetaTheRiddleAtom, wordMetaTheRiddleAudioBufferAtom } from "@/features/game/state";
+import { usePlayAudioBuffer, useSpeakRiddle } from "@/hooks";
 
 // components
 import { Button } from "@base-ui/react";
@@ -38,22 +38,34 @@ function RiddleText({ isAwaiting, isLoading, riddle }: { isAwaiting: boolean; is
 
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
-  const sanitizedRiddle = Option.fromNullOr(useAtomValue(wordMetaSanitizedRiddleAtom));
+  const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
+  const theRiddleAudioBuffer = useAtomValue(wordMetaTheRiddleAudioBufferAtom);
   const speakRiddle = useSpeakRiddle();
+  const playAudioBuffer = usePlayAudioBuffer();
 
   const isAwaiting = wordMetaMachineSnapshot.matches("awaitingTheSecretWord");
   const isLoading = wordMetaMachineSnapshot.matches("loading");
-  const canSpeak = Option.isSome(sanitizedRiddle) && !isAwaiting && !isLoading;
+  const canSpeak = Option.isSome(theRiddle) && !isAwaiting && !isLoading;
 
   return (
     <>
-      <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} riddle={sanitizedRiddle} />
+      <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} riddle={theRiddle} />
 
       {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
       <SpeakButton
         className={cn("button mx-auto", mode === "voiceTest" && "mt-4")}
         disabled={!canSpeak}
-        onClick={() => Option.match(sanitizedRiddle, { onNone: () => {}, onSome: (text) => speakRiddle(text) })}
+        onClick={() => Option.match(theRiddle, { onNone: () => {}, onSome: (theRiddle) => speakRiddle(theRiddle) })}
+      >
+        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
+      </SpeakButton>
+
+      <SpeakButton
+        className={cn("button mx-auto", mode === "voiceTest" && "mt-4")}
+        disabled={!canSpeak}
+        onClick={() =>
+          Option.match(theRiddleAudioBuffer, { onNone: () => {}, onSome: (audioBuffer) => playAudioBuffer(audioBuffer as unknown as ArrayBuffer) })
+        }
       >
         {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
       </SpeakButton>

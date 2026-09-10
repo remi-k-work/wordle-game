@@ -7,8 +7,6 @@ import { MAX_TURNS, WORD_LENGTH } from ".";
 // types
 export type TheSecretWord = typeof TheSecretWord.Type;
 export type SolutionsLanguage = typeof SolutionsLanguage.Type;
-export type TheRiddle = typeof TheRiddle.Type;
-export type WordDefinition = typeof WordDefinition.Type;
 export type RunDeathReason = typeof RunDeathReason.Type;
 
 export type Color = typeof Color.Type;
@@ -17,9 +15,6 @@ export type Keypad = typeof Keypad.Type;
 
 export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isMinLength(WORD_LENGTH)), Schema.check(Schema.isMaxLength(WORD_LENGTH)));
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
-
-export const TheRiddle = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
-export const WordDefinition = Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()));
 export const RunDeathReason = Schema.Literals(["Forfeit", "Guesses"]);
 
 // All the available colors for a single tile
@@ -39,8 +34,9 @@ export class GameData extends Schema.Class<GameData>("GameData")({
 }) {}
 
 export class WordMeta extends Schema.Class<WordMeta>("WordMeta")({
-  theRiddle: Schema.Option(TheRiddle),
-  wordDefinition: Schema.Option(WordDefinition),
+  theRiddle: Schema.Option(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
+  wordDefinition: Schema.Option(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
+  theRiddleAudioBuffer: Schema.Option(Schema.Uint8Array),
 }) {}
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)

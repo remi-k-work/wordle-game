@@ -4,7 +4,6 @@ import { Atom } from "effect/unstable/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
 import { createMachineAtom } from "@/lib/machine-atom";
-import { sanitizedTextAtom } from "@/lib/formatters";
 
 // types
 import type { Color, Tile, WordleGrid } from "@/features/game/domain";
@@ -51,6 +50,3 @@ export const overdriveHacksCanApplyHackAtom = Atom.family((overdriveHackId: Over
     return gameFlowMachineSnapshot.matches("playing") && runScore >= OVERDRIVE_HACK_COST(overdriveHackId);
   })
 );
-
-// The override text with Markdown stripped and whitespace collapsed for TTS
-export const overdriveHacksSanitizedOverrideAtom = sanitizedTextAtom(overdriveHacksTheOverrideAtom);

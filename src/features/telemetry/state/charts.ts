@@ -1,3 +1,5 @@
+// oxlint-disable typescript/no-misused-spread
+
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";

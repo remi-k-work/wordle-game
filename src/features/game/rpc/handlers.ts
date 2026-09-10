@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Option } from "effect";
+import { Effect, HashSet, Layer, Option } from "effect";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { NodeHttpClient } from "@effect/platform-node";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
@@ -7,6 +7,8 @@ import { RpcGame } from "./requests";
 import { generateRiddle, matchLanguage } from "@/features/game/domain";
 import { OpenRouterClientLayer } from "@/domain";
 import { readAiSwitch } from "@/lib/rpc";
+import { OpenRouter } from "@/services/open-router";
+import { formatTextForTTS } from "@/lib/formatters";
 
 // assets
 import solutionsEnJson from "@/assets/data/solutions-en.json";
@@ -23,27 +25,42 @@ const DEFINITIONS_EN = definitionsEnJson as Record<string, string | null>;
 const DEFINITIONS_PL = definitionsPlJson as Record<string, string | null>;
 
 const RpcGameLayer = RpcGame.toLayer({
-  fetchSolutions: ({ solutionsLanguage }) => Effect.succeed(matchLanguage(solutionsLanguage, solutionsEnJson, solutionsPlJson)),
-  fetchDictionary: ({ solutionsLanguage }) => Effect.succeed(matchLanguage(solutionsLanguage, dictionaryEnJson, dictionaryPlJson)),
-  fetchKeypad: ({ solutionsLanguage }) => Effect.succeed(matchLanguage(solutionsLanguage, keypadEnJson, keypadPlJson)),
+  fetchSolutions: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, solutionsEnJson, solutionsPlJson)),
+
+  // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
+  fetchDictionary: ({ solutionsLanguage }) => Effect.succeedSome(HashSet.fromIterable(matchLanguage(solutionsLanguage, dictionaryEnJson, dictionaryPlJson))),
+  fetchKeypad: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, keypadEnJson, keypadPlJson)),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
     Effect.gen(function* () {
       // Do not generate a riddle in the AI off mode to avoid rate limits and unnecessary token usage
       const aiSwitch = yield* readAiSwitch;
-      if (aiSwitch === "off") return yield* Effect.sleep("5 seconds").pipe(Effect.as("No riddle available in the AI off mode."));
+      if (aiSwitch === "off") return yield* Effect.succeedSome("No riddle available in the AI off mode.");
       return yield* generateRiddle(theSecretWord, solutionsLanguage);
     }).pipe(
       Effect.tapError(Effect.logError),
-      Effect.orElseSucceed(() => "Riddle unavailable. You are on your own!")
+      Effect.orElseSucceed(() => Option.none())
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
-    Effect.succeed(Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord]))),
+    Effect.succeed(
+      Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord])).pipe(Option.map(formatTextForTTS))
+    ),
+
+  fetchRiddleAudioBuffer: ({ input }) =>
+    Effect.gen(function* () {
+      const { generateSpeech } = yield* OpenRouter;
+      const { audioData } = yield* generateSpeech({ input });
+
+      return yield* Effect.succeedSome(audioData);
+    }).pipe(
+      Effect.tapError(Effect.logError),
+      Effect.orElseSucceed(() => Option.none())
+    ),
 });
 
 const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
-const RpcGameLayerWithOpenRouter = RpcGameLayer.pipe(Layer.provide(OpenRouterClientWithHttp));
+const RpcGameLayerWithOpenRouter = RpcGameLayer.pipe(Layer.provide(OpenRouterClientWithHttp), Layer.provide(OpenRouter.layer));
 
 const RpcLayer = RpcServer.layerHttp({
   group: RpcGame,

@@ -20,17 +20,18 @@ const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: { inpu
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
       // Load both pieces of metadata independently; we use "result" mode so a failure in one request does not interrupt the other request
-      const { fetchRiddle, fetchDefinition } = yield* RpcGameClient;
-      const { theRiddle, wordDefinition } = yield* Effect.all(
-        { theRiddle: fetchRiddle({ theSecretWord, solutionsLanguage }), wordDefinition: fetchDefinition({ solutionsLanguage, theSecretWord }) },
+      const { fetchRiddle, fetchDefinition, fetchRiddleAudioBuffer } = yield* RpcGameClient;
+      const { theRiddleResult, wordDefinitionResult } = yield* Effect.all(
+        { theRiddleResult: fetchRiddle({ theSecretWord, solutionsLanguage }), wordDefinitionResult: fetchDefinition({ solutionsLanguage, theSecretWord }) },
         { mode: "result", concurrency: 2 }
       );
 
+      const theRiddle = Result.getOrElse(theRiddleResult, Option.none);
+      const wordDefinition = Result.getOrElse(wordDefinitionResult, Option.none);
+      const theRiddleAudioBuffer = yield* fetchRiddleAudioBuffer({ input: theRiddle.valueOrUndefined ?? "" });
+
       // Riddles and definitions are optional enrichments; failed requests are converted into Option.none() instead of failing the entire actor
-      return {
-        theRiddle: Result.match(theRiddle, { onFailure: Option.none, onSuccess: Option.some }),
-        wordDefinition: Result.match(wordDefinition, { onFailure: Option.none, onSuccess: (definition) => definition }),
-      } as const satisfies WordMeta;
+      return { theRiddle, wordDefinition, theRiddleAudioBuffer } as const satisfies WordMeta;
     }),
     { signal }
   )

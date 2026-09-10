@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Effect, Layer, Logger } from "effect";
+import { Effect, Layer, Logger, Option } from "effect";
 import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node";
 import { generateSingleField2, OpenRouterClientLayer } from "@/domain";
 
@@ -53,10 +53,10 @@ const main = Effect.gen(function* () {
     description: "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.",
   }).pipe(
     Effect.tapError(Effect.logError),
-    Effect.orElseSucceed(() => "Riddle unavailable. You are on your own!")
+    Effect.orElseSucceed(() => Option.some("Riddle unavailable. You are on your own!"))
   );
 
-  yield* Effect.log(`${riddleEn}\n`);
+  yield* Effect.log(`${riddleEn.valueOrUndefined}\n`);
   yield* Effect.log("**********************\n");
 
   const riddlePl = yield* generateSingleField2({
@@ -66,10 +66,10 @@ const main = Effect.gen(function* () {
     description: "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.",
   }).pipe(
     Effect.tapError(Effect.logError),
-    Effect.orElseSucceed(() => "Riddle unavailable. You are on your own!")
+    Effect.orElseSucceed(() => Option.some("Riddle unavailable. You are on your own!"))
   );
 
-  yield* Effect.log(`${riddlePl}\n`);
+  yield* Effect.log(`${riddlePl.valueOrUndefined}\n`);
   yield* Effect.log("**********************\n");
 }).pipe(Effect.provide(MainLayer));
 

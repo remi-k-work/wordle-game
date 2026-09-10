@@ -1,5 +1,7 @@
+// oxlint-disable typescript/no-misused-spread
+
 // services, features, and other libraries
-import { Array, Effect, HashSet, Option, Random } from "effect";
+import { Array, Effect, Option, Random } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
@@ -26,14 +28,7 @@ const onLoadingActor = fromPromise(({ input, signal }: { input: { solutionsLangu
         { concurrency: 3 }
       );
 
-      return {
-        solutions: Option.some(solutions),
-
-        // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
-        dictionary: Option.some(HashSet.fromIterable(dictionary.map((word) => word.toUpperCase()))),
-
-        keypad: Option.some(keypad),
-      } as const satisfies GameData;
+      return { solutions, dictionary, keypad } as const satisfies GameData;
     }),
     { signal }
   )

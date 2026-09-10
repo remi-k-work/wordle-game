@@ -1,6 +1,5 @@
 // services, features, and other libraries
-import { Duration, Option } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Duration } from "effect";
 
 // Formats an Effect Duration into a human-readable HH:mm:ss string (also considers days)
 export const formatDuration = (duration: Duration.Duration) => {
@@ -28,7 +27,3 @@ export const formatTextForTTS = (text: string) => {
       .trim()
   );
 };
-
-// Maps an Option<string> atom to a string-or-null atom with TTS formatting applied
-export const sanitizedTextAtom = (baseAtom: Atom.Atom<Option.Option<string>>) =>
-  baseAtom.pipe(Atom.map((option) => Option.getOrNull(Option.map(option, formatTextForTTS))));

@@ -54,6 +54,7 @@ export const INITIAL_GAME_DATA = {
 export const INITIAL_WORD_META = {
   theRiddle: Option.none(),
   wordDefinition: Option.none(),
+  theRiddleAudioBuffer: Option.none(),
 } as const satisfies WordMeta;
 
 export const INITIAL_WORD_CHALLENGE = {

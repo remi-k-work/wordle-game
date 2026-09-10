@@ -13,7 +13,7 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
     Effect.gen(function* () {
       // Do not generate an override in the AI off mode to avoid rate limits and unnecessary token usage
       const aiSwitch = yield* readAiSwitch;
-      if (aiSwitch === "off") return yield* Effect.sleep("5 seconds").pipe(Effect.as(Option.some("No override available in the AI off mode.")));
+      if (aiSwitch === "off") return yield* Effect.succeedSome("No override available in the AI off mode.");
       return yield* generateOverride(theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage);
     }).pipe(
       Effect.tapError(Effect.logError),

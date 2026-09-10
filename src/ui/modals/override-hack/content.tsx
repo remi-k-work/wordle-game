@@ -2,7 +2,7 @@
 import { Option } from "effect";
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
-import { overdriveHacksMachineAtom, overdriveHacksSanitizedOverrideAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksMachineAtom, overdriveHacksTheOverrideAtom } from "@/features/overdrive-hacks/state";
 import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
 
 // components
@@ -15,12 +15,12 @@ import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
 export function Content() {
   const overdriveHacksMachineSnapshot = useAtomValue(overdriveHacksMachineAtom);
-  const sanitizedOverride = Option.fromNullOr(useAtomValue(overdriveHacksSanitizedOverrideAtom));
+  const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
   const speakRiddle = useSpeakRiddle();
 
   const isAwaiting = overdriveHacksMachineSnapshot.matches("idle");
   const isLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
-  const canSpeak = Option.isSome(sanitizedOverride) && !isAwaiting && !isLoading;
+  const canSpeak = Option.isSome(theOverride) && !isAwaiting && !isLoading;
 
   return (
     <article className="mx-auto max-w-prose space-y-9">
@@ -30,7 +30,7 @@ export function Content() {
         ) : isLoading ? (
           <T>Thinking...</T>
         ) : (
-          Option.getOrElse(sanitizedOverride, () => <T>Override unavailable. You are on your own! Please try again later.</T>)
+          Option.getOrElse(theOverride, () => <T>Override unavailable. You are on your own! Please try again later.</T>)
         )}
       </p>
 
@@ -38,7 +38,7 @@ export function Content() {
         <SpeakButton
           className="button"
           disabled={!canSpeak}
-          onClick={() => Option.match(sanitizedOverride, { onNone: () => {}, onSome: (text) => speakRiddle(text) })}
+          onClick={() => Option.match(theOverride, { onNone: () => {}, onSome: (theOverride) => speakRiddle(theOverride) })}
         >
           <T>Speak Override</T>
         </SpeakButton>
