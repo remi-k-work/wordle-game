@@ -31,7 +31,7 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
     <>
       <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} theRiddle={theRiddle} />
 
-      {isAwaiting && <GameFlowButton className={cn(mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
+      {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
       <SpeakButtonRegular className={cn(mode === "voiceTest" && "mt-4")} sanitizedText={theRiddle} disabled={!canSpeakRegular}>
         {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
       </SpeakButtonRegular>
