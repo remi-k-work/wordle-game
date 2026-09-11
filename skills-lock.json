@@ -19,12 +19,6 @@
       "skillPath": "skills/motion-patterns/SKILL.md",
       "computedHash": "71d7279a0651e6cb95a0fe804c77cb7bfa88befba1cbd1c60c05d23feada4dcc"
     },
-    "motion-ui": {
-      "source": "affaan-m/everything-claude-code",
-      "sourceType": "github",
-      "skillPath": "skills/motion-ui/SKILL.md",
-      "computedHash": "63411a4e8804b8ede6e7647de461563fdf1b04e90a1fa165d2aca4f4d673e046"
-    },
     "xstate-v5": {
       "source": "statelyai/skills",
       "sourceType": "github",
