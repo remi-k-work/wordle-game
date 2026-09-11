@@ -1,3 +1,5 @@
+// oxlint-disable typescript/no-misused-spread
+
 // services, features, and other libraries
 import { assign, setup, assertEvent } from "xstate";
 

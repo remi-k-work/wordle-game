@@ -10,6 +10,7 @@ import { Button } from "@base-ui/react";
 import { T } from "gt-next";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 import { SpeakButton } from "@/ui/speak-button";
+import { RiddleText, RiddleTextSkeleton } from "./riddle-text";
 
 // assets
 import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
@@ -18,22 +19,6 @@ import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
 interface ContentProps {
   mode: "popover" | "voiceTest";
   onGameFlowClicked?: () => void;
-}
-
-function RiddleText({ isAwaiting, isLoading, riddle }: { isAwaiting: boolean; isLoading: boolean; riddle: Option.Option<string> }) {
-  const isPulsing = isAwaiting || isLoading;
-
-  return (
-    <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", isPulsing && "animate-pulse")}>
-      {isAwaiting ? (
-        <T>Waiting for the secret word...</T>
-      ) : isLoading ? (
-        <T>Thinking...</T>
-      ) : (
-        Option.getOrElse(riddle, () => <T>Riddle unavailable. You are on your own!</T>)
-      )}
-    </p>
-  );
 }
 
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
@@ -49,7 +34,7 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
 
   return (
     <>
-      <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} riddle={theRiddle} />
+      <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} theRiddle={theRiddle} />
 
       {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
       <SpeakButton
@@ -76,9 +61,7 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
 export function ContentSkeleton({ mode }: ContentProps) {
   return (
     <>
-      <p className="mx-auto animate-pulse text-center text-lg leading-relaxed sm:text-xl lg:text-2xl">
-        <T>Thinking...</T>
-      </p>
+      <RiddleTextSkeleton />
 
       <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled>
         <SpeakerWaveIcon className="size-11" />

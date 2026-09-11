@@ -5,7 +5,7 @@ import { Array, Effect, Option, Random } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { assign, setup, fromPromise } from "xstate";
+import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
@@ -13,11 +13,21 @@ import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 // types
 import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
+interface OnLoadingActorArgs {
+  input: { solutionsLanguage?: SolutionsLanguage };
+  signal: AbortSignal;
+}
+
+interface SelectSecretWordActorArgs {
+  input: { solutions: Option.Option.Value<GameData["solutions"]> };
+  signal: AbortSignal;
+}
+
 // constants
 import { INITIAL_GAME_DATA } from "@/features/game/domain";
 
 // Load the needed game data and create the dictionary of valid words
-const onLoadingActor = fromPromise(({ input, signal }: { input: { solutionsLanguage?: SolutionsLanguage }; signal: AbortSignal }) =>
+const onLoadingActor = fromPromise(({ input, signal }: OnLoadingActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const solutionsLanguage = input.solutionsLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
@@ -34,11 +44,11 @@ const onLoadingActor = fromPromise(({ input, signal }: { input: { solutionsLangu
   )
 );
 
-const selectSecretWordActor = fromPromise(({ input, signal }: { input: { solutions: ReadonlyArray<string> }; signal: AbortSignal }) =>
+const selectSecretWordActor = fromPromise(({ input: { solutions }, signal }: SelectSecretWordActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
-      const randomIndex = yield* Random.nextIntBetween(0, input.solutions.length);
-      return Option.getOrThrow(Array.get(input.solutions, randomIndex)).toUpperCase();
+      const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
+      return Option.getOrThrow(Array.get(solutions, randomIndex)).toUpperCase();
     }),
     { signal }
   )
@@ -92,7 +102,10 @@ export const gameDataMachine = setup({
         src: "onLoadingActor",
 
         // The solutions language is supplied by the event that triggered this load
-        input: ({ event }) => (event.type === "solutionsLanguageChanged" ? { solutionsLanguage: event.solutionsLanguage } : {}),
+        input: ({ event }) => {
+          assertEvent(event, "solutionsLanguageChanged");
+          return { solutionsLanguage: event.solutionsLanguage };
+        },
         onDone: { target: "ready", actions: [{ type: "saveGameData", params: ({ event }) => ({ gameData: event.output }) }, "onGameDataLoaded"] },
         onError: "failure",
       },
@@ -101,7 +114,6 @@ export const gameDataMachine = setup({
     ready: { on: { nextWordRequested: { target: "selectingWord" } } },
 
     selectingWord: {
-      tags: ["loading"],
       invoke: {
         src: "selectSecretWordActor",
         input: ({ context }) => ({ solutions: Option.getOrThrow(context.solutions) }),

@@ -1,3 +1,5 @@
+// oxlint-disable typescript/no-misused-spread
+
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
@@ -22,19 +24,19 @@ import { modalMachineAtom } from "@/state";
 import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain";
 
 interface ApplyEmpHackActorArgs {
-  input: { readonly empNukedLetters: OverdriveHacks["empNukedLetters"] };
+  input: { empNukedLetters: OverdriveHacks["empNukedLetters"] };
   signal: AbortSignal;
 }
 
 interface ApplySonarHackActorArgs {
-  input: { readonly sonarReveals: OverdriveHacks["sonarReveals"] };
+  input: { sonarReveals: OverdriveHacks["sonarReveals"] };
   signal: AbortSignal;
 }
 
 // constants
 import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
-const applyEmpHackActor = fromPromise(({ input, signal }: ApplyEmpHackActorArgs) =>
+const applyEmpHackActor = fromPromise(({ input: { empNukedLetters }, signal }: ApplyEmpHackActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
@@ -45,7 +47,7 @@ const applyEmpHackActor = fromPromise(({ input, signal }: ApplyEmpHackActorArgs)
       const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
       const keypad = Option.getOrThrow(yield* Atom.get(gameDataKeypadAtom));
 
-      const empTargets = yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, input.empNukedLetters);
+      const empTargets = yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
 
       // Charge the player's run score for the hack, if applicable
       if (Option.isSome(empTargets)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("emp") });
@@ -56,7 +58,7 @@ const applyEmpHackActor = fromPromise(({ input, signal }: ApplyEmpHackActorArgs)
   )
 );
 
-const applySonarHackActor = fromPromise(({ input, signal }: ApplySonarHackActorArgs) =>
+const applySonarHackActor = fromPromise(({ input: { sonarReveals }, signal }: ApplySonarHackActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
@@ -71,7 +73,7 @@ const applySonarHackActor = fromPromise(({ input, signal }: ApplySonarHackActorA
         theSecretWord,
         wordleGuesses,
         VOWELS_BY_LANGUAGE[solutionsLanguage],
-        input.sonarReveals.map((reveal) => reveal.vowel)
+        sonarReveals.map((reveal) => reveal.vowel)
       );
 
       // Charge the player's run score for the hack, if applicable

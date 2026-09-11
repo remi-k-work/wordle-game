@@ -1,3 +1,5 @@
+// oxlint-disable typescript/no-misused-spread
+
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
@@ -10,21 +12,30 @@ import { modalMachineAtom } from "@/state";
 // types
 import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain";
 
+interface Top10HighScoresActorArgs {
+  input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] };
+  signal: AbortSignal;
+}
+
+interface AddHighScoreActorArgs {
+  input: { context: HighScoreMachineContext };
+  signal: AbortSignal;
+}
+
 // constants
 import { INITIAL_HIGH_SCORE_CONTEXT, beatsTop10Tail } from "@/features/high-score/domain";
 
-const top10HighScoresActor = fromPromise(
-  ({ input, signal }: { input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] }; signal: AbortSignal }) =>
-    RuntimeClient.runPromise(
-      Effect.gen(function* () {
-        const { top10HighScores } = yield* RpcHighScoreClient;
-        return yield* top10HighScores(input.solutionsLanguage);
-      }),
-      { signal }
-    )
+const top10HighScoresActor = fromPromise(({ input: { solutionsLanguage }, signal }: Top10HighScoresActorArgs) =>
+  RuntimeClient.runPromise(
+    Effect.gen(function* () {
+      const { top10HighScores } = yield* RpcHighScoreClient;
+      return yield* top10HighScores(solutionsLanguage);
+    }),
+    { signal }
+  )
 );
 
-const addHighScoreActor = fromPromise(({ input: { context }, signal }: { input: { context: HighScoreMachineContext }; signal: AbortSignal }) =>
+const addHighScoreActor = fromPromise(({ input: { context }, signal }: AddHighScoreActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const { addHighScore } = yield* RpcHighScoreClient;
