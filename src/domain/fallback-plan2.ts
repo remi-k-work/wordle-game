@@ -19,5 +19,5 @@ export const makeFallbackPlan2 = ExecutionPlan.make(
 
 // The OpenRouter client layer, backed by the OpenAI-compatible endpoint
 export const OpenRouterClientLayer = Layer.unwrap(
-  Config.redacted("OPENROUTER_API_KEY").pipe(Effect.map((apiKey) => Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }))))
+  Config.Redacted("OPENROUTER_API_KEY").pipe(Effect.map((apiKey) => Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }))))
 );

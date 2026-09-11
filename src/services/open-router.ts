@@ -19,7 +19,7 @@ class OpenRouterError extends Schema.TaggedError<OpenRouterError>()("OpenRouterE
 
 export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
   make: Effect.gen(function* () {
-    const apiKey = yield* Config.redacted("OPENROUTER_API_KEY");
+    const apiKey = yield* Config.Redacted("OPENROUTER_API_KEY");
 
     // Configure common client settings, base URL, auth, and retry policies
     const client = (yield* HttpClient.HttpClient).pipe(

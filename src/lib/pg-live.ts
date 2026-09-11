@@ -10,9 +10,9 @@ export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: b
 // Resolves the connection options shared by the live client layer and the migration runner:
 // `ENV` drives SSL, `DATABASE_URL` is always read from the redacted config.
 export const connectConfig = Effect.gen(function* () {
-  const env = yield* Config.literal("local", "ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
+  const env = yield* Config.Literal("local", "ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
   const ssl = env !== "local" ? { rejectUnauthorized: false } : false;
-  const databaseUrl = yield* Config.redacted("DATABASE_URL");
+  const databaseUrl = yield* Config.Redacted("DATABASE_URL");
 
   return { databaseUrl, ssl };
 });

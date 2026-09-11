@@ -19,4 +19,4 @@ export const makeRpcClient = <Rpcs extends Rpc.Any>(serviceName: string, group: 
 
 // Reads the AI switch from Config, defaulting to "on". AI-backed RPCs call this to skip expensive
 // generation (avoiding rate limits and token usage) when the switch is off.
-export const readAiSwitch = Config.literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
+export const readAiSwitch = Config.Literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
