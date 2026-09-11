@@ -47,7 +47,7 @@ const RpcGameLayer = RpcGame.toLayer({
       Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord])).pipe(Option.map(formatTextForTTS))
     ),
 
-  fetchRiddleAudioBuffer: ({ input }) =>
+  fetchRiddleAudio: ({ input }) =>
     Effect.gen(function* () {
       const { generateSpeech } = yield* OpenRouter;
       const { audioData } = yield* generateSpeech({ input });

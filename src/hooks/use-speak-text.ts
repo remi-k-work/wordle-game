@@ -16,7 +16,7 @@ import {
 import { useSpeechVoices } from ".";
 import { matchLanguage } from "@/features/game/domain";
 
-export function useSpeakRiddle() {
+export function useSpeakText() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const voiceVoice = useAtomValue(gameSettingsVoiceAtom);
   const voiceVolume = useAtomValue(gameSettingsVoiceVolumeAtom);
@@ -27,14 +27,14 @@ export function useSpeakRiddle() {
   const voices = useSpeechVoices();
 
   return useCallback(
-    (sanitizedRiddle: string) => {
+    (sanitizedText: string) => {
       if (typeof window === "undefined" || !window.speechSynthesis) {
         console.warn("Speech Synthesis is not supported in this environment.");
         return;
       }
 
       // Guard empty TTS input
-      const trimmed = sanitizedRiddle.trim();
+      const trimmed = sanitizedText.trim();
       if (!trimmed) return;
 
       // Cancel any current speech

@@ -9,4 +9,4 @@ export const wordMetaMachineAtom = createMachineAtom(wordMetaMachine);
 // Specialized selectors for granular state access and optimized re-renders
 export const wordMetaTheRiddleAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddle));
 export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinition));
-export const wordMetaTheRiddleAudioBufferAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddleAudioBuffer));
+export const wordMetaTheRiddleAudioAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddleAudio));

@@ -2,18 +2,13 @@
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaMachineAtom, wordMetaTheRiddleAtom, wordMetaTheRiddleAudioBufferAtom } from "@/features/game/state";
-import { usePlayAudioBuffer, useSpeakRiddle } from "@/hooks";
+import { wordMetaMachineAtom, wordMetaTheRiddleAtom, wordMetaTheRiddleAudioAtom } from "@/features/game/state";
 
 // components
-import { Button } from "@base-ui/react";
 import { T } from "gt-next";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
-import { SpeakButton } from "@/ui/speak-button";
+import { SpeakButtonNatural, SpeakButtonNaturalSkeleton, SpeakButtonRegular, SpeakButtonRegularSkeleton } from "@/ui/speak-button";
 import { RiddleText, RiddleTextSkeleton } from "./riddle-text";
-
-// assets
-import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
 
 // types
 interface ContentProps {
@@ -24,36 +19,26 @@ interface ContentProps {
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
-  const theRiddleAudioBuffer = useAtomValue(wordMetaTheRiddleAudioBufferAtom);
-  const speakRiddle = useSpeakRiddle();
-  const playAudioBuffer = usePlayAudioBuffer();
+  const theRiddleAudio = useAtomValue(wordMetaTheRiddleAudioAtom);
 
   const isAwaiting = wordMetaMachineSnapshot.matches("awaitingTheSecretWord");
   const isLoading = wordMetaMachineSnapshot.matches("loading");
-  const canSpeak = Option.isSome(theRiddle) && !isAwaiting && !isLoading;
+  const isFetching = wordMetaMachineSnapshot.matches("fetchingRiddleAudio");
+  const canSpeakRegular = Option.isSome(theRiddle) && !isAwaiting && !isLoading;
+  const canSpeakNatural = canSpeakRegular && Option.isSome(theRiddleAudio) && !isFetching;
 
   return (
     <>
       <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} theRiddle={theRiddle} />
 
-      {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
-      <SpeakButton
-        className={cn("button mx-auto", mode === "voiceTest" && "mt-4")}
-        disabled={!canSpeak}
-        onClick={() => Option.match(theRiddle, { onNone: () => {}, onSome: (theRiddle) => speakRiddle(theRiddle) })}
-      >
+      {isAwaiting && <GameFlowButton className={cn(mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
+      <SpeakButtonRegular className={cn(mode === "voiceTest" && "mt-4")} sanitizedText={theRiddle} disabled={!canSpeakRegular}>
         {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </SpeakButton>
+      </SpeakButtonRegular>
 
-      <SpeakButton
-        className={cn("button mx-auto", mode === "voiceTest" && "mt-4")}
-        disabled={!canSpeak}
-        onClick={() =>
-          Option.match(theRiddleAudioBuffer, { onNone: () => {}, onSome: (audioBuffer) => playAudioBuffer(audioBuffer as unknown as ArrayBuffer) })
-        }
-      >
+      <SpeakButtonNatural className={cn(mode === "voiceTest" && "mt-4")} audioBuffer={theRiddleAudio} disabled={!canSpeakNatural}>
         {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </SpeakButton>
+      </SpeakButtonNatural>
     </>
   );
 }
@@ -63,10 +48,13 @@ export function ContentSkeleton({ mode }: ContentProps) {
     <>
       <RiddleTextSkeleton />
 
-      <Button className={cn("button mx-auto", mode === "voiceTest" && "mt-4")} disabled>
-        <SpeakerWaveIcon className="size-11" />
+      <SpeakButtonRegularSkeleton className={cn(mode === "voiceTest" && "mt-4")}>
         {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </Button>
+      </SpeakButtonRegularSkeleton>
+
+      <SpeakButtonNaturalSkeleton className={cn(mode === "voiceTest" && "mt-4")}>
+        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
+      </SpeakButtonNaturalSkeleton>
     </>
   );
 }

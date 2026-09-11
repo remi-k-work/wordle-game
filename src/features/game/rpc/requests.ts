@@ -29,8 +29,8 @@ export class RpcGame extends RpcGroup.make(
     success: WordMeta.fields.wordDefinition,
   }),
 
-  Rpc.make("fetchRiddleAudioBuffer", {
+  Rpc.make("fetchRiddleAudio", {
     payload: { input: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())) },
-    success: WordMeta.fields.theRiddleAudioBuffer,
+    success: WordMeta.fields.theRiddleAudio,
   })
 ) {}

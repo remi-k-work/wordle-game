@@ -5,7 +5,7 @@ import { Array, Effect, Option, Random } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { assign, setup, fromPromise, assertEvent } from "xstate";
+import { assign, setup, fromPromise } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
@@ -102,10 +102,7 @@ export const gameDataMachine = setup({
         src: "onLoadingActor",
 
         // The solutions language is supplied by the event that triggered this load
-        input: ({ event }) => {
-          assertEvent(event, "solutionsLanguageChanged");
-          return { solutionsLanguage: event.solutionsLanguage };
-        },
+        input: ({ event }) => (event.type === "solutionsLanguageChanged" ? { solutionsLanguage: event.solutionsLanguage } : {}),
         onDone: { target: "ready", actions: [{ type: "saveGameData", params: ({ event }) => ({ gameData: event.output }) }, "onGameDataLoaded"] },
         onError: "failure",
       },

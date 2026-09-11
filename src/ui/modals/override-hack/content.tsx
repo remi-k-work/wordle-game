@@ -3,12 +3,11 @@ import { Option } from "effect";
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
 import { overdriveHacksMachineAtom, overdriveHacksTheOverrideAtom } from "@/features/overdrive-hacks/state";
-import { useSpeakRiddle } from "@/hooks/use-speak-riddle";
 
 // components
 import { T } from "gt-next";
 import { CloseModalButton } from "@/ui/modal-close-button";
-import { SpeakButton } from "@/ui/speak-button";
+import { SpeakButtonRegular } from "@/ui/speak-button";
 
 // constants
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
@@ -16,7 +15,6 @@ import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 export function Content() {
   const overdriveHacksMachineSnapshot = useAtomValue(overdriveHacksMachineAtom);
   const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
-  const speakRiddle = useSpeakRiddle();
 
   const isAwaiting = overdriveHacksMachineSnapshot.matches("idle");
   const isLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
@@ -35,15 +33,11 @@ export function Content() {
       </p>
 
       <footer className={DIALOG_FOOTER_CLASSES}>
-        <SpeakButton
-          className="button"
-          disabled={!canSpeak}
-          onClick={() => Option.match(theOverride, { onNone: () => {}, onSome: (theOverride) => speakRiddle(theOverride) })}
-        >
+        <SpeakButtonRegular sanitizedText={theOverride} disabled={!canSpeak}>
           <T>Speak Override</T>
-        </SpeakButton>
+        </SpeakButtonRegular>
 
-        <CloseModalButton />
+        <CloseModalButton className="mt-0" />
       </footer>
     </article>
   );
