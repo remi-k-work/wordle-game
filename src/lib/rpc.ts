@@ -8,7 +8,7 @@ import type { Rpc } from "effect/unstable/rpc";
 
 // Builds a class-style RPC client service backed by an HTTP protocol layer for a given RPC group.
 export const makeRpcClient = <Rpcs extends Rpc.Any>(serviceName: string, group: RpcGroup.RpcGroup<Rpcs>, path: string) => {
-  const ProtocolLive = RpcClient.layerProtocolHttp({ url: path }).pipe(Layer.provide([FetchHttpClient.layer, RpcSerialization.layerJson]));
+  const ProtocolLive = RpcClient.layerProtocolHttp({ url: path }).pipe(Layer.provide([FetchHttpClient.layer, RpcSerialization.layerSchemaBinary()]));
 
   return class extends Context.Service<RpcClient.RpcClient<Rpcs>>()(serviceName, {
     make: RpcClient.make(group, { disableTracing: true }),

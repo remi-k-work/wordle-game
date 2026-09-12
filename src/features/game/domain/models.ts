@@ -6,6 +6,7 @@ import { MAX_TURNS, WORD_LENGTH } from ".";
 
 // types
 export type TheSecretWord = typeof TheSecretWord.Type;
+export type FailedOnWord = typeof FailedOnWord.Type;
 export type SolutionsLanguage = typeof SolutionsLanguage.Type;
 export type RunDeathReason = typeof RunDeathReason.Type;
 
@@ -14,6 +15,18 @@ export type WordleGrid = typeof WordleGrid.Type;
 export type Keypad = typeof Keypad.Type;
 
 export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isMinLength(WORD_LENGTH)), Schema.check(Schema.isMaxLength(WORD_LENGTH)));
+
+// The word a run died on, or the "N/A" sentinel when the run never reached a
+// word (e.g. forfeited during arcade setup). A single string schema (not a
+// Union of two string members): SchemaBinary requires union members to be
+// uniquely identifiable on the wire, and two plain-string members are not.
+export const FailedOnWord = Schema.Trim.pipe(
+  Schema.check(
+    Schema.makeFilter((word: string) => word === "N/A" || word.length === WORD_LENGTH, {
+      expected: `a ${WORD_LENGTH}-letter word or "N/A"`,
+    })
+  )
+);
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
 export const RunDeathReason = Schema.Literals(["Forfeit", "Guesses"]);
 

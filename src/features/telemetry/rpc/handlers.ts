@@ -93,6 +93,6 @@ const RpcLayer = RpcServer.layerHttp({
   protocol: "http",
   disableFatalDefects: true,
   disableTracing: true,
-}).pipe(Layer.provide(Layer.mergeAll(RpcTelemetryLayer, RpcSerialization.layerJson, HttpServer.layerServices)));
+}).pipe(Layer.provide(Layer.mergeAll(RpcTelemetryLayer, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices)));
 
 export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });

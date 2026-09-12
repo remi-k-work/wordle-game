@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
+import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
 
 export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
@@ -15,7 +15,7 @@ export class AddArcadeRunSummary extends Schema.Class<AddArcadeRunSummary>("AddA
   sessionId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
   deathReason: RunDeathReason,
-  failedOnWord: Schema.Union([TheSecretWord, Schema.Literal("N/A")]),
+  failedOnWord: FailedOnWord,
   finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
