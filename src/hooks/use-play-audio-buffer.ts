@@ -1,35 +1,46 @@
 // oxlint-disable effecttsgo/global-console
 
 // react
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { gameSettingsVoiceVolumeAtom } from "@/features/settings/state";
 
-// Plays a generated MP3 ArrayBuffer (e.g. from OpenRouter `generateSpeech`)
+// Shared player: one element for the whole app (mirrors window.speechSynthesis)
+let sharedAudio: HTMLAudioElement | null = null;
+
+// Active Blob URL for the current playback (must be revoked manually)
+let sharedUrl: string | null = null;
+
+// Release the Blob URL without touching playback
+function revokeSharedUrl() {
+  if (sharedUrl !== null) {
+    URL.revokeObjectURL(sharedUrl);
+    sharedUrl = null;
+  }
+}
+
+// Drop the media resource after playback ends (keeps the element reusable)
+function releaseMedia(audio: HTMLAudioElement) {
+  revokeSharedUrl();
+  audio.removeAttribute("src");
+  audio.load();
+}
+
+// Plays a generated MP3 buffer (e.g. from OpenRouter `generateSpeech`)
+// Bytes live in `wordMetaTheRiddleAudioAtom`; playback outlives the caller on purpose
 export function usePlayAudioBuffer() {
   // We only need volume here; pitch and rate are baked into the generated audio
   const voiceVolume = useAtomValue(gameSettingsVoiceVolumeAtom);
 
-  // Keep track of the active audio element and Object URL for cleanup
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const blobUrlRef = useRef<string | null>(null);
-
-  // Cleanup on unmount: stop playback and release the Blob URL
+  // Follow volume changes even mid-playback (never pauses or revokes)
   useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-      if (blobUrlRef.current !== null) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
-    };
-  }, []);
+    if (sharedAudio !== null) sharedAudio.volume = voiceVolume;
+  }, [voiceVolume]);
 
   return useCallback(
-    (audioBuffer: ArrayBuffer) => {
+    (audioBuffer: Uint8Array<ArrayBufferLike>) => {
       if (typeof window === "undefined" || typeof Audio === "undefined") {
         console.warn("HTMLAudio is not supported in this environment.");
         return;
@@ -38,22 +49,23 @@ export function usePlayAudioBuffer() {
       // Guard empty TTS input
       if (audioBuffer.byteLength === 0) return;
 
-      // Lazy-init the persistent element
-      const audio = (audioRef.current ??= new Audio());
+      // Lazy-init the shared element
+      const audio = (sharedAudio ??= new Audio());
       audio.preload = "auto";
 
       // Cancel any current playback (parity with synth.cancel())
       audio.pause();
-      if (blobUrlRef.current !== null) {
-        URL.revokeObjectURL(blobUrlRef.current);
-        blobUrlRef.current = null;
-      }
+      revokeSharedUrl();
 
-      // Copy defensively: constructing a Blob from the buffer can neuter it
+      // Copy defensively: keeps the atom's buffer replayable
       const copy = audioBuffer.slice(0);
-      const blob = new Blob([copy], { type: "audio/mpeg" });
+      const blob = new Blob([copy as BlobPart], { type: "audio/mpeg" });
       const url = URL.createObjectURL(blob);
-      blobUrlRef.current = url;
+      sharedUrl = url;
+
+      // Revoke on natural end (unmount-agnostic: fires after the caller is gone)
+      audio.onended = () => releaseMedia(audio);
+      audio.onerror = () => releaseMedia(audio);
 
       audio.src = url;
       audio.volume = voiceVolume;
@@ -61,6 +73,8 @@ export function usePlayAudioBuffer() {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch((error: unknown) => {
+          // Rejected play holds no audio: free the URL right away
+          releaseMedia(audio);
           console.warn("Audio playback failed.", error);
         });
       }

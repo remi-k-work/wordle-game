@@ -44,7 +44,7 @@ export function SpeakButtonNatural({ audioBuffer, children, className, ...rest }
   return (
     <Button
       className={cn("button mx-auto bg-secondary", className)}
-      onClick={() => Option.match(audioBuffer, { onNone: () => {}, onSome: (audioBuffer) => playAudioBuffer(audioBuffer as unknown as ArrayBuffer) })}
+      onClick={() => Option.match(audioBuffer, { onNone: () => {}, onSome: (audioBuffer) => playAudioBuffer(audioBuffer) })}
       {...rest}
     >
       <SpeakerWaveIcon className="size-11" />
