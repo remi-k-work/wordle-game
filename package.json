@@ -21,7 +21,7 @@
     "prepare": "effect-tsgo patch --typescript --oxlint"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.68",
+    "@ai-sdk/google": "^4.0.69",
     "@base-ui/react": "^1.8.0",
     "@effect/ai-openrouter": "^4.0.0-rc.115",
     "@effect/atom-react": "^4.0.0-rc.115",
@@ -30,7 +30,7 @@
     "@effect/sql-pg": "^4.0.0-rc.115",
     "@heroicons/react": "^2.2.0",
     "@vercel/analytics": "^2.0.1",
-    "ai": "^7.0.98",
+    "ai": "^7.0.99",
     "clsx": "^2.1.1",
     "effect": "^4.0.0-rc.115",
     "embla-carousel-react": "^8.6.0",
@@ -38,7 +38,6 @@
     "motion": "^13.2.0",
     "next": "^16.3.5",
     "next-themes": "^0.4.6",
-    "pg": "^8.23.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "recharts": "^3.10.1",
@@ -54,7 +53,6 @@
     "@tailwindcss/postcss": "^4",
     "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^26",
-    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import { PgContainer } from "./_pg-container";
+import { PgContainer, runDdlStatements } from "./_pg-container";
 import { AnyChartArgs, openingGuessesFrequencyQuery } from "@/features/telemetry/services/charts-db";
 
 // Minimal slice of init-telemetry.sql — only the global_pulse table, since the
@@ -64,7 +64,7 @@ const FIXTURE_ROWS: Array<{
 
 const seedFixture = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
-  yield* sql.unsafe(GLOBAL_PULSE_DDL);
+  yield* runDdlStatements(GLOBAL_PULSE_DDL);
   for (const row of FIXTURE_ROWS) {
     yield* sql`
       INSERT INTO global_pulse (session_id, instance_id, solutions_language, metric_name, metric_payload)

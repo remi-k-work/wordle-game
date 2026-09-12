@@ -21,11 +21,15 @@ CREATE TABLE IF NOT EXISTS high_score (
     CHECK (solutions_lang IN ('En', 'Pl')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
+`;
+  yield* sql`
 CREATE INDEX IF NOT EXISTS high_score_ranking_idx
   ON high_score (solutions_lang, score DESC, streak DESC);
-
--- seed data (only runs once on first migration)
+`;
+  // One statement per query: the native pg client (rc.113+) rejects
+  // multi-statement prepared statements.
+  // seed data (only runs once on first migration)
+  yield* sql`
 INSERT INTO high_score (player_name, score, streak, solutions_lang)
 VALUES
   ('ACE', 4200, 18, 'En'),

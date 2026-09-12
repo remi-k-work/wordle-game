@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import { PgContainer } from "./_pg-container";
+import { PgContainer, runDdlStatements } from "./_pg-container";
 import { AnyAvgStatArgs, anyAvgStatQuery } from "@/features/telemetry/services/charts-db";
 
 // Minimal slice of init-telemetry.sql — the two tables any-avg-stat touches.
@@ -99,7 +99,7 @@ const RWE_ROWS: RweRow[] = [
 
 const seedFixture = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
-  yield* sql.unsafe(DDL);
+  yield* runDdlStatements(DDL);
   for (const row of ARS_ROWS) {
     yield* sql`
       INSERT INTO arcade_run_summary

@@ -10,7 +10,7 @@ export class HighScore extends Schema.Class<HighScore>("HighScore")({
   score: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   solutionsLang: SolutionsLanguage,
-  createdAt: Schema.DateTimeUtcFromDate,
+  createdAt: Schema.DateTimeUtcFromMillis,
 }) {}
 
 // The schema for adding a new high score entry (the required fields only)

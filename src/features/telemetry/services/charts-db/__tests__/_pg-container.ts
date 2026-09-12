@@ -1,6 +1,7 @@
 import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { PgClient } from "@effect/sql-pg";
 import { Context, Data, Effect, Layer, Redacted } from "effect";
+import { SqlClient } from "effect/unstable/sql";
 import { pgConfig } from "@/lib/pg-live";
 
 class ContainerError extends Data.TaggedError("ContainerError")<{
@@ -29,3 +30,16 @@ class PgContainer extends Context.Service<PgContainer>()("test/PgContainer", {
 }
 
 export { PgContainer };
+
+// The native pg client (rc.113+) rejects multi-statement prepared statements,
+// so test DDL containing DROP + CREATE must run statement-by-statement.
+export const runDdlStatements = Effect.fn("runDdlStatements")(function* (ddl: string) {
+  const sql = yield* SqlClient.SqlClient;
+  const statements = ddl
+    .split(";")
+    .map((statement) => statement.trim())
+    .filter((statement) => statement.length > 0);
+  for (const statement of statements) {
+    yield* sql.unsafe(statement);
+  }
+});

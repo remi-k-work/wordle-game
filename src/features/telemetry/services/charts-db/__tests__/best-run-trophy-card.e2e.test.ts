@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Option, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import { PgContainer } from "./_pg-container";
+import { PgContainer, runDdlStatements } from "./_pg-container";
 import { BestRunTrophyCardArgs, bestRunTrophyCardQuery } from "@/features/telemetry/services/charts-db";
 
 // Minimal slice of init-telemetry.sql — only the arcade_run_summary table, since the
@@ -83,7 +83,7 @@ const FIXTURE_ROWS: Array<{
 
 const seedFixture = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
-  yield* sql.unsafe(ARCADE_RUN_SUMMARY_DDL);
+  yield* runDdlStatements(ARCADE_RUN_SUMMARY_DDL);
   for (const row of FIXTURE_ROWS) {
     yield* sql`
       INSERT INTO arcade_run_summary (run_id, session_id, solutions_language, death_reason, failed_on_word, final_score, final_streak, duration_seconds)

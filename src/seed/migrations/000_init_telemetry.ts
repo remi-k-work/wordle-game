@@ -3,6 +3,8 @@ import { SqlClient } from "effect/unstable/sql";
 
 const migration = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
+  // One statement per query: the native pg client (rc.113+) rejects
+  // multi-statement prepared statements.
   yield* sql`
 -- telemetry schema
 CREATE TABLE IF NOT EXISTS global_pulse (
@@ -16,10 +18,12 @@ CREATE TABLE IF NOT EXISTS global_pulse (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   PRIMARY KEY (session_id, instance_id, solutions_language, metric_name)
 );
-
+`;
+  yield* sql`
 CREATE INDEX IF NOT EXISTS global_pulse_metrics_lookup_idx
   ON global_pulse (solutions_language, metric_name, created_at DESC);
-
+`;
+  yield* sql`
 CREATE TABLE IF NOT EXISTS arcade_run_summary (
   run_id UUID PRIMARY KEY,
   session_id UUID NOT NULL,
@@ -41,10 +45,12 @@ CREATE TABLE IF NOT EXISTS arcade_run_summary (
     CHECK (duration_seconds >= 0),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
+`;
+  yield* sql`
 CREATE INDEX IF NOT EXISTS arcade_run_summary_leaderboard_idx
   ON arcade_run_summary (session_id, solutions_language, final_score DESC, final_streak DESC);
-
+`;
+  yield* sql`
 CREATE TABLE IF NOT EXISTS run_word_event (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   run_id UUID NOT NULL,
@@ -60,7 +66,8 @@ CREATE TABLE IF NOT EXISTS run_word_event (
     CHECK (time_seconds >= 0),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
+`;
+  yield* sql`
 CREATE INDEX IF NOT EXISTS run_word_event_drill_down_idx
   ON run_word_event (run_id, created_at ASC);
 `;
