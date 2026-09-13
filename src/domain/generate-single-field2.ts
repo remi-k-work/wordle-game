@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Option, Schema } from "effect";
+import { Cause, Effect, Option, Schema } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/unstable/ai";
 import { AiProviderError, makeFallbackPlan2 } from ".";
 import { formatTextForTTS } from "@/lib/formatters";
@@ -28,7 +28,9 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
       Effect.map(({ value }) => value[fieldName]),
       Effect.map(formatTextForTTS),
       Effect.map((value) => Option.liftPredicate(value, (value) => value.length > 0)),
-      Effect.tapError(() => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful.`))
+      Effect.tapError((error) =>
+        Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(Cause.fail(error))}`)
+      )
     );
   },
   Effect.withExecutionPlan(makeFallbackPlan2),

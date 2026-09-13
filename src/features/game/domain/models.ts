@@ -50,6 +50,7 @@ export class WordMeta extends Schema.Class<WordMeta>("WordMeta")({
   theRiddle: Schema.Option(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
   wordDefinition: Schema.Option(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
   theRiddleAudio: Schema.Option(Schema.Uint8Array),
+  wordDefinitionAudio: Schema.Option(Schema.Uint8Array),
 }) {}
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)

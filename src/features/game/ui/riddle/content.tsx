@@ -1,5 +1,4 @@
 // services, features, and other libraries
-import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaMachineAtom, wordMetaTheRiddleAtom, wordMetaTheRiddleAudioAtom } from "@/features/game/state";
@@ -16,6 +15,9 @@ interface ContentProps {
   onGameFlowClicked?: () => void;
 }
 
+// constants
+import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
+
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
@@ -31,14 +33,16 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
     <>
       <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} theRiddle={theRiddle} />
 
-      {isAwaiting && <GameFlowButton className={cn("mx-auto", mode === "voiceTest" && "mt-4")} keepText onClicked={onGameFlowClicked} />}
-      <SpeakButtonRegular className={cn(mode === "voiceTest" && "mt-4")} sanitizedText={theRiddle} disabled={!canSpeakRegular}>
-        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </SpeakButtonRegular>
+      <section className={DIALOG_FOOTER_CLASSES}>
+        {isAwaiting && <GameFlowButton keepText onClicked={onGameFlowClicked} />}
+        <SpeakButtonRegular sanitizedText={theRiddle} disabled={!canSpeakRegular}>
+          {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
+        </SpeakButtonRegular>
 
-      <SpeakButtonNatural className={cn(mode === "voiceTest" && "mt-4")} audioBuffer={theRiddleAudio} disabled={!canSpeakNatural}>
-        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </SpeakButtonNatural>
+        <SpeakButtonNatural audioBuffer={theRiddleAudio} disabled={!canSpeakNatural}>
+          {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
+        </SpeakButtonNatural>
+      </section>
     </>
   );
 }
@@ -48,13 +52,11 @@ export function ContentSkeleton({ mode }: ContentProps) {
     <>
       <RiddleTextSkeleton />
 
-      <SpeakButtonRegularSkeleton className={cn(mode === "voiceTest" && "mt-4")}>
-        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </SpeakButtonRegularSkeleton>
+      <section className={DIALOG_FOOTER_CLASSES}>
+        <SpeakButtonRegularSkeleton>{mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}</SpeakButtonRegularSkeleton>
 
-      <SpeakButtonNaturalSkeleton className={cn(mode === "voiceTest" && "mt-4")}>
-        {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
-      </SpeakButtonNaturalSkeleton>
+        <SpeakButtonNaturalSkeleton>{mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}</SpeakButtonNaturalSkeleton>
+      </section>
     </>
   );
 }

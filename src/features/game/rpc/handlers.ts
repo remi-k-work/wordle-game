@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, HashSet, Layer, Option } from "effect";
+import { Array, Effect, HashSet, Layer, Option, Random } from "effect";
 import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { NodeHttpClient } from "@effect/platform-node";
 import { HttpServer, HttpRouter } from "effect/unstable/http";
@@ -21,6 +21,8 @@ import dictionaryEnJson from "@/assets/data/dictionary-en.json";
 import dictionaryPlJson from "@/assets/data/dictionary-pl.json";
 
 // constants
+import { VOICES_PL } from "@/domain";
+
 const DEFINITIONS_EN = definitionsEnJson as Record<string, string | null>;
 const DEFINITIONS_PL = definitionsPlJson as Record<string, string | null>;
 
@@ -47,10 +49,27 @@ const RpcGameLayer = RpcGame.toLayer({
       Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord])).pipe(Option.map(formatTextForTTS))
     ),
 
-  fetchRiddleAudio: ({ input }) =>
+  fetchRiddleAudio: ({ input, solutionsLanguage }) =>
     Effect.gen(function* () {
       const { generateSpeech } = yield* OpenRouter;
-      const { audioData } = yield* generateSpeech({ input });
+      const randomIndex = yield* Random.nextIntBetween(0, VOICES_PL.length);
+      const voice = matchLanguage(solutionsLanguage, Option.none(), Array.get(VOICES_PL, randomIndex)).valueOrUndefined;
+
+      const { audioData } = yield* generateSpeech(voice === undefined ? { input } : { input, voice });
+
+      return yield* Effect.succeedSome(audioData);
+    }).pipe(
+      Effect.tapError(Effect.logError),
+      Effect.orElseSucceed(() => Option.none())
+    ),
+
+  fetchWordDefinitionAudio: ({ input, solutionsLanguage }) =>
+    Effect.gen(function* () {
+      const { generateSpeech } = yield* OpenRouter;
+      const randomIndex = yield* Random.nextIntBetween(0, VOICES_PL.length);
+      const voice = matchLanguage(solutionsLanguage, Option.none(), Array.get(VOICES_PL, randomIndex)).valueOrUndefined;
+
+      const { audioData } = yield* generateSpeech(voice === undefined ? { input } : { input, voice });
 
       return yield* Effect.succeedSome(audioData);
     }).pipe(

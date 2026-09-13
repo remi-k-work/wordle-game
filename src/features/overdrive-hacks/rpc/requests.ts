@@ -2,6 +2,7 @@
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
 import { OverdriveHacks } from "@/features/overdrive-hacks/domain";
+import { SpeechRequest } from "@/domain";
 
 export class RpcOverdriveHacks extends RpcGroup.make(
   Rpc.make("fetchOverride", {
@@ -13,5 +14,10 @@ export class RpcOverdriveHacks extends RpcGroup.make(
       solutionsLanguage: SolutionsLanguage,
     },
     success: OverdriveHacks.fields.theOverride,
+  }),
+
+  Rpc.make("fetchOverrideAudio", {
+    payload: { input: SpeechRequest.fields.input, solutionsLanguage: SolutionsLanguage },
+    success: OverdriveHacks.fields.theOverrideAudio,
   })
 ) {}

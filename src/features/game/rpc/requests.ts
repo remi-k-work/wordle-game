@@ -1,7 +1,7 @@
 // services, features, and other libraries
-import { Schema } from "effect";
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { GameData, SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain";
+import { SpeechRequest } from "@/domain";
 
 export class RpcGame extends RpcGroup.make(
   Rpc.make("fetchSolutions", {
@@ -30,7 +30,12 @@ export class RpcGame extends RpcGroup.make(
   }),
 
   Rpc.make("fetchRiddleAudio", {
-    payload: { input: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())) },
+    payload: { input: SpeechRequest.fields.input, solutionsLanguage: SolutionsLanguage },
     success: WordMeta.fields.theRiddleAudio,
+  }),
+
+  Rpc.make("fetchWordDefinitionAudio", {
+    payload: { input: SpeechRequest.fields.input, solutionsLanguage: SolutionsLanguage },
+    success: WordMeta.fields.wordDefinitionAudio,
   })
 ) {}

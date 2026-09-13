@@ -22,3 +22,9 @@ export class InvalidPageInputsError extends Schema.TaggedError<InvalidPageInputs
   message: Schema.String,
   cause: Schema.optionalKey(Schema.Defect()),
 }) {}
+
+export class OpenRouterError extends Schema.TaggedError<OpenRouterError>()("OpenRouterError", {
+  cause: Schema.Defect(),
+  status: Schema.optionalKey(Schema.Int),
+  responseBody: Schema.optionalKey(Schema.String),
+}) {}

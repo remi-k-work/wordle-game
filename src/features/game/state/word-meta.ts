@@ -10,3 +10,4 @@ export const wordMetaMachineAtom = createMachineAtom(wordMetaMachine);
 export const wordMetaTheRiddleAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddle));
 export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinition));
 export const wordMetaTheRiddleAudioAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddleAudio));
+export const wordMetaWordDefinitionAudioAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinitionAudio));

@@ -21,6 +21,11 @@ interface FetchRiddleAudioActorArgs {
   signal: AbortSignal;
 }
 
+interface FetchWordDefinitionAudioActorArgs {
+  input: { wordDefinition: WordMeta["wordDefinition"] };
+  signal: AbortSignal;
+}
+
 // constants
 import { INITIAL_WORD_META } from "@/features/game/domain";
 
@@ -40,7 +45,7 @@ const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: OnLoad
       const wordDefinition = Result.getOrElse(wordDefinitionResult, Option.none);
 
       // Riddles and definitions are optional enrichments; failed requests are converted into Option.none() instead of failing the entire actor
-      return { theRiddle, wordDefinition } as const satisfies Omit<WordMeta, "theRiddleAudio">;
+      return { theRiddle, wordDefinition } as const satisfies Omit<WordMeta, "theRiddleAudio" | "wordDefinitionAudio">;
     }),
     { signal }
   )
@@ -49,9 +54,24 @@ const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: OnLoad
 const fetchRiddleAudioActor = fromPromise(({ input: { theRiddle }, signal }: FetchRiddleAudioActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+
       const { fetchRiddleAudio } = yield* RpcGameClient;
       if (Option.isNone(theRiddle)) return Option.none();
-      return yield* fetchRiddleAudio({ input: theRiddle.value });
+      return yield* fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage });
+    }),
+    { signal }
+  )
+);
+
+const fetchWordDefinitionAudioActor = fromPromise(({ input: { wordDefinition }, signal }: FetchWordDefinitionAudioActorArgs) =>
+  RuntimeClient.runPromise(
+    Effect.gen(function* () {
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+
+      const { fetchWordDefinitionAudio } = yield* RpcGameClient;
+      if (Option.isNone(wordDefinition)) return Option.none();
+      return yield* fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage });
     }),
     { signal }
   )
@@ -65,7 +85,8 @@ export const wordMetaMachine = setup({
   actions: {
     // Save the loaded word meta
     saveWordMeta: assign(
-      ({ context }, params: { wordMeta: Omit<WordMeta, "theRiddleAudio"> }) => ({ ...context, ...params.wordMeta }) as const satisfies WordMeta
+      ({ context }, params: { wordMeta: Omit<WordMeta, "theRiddleAudio" | "wordDefinitionAudio"> }) =>
+        ({ ...context, ...params.wordMeta }) as const satisfies WordMeta
     ),
 
     saveRiddleAudio: assign(
@@ -73,9 +94,14 @@ export const wordMetaMachine = setup({
         ({ ...context, theRiddleAudio: params.theRiddleAudio }) as const satisfies WordMeta
     ),
 
+    saveWordDefinitionAudio: assign(
+      ({ context }, params: { wordDefinitionAudio: WordMeta["wordDefinitionAudio"] }) =>
+        ({ ...context, wordDefinitionAudio: params.wordDefinitionAudio }) as const satisfies WordMeta
+    ),
+
     clearWordMeta: assign(() => INITIAL_WORD_META),
   },
-  actors: { onLoadingActor, fetchRiddleAudioActor },
+  actors: { onLoadingActor, fetchRiddleAudioActor, fetchWordDefinitionAudioActor },
 }).createMachine({
   id: "wordMeta",
   context: INITIAL_WORD_META,
@@ -111,7 +137,19 @@ export const wordMetaMachine = setup({
         src: "fetchRiddleAudioActor",
 
         input: ({ context }) => ({ theRiddle: context.theRiddle }),
-        onDone: { target: "ready", actions: { type: "saveRiddleAudio", params: ({ event }) => ({ theRiddleAudio: event.output }) } },
+        onDone: { target: "fetchingWordDefinitionAudio", actions: { type: "saveRiddleAudio", params: ({ event }) => ({ theRiddleAudio: event.output }) } },
+
+        // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
+        onError: "ready",
+      },
+    },
+
+    fetchingWordDefinitionAudio: {
+      invoke: {
+        src: "fetchWordDefinitionAudioActor",
+
+        input: ({ context }) => ({ wordDefinition: context.wordDefinition }),
+        onDone: { target: "ready", actions: { type: "saveWordDefinitionAudio", params: ({ event }) => ({ wordDefinitionAudio: event.output }) } },
 
         // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
         onError: "ready",

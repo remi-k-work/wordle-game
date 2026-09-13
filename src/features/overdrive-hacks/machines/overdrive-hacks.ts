@@ -33,6 +33,11 @@ interface ApplySonarHackActorArgs {
   signal: AbortSignal;
 }
 
+interface FetchOverrideAudioActorArgs {
+  input: { theOverride: OverdriveHacks["theOverride"] };
+  signal: AbortSignal;
+}
+
 // constants
 import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
 
@@ -110,6 +115,19 @@ const applyOverrideHackActor = fromPromise(({ signal }: { signal: AbortSignal })
   )
 );
 
+const fetchOverrideAudioActor = fromPromise(({ input: { theOverride }, signal }: FetchOverrideAudioActorArgs) =>
+  RuntimeClient.runPromise(
+    Effect.gen(function* () {
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+
+      const { fetchOverrideAudio } = yield* RpcOverdriveHacksClient;
+      if (Option.isNone(theOverride)) return Option.none();
+      return yield* fetchOverrideAudio({ input: theOverride.value, solutionsLanguage });
+    }),
+    { signal }
+  )
+);
+
 export const overdriveHacksMachine = setup({
   types: {} as {
     context: OverdriveHacks;
@@ -155,6 +173,12 @@ export const overdriveHacksMachine = setup({
 
     onOverrideHackApplied: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
 
+    // @ts-expect-error XState inference breaks due to circular module dependency
+    saveOverrideAudio: assign(
+      ({ context }, params: { theOverrideAudio: OverdriveHacks["theOverrideAudio"] }) =>
+        ({ ...context, theOverrideAudio: params.theOverrideAudio }) as const satisfies OverdriveHacks
+    ),
+
     // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
     forwardKeyPress: ({ context, event }) => {
       assertEvent(event, "input.keyPressed");
@@ -164,7 +188,7 @@ export const overdriveHacksMachine = setup({
       void runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },
   },
-  actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor },
+  actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor, fetchOverrideAudioActor },
 }).createMachine({
   id: "overdriveHacks",
   context: INITIAL_OVERDRIVE_HACKS,
@@ -230,10 +254,24 @@ export const overdriveHacksMachine = setup({
       invoke: {
         src: "applyOverrideHackActor",
         onDone: {
-          target: "active",
+          target: "fetchingOverrideAudio",
           actions: [{ type: "applyOverrideHack", params: ({ event }) => ({ theOverride: event.output }) }, "onOverrideHackApplied"],
         },
         onError: { target: "active", actions: "onOverrideHackApplied" },
+      },
+    },
+
+    fetchingOverrideAudio: {
+      on: { "input.keyPressed": { actions: "forwardKeyPress" } },
+
+      invoke: {
+        src: "fetchOverrideAudioActor",
+
+        input: ({ context }) => ({ theOverride: context.theOverride }),
+        onDone: { target: "active", actions: { type: "saveOverrideAudio", params: ({ event }) => ({ theOverrideAudio: event.output }) } },
+
+        // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
+        onError: "active",
       },
     },
   },

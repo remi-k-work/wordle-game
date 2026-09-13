@@ -20,4 +20,5 @@ export const INITIAL_OVERDRIVE_HACKS = {
   empNukedLetters: [],
   sonarReveals: [],
   theOverride: Option.none(),
+  theOverrideAudio: Option.none(),
 } as const satisfies OverdriveHacks;

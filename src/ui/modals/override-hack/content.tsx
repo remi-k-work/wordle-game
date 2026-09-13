@@ -2,12 +2,12 @@
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { overdriveHacksMachineAtom, overdriveHacksTheOverrideAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksMachineAtom, overdriveHacksTheOverrideAtom, overdriveHacksTheOverrideAudioAtom } from "@/features/overdrive-hacks/state";
 
 // components
 import { T } from "gt-next";
 import { CloseModalButton } from "@/ui/modal-close-button";
-import { SpeakButtonRegular } from "@/ui/speak-button";
+import { SpeakButtonNatural, SpeakButtonRegular } from "@/ui/speak-button";
 
 // constants
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
@@ -15,10 +15,12 @@ import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 export function Content() {
   const overdriveHacksMachineSnapshot = useAtomValue(overdriveHacksMachineAtom);
   const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
+  const theOverrideAudio = useAtomValue(overdriveHacksTheOverrideAudioAtom);
 
   const isAwaiting = overdriveHacksMachineSnapshot.matches("idle");
   const isLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
-  const canSpeak = Option.isSome(theOverride) && !isAwaiting && !isLoading;
+  const canSpeakRegular = Option.isSome(theOverride) && !isAwaiting && !isLoading;
+  const canSpeakNatural = canSpeakRegular && Option.isSome(theOverrideAudio);
 
   return (
     <article className="mx-auto max-w-prose space-y-9">
@@ -33,9 +35,13 @@ export function Content() {
       </p>
 
       <footer className={DIALOG_FOOTER_CLASSES}>
-        <SpeakButtonRegular sanitizedText={theOverride} disabled={!canSpeak}>
+        <SpeakButtonRegular sanitizedText={theOverride} disabled={!canSpeakRegular}>
           <T>Speak Override</T>
         </SpeakButtonRegular>
+
+        <SpeakButtonNatural audioBuffer={theOverrideAudio} disabled={!canSpeakNatural}>
+          <T>Speak Override</T>
+        </SpeakButtonNatural>
 
         <CloseModalButton className="mt-0" />
       </footer>

@@ -1,21 +1,7 @@
 // services, features, and other libraries
 import { Config, Context, Effect, flow, Layer, Schedule, Schema } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/http";
-
-class SpeechRequest extends Schema.Class<SpeechRequest>("SpeechRequest")({
-  model: Schema.optionalKey(
-    Schema.Trim.pipe(
-      Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")),
-      Schema.withConstructorDefault(Effect.succeed("fish-audio/s2.1-pro-free:free"))
-    )
-  ),
-  input: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())),
-  response_format: Schema.optionalKey(Schema.Literal("mp3").pipe(Schema.withDecodingDefaultType(Effect.succeed("mp3")))),
-}) {}
-
-class OpenRouterError extends Schema.TaggedError<OpenRouterError>()("OpenRouterError", {
-  cause: Schema.Defect(),
-}) {}
+import { OpenRouterError, SpeechRequest } from "@/domain";
 
 export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
   make: Effect.gen(function* () {
@@ -36,7 +22,16 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
         // Execute request
         const response = yield* HttpClientRequest.post("/audio/speech").pipe(
           HttpClientRequest.bodyJsonUnsafe(yield* Schema.decodeEffect(SpeechRequest)(speechRequest)),
-          client.execute
+          client.execute,
+          // Surface upstream status + body (e.g. rate-limit details) instead of burying them in `cause`
+          Effect.catchTag("HttpClientError", (clientError) => {
+            const response = clientError.response;
+            if (response === undefined) return Effect.fail(new OpenRouterError({ cause: clientError }));
+            return response.text.pipe(
+              Effect.orElseSucceed(() => "<unreadable body>"),
+              Effect.flatMap((responseBody) => Effect.fail(new OpenRouterError({ cause: clientError, status: response.status, responseBody })))
+            );
+          })
         );
 
         // Decode response body as ArrayBuffer using the getter on the response object
@@ -50,7 +45,7 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
 
         return { audioData, generationId } as const;
       },
-      Effect.mapError((cause) => new OpenRouterError({ cause }))
+      Effect.mapError((cause) => (Schema.is(OpenRouterError)(cause) ? cause : new OpenRouterError({ cause })))
     );
 
     return { generateSpeech } as const;

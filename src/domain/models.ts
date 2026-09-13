@@ -13,3 +13,15 @@ export class BasePage extends Schema.Class<BasePage>("BasePage")({
   params: PageParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
   searchParams: PageSearchParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
 }) {}
+
+export class SpeechRequest extends Schema.Class<SpeechRequest>("SpeechRequest")({
+  model: Schema.optionalKey(
+    Schema.Trim.pipe(
+      Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")),
+      Schema.withConstructorDefault(Effect.succeed("fish-audio/s2.1-pro-free:free"))
+    )
+  ),
+  input: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())),
+  voice: Schema.optionalKey(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
+  response_format: Schema.optionalKey(Schema.Literal("mp3").pipe(Schema.withDecodingDefaultType(Effect.succeed("mp3")))),
+}) {}
