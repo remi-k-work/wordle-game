@@ -46,7 +46,6 @@
     "zod": "^4.6.2"
   },
   "devDependencies": {
-    "@effect/language-service": "^0.87.2",
     "@effect/tsgo": "0.45.0",
     "@effect/vitest": "^4.0.0-rc.115",
     "@statelyai/inspect": "^0.7.2",
