@@ -1,14 +1,11 @@
 // services, features, and other libraries
 import { Array, Effect, HashSet, Layer, Option, Random } from "effect";
-import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { NodeHttpClient } from "@effect/platform-node";
-import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcGame } from "./requests";
 import { generateRiddle, matchLanguage } from "@/features/game/domain";
-import { OpenRouterClientLayer } from "@/domain";
-import { readAiSwitch } from "@/lib/rpc";
 import { OpenRouter } from "@/services/open-router";
 import { formatTextForTTS } from "@/lib/formatters";
+import { makeRpcHandler, OpenRouterClientLayer, readAiSwitch } from "@/domain";
 
 // assets
 import solutionsEnJson from "@/assets/data/solutions-en.json";
@@ -81,12 +78,4 @@ const RpcGameLayer = RpcGame.toLayer({
 const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
 const RpcGameLayerWithOpenRouter = RpcGameLayer.pipe(Layer.provide(OpenRouterClientWithHttp), Layer.provide(OpenRouter.layer));
 
-const RpcLayer = RpcServer.layerHttp({
-  group: RpcGame,
-  path: "/api/rpc/game",
-  protocol: "http",
-  disableFatalDefects: true,
-  disableTracing: true,
-}).pipe(Layer.provide(Layer.mergeAll(RpcGameLayerWithOpenRouter, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices)));
-
-export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });
+export const handler = makeRpcHandler(RpcGame, "/api/rpc/game", RpcGameLayerWithOpenRouter);

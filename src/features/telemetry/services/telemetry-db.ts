@@ -2,7 +2,7 @@
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
-import { dieOnDbFailure } from "@/lib/db";
+import { dieOnDbFailure } from "@/domain";
 
 export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
   make: Effect.gen(function* () {

@@ -1,11 +1,10 @@
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
-import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
-import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcTelemetry } from "./requests";
 import { TelemetryDB } from "@/features/telemetry/services/telemetry-db";
 import { ChartsDB } from "@/features/telemetry/services/charts-db";
 import { PgLive } from "@/lib/pg-live";
+import { makeRpcHandler } from "@/domain";
 
 const RpcTelemetryLayer = RpcTelemetry.toLayer({
   addGlobalPulse: (payload) =>
@@ -87,12 +86,4 @@ const RpcTelemetryLayer = RpcTelemetry.toLayer({
     }),
 }).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer).pipe(Layer.provide(PgLive))));
 
-const RpcLayer = RpcServer.layerHttp({
-  group: RpcTelemetry,
-  path: "/api/rpc/telemetry",
-  protocol: "http",
-  disableFatalDefects: true,
-  disableTracing: true,
-}).pipe(Layer.provide(Layer.mergeAll(RpcTelemetryLayer, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices)));
-
-export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });
+export const handler = makeRpcHandler(RpcTelemetry, "/api/rpc/telemetry", RpcTelemetryLayer);

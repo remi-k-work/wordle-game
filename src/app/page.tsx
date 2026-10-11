@@ -2,6 +2,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
+// services, features, and other libraries
+import { T, msg } from "gt-next";
+import { getGT } from "gt-next/server";
+
 // components
 import { Button } from "@base-ui/react";
 import { PageHeader } from "@/ui/page-header";
@@ -15,8 +19,6 @@ import pillar1 from "@/assets/pillar1.webp";
 import pillar2 from "@/assets/pillar2.webp";
 import pillar3 from "@/assets/pillar3.webp";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
-import { T, msg } from "gt-next";
-import { getGT } from "gt-next/server";
 
 export default async function Page() {
   const gt = await getGT();

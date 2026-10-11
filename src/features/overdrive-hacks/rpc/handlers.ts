@@ -1,14 +1,11 @@
 // services, features, and other libraries
 import { Array, Effect, Layer, Option, Random } from "effect";
-import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { NodeHttpClient } from "@effect/platform-node";
-import { HttpServer, HttpRouter } from "effect/unstable/http";
 import { RpcOverdriveHacks } from "./requests";
 import { generateOverride } from "@/features/overdrive-hacks/domain";
-import { OpenRouterClientLayer } from "@/domain";
-import { readAiSwitch } from "@/lib/rpc";
 import { matchLanguage } from "@/features/game/domain";
 import { OpenRouter } from "@/services/open-router";
+import { makeRpcHandler, OpenRouterClientLayer, readAiSwitch } from "@/domain";
 
 // constants
 import { VOICES_PL } from "@/domain";
@@ -43,12 +40,4 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
 const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
 const RpcOverdriveHacksLayerWithOpenRouter = RpcOverdriveHacksLayer.pipe(Layer.provide(OpenRouterClientWithHttp), Layer.provide(OpenRouter.layer));
 
-const RpcLayer = RpcServer.layerHttp({
-  group: RpcOverdriveHacks,
-  path: "/api/rpc/overdrive-hacks",
-  protocol: "http",
-  disableFatalDefects: true,
-  disableTracing: true,
-}).pipe(Layer.provide(Layer.mergeAll(RpcOverdriveHacksLayerWithOpenRouter, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices)));
-
-export const handler = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });
+export const handler = makeRpcHandler(RpcOverdriveHacks, "/api/rpc/overdrive-hacks", RpcOverdriveHacksLayerWithOpenRouter);

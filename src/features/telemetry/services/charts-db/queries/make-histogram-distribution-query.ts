@@ -2,7 +2,7 @@
 import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyChartArgs } from "@/features/telemetry/services/charts-db";
-import { dieOnDbFailure } from "@/lib/db";
+import { dieOnDbFailure } from "@/domain";
 
 // Factory backing timeToSolve, arcadeStreak, guessDistribution. All three
 // share the same query shape; metricName, bucketAlias, and Result schema
