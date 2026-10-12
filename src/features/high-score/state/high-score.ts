@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { highScoreMachine } from "@/features/high-score/machines/high-score";
-import { createMachineAtom } from "@/lib/machine-atom";
+import { createMachineAtom } from "@/domain";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain";

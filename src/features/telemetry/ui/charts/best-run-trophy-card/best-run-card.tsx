@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
 import { useGT, useLocale } from "gt-next";
-import { formatSeconds } from "@/lib/formatters";
+import { formatSeconds } from "@/domain";
 
 // components
 import { InfoLine } from "@/ui/info-line";

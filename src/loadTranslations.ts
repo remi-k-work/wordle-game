@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/async-function
+
 export default async function loadTranslations(locale: string) {
   if (locale === "en") return {};
 

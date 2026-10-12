@@ -7,7 +7,7 @@ import { useState } from "react";
 import { T, Var, useGT, useLocale, useMessages } from "gt-next";
 import { calculatePotentialScore, getBasePointsPerTurn, getSpeedMultiplier, potentialScoreAsPercentage } from "@/features/game/domain";
 import { speedMultiplierToCategoryMessage } from "@/features/game/domain";
-import { formatSeconds } from "@/lib/formatters";
+import { formatSeconds } from "@/domain";
 
 // components
 import { Progress } from "@base-ui/react";

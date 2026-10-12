@@ -5,7 +5,7 @@ import { Array, DateTime, HashMap, Option, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState, formatGuess } from "@/features/game/domain";
-import { createMachineAtom } from "@/lib/machine-atom";
+import { createMachineAtom } from "@/domain";
 
 // types
 import type { Color } from "@/features/game/domain";
@@ -26,7 +26,7 @@ export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map
 
 // Reactive selector for the "live" potential word score based on current progress
 // NOTE: `Atom.make` getters are synchronous, so `DateTime.now` (an Effect) is
-// unavailable here — `Date.now()` is the correct tool.
+// unavailable here — `Date.now()` is the correct tool
 export const wordChallengePotentialScoreAtom = Atom.make((get) =>
   calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
 );

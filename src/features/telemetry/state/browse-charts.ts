@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { browseChartsMachine } from "@/features/telemetry/machines/browse-charts";
-import { createMachineAtom } from "@/lib/machine-atom";
+import { createMachineAtom } from "@/domain";
 
 // The browse charts machine is now a living actor inside the effect atom
 export const browseChartsMachineAtom = createMachineAtom(browseChartsMachine);

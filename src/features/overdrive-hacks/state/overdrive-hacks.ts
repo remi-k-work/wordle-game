@@ -3,7 +3,7 @@ import { Array, HashMap, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
-import { createMachineAtom } from "@/lib/machine-atom";
+import { createMachineAtom } from "@/domain";
 
 // types
 import type { Color, Tile, WordleGrid } from "@/features/game/domain";
@@ -29,7 +29,7 @@ export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
 );
 
 // Projection for completed rows. Sonar state remains separate from player guesses;
-// the current-guess component can use the same reveal selector when it gains final visuals.
+// the current-guess component can use the same reveal selector when it gains final visuals
 export const overdriveHacksWordleGridAtom = Atom.make((get) => {
   const wordleGrid = get(wordChallengeWordleGridAtom);
   const reveals = get(overdriveHacksSonarRevealsAtom);

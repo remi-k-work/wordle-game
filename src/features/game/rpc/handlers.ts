@@ -4,8 +4,7 @@ import { NodeHttpClient } from "@effect/platform-node";
 import { RpcGame } from "./requests";
 import { generateRiddle, matchLanguage } from "@/features/game/domain";
 import { OpenRouter } from "@/services/open-router";
-import { formatTextForTTS } from "@/lib/formatters";
-import { makeRpcHandler, OpenRouterClientLayer, readAiSwitch } from "@/domain";
+import { formatTextForTTS, makeRpcHandler, OpenRouterClientLayer, readAiSwitch } from "@/domain";
 
 // assets
 import solutionsEnJson from "@/assets/data/solutions-en.json";

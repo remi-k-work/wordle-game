@@ -1,10 +1,12 @@
+// oxlint-disable effecttsgo/async-function
+
 // react
 import { Suspense } from "react";
 
 // services, features, and other libraries
 import { Effect } from "effect";
 import { msg } from "gt-next";
-import { runPageMainOrNavigate, validatePageInputs } from "@/lib/helpers-effect";
+import { runPageMainOrNavigate, validatePageInputs } from "@/domain";
 import { HighScorePage } from "@/features/high-score/domain";
 
 // components

@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/async-function
+
 import "./globals.css";
 
 // next
@@ -11,7 +13,7 @@ import { getGT, getLocale } from "gt-next/server";
 
 // components
 import { ThemeProvider } from "next-themes";
-import { AtomRegistryProvider } from "@/lib/atom-registry-provider";
+import { AtomRegistryProvider } from "@/ui/atom-registry-provider";
 import { Toastify } from "@/ui/toastify";
 import { Header } from "@/ui/header";
 import { Modals } from "@/ui/modals";

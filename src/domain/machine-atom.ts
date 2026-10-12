@@ -7,7 +7,7 @@ import { inspect } from "@/machines/inspect";
 // types
 import type { Actor, ActorOptions, AnyStateMachine, EventFromLogic, InputFrom, SnapshotFrom } from "xstate";
 
-// Options controlling how a machine is bootstrapped into an atom.
+// Options controlling how a machine is bootstrapped into an atom
 export type MachineAtomOptions<M extends AnyStateMachine> = {
   // Resolves the machine's createActor input. Runs once, in the actor atom's read function,
   // so it may read from peer atoms (persisted state, sibling snapshots, etc.).
@@ -19,7 +19,7 @@ export type MachineAtomOptions<M extends AnyStateMachine> = {
 
 // Bridges an XState v5 machine into an Effect writable atom: it owns the actor lifecycle, feeds
 // snapshots into the atom's read side, and forwards writes as `send(event)`. This is the single
-// canonical implementation of the previously repeated "machine actor atom" pattern.
+// canonical implementation of the previously repeated "machine actor atom" pattern
 export const createMachineAtom = <M extends AnyStateMachine>(
   machine: M,
   options: MachineAtomOptions<M> = {}
@@ -27,7 +27,7 @@ export const createMachineAtom = <M extends AnyStateMachine>(
   // Creates an Atom-owned XState actor reference
   const actorAtom = Atom.make<Actor<M>>((get) => {
     // The generic machine type makes createActor's conditional `input` requirement undecidable;
-    // the concrete call site still enforces this via the returned atom's typed surface.
+    // the concrete call site still enforces this via the returned atom's typed surface
     const actorOptions = {
       ...Option.match(Option.fromNullishOr(options.input), {
         onNone: () => ({}) as Record<string, never>,

@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { GameSettings } from "@/features/settings/domain";
 import { gameSettingsMachine } from "@/features/settings/machines/game-settings";
-import { createMachineAtom } from "@/lib/machine-atom";
+import { createMachineAtom } from "@/domain";
 
 // constants
 import { INITIAL_GAME_SETTINGS } from "@/features/settings/domain";
@@ -17,8 +17,7 @@ const gameSettingsAtom = Atom.kvs({
   defaultValue: () => INITIAL_GAME_SETTINGS,
 }).pipe(Atom.keepAlive);
 
-// The game settings machine is now a living actor inside the effect atom, hydrated from (and
-// persisting back to) durable storage on every snapshot.
+// The game settings machine is now a living actor inside the effect atom, hydrated from (and persisting back to) durable storage on every snapshot
 export const gameSettingsMachineAtom = createMachineAtom(gameSettingsMachine, {
   input: (get) => get.once(gameSettingsAtom),
   onSnapshot: (get, snapshot) => {

@@ -2,7 +2,7 @@
 import { Cause, Effect, Option, Schema } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/unstable/ai";
 import { AiProviderError, makeFallbackPlan2 } from ".";
-import { formatTextForTTS } from "@/lib/formatters";
+import { formatTextForTTS } from "@/domain";
 
 // types
 interface GenerateSingleFieldOptions {
