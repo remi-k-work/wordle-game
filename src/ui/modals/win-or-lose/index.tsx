@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtom, useAtomValue } from "@effect/atom-react";
-import { wordChallengeMachineAtom } from "@/features/game/state";
-import { modalMachineAtom } from "@/state";
+import { wordChallengeHasWonAtom } from "@/features/game/state";
+import { modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";
@@ -19,10 +19,8 @@ import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
 export function WinOrLoseModal() {
   const [modalMachineSnapshot, modalMachineEvent] = useAtom(modalMachineAtom);
-  const wordChallengeMachineSnapshot = useAtomValue(wordChallengeMachineAtom);
-
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
-  const hasWon = wordChallengeMachineSnapshot.matches("wordWon");
+  const hasWon = useAtomValue(wordChallengeHasWonAtom);
   const gt = useGT();
 
   return (

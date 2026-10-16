@@ -15,6 +15,10 @@ export const computeSonarCandidates = (
 ) => {
   const alreadyRevealedSet = HashSet.fromIterable(alreadyRevealedLetters);
 
+  // Computed once: the third filter below runs per vowel, and re-evaluating the
+  // full board (formatGuess x guesses + reduce) per item is ~30x redundant work
+  const keypadState = computeKeypadState(theSecretWord, wordleGuesses);
+
   return pipe(
     vowels,
     // Keep only vowels that actually appear somewhere in the secret word
@@ -23,7 +27,7 @@ export const computeSonarCandidates = (
     Array.filter((vowel) => !HashSet.has(alreadyRevealedSet, vowel)),
     // Keep vowels the player hasn't positively identified yet (untouched or only greyed-out guesses)
     Array.filter((vowel) =>
-      Option.match(HashMap.get(computeKeypadState(theSecretWord, wordleGuesses), vowel), {
+      Option.match(HashMap.get(keypadState, vowel), {
         onNone: () => true,
         onSome: (color) => color === "" || color === "grey",
       })

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "oxlint",
+    "lint": "oxlint && npm run lint:boundaries",
+    "lint:boundaries": "node scripts/check-boundaries.mjs",
     "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
     "seed-sol-en": "tsx ./src/seed/solutions-en.ts",
@@ -41,6 +42,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "recharts": "^3.10.1",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
     "xstate": "^5.32.6",
     "zod": "^4.6.2"

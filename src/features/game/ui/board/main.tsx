@@ -20,15 +20,8 @@ export function Main() {
   );
 }
 
+const MAIN_SKELETON_ROWS = Array.from({ length: 6 }, (_, index) => <GuessRowSkeleton key={index} />);
+
 export function MainSkeleton() {
-  return (
-    <article className="grid min-h-full grid-cols-1 grid-rows-6 gap-1">
-      <GuessRowSkeleton />
-      <GuessRowSkeleton />
-      <GuessRowSkeleton />
-      <GuessRowSkeleton />
-      <GuessRowSkeleton />
-      <GuessRowSkeleton />
-    </article>
-  );
+  return <article className="grid min-h-full grid-cols-1 grid-rows-6 gap-1">{MAIN_SKELETON_ROWS}</article>;
 }

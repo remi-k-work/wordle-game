@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaMachineAtom } from "@/features/game/state";
+import { wordMetaIsLoadingAtom } from "@/features/game/state";
 import { useGT } from "gt-next";
 
 // components
@@ -15,8 +15,7 @@ import { SpinnerIcon } from "@/assets/icons";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 
 export function RiddlePopover() {
-  const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
-  const isLoading = wordMetaMachineSnapshot.matches("loading");
+  const isLoading = useAtomValue(wordMetaIsLoadingAtom);
   const gt = useGT();
 
   // Controls whether the popover is open or not

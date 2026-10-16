@@ -1,3 +1,5 @@
+import "server-only";
+
 // services, features, and other libraries
 import { Layer, Logger, ManagedRuntime } from "effect";
 import { HighScoreDB } from "@/features/high-score/services/high-score-db";

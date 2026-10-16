@@ -1,4 +1,4 @@
-// services, features, and other libraries
+// react
 import { useMemo } from "react";
 
 // components
@@ -21,17 +21,17 @@ export function DistributionCharts({ solutionsLanguage }: DistributionChartsProp
       {
         value: "guesses",
         label: <T>Guesses to Win</T>,
-        content: <GuessDistributionChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <GuessDistributionChart solutionsLanguage={solutionsLanguage} />,
       },
       {
         value: "time",
         label: <T>Time to Solve</T>,
-        content: <TimeToSolveDistributionChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <TimeToSolveDistributionChart solutionsLanguage={solutionsLanguage} />,
       },
       {
         value: "streak",
         label: <T>Streak</T>,
-        content: <ArcadeStreakDistributionChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <ArcadeStreakDistributionChart solutionsLanguage={solutionsLanguage} />,
       },
     ],
     [solutionsLanguage]

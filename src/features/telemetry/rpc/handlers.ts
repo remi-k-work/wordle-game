@@ -1,10 +1,12 @@
+import "server-only";
+
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
 import { RpcTelemetry } from "./requests";
 import { TelemetryDB } from "@/features/telemetry/services/telemetry-db";
 import { ChartsDB } from "@/features/telemetry/services/charts-db";
 import { PgLive } from "@/lib/pg-live";
-import { makeRpcHandler } from "@/domain";
+import { makeRpcHandler } from "@/domain/helpers";
 
 const RpcTelemetryLayer = RpcTelemetry.toLayer({
   addGlobalPulse: (payload) =>

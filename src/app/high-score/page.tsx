@@ -3,27 +3,43 @@
 // react
 import { Suspense } from "react";
 
+// next
+import dynamic from "next/dynamic";
+
 // services, features, and other libraries
 import { Effect } from "effect";
 import { msg } from "gt-next";
-import { runPageMainOrNavigate, validatePageInputs } from "@/domain";
+import { runPageMainOrNavigate, validatePageInputs } from "@/domain/helpers";
 import { HighScorePage } from "@/features/high-score/domain";
 
 // components
 import { PageHeader, PageHeaderSkeleton } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
 import {
-  BestRunTrophyCardChart,
   BestRunTrophyCardChartSkeleton,
-  BrowseCharts,
   BrowseChartsSkeleton,
-  DistributionCharts,
   DistributionChartsSkeleton,
-  FrequencyCharts,
   FrequencyChartsSkeleton,
-  TotalsSlider,
   TotalsSliderSkeleton,
 } from "@/features/telemetry/ui/charts";
+
+// Heavy chart sections (recharts, embla) are split into separate chunks, keeping
+// them out of the initial bundle; each shows its existing skeleton while loading
+const BrowseCharts = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.BrowseCharts), {
+  loading: () => <BrowseChartsSkeleton />,
+});
+const BestRunTrophyCardChart = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.BestRunTrophyCardChart), {
+  loading: () => <BestRunTrophyCardChartSkeleton />,
+});
+const TotalsSlider = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.TotalsSlider), {
+  loading: () => <TotalsSliderSkeleton />,
+});
+const DistributionCharts = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.DistributionCharts), {
+  loading: () => <DistributionChartsSkeleton />,
+});
+const FrequencyCharts = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.FrequencyCharts), {
+  loading: () => <FrequencyChartsSkeleton />,
+});
 
 // types
 import type { Metadata } from "next";

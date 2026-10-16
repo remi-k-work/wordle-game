@@ -7,7 +7,7 @@ import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { toastManager } from "@/ui/toastify";
-import { modalMachineAtom } from "@/state";
+import { modalMachineAtom } from "@/state/modal";
 
 // types
 import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain";

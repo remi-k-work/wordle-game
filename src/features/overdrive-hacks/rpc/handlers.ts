@@ -1,3 +1,5 @@
+import "server-only";
+
 // services, features, and other libraries
 import { Array, Effect, Layer, Option, Random } from "effect";
 import { NodeHttpClient } from "@effect/platform-node";
@@ -5,7 +7,8 @@ import { RpcOverdriveHacks } from "./requests";
 import { generateOverride } from "@/features/overdrive-hacks/domain";
 import { matchLanguage } from "@/features/game/domain";
 import { OpenRouter } from "@/services/open-router";
-import { makeRpcHandler, OpenRouterClientLayer, readAiSwitch } from "@/domain";
+import { OpenRouterClientLayer } from "@/domain";
+import { makeRpcHandler, readAiSwitch } from "@/domain/helpers";
 
 // constants
 import { VOICES_PL } from "@/domain";

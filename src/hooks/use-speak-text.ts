@@ -13,7 +13,7 @@ import {
   gameSettingsVoiceAtom,
   gameSettingsVoiceVolumeAtom,
 } from "@/features/settings/state";
-import { useSpeechVoices } from ".";
+import { useSpeechVoices } from "./use-speech-voices";
 import { matchLanguage } from "@/features/game/domain";
 
 export function useSpeakText() {

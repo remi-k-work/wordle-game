@@ -5,7 +5,7 @@ import { assign, setup, assertEvent } from "xstate";
 
 // types
 import type { BrowseCharts } from "@/features/telemetry/domain";
-import type { useUrlScribe } from "@/hooks";
+import type { useUrlScribe } from "@/hooks/use-url-scribe";
 
 // constants
 import { INITIAL_BROWSE_CHARTS } from "@/features/telemetry/domain";

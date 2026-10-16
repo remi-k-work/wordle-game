@@ -1,7 +1,13 @@
 // services, features, and other libraries
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaMachineAtom, wordMetaTheRiddleAtom, wordMetaTheRiddleAudioAtom } from "@/features/game/state";
+import {
+  wordMetaIsAwaitingAtom,
+  wordMetaIsFetchingAudioAtom,
+  wordMetaIsLoadingAtom,
+  wordMetaTheRiddleAtom,
+  wordMetaTheRiddleAudioAtom,
+} from "@/features/game/state";
 
 // components
 import { T } from "gt-next";
@@ -19,13 +25,13 @@ interface ContentProps {
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
-  const wordMetaMachineSnapshot = useAtomValue(wordMetaMachineAtom);
   const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
   const theRiddleAudio = useAtomValue(wordMetaTheRiddleAudioAtom);
 
-  const isAwaiting = wordMetaMachineSnapshot.matches("awaitingTheSecretWord");
-  const isLoading = wordMetaMachineSnapshot.matches("loading");
-  const isFetching = wordMetaMachineSnapshot.matches("fetchingRiddleAudio");
+  const isAwaiting = useAtomValue(wordMetaIsAwaitingAtom);
+  const isLoading = useAtomValue(wordMetaIsLoadingAtom);
+  const isFetching = useAtomValue(wordMetaIsFetchingAudioAtom);
+
   const canSpeakRegular = Option.isSome(theRiddle) && !isAwaiting && !isLoading;
   const canSpeakNatural = canSpeakRegular && Option.isSome(theRiddleAudio) && !isFetching;
 

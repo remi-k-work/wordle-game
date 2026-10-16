@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { alertMachineAtom } from "@/state";
+import { alertMachineAtom } from "@/state/alert";
 
 // components
 import { AlertDialog } from "@base-ui/react";

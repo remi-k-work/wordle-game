@@ -3,9 +3,14 @@ import { useCallback, useState } from "react";
 
 // services, features, and other libraries
 import { Option } from "effect";
-import { useAtom, useAtomSet, useAtomValue } from "@effect/atom-react";
-import { overdriveHacksCanApplyHackAtom, overdriveHacksMachineAtom, overdriveHacksTheOverrideAtom } from "@/features/overdrive-hacks/state";
-import { modalMachineAtom } from "@/state";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import {
+  overdriveHacksCanApplyHackAtom,
+  overdriveHacksIsApplyingOverrideAtom,
+  overdriveHacksMachineAtom,
+  overdriveHacksTheOverrideAtom,
+} from "@/features/overdrive-hacks/state";
+import { modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";
@@ -32,7 +37,7 @@ function HackCostBadge({ children }: { children: ReactNode }) {
 }
 
 export function HacksMenu() {
-  const [overdriveHacksMachineSnapshot, overdriveHacksMachineEvent] = useAtom(overdriveHacksMachineAtom);
+  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
   const canApplyHackEmp = useAtomValue(overdriveHacksCanApplyHackAtom("emp"));
   const canApplyHackSonar = useAtomValue(overdriveHacksCanApplyHackAtom("sonar"));
@@ -41,7 +46,7 @@ export function HacksMenu() {
   const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
-  const isOverrideHackLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
+  const isOverrideHackLoading = useAtomValue(overdriveHacksIsApplyingOverrideAtom);
   const isOverrideHackReady = Option.isSome(theOverride);
 
   // Controls whether the popover is open or not

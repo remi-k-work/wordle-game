@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyChartArgs, RunDeathReasonFrequencyData } from "@/features/telemetry/services/charts-db";
-import { dieOnDbFailure } from "@/domain";
+import { dieOnDbFailure } from "@/domain/helpers";
 
 export const runDeathReasonFrequencyQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findAll({

@@ -5,7 +5,7 @@ import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assertEvent } from "xstate";
 import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
-import { modalMachineAtom } from "@/state";
+import { modalMachineAtom } from "@/state/modal";
 
 // types
 import type { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain";

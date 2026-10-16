@@ -1,8 +1,10 @@
+import "server-only";
+
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
 import { RpcHighScore } from "./requests";
 import { HighScoreDB } from "@/features/high-score/services/high-score-db";
-import { makeRpcHandler } from "@/domain";
+import { makeRpcHandler } from "@/domain/helpers";
 
 const RpcHighScoreLayer = RpcHighScore.toLayer({
   top10HighScores: (solutionsLanguage) =>

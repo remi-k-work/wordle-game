@@ -18,7 +18,7 @@ import {
 } from "@/features/game/state";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state";
 import { calculateEmpTargets, calculateSonarTarget } from "@/features/overdrive-hacks/domain";
-import { modalMachineAtom } from "@/state";
+import { modalMachineAtom } from "@/state/modal";
 
 // types
 import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain";

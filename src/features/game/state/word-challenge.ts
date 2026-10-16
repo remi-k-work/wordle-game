@@ -24,6 +24,11 @@ export const wordChallengeCurrentTurnAtom = wordChallengeMachineAtom.pipe(Atom.m
 export const wordChallengeStartTimeAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.startTime));
 export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordScore));
 
+// Derived booleans: subscribe to these instead of the full snapshot when only
+// the machine state (not context) is needed
+export const wordChallengeIsRejectedAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("rejected")));
+export const wordChallengeHasWonAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("wordWon")));
+
 // Reactive selector for the "live" potential word score based on current progress
 // NOTE: `Atom.make` getters are synchronous, so `DateTime.now` (an Effect) is
 // unavailable here — `Date.now()` is the correct tool

@@ -1,3 +1,6 @@
+// react
+import { useMemo } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
@@ -24,11 +27,14 @@ export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
   const baseWordleGrid = useAtomValue(wordChallengeWordleGridAtom);
   const isCurrentTurn = rowIndex === currentTurn - 2;
 
+  // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
+  const sonarTiles = useMemo(() => new Set(sonarReveals.flatMap((reveal) => reveal.positions)), [sonarReveals]);
+
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isCurrentTurn && FLIP_STAGGER_CLASSES)}>
       {wordleGrid[rowIndex].map((tile, tileIndex) => {
         const wasEmpty = baseWordleGrid[rowIndex][tileIndex].tileKey === "";
-        const isSonarReveal = wasEmpty && tile.tileKey !== "" && sonarReveals.some((reveal) => reveal.positions.includes(tileIndex));
+        const isSonarReveal = wasEmpty && tile.tileKey !== "" && sonarTiles.has(tileIndex);
         return <GuessTile key={tileIndex + String(isSonarReveal)} tile={tile} isSonarReveal={isSonarReveal} />;
       })}
     </div>

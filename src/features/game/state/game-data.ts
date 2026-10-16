@@ -10,3 +10,6 @@ export const gameDataMachineAtom = createMachineAtom(gameDataMachine);
 export const gameDataSolutionsAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutions));
 export const gameDataDictionaryAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.dictionary));
 export const gameDataKeypadAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.keypad));
+
+// Derived boolean: the page shell only needs to know whether data is pending or failed
+export const gameDataIsLoadingOrFailedAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("loading") || snapshot.matches("failure")));

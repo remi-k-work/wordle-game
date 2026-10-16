@@ -1,7 +1,8 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
-import { usePlayAudioBuffer, useSpeakText } from "@/hooks";
+import { usePlayAudioBuffer } from "@/hooks/use-play-audio-buffer";
+import { useSpeakText } from "@/hooks/use-speak-text";
 
 // components
 import { Button } from "@base-ui/react";

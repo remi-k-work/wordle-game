@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
-import { alertMachineAtom } from "@/state";
+import { alertMachineAtom } from "@/state/alert";
 import { gameFlowMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components

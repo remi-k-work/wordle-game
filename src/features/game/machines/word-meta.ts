@@ -16,13 +16,8 @@ interface OnLoadingActorArgs {
   signal: AbortSignal;
 }
 
-interface FetchRiddleAudioActorArgs {
-  input: { theRiddle: WordMeta["theRiddle"] };
-  signal: AbortSignal;
-}
-
-interface FetchWordDefinitionAudioActorArgs {
-  input: { wordDefinition: WordMeta["wordDefinition"] };
+interface FetchAudioActorArgs {
+  input: { theRiddle: WordMeta["theRiddle"]; wordDefinition: WordMeta["wordDefinition"] };
   signal: AbortSignal;
 }
 
@@ -51,27 +46,30 @@ const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: OnLoad
   )
 );
 
-const fetchRiddleAudioActor = fromPromise(({ input: { theRiddle }, signal }: FetchRiddleAudioActorArgs) =>
+const fetchAudioActor = fromPromise(({ input: { theRiddle, wordDefinition }, signal }: FetchAudioActorArgs) =>
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-      const { fetchRiddleAudio } = yield* RpcGameClient;
-      if (Option.isNone(theRiddle)) return Option.none();
-      return yield* fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage });
-    }),
-    { signal }
-  )
-);
+      // Both TTS fetches are independent (inputs already in context), so run them
+      // concurrently; we use "result" mode so a failure in one request does not
+      // interrupt the other request. Each branch short-circuits to Option.none()
+      // when its text is missing
+      const { fetchRiddleAudio, fetchWordDefinitionAudio } = yield* RpcGameClient;
+      const { theRiddleAudioResult, wordDefinitionAudioResult } = yield* Effect.all(
+        {
+          theRiddleAudioResult: Option.isNone(theRiddle) ? Effect.succeedNone : fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage }),
+          wordDefinitionAudioResult: Option.isNone(wordDefinition)
+            ? Effect.succeedNone
+            : fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage }),
+        },
+        { mode: "result", concurrency: 2 }
+      );
 
-const fetchWordDefinitionAudioActor = fromPromise(({ input: { wordDefinition }, signal }: FetchWordDefinitionAudioActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+      const theRiddleAudio = Result.getOrElse(theRiddleAudioResult, Option.none);
+      const wordDefinitionAudio = Result.getOrElse(wordDefinitionAudioResult, Option.none);
 
-      const { fetchWordDefinitionAudio } = yield* RpcGameClient;
-      if (Option.isNone(wordDefinition)) return Option.none();
-      return yield* fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage });
+      return { theRiddleAudio, wordDefinitionAudio } as const satisfies Pick<WordMeta, "theRiddleAudio" | "wordDefinitionAudio">;
     }),
     { signal }
   )
@@ -89,19 +87,14 @@ export const wordMetaMachine = setup({
         ({ ...context, ...params.wordMeta }) as const satisfies WordMeta
     ),
 
-    saveRiddleAudio: assign(
-      ({ context }, params: { theRiddleAudio: WordMeta["theRiddleAudio"] }) =>
-        ({ ...context, theRiddleAudio: params.theRiddleAudio }) as const satisfies WordMeta
-    ),
-
-    saveWordDefinitionAudio: assign(
-      ({ context }, params: { wordDefinitionAudio: WordMeta["wordDefinitionAudio"] }) =>
-        ({ ...context, wordDefinitionAudio: params.wordDefinitionAudio }) as const satisfies WordMeta
+    saveAudio: assign(
+      ({ context }, params: { audio: Pick<WordMeta, "theRiddleAudio" | "wordDefinitionAudio"> }) =>
+        ({ ...context, ...params.audio }) as const satisfies WordMeta
     ),
 
     clearWordMeta: assign(() => INITIAL_WORD_META),
   },
-  actors: { onLoadingActor, fetchRiddleAudioActor, fetchWordDefinitionAudioActor },
+  actors: { onLoadingActor, fetchAudioActor },
 }).createMachine({
   id: "wordMeta",
   context: INITIAL_WORD_META,
@@ -125,31 +118,19 @@ export const wordMetaMachine = setup({
           assertEvent(event, "secretWordPicked");
           return { theSecretWord: event.theSecretWord };
         },
-        onDone: { target: "fetchingRiddleAudio", actions: { type: "saveWordMeta", params: ({ event }) => ({ wordMeta: event.output }) } },
+        onDone: { target: "fetchingAudio", actions: { type: "saveWordMeta", params: ({ event }) => ({ wordMeta: event.output }) } },
 
         // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
         onError: "ready",
       },
     },
 
-    fetchingRiddleAudio: {
+    fetchingAudio: {
       invoke: {
-        src: "fetchRiddleAudioActor",
+        src: "fetchAudioActor",
 
-        input: ({ context }) => ({ theRiddle: context.theRiddle }),
-        onDone: { target: "fetchingWordDefinitionAudio", actions: { type: "saveRiddleAudio", params: ({ event }) => ({ theRiddleAudio: event.output }) } },
-
-        // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
-        onError: "ready",
-      },
-    },
-
-    fetchingWordDefinitionAudio: {
-      invoke: {
-        src: "fetchWordDefinitionAudioActor",
-
-        input: ({ context }) => ({ wordDefinition: context.wordDefinition }),
-        onDone: { target: "ready", actions: { type: "saveWordDefinitionAudio", params: ({ event }) => ({ wordDefinitionAudio: event.output }) } },
+        input: ({ context }) => ({ theRiddle: context.theRiddle, wordDefinition: context.wordDefinition }),
+        onDone: { target: "ready", actions: { type: "saveAudio", params: ({ event }) => ({ audio: event.output }) } },
 
         // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
         onError: "ready",

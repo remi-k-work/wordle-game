@@ -92,29 +92,29 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
     .render();
 }
 
+const TOP10_SKELETON_ROWS = [...Array(10)].map((_, index: number) => (
+  <TableRow key={index} className="odd:bg-surface-2">
+    <TableCell>{index + 1}</TableCell>
+    <TableCell>
+      <div className="mx-auto h-4 w-12 animate-pulse bg-accent" />
+    </TableCell>
+    <TableCell className="bg-accent/30">
+      <div className="mx-auto h-4 w-16 animate-pulse bg-accent" />
+    </TableCell>
+    <TableCell className="bg-destructive/30">
+      <div className="mx-auto h-4 w-8 animate-pulse bg-accent" />
+    </TableCell>
+    <TableCell>
+      <div className="mx-auto size-11 animate-pulse bg-accent" />
+    </TableCell>
+  </TableRow>
+));
+
 export function Top10HighScoresSkeleton() {
   return (
     <Table>
       <Top10TableHeader />
-      <TableBody>
-        {[...Array(10)].map((_, index: number) => (
-          <TableRow key={index} className="odd:bg-surface-2">
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>
-              <div className="mx-auto h-4 w-12 animate-pulse bg-accent" />
-            </TableCell>
-            <TableCell className="bg-accent/30">
-              <div className="mx-auto h-4 w-16 animate-pulse bg-accent" />
-            </TableCell>
-            <TableCell className="bg-destructive/30">
-              <div className="mx-auto h-4 w-8 animate-pulse bg-accent" />
-            </TableCell>
-            <TableCell>
-              <div className="mx-auto size-11 animate-pulse bg-accent" />
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
+      <TableBody>{TOP10_SKELETON_ROWS}</TableBody>
     </Table>
   );
 }

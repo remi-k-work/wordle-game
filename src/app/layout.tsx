@@ -59,8 +59,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Layout({ children }: LayoutProps<"/">) {
-  const locale = await getLocale();
-  const gt = await getGT();
+  const [locale, gt] = await Promise.all([getLocale(), getGT()]);
 
   return (
     <html lang={locale} translate="no" className="antialiased" suppressHydrationWarning>

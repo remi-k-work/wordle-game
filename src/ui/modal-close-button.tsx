@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
-import { modalMachineAtom } from "@/state";
+import { modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";

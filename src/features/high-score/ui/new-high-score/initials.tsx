@@ -2,8 +2,8 @@
 import { useState } from "react";
 
 // services, features, and other libraries
-import { useAtom } from "@effect/atom-react";
-import { highScoreMachineAtom } from "@/features/high-score/state";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { highScoreIsSubmittingAtom, highScoreMachineAtom } from "@/features/high-score/state";
 
 // components
 import { Button, Input } from "@base-ui/react";
@@ -14,7 +14,7 @@ import { SpinnerIcon } from "@/assets/icons";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 export function Initials() {
-  const [highScoreMachineSnapshot, highScoreMachineEvent] = useAtom(highScoreMachineAtom);
+  const highScoreMachineEvent = useAtomSet(highScoreMachineAtom);
   const [initials, setInitials] = useState("");
 
   const sanitizedInitials = initials
@@ -22,8 +22,8 @@ export function Initials() {
     .replace(/[^A-Z]/g, "")
     .slice(0, 3);
 
-  const canSubmit = sanitizedInitials.length === 3 && !highScoreMachineSnapshot.matches("submitting");
-  const isSubmitting = highScoreMachineSnapshot.matches("submitting");
+  const isSubmitting = useAtomValue(highScoreIsSubmittingAtom);
+  const canSubmit = sanitizedInitials.length === 3 && !isSubmitting;
 
   return (
     <form className="flex gap-4" onSubmit={(ev) => ev.preventDefault()}>

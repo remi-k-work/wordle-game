@@ -1,3 +1,8 @@
+"use client";
+
+// react
+import { useState } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
@@ -12,7 +17,9 @@ import type { ReactNode } from "react";
 interface ChartTabSpec {
   value: string;
   label: ReactNode;
-  content: ReactNode;
+  // Lazy content: invoked only for the active tab, so switching tabs mounts a
+  // single chart (one RPC family) instead of every tab at once
+  render: () => ReactNode;
 }
 
 // constants
@@ -23,10 +30,13 @@ const TABS_INDICATOR_CLASSES = cn(
 );
 
 // Shared Tabs chrome for DistributionCharts/FrequencyCharts. Tab specs stay
-// declarative at call sites; only list/indicator/panel scaffolding is shared.
+// declarative at call sites; only list/indicator/panel scaffolding is shared
 export function ChartTabs({ defaultValue, tabs }: { defaultValue: string; tabs: ReadonlyArray<ChartTabSpec> }) {
+  const [activeValue, setActiveValue] = useState(defaultValue);
+  const activeTab = tabs.find((tab) => tab.value === activeValue) ?? tabs[0];
+
   return (
-    <Tabs.Root className="@container my-8 w-full" defaultValue={defaultValue}>
+    <Tabs.Root className="@container my-8 w-full" value={activeValue} onValueChange={setActiveValue}>
       <Tabs.List className={TABS_LIST_CLASSES}>
         {tabs.map(({ value, label }) => (
           <ChartTab key={value} value={value}>
@@ -35,11 +45,11 @@ export function ChartTabs({ defaultValue, tabs }: { defaultValue: string; tabs: 
         ))}
         <Tabs.Indicator className={TABS_INDICATOR_CLASSES} />
       </Tabs.List>
-      {tabs.map(({ value, content }) => (
-        <ChartPanel key={value} value={value}>
-          {content}
+      {activeTab === undefined ? null : (
+        <ChartPanel key={activeTab.value} value={activeTab.value}>
+          {activeTab.render()}
         </ChartPanel>
-      ))}
+      )}
     </Tabs.Root>
   );
 }

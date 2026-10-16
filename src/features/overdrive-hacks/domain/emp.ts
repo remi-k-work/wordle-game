@@ -17,6 +17,10 @@ export const computeEmpCandidates = (
 ) => {
   const empNukedSet = HashSet.fromIterable(empNukedLetters);
 
+  // Computed once: the third filter below runs per keypad letter, and
+  // re-evaluating the full board per item is ~30x redundant work
+  const keypadState = computeKeypadState(theSecretWord, wordleGuesses);
+
   return pipe(
     keypad,
     // Exclude letters that are anywhere in the secret word
@@ -25,7 +29,7 @@ export const computeEmpCandidates = (
     Array.filter((letter) => !HashSet.has(empNukedSet, letter)),
     // Exclude letters the player has already discovered through guessing (green/yellow from keypad)
     Array.filter((letter) =>
-      Option.match(HashMap.get(computeKeypadState(theSecretWord, wordleGuesses), letter), {
+      Option.match(HashMap.get(keypadState, letter), {
         onNone: () => true,
         onSome: (color) => color === "",
       })

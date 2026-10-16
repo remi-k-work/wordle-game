@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { modalMachineAtom } from "@/state";
+import { modalMachineAtom } from "@/state/modal";
 import { useGT } from "gt-next";
 
 // components

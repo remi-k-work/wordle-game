@@ -21,6 +21,10 @@ export const overdriveHacksSonarRevealsAtom = overdriveHacksMachineAtom.pipe(Ato
 export const overdriveHacksTheOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverride));
 export const overdriveHacksTheOverrideAudioAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverrideAudio));
 
+// Derived boolean: subscribe to this instead of the full snapshot when only
+// the machine state (not context) is needed
+export const overdriveHacksIsApplyingOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("applyingOverrideHack")));
+
 export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
   pipe(
     get(overdriveHacksEmpNukedLettersAtom),
@@ -35,10 +39,13 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
   const reveals = get(overdriveHacksSonarRevealsAtom);
   if (reveals.length === 0) return wordleGrid;
 
+  // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
+  const vowelByPosition = new Map(reveals.flatMap((reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const)));
+
   return wordleGrid.map((row) =>
     row.map((tile, index) => {
-      const reveal = reveals.find((candidate) => candidate.positions.includes(index));
-      return reveal === undefined || tile.tileKey !== "" ? tile : ({ tileKey: reveal.vowel, color: "green" } as const satisfies Tile);
+      const vowel = vowelByPosition.get(index);
+      return vowel === undefined || tile.tileKey !== "" ? tile : ({ tileKey: vowel, color: "green" } as const satisfies Tile);
     })
   ) as WordleGrid;
 });

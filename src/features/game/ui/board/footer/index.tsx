@@ -16,30 +16,30 @@ import { KeypadPool, KeypadPoolSkeleton } from "./keypad-pool";
 import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { Color } from "@/features/game/domain";
+import type { Color, Keypad } from "@/features/game/domain";
 
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
+
+  // Early return before any memo: the keyed area owns its own hooks
+  if (Option.isNone(gameDataKeypad)) return <FooterSkeleton />;
+  return <KeypadArea keys={gameDataKeypad.value} />;
+}
+
+function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
-  // Memoized before the early return so hook order stays stable when the keypad is unavailable
+  // Dynamically filter out the grey keys
   const availableKeys = useMemo(
-    () =>
-      Option.match(gameDataKeypad, {
-        onNone: () => undefined,
-        // Dynamically filter out the grey keys
-        onSome: (keys) => keys.filter((key) => Option.getOrElse(HashMap.get(keypadColors, key), () => "" as Color) !== "grey"),
-      }),
-    [gameDataKeypad, keypadColors]
+    () => keys.filter((key) => Option.getOrElse(HashMap.get(keypadColors, key), () => "" as Color) !== "grey"),
+    [keys, keypadColors]
   );
 
   const handleKeyPressed = useCallback(
     (pressedKey: string) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey }),
     [overdriveHacksMachineEvent]
   );
-
-  if (!availableKeys) return <FooterSkeleton />;
 
   return (
     <footer className="grid gap-1">

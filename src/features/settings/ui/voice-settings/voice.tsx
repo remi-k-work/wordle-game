@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state";
-import { useSpeechVoices } from "@/hooks";
+import { useSpeechVoices } from "@/hooks/use-speech-voices";
 import { matchLanguage } from "@/features/game/domain";
 
 // components

@@ -1,4 +1,4 @@
-// services, features, and other libraries
+// react
 import { useMemo } from "react";
 
 // components
@@ -22,22 +22,22 @@ export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
       {
         value: "firstWords",
         label: <T>First Words</T>,
-        content: <OpeningGuessesFrequencyChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <OpeningGuessesFrequencyChart solutionsLanguage={solutionsLanguage} />,
       },
       {
         value: "missedWords",
         label: <T>Missed Words</T>,
-        content: <FailedWordsFrequencyChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <FailedWordsFrequencyChart solutionsLanguage={solutionsLanguage} />,
       },
       {
         value: "runDeaths",
         label: <T>Run Deaths</T>,
-        content: <RunDeathReasonFrequencyChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <RunDeathReasonFrequencyChart solutionsLanguage={solutionsLanguage} />,
       },
       {
         value: "hardestWords",
         label: <T>Hardest Words</T>,
-        content: <HardestWordsLeaderboardChart solutionsLanguage={solutionsLanguage} />,
+        render: () => <HardestWordsLeaderboardChart solutionsLanguage={solutionsLanguage} />,
       },
     ],
     [solutionsLanguage]

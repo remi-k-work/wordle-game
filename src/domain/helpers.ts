@@ -1,18 +1,20 @@
 // oxlint-disable effecttsgo/async-function
 
+import "server-only";
+
 // next
 import { connection } from "next/server";
 import { notFound, unauthorized } from "next/navigation";
 
 // services, features, and other libraries
-import { Config, Context, Effect, Layer, Match, pipe, Result, Schema } from "effect";
-import { RpcClient, RpcGroup, RpcSerialization, RpcServer } from "effect/unstable/rpc";
-import { FetchHttpClient, HttpRouter, HttpServer } from "effect/unstable/http";
+import { Config, Effect, Layer, Match, pipe, Result, Schema } from "effect";
+import { RpcGroup, RpcSerialization, RpcServer } from "effect/unstable/rpc";
+import { HttpRouter, HttpServer } from "effect/unstable/http";
 import { RpcLogger } from "@/services/rpc-logger";
-import { BasePage, InvalidPageInputsError } from "@/domain";
-import { RuntimeServer } from "@/lib/runtime-server";
+import { InvalidPageInputsError } from "./errors";
 
 // types
+import type { BasePage } from "./models";
 import type { Rpc } from "effect/unstable/rpc";
 import type { ServerMainServices } from "@/lib/runtime-server";
 
@@ -26,17 +28,6 @@ interface PageInputPromises {
 // the schema's `Type`, `Encoded`, and `DecodingServices` precise instead of
 // widening to `Schema.Top` (whose `DecodingServices` is `unknown`)
 type PageInputsEncoded = (typeof BasePage)["Encoded"];
-
-// Builds a class-style RPC client service backed by an HTTP protocol layer for a given RPC group
-export const makeRpcClient = <Rpcs extends Rpc.Any>(serviceName: string, group: RpcGroup.RpcGroup<Rpcs>, path: string) => {
-  const ProtocolLive = RpcClient.layerProtocolHttp({ url: path }).pipe(Layer.provide([FetchHttpClient.layer, RpcSerialization.layerSchemaBinary()]));
-
-  return class extends Context.Service<RpcClient.RpcClient<Rpcs>>()(serviceName, {
-    make: RpcClient.make(group, { disableTracing: true }),
-  }) {
-    static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(ProtocolLive));
-  };
-};
 
 // Builds the web handler for an RPC group's HTTP route. disableFatalDefects serializes defects
 // as an Exit instead of closing the connection; disableTracing is deliberate (no tracer configured)
@@ -90,6 +81,11 @@ export const validatePageInputs = <A, S extends Schema.Constraint & { readonly T
 export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageMain: Effect.Effect<A, E, ServerMainServices>) => {
   // Explicitly defer to request time (Effect uses Date.now() internally)
   await connection();
+
+  // Dynamic import breaks the static cycle helpers -> runtime-server -> *-db -> helpers.
+  // DB services import dieOnDbFailure from here, so a top-level RuntimeServer import
+  // would evaluate HighScoreDB.layer before high-score-db finishes initializing
+  const { RuntimeServer } = await import("@/lib/runtime-server");
 
   // We wrap in Effect.result to catch failures gracefully
   const pageMainResult = await RuntimeServer.runPromise(

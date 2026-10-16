@@ -1,10 +1,13 @@
+import "server-only";
+
 // services, features, and other libraries
 import { Array, Effect, HashSet, Layer, Option, Random } from "effect";
 import { NodeHttpClient } from "@effect/platform-node";
 import { RpcGame } from "./requests";
 import { generateRiddle, matchLanguage } from "@/features/game/domain";
 import { OpenRouter } from "@/services/open-router";
-import { formatTextForTTS, makeRpcHandler, OpenRouterClientLayer, readAiSwitch } from "@/domain";
+import { formatTextForTTS, OpenRouterClientLayer } from "@/domain";
+import { makeRpcHandler, readAiSwitch } from "@/domain/helpers";
 
 // assets
 import solutionsEnJson from "@/assets/data/solutions-en.json";

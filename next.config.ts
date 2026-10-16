@@ -5,6 +5,12 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   typedRoutes: true,
 
+  // Trim third-party barrels (see bundle-barrel-imports): only these packages
+  // are rewritten to per-component imports; the rest stay as written
+  experimental: {
+    optimizePackageImports: ["@base-ui/react", "motion", "gt-next"],
+  },
+
   images: {
     remotePatterns: [
       {
