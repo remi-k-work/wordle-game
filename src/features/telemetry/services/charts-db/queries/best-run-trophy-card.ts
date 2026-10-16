@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { BestRunTrophyCardArgs, BestRunTrophyCardData } from "@/features/telemetry/services/charts-db";
-import { dieOnDbFailure } from "@/domain/helpers";
+import { dieOnDbFailure } from "@/domain/db-policy";
 
 export const bestRunTrophyCardQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findOneOption({

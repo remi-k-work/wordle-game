@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
 import { AnyAvgStatArgs, AnyAvgStatData } from "@/features/telemetry/services/charts-db";
-import { dieOnDbFailure } from "@/domain/helpers";
+import { dieOnDbFailure } from "@/domain/db-policy";
 
 export const anyAvgStatQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findOne({

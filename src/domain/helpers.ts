@@ -53,14 +53,6 @@ export const makeRpcHandler = <Rpcs extends Rpc.Any, LE>(
 // generation (avoiding rate limits and token usage) when the switch is off
 export const readAiSwitch = Config.Literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
 
-// Centralized error-escalation policy for SQL/Schema failures (E5): log the failure, then
-// escalate SchemaError, SqlError, and NoSuchElementError to defects. This is intentional and
-// uniform across every DB-bound service and chart query — failures become fatal rather than
-// silently degrading. Keeping the policy here prevents the per-call-site duplicated
-// `tapError(...) + catchTags({...})` chain from drifting
-export const dieOnDbFailure = <A, E extends { _tag: string }, R>(effect: Effect.Effect<A, E, R>) =>
-  effect.pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die, NoSuchElementError: Effect.die }));
-
 // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
 export const validatePageInputs = <A, S extends Schema.Constraint & { readonly Type: A; readonly Encoded: PageInputsEncoded }>(
   schema: S,
@@ -82,9 +74,8 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
   // Explicitly defer to request time (Effect uses Date.now() internally)
   await connection();
 
-  // Dynamic import breaks the static cycle helpers -> runtime-server -> *-db -> helpers.
-  // DB services import dieOnDbFailure from here, so a top-level RuntimeServer import
-  // would evaluate HighScoreDB.layer before high-score-db finishes initializing
+  // Dynamic import breaks the static cycle helpers -> runtime-server. Keeping it
+  // lazy lets server modules (e.g. *-db) stay importable from both graphs
   const { RuntimeServer } = await import("@/lib/runtime-server");
 
   // We wrap in Effect.result to catch failures gracefully
