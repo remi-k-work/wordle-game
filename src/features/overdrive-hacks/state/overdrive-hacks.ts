@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Array, HashMap, pipe } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { runSessionRunScoreAtom } from "@/features/game/state/run-session";

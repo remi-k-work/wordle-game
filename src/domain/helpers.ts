@@ -8,14 +8,14 @@ import { notFound, unauthorized } from "next/navigation";
 
 // services, features, and other libraries
 import { Config, Effect, Layer, Match, pipe, Result, Schema } from "effect";
-import { RpcGroup, RpcSerialization, RpcServer } from "effect/unstable/rpc";
-import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
+import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
 import { InvalidPageInputsError } from "./errors";
 
 // types
 import type { BasePage } from "./models";
-import type { Rpc } from "effect/unstable/rpc";
+import type { Rpc } from "effect/rpc";
 import type { ServerMainServices } from "@/lib/runtime-server";
 
 interface PageInputPromises {

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { gameDataMachineAtom } from "@/features/game/state/game-data";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";

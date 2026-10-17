@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
+import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-next";
 import { failedWordsFrequencyAtom } from "@/features/telemetry/state/charts";
 import { XAxis, YAxis } from "recharts";

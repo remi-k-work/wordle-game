@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 import { PgContainer, runDdlStatements } from "./_pg-container";
 import { AnyCounterArgs } from "@/features/telemetry/services/charts-db/models";
 import { anyCounterQuery } from "@/features/telemetry/services/charts-db/queries/any-counter";

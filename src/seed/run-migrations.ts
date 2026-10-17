@@ -3,7 +3,7 @@ import "dotenv/config";
 // services, features, and other libraries
 import { Effect, Layer, Logger } from "effect";
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
-import { Migrator } from "effect/unstable/sql";
+import { Migrator } from "effect/sql";
 import { PgMigrator } from "@effect/sql-pg";
 import { connectConfig, makePgClientLayer } from "@/lib/pg-live";
 

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
 import { createMachineAtom } from "@/domain/machine-atom";
 

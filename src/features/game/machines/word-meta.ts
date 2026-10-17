@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { Effect, Option, Result } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";

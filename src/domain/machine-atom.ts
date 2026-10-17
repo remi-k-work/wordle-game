@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Option } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { createActor } from "xstate";
 import { inspect } from "@/machines/inspect";
 

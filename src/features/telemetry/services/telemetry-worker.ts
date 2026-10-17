@@ -41,7 +41,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     // Generate the unique identifier for this specific browser session/tab load
     // This lives in the closure of the worker and remains constant until the page reloads
     const crypto = yield* Crypto.Crypto;
-    const instanceId = yield* crypto.randomUUIDv4;
+    const instanceId = yield* crypto.randomUUIDv4();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
     const processSpanBatch = (spanBatch: ReadonlyArray<Tracer.Span>) =>

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { alertMachine } from "@/machines/alert";
 import { createMachineAtom } from "@/domain/machine-atom";
 

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Cause, Effect, Option, Schema } from "effect";
-import { AiError, LanguageModel, Model, Prompt } from "effect/unstable/ai";
+import { AiError, LanguageModel, Model, Prompt } from "effect/ai";
 import { AiProviderError } from "./errors";
 import { makeFallbackPlan2 } from "./fallback-plan2";
 import { formatTextForTTS } from "./formatters";

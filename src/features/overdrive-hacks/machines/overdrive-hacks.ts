@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { Effect, Option } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, fromPromise, assertEvent } from "xstate";

@@ -2,11 +2,21 @@
   "$schema": "./node_modules/@effect/tsgo/oxlint-schema.json",
   // Effect recommended preset: enables type-aware mode + effecttsgo rules.
   // See https://effect.website/docs/v4/getting-started/devtools#oxlint
-  "extends": ["./node_modules/@effect/tsgo/oxlint-presets/recommended.json"],
+  "extends": [
+    "./node_modules/@effect/tsgo/oxlint-presets/recommended.json"
+  ],
   // Tight scope: closest clean equivalent of `eslint-config-next/core-web-vitals`
   // + `eslint-config-next/typescript` (react, react-hooks, nextjs, jsx-a11y,
   // typescript, import, vitest). No unicorn/oxc extras, no JS-plugin compat layer.
-  "plugins": ["eslint", "typescript", "react", "nextjs", "jsx-a11y", "import", "vitest"],
+  "plugins": [
+    "eslint",
+    "typescript",
+    "react",
+    "nextjs",
+    "jsx-a11y",
+    "import",
+    "vitest"
+  ],
   "categories": {
     "correctness": "error"
   },
@@ -17,14 +27,23 @@
   },
   // Mirrors the old eslint.config.mjs globalIgnores plus local scratch/dict files.
   // node_modules and .git are ignored by default; .gitignore is respected automatically.
-  "ignorePatterns": [".next/**", "out/**", "build/**", "next-env.d.ts", ".repos/**", "_scratchpad/**", "src/seed/dictionary-pl.txt"],
+  "ignorePatterns": [
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    ".repos/**",
+    "_scratchpad/**",
+    "src/seed/dictionary-pl.txt"
+  ],
   "settings": {
     // Oxlint has no "detect"; pin to the installed React version.
     "react": {
-      "version": "19.2.8"
+      "version": "19.3.1"
     }
   },
   "rules": {
+    "effecttsgo/unstable-api-usage": "off",
     // --- Next.js core-web-vitals parity ---
     // Oxlint rule names drop the `@next/next` prefix.
     // core-web-vitals upgrades these two to error (rest of recommended stays warn/error via correctness).
@@ -49,7 +68,14 @@
     "vitest/no-standalone-expect": [
       "error",
       {
-        "additionalTestBlockFunctions": ["it.effect", "it.live", "it.scoped", "test.effect", "test.live", "test.scoped"]
+        "additionalTestBlockFunctions": [
+          "it.effect",
+          "it.live",
+          "it.scoped",
+          "test.effect",
+          "test.live",
+          "test.scoped"
+        ]
       }
     ],
     // --- Downgraded to warn: valuable type-aware / Effect rules that fire on

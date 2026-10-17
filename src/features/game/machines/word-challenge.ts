@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { Array, DateTime, HashSet, Match, Option, String, Effect } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, computeGreyLetters } from "@/features/game/domain/game-logic";

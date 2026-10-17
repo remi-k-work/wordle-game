@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { Struct } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { RuntimeTelemetryStarter } from "@/lib/runtime-client";
 import { PlayerSession } from "@/features/player/domain/models";
 

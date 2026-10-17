@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
+import { AsyncResult } from "effect/reactivity";
 import { msg, useMessages } from "gt-next";
 import { bestRunTrophyCardAtom } from "@/features/telemetry/state/charts";
 

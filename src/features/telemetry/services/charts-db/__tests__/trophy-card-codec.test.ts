@@ -3,7 +3,7 @@
 // unions whose members are not uniquely identifiable (e.g. two plain strings),
 // which fails at first encode — surfacing as a silent onFailure skeleton in the UI.
 import { DateTime, Option, Schema } from "effect";
-import * as SchemaBinary from "effect/unstable/encoding/SchemaBinary";
+import * as SchemaBinary from "effect/encoding/SchemaBinary";
 import { describe, expect, it } from "vitest";
 import { AddArcadeRunSummary } from "@/features/telemetry/domain/models";
 import { BestRunTrophyCardData } from "@/features/telemetry/services/charts-db/models";

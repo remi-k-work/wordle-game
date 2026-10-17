@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 import { TimeToSolveDistributionData } from "@/features/telemetry/services/charts-db/models";
 import { makeHistogramDistributionQuery } from "./make-histogram-distribution-query";
 

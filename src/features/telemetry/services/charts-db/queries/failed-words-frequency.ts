@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 import { FailedWordsFrequencyData } from "@/features/telemetry/services/charts-db/models";
 import { makeWordFrequencyQuery } from "./make-word-frequency-query";
 

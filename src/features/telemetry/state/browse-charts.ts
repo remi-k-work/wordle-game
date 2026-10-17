@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { browseChartsMachine } from "@/features/telemetry/machines/browse-charts";
 import { createMachineAtom } from "@/domain/machine-atom";
 

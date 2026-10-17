@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { T, useLocale } from "gt-next";
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
+import { AsyncResult } from "effect/reactivity";
 import { anyAvgStatAtom } from "@/features/telemetry/state/charts";
 import { formatSeconds } from "@/domain/formatters";
 

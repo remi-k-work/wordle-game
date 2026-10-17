@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Match } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/unstable/reactivity";
+import { AsyncResult } from "effect/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state/high-score";
 import { motion } from "motion/react";
 import { T, useLocale } from "gt-next";

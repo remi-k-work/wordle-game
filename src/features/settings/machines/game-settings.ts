@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { Match } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";

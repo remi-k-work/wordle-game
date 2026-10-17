@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime, Duration, Effect, Metric, Option } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { metrics } from "@/features/telemetry/domain/metrics";
 import { sessionIdAtom } from "@/features/player/state/player";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";

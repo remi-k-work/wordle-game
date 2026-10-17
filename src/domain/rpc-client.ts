@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { Context, Layer } from "effect";
-import { RpcClient, RpcGroup, RpcSerialization } from "effect/unstable/rpc";
-import { FetchHttpClient } from "effect/unstable/http";
+import { RpcClient, RpcGroup, RpcSerialization } from "effect/rpc";
+import { FetchHttpClient } from "effect/http";
 
 // types
-import type { Rpc } from "effect/unstable/rpc";
+import type { Rpc } from "effect/rpc";
 
 // Builds a class-style RPC client service backed by an HTTP protocol layer for a given RPC group.
 // Browser-safe: Fetch-based only. Must stay free of server imports (next/server,

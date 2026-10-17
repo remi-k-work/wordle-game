@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Layer, Logger, ManagedRuntime } from "effect";
-import { Atom, AtomRegistry, Reactivity } from "effect/unstable/reactivity";
+import { Atom, AtomRegistry, Reactivity } from "effect/reactivity";
 import { BrowserCrypto, BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";

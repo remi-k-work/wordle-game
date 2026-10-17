@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Schema } from "effect";
-import { SqlClient } from "effect/unstable/sql";
+import { SqlClient } from "effect/sql";
 import { AnyChartArgs, ArcadeStreakDistributionData, GuessDistributionData, TimeToSolveDistributionData } from "./models";
 import { cumulativeToDistribution } from "./helpers";
 import { anyAvgStatQuery } from "./queries/any-avg-stat";

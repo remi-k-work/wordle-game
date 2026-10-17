@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { Rpc, RpcGroup } from "effect/unstable/rpc";
+import { Rpc, RpcGroup } from "effect/rpc";
 import { AddHighScore, HighScore } from "@/features/high-score/domain/models";
 import { SolutionsLanguage } from "@/features/game/domain/models";
 

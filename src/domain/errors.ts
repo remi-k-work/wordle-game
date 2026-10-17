@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { AiError } from "effect/unstable/ai";
+import { AiError } from "effect/ai";
 
 // Define a domain error for the Effect-based AI providers
 export class AiProviderError extends Schema.TaggedError<AiProviderError>()("AiProviderError", {

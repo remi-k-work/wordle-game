@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { Array, DateTime, HashMap, Option, pipe } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState } from "@/features/game/domain/game-logic";
 import { formatGuess } from "@/features/game/domain/formatters";

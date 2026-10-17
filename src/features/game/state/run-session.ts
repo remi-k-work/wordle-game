@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Option, Struct } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain/models";
 import { runSessionMachine } from "@/features/game/machines/run-session";

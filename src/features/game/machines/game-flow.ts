@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect } from "effect";
-import { Atom } from "effect/unstable/reactivity";
+import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assertEvent } from "xstate";
 import { gameDataMachineAtom } from "@/features/game/state/game-data";
