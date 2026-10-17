@@ -12,7 +12,7 @@ import { SectionHeaderSkeleton } from "@/ui/section-header";
 import { ChartBody } from "./chart-body";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface RunDeathReasonFrequencyChartProps {
   solutionsLanguage: SolutionsLanguage;

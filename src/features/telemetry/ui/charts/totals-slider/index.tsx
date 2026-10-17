@@ -15,7 +15,7 @@ import { AnyAvgStatChart, AnyAvgStatChartSkeleton } from "@/features/telemetry/u
 import { AnyCounterChart, AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts/any-counter";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/services/charts-db";
 
 interface TotalsSliderProps {

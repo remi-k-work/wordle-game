@@ -9,7 +9,7 @@ import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
 // types
-import type { TheSecretWord, WordMeta } from "@/features/game/domain";
+import type { TheSecretWord, WordMeta } from "@/features/game/domain/models";
 
 interface OnLoadingActorArgs {
   input: { theSecretWord: TheSecretWord };
@@ -22,7 +22,7 @@ interface FetchAudioActorArgs {
 }
 
 // constants
-import { INITIAL_WORD_META } from "@/features/game/domain";
+import { INITIAL_WORD_META } from "@/features/game/domain/constants";
 
 const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: OnLoadingActorArgs) =>
   RuntimeClient.runPromise(

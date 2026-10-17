@@ -11,7 +11,7 @@ import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { BestRunCard, BestRunCardSkeleton } from "./best-run-card";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface BestRunTrophyCardChartProps {
   solutionsLanguage: SolutionsLanguage;

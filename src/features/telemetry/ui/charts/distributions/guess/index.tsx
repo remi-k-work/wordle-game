@@ -13,7 +13,7 @@ import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } f
 import { DistributionEmpty, DistributionFrame, DistributionSkeleton } from "@/features/telemetry/ui/charts/distribution-shell";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface GuessDistributionChartProps {
   solutionsLanguage: SolutionsLanguage;

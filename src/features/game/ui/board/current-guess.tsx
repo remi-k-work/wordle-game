@@ -11,10 +11,10 @@ import { overdriveHacksMachineAtom, overdriveHacksSonarRevealsAtom } from "@/fea
 import { GuessTile } from "./guess-tile";
 
 // types
-import type { Color, Tile } from "@/features/game/domain";
+import type { Color, Tile } from "@/features/game/domain/models";
 
 // constants
-import { WORD_LENGTH } from "@/features/game/domain";
+import { WORD_LENGTH } from "@/features/game/domain/constants";
 
 export function CurrentGuess() {
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);

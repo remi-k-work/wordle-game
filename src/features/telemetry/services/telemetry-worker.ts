@@ -3,7 +3,7 @@ import { Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain";
-import { SolutionsLanguage } from "@/features/game/domain";
+import { SolutionsLanguage } from "@/features/game/domain/models";
 
 // types
 import type { Tracer } from "effect";

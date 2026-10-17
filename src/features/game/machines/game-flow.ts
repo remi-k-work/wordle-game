@@ -11,7 +11,7 @@ import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 import { modalMachineAtom } from "@/state/modal";
 
 // types
-import type { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain";
+import type { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain/models";
 
 export const gameFlowMachine = setup({
   types: {} as {

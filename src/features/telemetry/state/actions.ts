@@ -6,7 +6,7 @@ import { sessionIdAtom } from "@/features/player/state";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 
 // types
-import type { RunDeathReason, RunSession, WordChallenge } from "@/features/game/domain";
+import type { RunDeathReason, RunSession, WordChallenge } from "@/features/game/domain/models";
 
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSession, wordChallenge: WordChallenge) {

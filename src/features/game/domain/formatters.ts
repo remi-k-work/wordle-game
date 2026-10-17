@@ -3,10 +3,10 @@ import { Array, HashMap, Option } from "effect";
 import { msg } from "gt-next";
 
 // types
-import type { TheSecretWord, Tile, WordChallenge } from ".";
+import type { TheSecretWord, Tile, WordChallenge } from "./models";
 
 // constants
-import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, SPEED_MULTIPLIER_RULES } from ".";
+import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, SPEED_MULTIPLIER_RULES } from "./constants";
 
 // Maps a speed multiplier to a stable category identifier for UI presentation.
 export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];

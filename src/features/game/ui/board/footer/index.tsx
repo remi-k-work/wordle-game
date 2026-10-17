@@ -16,7 +16,7 @@ import { KeypadPool, KeypadPoolSkeleton } from "./keypad-pool";
 import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { Color, Keypad } from "@/features/game/domain";
+import type { Color, Keypad } from "@/features/game/domain/models";
 
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);

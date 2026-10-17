@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
-import { SolutionsLanguage } from "@/features/game/domain";
+import { SolutionsLanguage } from "@/features/game/domain/models";
 import { BasePage } from "@/domain/models";
 
 // Represents the high score entry for a player

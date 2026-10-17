@@ -3,7 +3,7 @@ import { HashSet, Option } from "effect";
 import { msg } from "gt-next";
 
 // types
-import type { Color, GameData, RunSession, WordChallenge, WordMeta } from ".";
+import type { Color, GameData, RunSession, WordChallenge, WordMeta } from "./models";
 
 // constants
 export const WORD_LENGTH = 5;

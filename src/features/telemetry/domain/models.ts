@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
+import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
 export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse")({
   sessionId: Schema.Trim.check(Schema.isUUID()),

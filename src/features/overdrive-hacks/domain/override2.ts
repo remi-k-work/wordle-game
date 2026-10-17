@@ -1,10 +1,11 @@
 // services, features, and other libraries
 import { Match, Option } from "effect";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
-import { formatGuess, matchLanguage } from "@/features/game/domain";
+import { formatGuess } from "@/features/game/domain/formatters";
+import { matchLanguage } from "@/features/game/domain/helpers";
 
 // types
-import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
+import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain/models";
 
 // constants
 const SYSTEM_PROMPT_EN = (theSecretWord: TheSecretWord) => `

@@ -3,10 +3,10 @@ import { Context, Effect } from "effect";
 import { AiSdkError } from "@/domain/errors";
 import { generateSingleField } from "@/domain/generate-single-field";
 import { makeFallbackPlan } from "@/domain/fallback-plan";
-import { matchLanguage } from ".";
+import { matchLanguage } from "./helpers";
 
 // types
-import type { SolutionsLanguage, TheSecretWord } from ".";
+import type { SolutionsLanguage, TheSecretWord } from "./models";
 import type { LanguageModel } from "ai";
 
 // constants

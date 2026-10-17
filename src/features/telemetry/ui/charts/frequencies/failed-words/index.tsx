@@ -13,7 +13,7 @@ import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/
 import { HorizontalBarEmpty, HorizontalBarFrame, HorizontalBarSkeleton } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface FailedWordsFrequencyChartProps {
   solutionsLanguage: SolutionsLanguage;

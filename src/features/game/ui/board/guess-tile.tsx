@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useSonarPing } from "@/features/game/hooks/use-sonar-ping";
 
 // types
-import type { Tile } from "@/features/game/domain";
+import type { Tile } from "@/features/game/domain/models";
 
 interface GuessTileProps {
   tile: Tile;

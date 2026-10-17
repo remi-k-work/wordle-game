@@ -1,5 +1,5 @@
 // types
-import type { Color } from "@/features/game/domain";
+import type { Color } from "@/features/game/domain/models";
 
 // constants
 import { motionTokens } from "@/lib/motion-tokens";

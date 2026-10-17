@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { Effect, Array, HashMap, HashSet, Option, Random, pipe } from "effect";
-import { computeKeypadState } from "@/features/game/domain";
+import { computeKeypadState } from "@/features/game/domain/game-logic";
 
 // types
-import type { Keypad, TheSecretWord } from "@/features/game/domain";
+import type { Keypad, TheSecretWord } from "@/features/game/domain/models";
 
 // constants
 import { EMP_LETTER_COUNT } from ".";

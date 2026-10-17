@@ -11,10 +11,10 @@ import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/stat
 import { runResultAtom } from "@/features/game/state/run-session";
 
 // types
-import type { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain";
+import type { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain/models";
 
 // constants
-import { INITIAL_RUN_SESSION } from "@/features/game/domain";
+import { INITIAL_RUN_SESSION } from "@/features/game/domain/constants";
 
 export const runSessionMachine = setup({
   types: {} as {

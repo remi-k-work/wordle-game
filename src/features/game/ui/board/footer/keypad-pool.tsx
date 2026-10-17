@@ -6,7 +6,7 @@ import { AnimatePresence } from "motion/react";
 import { KeypadKey, KeypadKeySkeleton } from "./keypad-key";
 
 // types
-import type { Color } from "@/features/game/domain";
+import type { Color } from "@/features/game/domain/models";
 
 interface KeypadPoolProps {
   availableKeys: ReadonlyArray<string>;

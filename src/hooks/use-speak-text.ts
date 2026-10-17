@@ -14,7 +14,7 @@ import {
   gameSettingsVoiceVolumeAtom,
 } from "@/features/settings/state";
 import { useSpeechVoices } from "./use-speech-voices";
-import { matchLanguage } from "@/features/game/domain";
+import { matchLanguage } from "@/features/game/domain/helpers";
 
 export function useSpeakText() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);

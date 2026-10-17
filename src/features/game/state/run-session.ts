@@ -2,15 +2,15 @@
 import { Option, Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { RunSession } from "@/features/game/domain";
+import { RunSession } from "@/features/game/domain/models";
 import { runSessionMachine } from "@/features/game/machines/run-session";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { RunResult } from "@/features/game/domain";
+import type { RunResult } from "@/features/game/domain/models";
 
 // constants
-import { INITIAL_RUN_SESSION } from "@/features/game/domain";
+import { INITIAL_RUN_SESSION } from "@/features/game/domain/constants";
 
 // Persistent storage for tracking the current arcade run progress and high water marks
 const runSessionAtom = Atom.kvs({

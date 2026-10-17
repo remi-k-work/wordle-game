@@ -8,7 +8,7 @@ import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/fe
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { Color, Tile, WordleGrid } from "@/features/game/domain";
+import type { Color, Tile, WordleGrid } from "@/features/game/domain/models";
 import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
 
 // constants

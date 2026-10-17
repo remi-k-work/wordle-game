@@ -11,7 +11,7 @@ import { overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state
 import { GuessTile, GuessTileSkeleton } from "./guess-tile";
 
 // types
-import type { WordleGrid } from "@/features/game/domain";
+import type { WordleGrid } from "@/features/game/domain/models";
 
 interface GuessRowProps {
   wordleGrid: WordleGrid;

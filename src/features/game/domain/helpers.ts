@@ -2,10 +2,10 @@
 import { Array, DateTime, Duration, Match, Option, pipe } from "effect";
 
 // types
-import type { Color, SolutionsLanguage, WordChallenge, WordScore } from ".";
+import type { Color, SolutionsLanguage, WordChallenge, WordScore } from "./models";
 
 // constants
-import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from ".";
+import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from "./constants";
 
 // Pick the color with the higher priority
 export const pickStrongerColor = (a: Color | undefined, b: Color) =>

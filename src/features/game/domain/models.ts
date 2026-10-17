@@ -2,7 +2,7 @@
 import { Schema } from "effect";
 
 // constants
-import { MAX_TURNS, WORD_LENGTH } from ".";
+import { MAX_TURNS, WORD_LENGTH } from "./constants";
 
 // types
 export type TheSecretWord = typeof TheSecretWord.Type;

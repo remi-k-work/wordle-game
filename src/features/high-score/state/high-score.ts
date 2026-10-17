@@ -7,7 +7,7 @@ import { highScoreMachine } from "@/features/high-score/machines/high-score";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 // The high score machine is now a living actor inside the effect atom
 export const highScoreMachineAtom = createMachineAtom(highScoreMachine);

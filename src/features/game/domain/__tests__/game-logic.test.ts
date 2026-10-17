@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, DateTime, Duration, HashMap, HashSet, Option } from "effect";
 import { TestClock } from "effect/testing";
-import { calculateScore, computeGreyLetters, computeKeypadState, calculatePotentialScore } from "..";
+import { calculateScore, computeGreyLetters, computeKeypadState, calculatePotentialScore } from "@/features/game/domain/game-logic";
 import { formatDuration } from "@/domain/formatters";
 
 describe("gameLogic", () => {

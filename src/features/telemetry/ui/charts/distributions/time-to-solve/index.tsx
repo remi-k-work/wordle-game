@@ -7,14 +7,14 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { msg, useGT, useMessages } from "gt-next";
 import { timeToSolveDistributionAtom } from "@/features/telemetry/state";
 import { XAxis } from "recharts";
-import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain";
+import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";
 
 // components
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
 import { DistributionEmpty, DistributionFrame, DistributionSkeleton } from "@/features/telemetry/ui/charts/distribution-shell";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface TimeToSolveDistributionChartProps {
   solutionsLanguage: SolutionsLanguage;

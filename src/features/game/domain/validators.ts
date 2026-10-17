@@ -2,10 +2,10 @@
 import { Array, HashSet, Match, Option, String } from "effect";
 
 // types
-import type { WordChallenge } from ".";
+import type { WordChallenge } from "./models";
 
 // constants
-import { MAX_TURNS, WORD_LENGTH } from ".";
+import { MAX_TURNS, WORD_LENGTH } from "./constants";
 
 const LETTER_REGEX = /^[A-ZĄĆĘŁŃÓŚŹŻ]$/u;
 const CONTROL_KEYS = HashSet.fromIterable(["BACKSPACE", "ENTER"]);

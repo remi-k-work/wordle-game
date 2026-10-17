@@ -8,7 +8,7 @@ import { motion } from "motion/react";
 import { Button } from "@base-ui/react";
 
 // types
-import type { Color } from "@/features/game/domain";
+import type { Color } from "@/features/game/domain/models";
 
 interface KeypadKeyProps {
   pressKey: string;

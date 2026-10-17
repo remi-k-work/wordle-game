@@ -4,7 +4,7 @@ import "server-only";
 import { Array, Effect, HashSet, Layer, Option, Random } from "effect";
 import { NodeHttpClient } from "@effect/platform-node";
 import { RpcGame } from "./requests";
-import { matchLanguage } from "@/features/game/domain";
+import { matchLanguage } from "@/features/game/domain/helpers";
 import { generateRiddle } from "@/features/game/domain/riddle2";
 import { OpenRouter } from "@/services/open-router";
 import { formatTextForTTS } from "@/domain/formatters";

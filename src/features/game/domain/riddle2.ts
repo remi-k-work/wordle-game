@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { generateSingleField2 } from "@/domain/generate-single-field2";
-import { matchLanguage } from ".";
+import { matchLanguage } from "./helpers";
 
 // types
-import type { SolutionsLanguage, TheSecretWord } from ".";
+import type { SolutionsLanguage, TheSecretWord } from "./models";
 
 // constants
 const SYSTEM_PROMPT_EN = (theSecretWord: TheSecretWord) => `

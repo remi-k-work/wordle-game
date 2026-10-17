@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { SolutionsLanguage } from "@/features/game/domain";
+import { SolutionsLanguage } from "@/features/game/domain/models";
 
 // Persistent storage for game settings
 export class GameSettings extends Schema.Class<GameSettings>("GameSettings")({

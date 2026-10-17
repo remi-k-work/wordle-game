@@ -12,7 +12,7 @@ import { wordMetaMachineAtom } from "@/features/game/state/word-meta";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 
 // types
-import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain";
+import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
 interface OnLoadingActorArgs {
   input: { solutionsLanguage?: SolutionsLanguage };
@@ -25,7 +25,7 @@ interface SelectSecretWordActorArgs {
 }
 
 // constants
-import { INITIAL_GAME_DATA } from "@/features/game/domain";
+import { INITIAL_GAME_DATA } from "@/features/game/domain/constants";
 
 // Load the needed game data and create the dictionary of valid words
 const onLoadingActor = fromPromise(({ input, signal }: OnLoadingActorArgs) =>

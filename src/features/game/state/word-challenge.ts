@@ -4,14 +4,15 @@
 import { Array, DateTime, HashMap, Option, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
-import { calculatePotentialScore, computeKeypadState, formatGuess } from "@/features/game/domain";
+import { calculatePotentialScore, computeKeypadState } from "@/features/game/domain/game-logic";
+import { formatGuess } from "@/features/game/domain/formatters";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { Color } from "@/features/game/domain";
+import type { Color } from "@/features/game/domain/models";
 
 // constants
-import { MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
+import { MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
 
 // The word challenge machine is now a living actor inside the effect atom
 export const wordChallengeMachineAtom = createMachineAtom(wordChallengeMachine);

@@ -2,10 +2,11 @@
 
 // services, features, and other libraries
 import { Array, DateTime, HashMap, HashSet, Option, pipe } from "effect";
-import { formatGuess, getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrongerColor } from ".";
+import { getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrongerColor } from "./helpers";
+import { formatGuess } from "./formatters";
 
 // types
-import type { Color, TheSecretWord, WordChallenge, WordScore } from ".";
+import type { Color, TheSecretWord, WordChallenge, WordScore } from "./models";
 
 // Calculates the player's word score based on the turn they won on and how long it took them
 // This denotes the volatile points earned for the current word before they are banked into the run

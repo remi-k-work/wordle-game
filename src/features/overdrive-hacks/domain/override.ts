@@ -3,10 +3,11 @@ import { Context, Effect, Match, Option } from "effect";
 import { AiSdkError } from "@/domain/errors";
 import { generateSingleField } from "@/domain/generate-single-field";
 import { makeFallbackPlan } from "@/domain/fallback-plan";
-import { formatGuess, matchLanguage } from "@/features/game/domain";
+import { formatGuess } from "@/features/game/domain/formatters";
+import { matchLanguage } from "@/features/game/domain/helpers";
 
 // types
-import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
+import type { Color, SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain/models";
 import type { LanguageModel } from "ai";
 
 // constants

@@ -5,16 +5,17 @@ import { Array, DateTime, HashSet, Match, Option, String, Effect } from "effect"
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
-import { calculateScore, canSubmitGuess, computeGreyLetters, isGuessKeyValid } from "@/features/game/domain";
+import { calculateScore, computeGreyLetters } from "@/features/game/domain/game-logic";
+import { canSubmitGuess, isGuessKeyValid } from "@/features/game/domain/validators";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
 // types
-import type { TheSecretWord, WordChallenge } from "@/features/game/domain";
+import type { TheSecretWord, WordChallenge } from "@/features/game/domain/models";
 
 // constants
-import { INITIAL_WORD_CHALLENGE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain";
+import { INITIAL_WORD_CHALLENGE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
 
 export const wordChallengeMachine = setup({
   types: {} as {

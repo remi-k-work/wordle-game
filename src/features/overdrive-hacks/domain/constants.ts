@@ -2,7 +2,7 @@
 import { Option } from "effect";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 import type { OverdriveHackId, OverdriveHacks } from ".";
 
 // constants

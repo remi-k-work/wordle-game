@@ -12,7 +12,7 @@ import { RunDeathReasonFrequencyChart, RunDeathReasonFrequencyChartSkeleton } fr
 import { HardestWordsLeaderboardChart, HardestWordsLeaderboardChartSkeleton } from "@/features/telemetry/ui/charts/leaderboards/hardest-words";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface FrequencyChartsProps {
   solutionsLanguage: SolutionsLanguage;

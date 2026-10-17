@@ -8,7 +8,7 @@ import { anyCounterAtom } from "@/features/telemetry/state";
 import { StatPair, StatPairSkeleton } from "@/features/telemetry/ui/charts/stat-pair";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 import type { AnyCounterArgs } from "@/features/telemetry/services/charts-db";
 
 interface AnyCounterChartProps {

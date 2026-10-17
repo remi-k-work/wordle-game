@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { Effect, Array, HashMap, HashSet, Option, Random, pipe } from "effect";
-import { computeKeypadState } from "@/features/game/domain";
+import { computeKeypadState } from "@/features/game/domain/game-logic";
 
 // types
-import type { TheSecretWord } from "@/features/game/domain";
+import type { TheSecretWord } from "@/features/game/domain/models";
 import type { SonarReveal } from ".";
 
 // Randomly reveals one previously unknown vowel and all of its positions in the secret word

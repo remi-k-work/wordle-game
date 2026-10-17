@@ -21,7 +21,7 @@ import { Top10TableHeader } from "./top-10-table-header";
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface Top10HighScoresProps {
   solutionsLanguage: SolutionsLanguage;

@@ -11,7 +11,7 @@ import { TimeToSolveDistributionChart, TimeToSolveDistributionChartSkeleton } fr
 import { ArcadeStreakDistributionChart, ArcadeStreakDistributionChartSkeleton } from "./arcade-streak";
 
 // types
-import type { SolutionsLanguage } from "@/features/game/domain";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface DistributionChartsProps {
   solutionsLanguage: SolutionsLanguage;
