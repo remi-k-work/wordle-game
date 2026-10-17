@@ -10,7 +10,7 @@ import dynamic from "next/dynamic";
 import { Effect } from "effect";
 import { msg } from "gt-next";
 import { runPageMainOrNavigate, validatePageInputs } from "@/domain/helpers";
-import { HighScorePage } from "@/features/high-score/domain";
+import { HighScorePage } from "@/features/high-score/domain/models";
 
 // components
 import { PageHeader, PageHeaderSkeleton } from "@/ui/page-header";

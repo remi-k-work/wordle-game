@@ -8,9 +8,10 @@ import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { toastManager } from "@/ui/toastify";
 import { modalMachineAtom } from "@/state/modal";
+import { beatsTop10Tail } from "@/features/high-score/domain/helpers";
 
 // types
-import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain";
+import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain/models";
 
 interface Top10HighScoresActorArgs {
   input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] };
@@ -23,7 +24,7 @@ interface AddHighScoreActorArgs {
 }
 
 // constants
-import { INITIAL_HIGH_SCORE_CONTEXT, beatsTop10Tail } from "@/features/high-score/domain";
+import { INITIAL_HIGH_SCORE_CONTEXT } from "@/features/high-score/domain/constants";
 
 const top10HighScoresActor = fromPromise(({ input: { solutionsLanguage }, signal }: Top10HighScoresActorArgs) =>
   RuntimeClient.runPromise(

@@ -6,7 +6,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
-import { highScoreMachineAtom } from "@/features/high-score/state";
+import { highScoreMachineAtom } from "@/features/high-score/state/high-score";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state";
 import { runResultAtom } from "@/features/game/state/run-session";
 

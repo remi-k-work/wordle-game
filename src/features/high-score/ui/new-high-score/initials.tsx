@@ -3,7 +3,7 @@ import { useState } from "react";
 
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { highScoreIsSubmittingAtom, highScoreMachineAtom } from "@/features/high-score/state";
+import { highScoreIsSubmittingAtom, highScoreMachineAtom } from "@/features/high-score/state/high-score";
 
 // components
 import { Button, Input } from "@base-ui/react";

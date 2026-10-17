@@ -2,7 +2,7 @@
 import { Option } from "effect";
 
 // types
-import type { HighScoreMachineContext } from ".";
+import type { HighScoreMachineContext } from "./models";
 
 // constants
 export const INITIAL_HIGH_SCORE_CONTEXT = {
