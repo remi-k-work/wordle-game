@@ -9,7 +9,7 @@ import { assign, setup, fromPromise } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 import { wordMetaMachineAtom } from "@/features/game/state/word-meta";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // types
 import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";

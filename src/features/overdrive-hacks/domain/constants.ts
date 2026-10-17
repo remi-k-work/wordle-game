@@ -3,7 +3,7 @@ import { Option } from "effect";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { OverdriveHackId, OverdriveHacks } from ".";
+import type { OverdriveHackId, OverdriveHacks } from "./models";
 
 // constants
 export const EMP_LETTER_COUNT = 3;

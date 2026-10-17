@@ -6,7 +6,7 @@ import { computeKeypadState } from "@/features/game/domain/game-logic";
 import type { Keypad, TheSecretWord } from "@/features/game/domain/models";
 
 // constants
-import { EMP_LETTER_COUNT } from ".";
+import { EMP_LETTER_COUNT } from "./constants";
 
 // EMP permanently greys out eligible incorrect letters on the virtual keyboard
 export const computeEmpCandidates = (

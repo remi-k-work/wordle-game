@@ -11,12 +11,13 @@ import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { wordChallengeMachineAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from "@/features/game/state/word-challenge";
 import { wordMetaTheRiddleAtom, wordMetaWordDefinitionAtom } from "@/features/game/state/word-meta";
-import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state";
-import { calculateEmpTargets, calculateSonarTarget } from "@/features/overdrive-hacks/domain";
+import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { calculateEmpTargets } from "@/features/overdrive-hacks/domain/emp";
+import { calculateSonarTarget } from "@/features/overdrive-hacks/domain/sonar";
 import { modalMachineAtom } from "@/state/modal";
 
 // types
-import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain";
+import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 
 interface ApplyEmpHackActorArgs {
   input: { empNukedLetters: OverdriveHacks["empNukedLetters"] };
@@ -34,7 +35,7 @@ interface FetchOverrideAudioActorArgs {
 }
 
 // constants
-import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
+import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
 const applyEmpHackActor = fromPromise(({ input: { empNukedLetters }, signal }: ApplyEmpHackActorArgs) =>
   RuntimeClient.runPromise(

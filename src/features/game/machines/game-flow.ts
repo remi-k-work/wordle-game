@@ -7,7 +7,7 @@ import { gameDataMachineAtom } from "@/features/game/state/game-data";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 import { wordMetaMachineAtom } from "@/features/game/state/word-meta";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { modalMachineAtom } from "@/state/modal";
 
 // types

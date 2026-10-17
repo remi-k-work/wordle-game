@@ -9,7 +9,7 @@ import {
   overdriveHacksIsApplyingOverrideAtom,
   overdriveHacksMachineAtom,
   overdriveHacksTheOverrideAtom,
-} from "@/features/overdrive-hacks/state";
+} from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { modalMachineAtom } from "@/state/modal";
 
 // components
@@ -25,7 +25,7 @@ import { LifebuoyIcon, SparklesIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
 // constants
-import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
 const HACKS = [
   { id: "emp", label: "EMP", translatable: false, Icon: LifebuoyIcon },

@@ -4,7 +4,7 @@ import { computeKeypadState } from "@/features/game/domain/game-logic";
 
 // types
 import type { TheSecretWord } from "@/features/game/domain/models";
-import type { SonarReveal } from ".";
+import type { SonarReveal } from "./models";
 
 // Randomly reveals one previously unknown vowel and all of its positions in the secret word
 export const computeSonarCandidates = (

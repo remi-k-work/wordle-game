@@ -9,10 +9,10 @@ import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 import type { Color, Tile, WordleGrid } from "@/features/game/domain/models";
-import type { OverdriveHackId } from "@/features/overdrive-hacks/domain";
+import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 
 // constants
-import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain";
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
 // The overdrive hacks machine is now a living actor inside the effect atom
 export const overdriveHacksMachineAtom = createMachineAtom(overdriveHacksMachine);

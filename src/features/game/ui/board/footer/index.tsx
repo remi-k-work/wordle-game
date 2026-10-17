@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { HashMap, Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameDataKeypadAtom } from "@/features/game/state/game-data";
-import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
 import { Button } from "@base-ui/react";

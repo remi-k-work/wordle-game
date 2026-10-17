@@ -7,7 +7,7 @@ import {
   overdriveHacksIsIdleAtom,
   overdriveHacksTheOverrideAtom,
   overdriveHacksTheOverrideAudioAtom,
-} from "@/features/overdrive-hacks/state";
+} from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
 import { T } from "gt-next";

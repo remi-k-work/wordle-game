@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentTurnAtom } from "@/features/game/state/word-challenge";
-import { overdriveHacksWordleGridAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksWordleGridAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
 import { CurrentGuess } from "./current-guess";

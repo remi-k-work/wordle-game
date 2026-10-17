@@ -5,7 +5,7 @@ import { useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { wordChallengeCurrentGuessWordAtom, wordChallengeIsRejectedAtom } from "@/features/game/state/word-challenge";
-import { overdriveHacksMachineAtom, overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state";
+import { overdriveHacksMachineAtom, overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
 import { GuessTile } from "./guess-tile";
