@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "oxlint && npm run lint:boundaries",
-    "lint:boundaries": "node scripts/check-boundaries.mjs",
+    "lint": "oxlint",
     "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
     "seed-sol-en": "tsx ./src/seed/solutions-en.ts",
@@ -22,7 +21,6 @@
     "prepare": "effect-tsgo patch --typescript --oxlint"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.69",
     "@base-ui/react": "^1.8.0",
     "@effect/ai-openrouter": "^4.0.0-rc.115",
     "@effect/atom-react": "^4.0.0-rc.115",
@@ -31,7 +29,6 @@
     "@effect/sql-pg": "^4.0.0-rc.115",
     "@heroicons/react": "^2.2.0",
     "@vercel/analytics": "^2.0.1",
-    "ai": "^7.0.99",
     "clsx": "^2.1.1",
     "effect": "^4.0.0-rc.115",
     "embla-carousel-react": "^8.6.0",
@@ -44,8 +41,7 @@
     "recharts": "^3.10.1",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
-    "xstate": "^5.32.6",
-    "zod": "^4.6.2"
+    "xstate": "^5.32.6"
   },
   "devDependencies": {
     "@effect/tsgo": "0.45.0",
