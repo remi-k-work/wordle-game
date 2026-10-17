@@ -4,7 +4,7 @@ import { useMemo } from "react";
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
-import { wordChallengeCurrentTurnAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
+import { wordChallengeCurrentTurnAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state";
 
 // components

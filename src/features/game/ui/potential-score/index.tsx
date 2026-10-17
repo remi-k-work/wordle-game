@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { motion } from "motion/react";
 import { T, useLocale } from "gt-next";
-import { wordChallengePotentialScoreAtom } from "@/features/game/state";
+import { wordChallengePotentialScoreAtom } from "@/features/game/state/word-challenge";
 import { potentialScoreAsPercentage } from "@/features/game/domain";
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 

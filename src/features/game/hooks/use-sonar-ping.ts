@@ -1,3 +1,5 @@
+// oxlint-disable effecttsgo/async-function
+
 // react
 import { useEffect } from "react";
 

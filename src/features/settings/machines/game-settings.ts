@@ -5,7 +5,7 @@ import { Match } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
-import { gameFlowMachineAtom } from "@/features/game/state";
+import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 
 // types
 import type { GameSettings } from "@/features/settings/domain";

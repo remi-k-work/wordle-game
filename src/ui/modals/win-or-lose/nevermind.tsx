@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordChallengeTheSecretWordAtom } from "@/features/game/state";
+import { wordChallengeTheSecretWordAtom } from "@/features/game/state/word-challenge";
 
 // components
 import { RunScore } from "./run-score";

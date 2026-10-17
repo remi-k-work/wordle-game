@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChallengeWordScoreAtom } from "@/features/game/state";
+import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChallengeWordScoreAtom } from "@/features/game/state/word-challenge";
 
 // components
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";

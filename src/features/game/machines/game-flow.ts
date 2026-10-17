@@ -3,7 +3,10 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assertEvent } from "xstate";
-import { gameDataMachineAtom, runSessionMachineAtom, wordChallengeMachineAtom, wordMetaMachineAtom } from "@/features/game/state";
+import { gameDataMachineAtom } from "@/features/game/state/game-data";
+import { runSessionMachineAtom } from "@/features/game/state/run-session";
+import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
+import { wordMetaMachineAtom } from "@/features/game/state/word-meta";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state";
 import { modalMachineAtom } from "@/state/modal";
 

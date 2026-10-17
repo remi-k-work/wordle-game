@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { wordChallengeHasWonAtom } from "@/features/game/state";
+import { wordChallengeHasWonAtom } from "@/features/game/state/word-challenge";
 import { modalIsOpenAtom, modalMachineAtom } from "@/state/modal";
 
 // components

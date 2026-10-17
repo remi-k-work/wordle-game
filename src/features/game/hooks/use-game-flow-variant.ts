@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { gameFlowVariantAtom } from "@/features/game/state";
+import { gameFlowVariantAtom } from "@/features/game/state/game-flow-variant";
 
 // types
-import type { GameFlowVariant } from "@/features/game/state";
+import type { GameFlowVariant } from "@/features/game/state/game-flow-variant";
 
 // The variant is derived inside the atom graph: the button re-renders only
 // when the variant string actually changes, not on every machine snapshot

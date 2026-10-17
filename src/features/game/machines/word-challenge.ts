@@ -6,7 +6,8 @@ import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, canSubmitGuess, computeGreyLetters, isGuessKeyValid } from "@/features/game/domain";
-import { gameFlowMachineAtom, runSessionMachineAtom } from "@/features/game/state";
+import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
 // types

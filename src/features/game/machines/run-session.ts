@@ -8,7 +8,7 @@ import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
 import { highScoreMachineAtom } from "@/features/high-score/state";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state";
-import { runResultAtom } from "@/features/game/state";
+import { runResultAtom } from "@/features/game/state/run-session";
 
 // types
 import type { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain";

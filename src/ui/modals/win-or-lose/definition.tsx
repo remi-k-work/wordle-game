@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaWordDefinitionAtom, wordMetaWordDefinitionAudioAtom } from "@/features/game/state";
+import { wordMetaWordDefinitionAtom, wordMetaWordDefinitionAudioAtom } from "@/features/game/state/word-meta";
 
 // components
 import { T } from "gt-next";

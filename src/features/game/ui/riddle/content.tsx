@@ -7,7 +7,7 @@ import {
   wordMetaIsLoadingAtom,
   wordMetaTheRiddleAtom,
   wordMetaTheRiddleAudioAtom,
-} from "@/features/game/state";
+} from "@/features/game/state/word-meta";
 
 // components
 import { T } from "gt-next";

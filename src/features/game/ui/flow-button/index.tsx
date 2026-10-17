@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 import { Match } from "effect";
 import { useAtomSet } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state/alert";
-import { gameFlowMachineAtom } from "@/features/game/state";
-import { useGameFlowVariant } from "@/features/game/hooks";
+import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { useGameFlowVariant } from "@/features/game/hooks/use-game-flow-variant";
 
 // components
 import { Button } from "@base-ui/react";

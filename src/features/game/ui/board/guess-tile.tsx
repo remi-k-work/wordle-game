@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useSonarPing } from "@/features/game/hooks";
+import { useSonarPing } from "@/features/game/hooks/use-sonar-ping";
 
 // types
 import type { Tile } from "@/features/game/domain";

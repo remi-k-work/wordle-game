@@ -7,15 +7,10 @@ import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, fromPromise, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
-import {
-  gameDataKeypadAtom,
-  runSessionMachineAtom,
-  wordChallengeMachineAtom,
-  wordChallengeTheSecretWordAtom,
-  wordChallengeWordleGuessesAtom,
-  wordMetaTheRiddleAtom,
-  wordMetaWordDefinitionAtom,
-} from "@/features/game/state";
+import { gameDataKeypadAtom } from "@/features/game/state/game-data";
+import { runSessionMachineAtom } from "@/features/game/state/run-session";
+import { wordChallengeMachineAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from "@/features/game/state/word-challenge";
+import { wordMetaTheRiddleAtom, wordMetaWordDefinitionAtom } from "@/features/game/state/word-meta";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state";
 import { calculateEmpTargets, calculateSonarTarget } from "@/features/overdrive-hacks/domain";
 import { modalMachineAtom } from "@/state/modal";

@@ -4,7 +4,8 @@ import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
 import { alertIsForfeitRunAtom } from "@/state/alert";
-import { gameFlowMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
+import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 
 // components
 import { Alert } from "@/ui/alert";

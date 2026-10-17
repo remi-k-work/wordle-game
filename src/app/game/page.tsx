@@ -3,10 +3,12 @@
 // services, features, and other libraries
 import { useAtomValue, useAtomMount } from "@effect/atom-react";
 import { playerSessionAtom } from "@/features/player/state";
-import { gameDataIsLoadingOrFailedAtom } from "@/features/game/state";
+import { gameDataIsLoadingOrFailedAtom } from "@/features/game/state/game-data";
 
 // components
-import { Footer, FooterSkeleton, Header, HeaderSkeleton, Main, MainSkeleton } from "@/features/game/ui/board";
+import { Header, HeaderSkeleton } from "@/features/game/ui/board/header";
+import { Main, MainSkeleton } from "@/features/game/ui/board/main";
+import { Footer, FooterSkeleton } from "@/features/game/ui/board/footer";
 
 export default function Page() {
   useAtomMount(playerSessionAtom);

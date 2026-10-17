@@ -15,7 +15,7 @@ import {
   runSessionRunScoreAtom,
   runSessionStreakAtom,
   runResultAtom,
-} from "@/features/game/state";
+} from "@/features/game/state/run-session";
 import { formatDuration } from "@/domain/formatters";
 
 // components
@@ -37,12 +37,12 @@ export function RunScore() {
 
   // NOTE: React state initializer + interval callback are synchronous contexts —
   // `DateTime.now` (an Effect) and `Schedule` are unavailable here. `Date.now()`
-  // with the canonical `useEffect` cleanup below is the idiomatic React pattern.
+  // with the canonical `useEffect` cleanup below is the idiomatic React pattern
   const [now, setNow] = useState(() => DateTime.makeUnsafe(Date.now()));
 
   useEffect(() => {
     // Freeze the clock when there is no active run, or when the run already
-    // finished (the modal then shows the final result, not a live timer).
+    // finished (the modal then shows the final result, not a live timer)
     if (Option.isNone(activeRunId) || Option.isSome(runResult)) return;
 
     const interval = setInterval(() => {

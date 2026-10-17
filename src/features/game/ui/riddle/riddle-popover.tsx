@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { wordMetaIsLoadingAtom } from "@/features/game/state";
+import { wordMetaIsLoadingAtom } from "@/features/game/state/word-meta";
 import { useGT } from "gt-next";
 
 // components

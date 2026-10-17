@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
-import { wordChallengeCurrentGuessWordAtom, wordChallengeIsRejectedAtom } from "@/features/game/state";
+import { wordChallengeCurrentGuessWordAtom, wordChallengeIsRejectedAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksMachineAtom, overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state";
 
 // components
