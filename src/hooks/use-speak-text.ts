@@ -12,7 +12,7 @@ import {
   gameSettingsVoiceRateAtom,
   gameSettingsVoiceAtom,
   gameSettingsVoiceVolumeAtom,
-} from "@/features/settings/state";
+} from "@/features/settings/state/game-settings";
 import { useSpeechVoices } from "./use-speech-voices";
 import { matchLanguage } from "@/features/game/domain/helpers";
 

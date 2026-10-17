@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
-import { failedWordsFrequencyAtom } from "@/features/telemetry/state";
+import { failedWordsFrequencyAtom } from "@/features/telemetry/state/charts";
 import { XAxis, YAxis } from "recharts";
 
 // components

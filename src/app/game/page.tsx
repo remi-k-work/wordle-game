@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { useAtomValue, useAtomMount } from "@effect/atom-react";
-import { playerSessionAtom } from "@/features/player/state";
+import { playerSessionAtom } from "@/features/player/state/player";
 import { gameDataIsLoadingOrFailedAtom } from "@/features/game/state/game-data";
 
 // components

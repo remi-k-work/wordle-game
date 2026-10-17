@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { msg, useGT, useMessages } from "gt-next";
-import { timeToSolveDistributionAtom } from "@/features/telemetry/state";
+import { timeToSolveDistributionAtom } from "@/features/telemetry/state/charts";
 import { XAxis } from "recharts";
 import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";
 

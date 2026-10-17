@@ -1,5 +1,5 @@
 // types
-import type { GameSettings } from ".";
+import type { GameSettings } from "./models";
 
 // constants
 export const INITIAL_GAME_SETTINGS = {

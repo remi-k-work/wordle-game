@@ -2,7 +2,8 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Option, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { PgContainer, runDdlStatements } from "./_pg-container";
-import { BestRunTrophyCardArgs, bestRunTrophyCardQuery } from "@/features/telemetry/services/charts-db";
+import { BestRunTrophyCardArgs } from "@/features/telemetry/services/charts-db/models";
+import { bestRunTrophyCardQuery } from "@/features/telemetry/services/charts-db/queries/best-run-trophy-card";
 
 // Minimal slice of init-telemetry.sql — only the arcade_run_summary table, since the
 // best-run-trophy-card query touches nothing else. Mirrors production DDL.

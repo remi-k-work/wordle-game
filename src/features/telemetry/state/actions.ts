@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { DateTime, Duration, Effect, Metric, Option } from "effect";
 import { Atom } from "effect/unstable/reactivity";
-import { metrics } from "@/features/telemetry/domain";
-import { sessionIdAtom } from "@/features/player/state";
-import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
+import { metrics } from "@/features/telemetry/domain/metrics";
+import { sessionIdAtom } from "@/features/player/state/player";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // types
 import type { RunDeathReason, RunSession, WordChallenge } from "@/features/game/domain/models";

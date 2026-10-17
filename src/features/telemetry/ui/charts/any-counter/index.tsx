@@ -2,14 +2,14 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { T, useLocale } from "gt-next";
-import { anyCounterAtom } from "@/features/telemetry/state";
+import { anyCounterAtom } from "@/features/telemetry/state/charts";
 
 // components
 import { StatPair, StatPairSkeleton } from "@/features/telemetry/ui/charts/stat-pair";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { AnyCounterArgs } from "@/features/telemetry/services/charts-db";
+import type { AnyCounterArgs } from "@/features/telemetry/services/charts-db/models";
 
 interface AnyCounterChartProps {
   counterName: AnyCounterArgs["counterName"];

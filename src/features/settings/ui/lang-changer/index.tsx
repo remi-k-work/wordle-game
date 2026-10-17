@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Match } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { Button } from "@base-ui/react";

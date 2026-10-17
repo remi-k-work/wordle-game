@@ -2,12 +2,12 @@
 import { Struct } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { GameSettings } from "@/features/settings/domain";
+import { GameSettings } from "@/features/settings/domain/models";
 import { gameSettingsMachine } from "@/features/settings/machines/game-settings";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // constants
-import { INITIAL_GAME_SETTINGS } from "@/features/settings/domain";
+import { INITIAL_GAME_SETTINGS } from "@/features/settings/domain/constants";
 
 // Persistent storage for game settings
 const gameSettingsAtom = Atom.kvs({

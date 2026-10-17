@@ -2,7 +2,7 @@
 import { T, useLocale } from "gt-next";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
-import { anyAvgStatAtom } from "@/features/telemetry/state";
+import { anyAvgStatAtom } from "@/features/telemetry/state/charts";
 import { formatSeconds } from "@/domain/formatters";
 
 // components
@@ -10,7 +10,7 @@ import { StatPair, StatPairSkeleton } from "@/features/telemetry/ui/charts/stat-
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { AnyAvgStatArgs } from "@/features/telemetry/services/charts-db";
+import type { AnyAvgStatArgs } from "@/features/telemetry/services/charts-db/models";
 
 interface AnyAvgStatChartProps {
   statColumn: AnyAvgStatArgs["statColumn"];

@@ -5,7 +5,7 @@
 import { DateTime, Option, Schema } from "effect";
 import * as SchemaBinary from "effect/unstable/encoding/SchemaBinary";
 import { describe, expect, it } from "vitest";
-import { AddArcadeRunSummary } from "@/features/telemetry/domain";
+import { AddArcadeRunSummary } from "@/features/telemetry/domain/models";
 import { BestRunTrophyCardData } from "@/features/telemetry/services/charts-db/models";
 
 const trophyValue = BestRunTrophyCardData.make({

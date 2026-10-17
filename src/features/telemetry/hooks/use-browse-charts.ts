@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { browseChartsMachineAtom, browseChartsSolutionsLanguageAtom } from "@/features/telemetry/state";
+import { browseChartsMachineAtom, browseChartsSolutionsLanguageAtom } from "@/features/telemetry/state/browse-charts";
 import { useUrlScribe } from "@/hooks/use-url-scribe";
 
 export function useBrowseCharts() {

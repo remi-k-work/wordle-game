@@ -2,7 +2,8 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { PgContainer, runDdlStatements } from "./_pg-container";
-import { AnyAvgStatArgs, anyAvgStatQuery } from "@/features/telemetry/services/charts-db";
+import { AnyAvgStatArgs } from "@/features/telemetry/services/charts-db/models";
+import { anyAvgStatQuery } from "@/features/telemetry/services/charts-db/queries/any-avg-stat";
 
 // Minimal slice of init-telemetry.sql — the two tables any-avg-stat touches.
 //   - run_word_event: rows keyed by run_id (referenced by arcade_run_summary)
@@ -80,9 +81,9 @@ type RweRow = {
 // with final_score 0 — D2's "N/A" sentinel) so the average is non-trivial.
 const ARS_ROWS: ArsRow[] = [
   { runId: RUN_A1, sessionId: SESSION_A, language: "Pl", deathReason: "Guesses", failedOnWord: "KARDA", finalScore: 120, finalStreak: 3, durationSeconds: 240 },
-  { runId: RUN_A2, sessionId: SESSION_A, language: "Pl", deathReason: "Forfeit", failedOnWord: "N/A",  finalScore: 0,   finalStreak: 0, durationSeconds: 60  },
-  { runId: RUN_B1, sessionId: SESSION_B, language: "Pl", deathReason: "Guesses", failedOnWord: "ASTRA", finalScore: 80,  finalStreak: 1, durationSeconds: 180 },
-  { runId: EN_RUN, sessionId: EN_SESSION, language: "En", deathReason: "Guesses", failedOnWord: "BLIMP", finalScore: 50,  finalStreak: 2, durationSeconds: 90  },
+  { runId: RUN_A2, sessionId: SESSION_A, language: "Pl", deathReason: "Forfeit", failedOnWord: "N/A", finalScore: 0, finalStreak: 0, durationSeconds: 60 },
+  { runId: RUN_B1, sessionId: SESSION_B, language: "Pl", deathReason: "Guesses", failedOnWord: "ASTRA", finalScore: 80, finalStreak: 1, durationSeconds: 180 },
+  { runId: EN_RUN, sessionId: EN_SESSION, language: "En", deathReason: "Guesses", failedOnWord: "BLIMP", finalScore: 50, finalStreak: 2, durationSeconds: 90 },
 ];
 
 // Run_word_event rows: session A's runs both have 2 rwe rows each (so the join
@@ -116,11 +117,7 @@ const seedFixture = Effect.gen(function* () {
   }
 });
 
-const makeRequest = (
-  sessionId: string,
-  statColumn: "guessedTurn" | "finalScore",
-  statTable: "runWordEvent" | "arcadeRunSummary"
-): AnyAvgStatArgs =>
+const makeRequest = (sessionId: string, statColumn: "guessedTurn" | "finalScore", statTable: "runWordEvent" | "arcadeRunSummary"): AnyAvgStatArgs =>
   Schema.decodeSync(AnyAvgStatArgs)({
     sessionId,
     solutionsLanguage: "Pl",
@@ -148,7 +145,8 @@ describe("any-avg-stat e2e", () => {
 
         expect(result.personal).toBe(3);
         expect(result.global).toBe(3);
-      }));
+      })
+    );
 
     it.effect("arcadeRunSummary branch: averages final_score without a join", () =>
       Effect.gen(function* () {
@@ -161,7 +159,8 @@ describe("any-avg-stat e2e", () => {
 
         expect(result.personal).toBe(60);
         expect(result.global).toBe(67);
-      }));
+      })
+    );
 
     it.effect("findOne succeeds with the COALESCE-materialised scalar row when the session is unmatched", () =>
       // B5 / F3 contract check: an unmatched session still gets one row back.
@@ -185,6 +184,7 @@ describe("any-avg-stat e2e", () => {
 
         expect(result.personal).toBe(0);
         expect(result.global).toBe(50);
-      }));
+      })
+    );
   });
 });

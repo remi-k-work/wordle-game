@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { AnyChartArgs } from "@/features/telemetry/services/charts-db";
+import { AnyChartArgs } from "@/features/telemetry/services/charts-db/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 // Factory backing timeToSolve, arcadeStreak, guessDistribution. All three

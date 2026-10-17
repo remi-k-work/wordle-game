@@ -5,7 +5,7 @@ import { useCallback, useEffect } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { gameSettingsVoiceVolumeAtom } from "@/features/settings/state";
+import { gameSettingsVoiceVolumeAtom } from "@/features/settings/state/game-settings";
 
 // Shared player: one element for the whole app (mirrors window.speechSynthesis)
 let sharedAudio: HTMLAudioElement | null = null;

@@ -2,7 +2,8 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { PgContainer, runDdlStatements } from "./_pg-container";
-import { AnyChartArgs, openingGuessesFrequencyQuery } from "@/features/telemetry/services/charts-db";
+import { AnyChartArgs } from "@/features/telemetry/services/charts-db/models";
+import { openingGuessesFrequencyQuery } from "@/features/telemetry/services/charts-db/queries/opening-guesses-frequency";
 
 // Minimal slice of init-telemetry.sql — only the global_pulse table, since the
 // word-frequency query touches nothing else. Mirrors production DDL.
@@ -73,8 +74,7 @@ const seedFixture = Effect.gen(function* () {
   }
 });
 
-const makeRequest = (sessionId: string): AnyChartArgs =>
-  Schema.decodeSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
+const makeRequest = (sessionId: string): AnyChartArgs => Schema.decodeSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
 
 const TestLayer = PgContainer.ClientLive;
 
@@ -95,7 +95,8 @@ describe("opening-guesses frequency e2e", () => {
           { word: "GRAMY", personal: 2, global: 2 },
           { word: "ASTRA", personal: 1, global: 2 },
         ]);
-      }));
+      })
+    );
 
     it.effect("surfaces global-only words with personal=0 for a session that didn't emit them", () =>
       Effect.gen(function* () {
@@ -109,6 +110,7 @@ describe("opening-guesses frequency e2e", () => {
           { word: "ASTRA", personal: 1, global: 2 },
           { word: "GRAMY", personal: 0, global: 2 },
         ]);
-      }));
+      })
+    );
   });
 });

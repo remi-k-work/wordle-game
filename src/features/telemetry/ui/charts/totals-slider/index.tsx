@@ -6,17 +6,19 @@ import { useCallback } from "react";
 // services, features, and other libraries
 import useEmblaCarousel from "embla-carousel-react";
 import { msg } from "gt-next";
-import { useEmblaSelect } from "./hooks";
+import { useEmblaSelect } from "./hooks/use-embla-select";
 
 // components
 import { Slide, SLIDE_CLASS } from "./slide";
-import { Dot, DotSkeleton, Next, NextSkeleton, Prev, PrevSkeleton } from "./buttons";
+import { Dot, DotSkeleton } from "./buttons/Dot";
+import { Next, NextSkeleton } from "./buttons/Next";
+import { Prev, PrevSkeleton } from "./buttons/Prev";
 import { AnyAvgStatChart, AnyAvgStatChartSkeleton } from "@/features/telemetry/ui/charts/any-avg-stat";
 import { AnyCounterChart, AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts/any-counter";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/services/charts-db";
+import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/services/charts-db/models";
 
 interface TotalsSliderProps {
   solutionsLanguage: SolutionsLanguage;

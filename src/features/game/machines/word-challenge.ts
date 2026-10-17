@@ -9,7 +9,7 @@ import { calculateScore, computeGreyLetters } from "@/features/game/domain/game-
 import { canSubmitGuess, isGuessKeyValid } from "@/features/game/domain/validators";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
-import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
+import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state/actions";
 
 // types
 import type { TheSecretWord, WordChallenge } from "@/features/game/domain/models";

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient } from "effect/unstable/sql";
-import { ArcadeStreakDistributionData } from "@/features/telemetry/services/charts-db";
+import { ArcadeStreakDistributionData } from "@/features/telemetry/services/charts-db/models";
 import { makeHistogramDistributionQuery } from "./make-histogram-distribution-query";
 
 export const arcadeStreakDistributionQuery = (sql: SqlClient.SqlClient) =>

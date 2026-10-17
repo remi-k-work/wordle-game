@@ -4,7 +4,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { msg, useMessages } from "gt-next";
-import { bestRunTrophyCardAtom } from "@/features/telemetry/state";
+import { bestRunTrophyCardAtom } from "@/features/telemetry/state/charts";
 
 // components
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";

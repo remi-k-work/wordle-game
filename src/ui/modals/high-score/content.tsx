@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { Top10HighScores } from "@/features/high-score/ui/top-10-high-scores";

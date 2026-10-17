@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient } from "effect/unstable/sql";
-import { GuessDistributionData } from "@/features/telemetry/services/charts-db";
+import { GuessDistributionData } from "@/features/telemetry/services/charts-db/models";
 import { makeHistogramDistributionQuery } from "./make-histogram-distribution-query";
 
 export const guessDistributionQuery = (sql: SqlClient.SqlClient) =>

@@ -6,7 +6,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient } from "@/lib/runtime-client";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, fromPromise, assertEvent } from "xstate";
-import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // types
 import type { TheSecretWord, WordMeta } from "@/features/game/domain/models";

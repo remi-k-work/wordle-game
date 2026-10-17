@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
-import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state";
+import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state/charts";
 
 // components
 import { SectionHeaderSkeleton } from "@/ui/section-header";

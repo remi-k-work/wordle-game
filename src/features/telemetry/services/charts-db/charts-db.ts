@@ -1,23 +1,18 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
-import {
-  anyAvgStatQuery,
-  AnyChartArgs,
-  anyCounterQuery,
-  ArcadeStreakDistributionData,
-  arcadeStreakDistributionQuery,
-  bestRunTrophyCardQuery,
-  cumulativeToDistribution,
-  failedWordsFrequencyQuery,
-  GuessDistributionData,
-  guessDistributionQuery,
-  hardestWordsLeaderboardQuery,
-  openingGuessesFrequencyQuery,
-  runDeathReasonFrequencyQuery,
-  TimeToSolveDistributionData,
-  timeToSolveDistributionQuery,
-} from ".";
+import { AnyChartArgs, ArcadeStreakDistributionData, GuessDistributionData, TimeToSolveDistributionData } from "./models";
+import { cumulativeToDistribution } from "./helpers";
+import { anyAvgStatQuery } from "./queries/any-avg-stat";
+import { anyCounterQuery } from "./queries/any-counter";
+import { arcadeStreakDistributionQuery } from "./queries/arcade-streak-distribution";
+import { bestRunTrophyCardQuery } from "./queries/best-run-trophy-card";
+import { failedWordsFrequencyQuery } from "./queries/failed-words-frequency";
+import { guessDistributionQuery } from "./queries/guess-distribution";
+import { hardestWordsLeaderboardQuery } from "./queries/hardest-words-leaderboard";
+import { openingGuessesFrequencyQuery } from "./queries/opening-guesses-frequency";
+import { runDeathReasonFrequencyQuery } from "./queries/run-death-reason-frequency";
+import { timeToSolveDistributionQuery } from "./queries/time-to-solve-distribution";
 
 export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   // Error-escalation policy (E5): every chart query escalates both SchemaError

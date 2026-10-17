@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { AnyCounterArgs, AnyCounterData } from "@/features/telemetry/services/charts-db";
+import { AnyCounterArgs, AnyCounterData } from "@/features/telemetry/services/charts-db/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 export const anyCounterQuery = (sql: SqlClient.SqlClient) => {

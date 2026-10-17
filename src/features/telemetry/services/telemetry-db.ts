@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain";
+import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsVoiceVolumeAtom } from "@/features/settings/state";
+import { gameSettingsMachineAtom, gameSettingsVoiceVolumeAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { T } from "gt-next";

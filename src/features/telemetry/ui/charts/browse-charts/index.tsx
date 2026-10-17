@@ -1,7 +1,7 @@
 "use client";
 
 // services, features, and other libraries
-import { useBrowseCharts } from "@/features/telemetry/hooks";
+import { useBrowseCharts } from "@/features/telemetry/hooks/use-browse-charts";
 import { useGT } from "gt-next";
 
 // components

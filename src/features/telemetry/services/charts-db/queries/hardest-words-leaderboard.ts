@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { AnyChartArgs, HardestWordsLeaderboardData } from "@/features/telemetry/services/charts-db";
+import { AnyChartArgs, HardestWordsLeaderboardData } from "@/features/telemetry/services/charts-db/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 export const hardestWordsLeaderboardQuery = (sql: SqlClient.SqlClient) => {

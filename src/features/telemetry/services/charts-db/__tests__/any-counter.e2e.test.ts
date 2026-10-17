@@ -2,7 +2,8 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { PgContainer, runDdlStatements } from "./_pg-container";
-import { AnyCounterArgs, anyCounterQuery } from "@/features/telemetry/services/charts-db";
+import { AnyCounterArgs } from "@/features/telemetry/services/charts-db/models";
+import { anyCounterQuery } from "@/features/telemetry/services/charts-db/queries/any-counter";
 
 // Minimal slice of init-telemetry.sql — only the global_pulse table, since the
 // any-counter query touches nothing else. Mirrors production DDL.

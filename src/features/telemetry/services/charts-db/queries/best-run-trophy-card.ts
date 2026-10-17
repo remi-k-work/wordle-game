@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/unstable/sql";
-import { BestRunTrophyCardArgs, BestRunTrophyCardData } from "@/features/telemetry/services/charts-db";
+import { BestRunTrophyCardArgs, BestRunTrophyCardData } from "@/features/telemetry/services/charts-db/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 export const bestRunTrophyCardQuery = (sql: SqlClient.SqlClient) => {

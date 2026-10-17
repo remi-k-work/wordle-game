@@ -2,7 +2,9 @@ import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/unstable/sql";
 import { PgContainer, runDdlStatements } from "./_pg-container";
-import { AnyChartArgs, cumulativeToDistribution, GuessDistributionData, guessDistributionQuery } from "@/features/telemetry/services/charts-db";
+import { AnyChartArgs, GuessDistributionData } from "@/features/telemetry/services/charts-db/models";
+import { cumulativeToDistribution } from "@/features/telemetry/services/charts-db/helpers";
+import { guessDistributionQuery } from "@/features/telemetry/services/charts-db/queries/guess-distribution";
 
 // Minimal slice of init-telemetry.sql — only the global_pulse table, since the
 // guess-distribution query touches nothing else. Mirrors production DDL.

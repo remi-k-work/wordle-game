@@ -6,7 +6,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, fromPromise, assertEvent } from "xstate";
-import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { wordChallengeMachineAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from "@/features/game/state/word-challenge";

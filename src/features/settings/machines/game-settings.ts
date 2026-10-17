@@ -8,7 +8,7 @@ import { setup, assign, assertEvent } from "xstate";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 
 // types
-import type { GameSettings } from "@/features/settings/domain";
+import type { GameSettings } from "@/features/settings/domain/models";
 
 export const gameSettingsMachine = setup({
   types: {} as {

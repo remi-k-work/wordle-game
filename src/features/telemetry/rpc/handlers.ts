@@ -4,7 +4,7 @@ import "server-only";
 import { Effect, Layer } from "effect";
 import { RpcTelemetry } from "./requests";
 import { TelemetryDB } from "@/features/telemetry/services/telemetry-db";
-import { ChartsDB } from "@/features/telemetry/services/charts-db";
+import { ChartsDB } from "@/features/telemetry/services/charts-db/charts-db";
 import { PgLive } from "@/lib/pg-live";
 import { makeRpcHandler } from "@/domain/helpers";
 

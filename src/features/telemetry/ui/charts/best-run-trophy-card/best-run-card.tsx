@@ -11,7 +11,7 @@ import { BestRunCardFrame } from "./best-run-card-frame";
 import { CalendarIcon, ClockIcon, FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { BestRunTrophyCardData } from "@/features/telemetry/services/charts-db";
+import type { BestRunTrophyCardData } from "@/features/telemetry/services/charts-db/models";
 
 interface BestRunCardProps {
   Tag?: "header" | "footer" | "section" | "div" | "article";

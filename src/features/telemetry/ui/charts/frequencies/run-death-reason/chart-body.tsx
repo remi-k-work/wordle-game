@@ -13,7 +13,7 @@ import { CustomLegend } from "./custom-legend";
 
 // types
 import type { PieSectorShapeProps } from "recharts";
-import type { RunDeathReasonFrequencyData } from "@/features/telemetry/services/charts-db";
+import type { RunDeathReasonFrequencyData } from "@/features/telemetry/services/charts-db/models";
 
 interface ChartBodyProps {
   runDeathReasonFrequency: ReadonlyArray<{ reason: "Forfeit" | "Guesses"; personal: number; global: number }>;
