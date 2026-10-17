@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
 import { SolutionsLanguage } from "@/features/game/domain";
-import { BasePage } from "@/domain";
+import { BasePage } from "@/domain/models";
 
 // Represents the high score entry for a player
 export class HighScore extends Schema.Class<HighScore>("HighScore")({

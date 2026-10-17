@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { GameData, SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain";
-import { SpeechRequest } from "@/domain";
+import { SpeechRequest } from "@/domain/models";
 
 export class RpcGame extends RpcGroup.make(
   Rpc.make("fetchSolutions", {

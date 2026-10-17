@@ -4,10 +4,10 @@ import "dotenv/config";
 import { Cause, Effect, FileSystem, Layer, Logger } from "effect";
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { OpenRouter } from "@/services/open-router";
-import { OpenRouterError } from "@/domain";
+import { OpenRouterError } from "@/domain/errors";
 
 // constants
-import { VOICES_PL } from "@/domain";
+import { VOICES_PL } from "@/domain/constants";
 
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, OpenRouter.layer);
 

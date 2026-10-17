@@ -16,7 +16,7 @@ import {
   runSessionStreakAtom,
   runResultAtom,
 } from "@/features/game/state";
-import { formatDuration } from "@/domain";
+import { formatDuration } from "@/domain/formatters";
 
 // components
 import { T } from "gt-next";

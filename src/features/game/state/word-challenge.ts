@@ -5,7 +5,7 @@ import { Array, DateTime, HashMap, Option, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState, formatGuess } from "@/features/game/domain";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 import type { Color } from "@/features/game/domain";

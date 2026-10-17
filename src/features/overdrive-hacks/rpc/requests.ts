@@ -2,7 +2,7 @@
 import { Rpc, RpcGroup } from "effect/unstable/rpc";
 import { SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/features/game/domain";
 import { OverdriveHacks } from "@/features/overdrive-hacks/domain";
-import { SpeechRequest } from "@/domain";
+import { SpeechRequest } from "@/domain/models";
 
 export class RpcOverdriveHacks extends RpcGroup.make(
   Rpc.make("fetchOverride", {

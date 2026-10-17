@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain";
 import { runSessionMachine } from "@/features/game/machines/run-session";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 import type { RunResult } from "@/features/game/domain";

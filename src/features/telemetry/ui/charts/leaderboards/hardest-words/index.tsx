@@ -7,7 +7,7 @@ import { AsyncResult } from "effect/unstable/reactivity";
 import { useGT } from "gt-next";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state";
 import { XAxis, YAxis } from "recharts";
-import { formatSeconds } from "@/domain";
+import { formatSeconds } from "@/domain/formatters";
 
 // components
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";

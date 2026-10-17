@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { gameDataMachine } from "@/features/game/machines/game-data";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // The game data machine is now a living actor inside the effect atom
 export const gameDataMachineAtom = createMachineAtom(gameDataMachine);

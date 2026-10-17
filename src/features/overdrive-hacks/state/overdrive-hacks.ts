@@ -3,7 +3,7 @@ import { Array, HashMap, pipe } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { gameFlowMachineAtom, runSessionRunScoreAtom, wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 import type { Color, Tile, WordleGrid } from "@/features/game/domain";

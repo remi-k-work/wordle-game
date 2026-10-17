@@ -4,7 +4,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { GameSettings } from "@/features/settings/domain";
 import { gameSettingsMachine } from "@/features/settings/machines/game-settings";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // constants
 import { INITIAL_GAME_SETTINGS } from "@/features/settings/domain";

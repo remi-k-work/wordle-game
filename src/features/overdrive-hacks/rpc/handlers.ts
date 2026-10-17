@@ -11,7 +11,7 @@ import { OpenRouterClientLayer } from "@/domain/fallback-plan2";
 import { makeRpcHandler, readAiSwitch } from "@/domain/helpers";
 
 // constants
-import { VOICES_PL } from "@/domain";
+import { VOICES_PL } from "@/domain/constants";
 
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverride: ({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage }) =>

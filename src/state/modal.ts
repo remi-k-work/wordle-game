@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { modalMachine } from "@/machines/modal";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 export type ModalType = "help" | "status" | "voice-settings" | "high-score" | "override-hack";

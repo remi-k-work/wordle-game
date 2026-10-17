@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Atom } from "effect/unstable/reactivity";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
-import { createMachineAtom } from "@/domain";
+import { createMachineAtom } from "@/domain/machine-atom";
 
 // The word meta machine is now a living actor inside the effect atom
 export const wordMetaMachineAtom = createMachineAtom(wordMetaMachine);

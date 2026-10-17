@@ -4,17 +4,13 @@ import { withGTConfig } from "gt-next/config";
 const nextConfig: NextConfig = {
   devIndicators: false,
   typedRoutes: true,
+  agentRules: false,
 
   // Trim third-party barrels (see bundle-barrel-imports): only these packages
   // are rewritten to per-component imports; the rest stay as written
   experimental: {
     optimizePackageImports: ["@base-ui/react", "motion", "gt-next"],
   },
-
-  // Keep the Postgres driver out of the server bundles: it is required at
-  // runtime only, and bundling it duplicates the driver into every
-  // DB-backed route chunk
-  serverExternalPackages: ["pg", "@effect/sql-pg"],
 
   images: {
     remotePatterns: [

@@ -1,7 +1,8 @@
 // services, features, and other libraries
 import { Config, Context, Effect, flow, Layer, Schedule, Schema } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/http";
-import { OpenRouterError, SpeechRequest } from "@/domain";
+import { SpeechRequest } from "@/domain/models";
+import { OpenRouterError } from "@/domain/errors";
 
 export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
   make: Effect.gen(function* () {

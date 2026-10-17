@@ -3,7 +3,7 @@ import { T, useLocale } from "gt-next";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/unstable/reactivity";
 import { anyAvgStatAtom } from "@/features/telemetry/state";
-import { formatSeconds } from "@/domain";
+import { formatSeconds } from "@/domain/formatters";
 
 // components
 import { StatPair, StatPairSkeleton } from "@/features/telemetry/ui/charts/stat-pair";

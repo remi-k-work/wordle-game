@@ -7,7 +7,7 @@ import { RpcGame } from "./requests";
 import { matchLanguage } from "@/features/game/domain";
 import { generateRiddle } from "@/features/game/domain/riddle2";
 import { OpenRouter } from "@/services/open-router";
-import { formatTextForTTS } from "@/domain";
+import { formatTextForTTS } from "@/domain/formatters";
 import { OpenRouterClientLayer } from "@/domain/fallback-plan2";
 import { makeRpcHandler, readAiSwitch } from "@/domain/helpers";
 
@@ -22,7 +22,7 @@ import dictionaryEnJson from "@/assets/data/dictionary-en.json";
 import dictionaryPlJson from "@/assets/data/dictionary-pl.json";
 
 // constants
-import { VOICES_PL } from "@/domain";
+import { VOICES_PL } from "@/domain/constants";
 
 const DEFINITIONS_EN = definitionsEnJson as Record<string, string | null>;
 const DEFINITIONS_PL = definitionsPlJson as Record<string, string | null>;
