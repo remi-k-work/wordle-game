@@ -1,11 +1,11 @@
 // oxlint-disable effecttsgo/global-date typescript/no-misused-spread
 
 // services, features, and other libraries
-import { Array, DateTime, HashMap, Match, Option, String, Effect } from "effect";
+import { Array, DateTime, HashSet, Match, Option, String, Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
-import { calculateScore, canSubmitGuess, computeKeypadState, isGuessKeyValid } from "@/features/game/domain";
+import { calculateScore, canSubmitGuess, computeGreyLetters, isGuessKeyValid } from "@/features/game/domain";
 import { gameFlowMachineAtom, runSessionMachineAtom } from "@/features/game/state";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state";
 
@@ -50,11 +50,10 @@ export const wordChallengeMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       if (normalizedKey === "ENTER" || normalizedKey === "BACKSPACE") return false;
 
-      // Prevent typing letters already ruled out by genuine guesses
-      const theSecretWord = Option.getOrThrow(context.theSecretWord);
-      const keypadState = computeKeypadState(theSecretWord, context.wordleGuesses);
-      if (Option.getOrElse(HashMap.get(keypadState, normalizedKey), () => "" as const) === "grey") return false;
-      return true;
+      // Prevent typing letters already ruled out by genuine guesses.
+      // `greyLetters` is maintained at submit time, so this hot path (it runs
+      // on every keypress) is a pure O(1) set lookup
+      return !HashSet.has(context.greyLetters, normalizedKey);
     },
   },
   actions: {
@@ -100,15 +99,17 @@ export const wordChallengeMachine = setup({
     removeLetter: assign(({ context }) => ({ ...context, currentGuessWord: context.currentGuessWord.slice(0, -1) }) as const satisfies WordChallenge),
 
     // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
-    submitGuess: assign(
-      ({ context }) =>
-        ({
-          ...context,
-          currentGuessWord: "",
-          wordleGuesses: [...context.wordleGuesses, context.currentGuessWord],
-          currentTurn: context.currentTurn + 1,
-        }) as const satisfies WordChallenge
-    ),
+    // `greyLetters` is recomputed here — once per submission — so the keypress guard above never has to
+    submitGuess: assign(({ context }) => {
+      const wordleGuesses = [...context.wordleGuesses, context.currentGuessWord];
+      return {
+        ...context,
+        currentGuessWord: "",
+        wordleGuesses,
+        currentTurn: context.currentTurn + 1,
+        greyLetters: computeGreyLetters(Option.getOrThrow(context.theSecretWord), wordleGuesses),
+      } as const satisfies WordChallenge;
+    }),
 
     // Calculates the player's word score based on the turn they won on and how long it took them
     // NOTE: `assign` is synchronous — `DateTime.now` (an Effect) is unavailable here.

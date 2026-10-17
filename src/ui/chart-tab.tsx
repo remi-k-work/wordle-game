@@ -1,6 +1,3 @@
-// services, features, and other libraries
-import { cn } from "@/lib/utils";
-
 // components
 import { Tabs } from "@base-ui/react";
 
@@ -12,18 +9,15 @@ interface ChartTabProps {
   children: ReactNode;
 }
 
+// constants
+// Fully static class string, hoisted so tab switches don't re-run it through
+// twMerge; shared by the tab and its skeleton
+const TAB_CLASS =
+  "flex items-center justify-center px-6 py-4 text-lg font-semibold tracking-widest text-text-2 uppercase break-keep whitespace-nowrap outline-none select-none hover:text-text-2 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid data-active:text-primary";
+
 export function ChartTab({ value, children }: ChartTabProps) {
   return (
-    <Tabs.Tab
-      className={cn(
-        "flex items-center justify-center px-6 py-4 text-lg font-semibold tracking-widest text-text-2 uppercase",
-        "break-keep whitespace-nowrap outline-none select-none",
-        "hover:text-text-2",
-        "focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid",
-        "data-active:text-primary"
-      )}
-      value={value}
-    >
+    <Tabs.Tab className={TAB_CLASS} value={value}>
       {children}
     </Tabs.Tab>
   );
@@ -31,17 +25,7 @@ export function ChartTab({ value, children }: ChartTabProps) {
 
 export function ChartTabSkeleton({ value }: Pick<ChartTabProps, "value">) {
   return (
-    <Tabs.Tab
-      className={cn(
-        "flex items-center justify-center px-6 py-4 text-lg font-semibold tracking-widest text-text-2 uppercase",
-        "break-keep whitespace-nowrap outline-none select-none",
-        "hover:text-text-2",
-        "focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid",
-        "data-active:text-primary"
-      )}
-      value={value}
-      disabled
-    >
+    <Tabs.Tab className={TAB_CLASS} value={value} disabled>
       <div className="h-6 w-full animate-pulse bg-accent" />
     </Tabs.Tab>
   );

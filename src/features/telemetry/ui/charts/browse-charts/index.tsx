@@ -1,3 +1,5 @@
+"use client";
+
 // services, features, and other libraries
 import { useBrowseCharts } from "@/features/telemetry/hooks";
 import { useGT } from "gt-next";

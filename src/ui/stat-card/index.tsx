@@ -17,20 +17,13 @@ const VARIANT_STYLES = {
   secondary: "border-secondary text-secondary",
 } as const;
 
+// Fully static portion of the card chrome, hoisted so each card render only
+// merges the two-argument variant override
+const CARD_CLASS = "row-span-2 grid grid-rows-subgrid gap-3 rounded-xl border-2 bg-surface-1 p-3 text-center md:p-6 lg:p-9 w-3/4 max-w-lg justify-self-center";
+
 export function StatCard({ Tag = "section", variant, title, children }: StatCardProps) {
   return (
-    <Tag
-      className={cn(
-        // Layout
-        "row-span-2 grid grid-rows-subgrid gap-3",
-        // Card chrome
-        "rounded-xl border-2 bg-surface-1 p-3 text-center md:p-6 lg:p-9",
-        // Sizing — center each card in its column, max-w matches the rest of the telemetry cards
-        "w-3/4 max-w-lg justify-self-center",
-        // Variant color
-        VARIANT_STYLES[variant]
-      )}
-    >
+    <Tag className={cn(CARD_CLASS, VARIANT_STYLES[variant])}>
       {/* self-center perfectly vertically aligns the title in its 1fr track */}
       <div className="@container self-center">
         <h3 className="text-[6cqi] font-semibold tracking-widest uppercase">{title}</h3>

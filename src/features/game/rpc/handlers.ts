@@ -4,9 +4,11 @@ import "server-only";
 import { Array, Effect, HashSet, Layer, Option, Random } from "effect";
 import { NodeHttpClient } from "@effect/platform-node";
 import { RpcGame } from "./requests";
-import { generateRiddle, matchLanguage } from "@/features/game/domain";
+import { matchLanguage } from "@/features/game/domain";
+import { generateRiddle } from "@/features/game/domain/riddle2";
 import { OpenRouter } from "@/services/open-router";
-import { formatTextForTTS, OpenRouterClientLayer } from "@/domain";
+import { formatTextForTTS } from "@/domain";
+import { OpenRouterClientLayer } from "@/domain/fallback-plan2";
 import { makeRpcHandler, readAiSwitch } from "@/domain/helpers";
 
 // assets
@@ -25,11 +27,16 @@ import { VOICES_PL } from "@/domain";
 const DEFINITIONS_EN = definitionsEnJson as Record<string, string | null>;
 const DEFINITIONS_PL = definitionsPlJson as Record<string, string | null>;
 
+// Built once at module scope: hashing 30,000+ words into a HashSet is far too
+// expensive to repeat on every request (server-hoist-static-io)
+const DICTIONARY_EN = HashSet.fromIterable(dictionaryEnJson);
+const DICTIONARY_PL = HashSet.fromIterable(dictionaryPlJson);
+
 const RpcGameLayer = RpcGame.toLayer({
   fetchSolutions: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, solutionsEnJson, solutionsPlJson)),
 
   // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
-  fetchDictionary: ({ solutionsLanguage }) => Effect.succeedSome(HashSet.fromIterable(matchLanguage(solutionsLanguage, dictionaryEnJson, dictionaryPlJson))),
+  fetchDictionary: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, DICTIONARY_EN, DICTIONARY_PL)),
   fetchKeypad: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, keypadEnJson, keypadPlJson)),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>

@@ -21,7 +21,7 @@ import { motionTokens, springs } from "@/lib/motion-tokens";
 export function InfoLine({ message, className }: InfoLineProps) {
   return (
     <AnimatePresence>
-      {message && (
+      {message ? (
         <motion.p
           role="status"
           aria-live="polite"
@@ -35,7 +35,7 @@ export function InfoLine({ message, className }: InfoLineProps) {
           <InformationCircleIcon className="size-11 flex-none" />
           {message}
         </motion.p>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 }

@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
-import { alertMachineAtom } from "@/state/alert";
+import { alertIsForfeitRunAtom } from "@/state/alert";
 import { gameFlowMachineAtom, wordChallengeMachineAtom } from "@/features/game/state";
 
 // components
@@ -12,12 +12,13 @@ import { Content } from "./content";
 import { useGT } from "gt-next";
 
 export function ForfeitRunAlert() {
-  const alertMachineSnapshot = useAtomValue(alertMachineAtom);
+  // Derived boolean atom: re-renders only when visibility actually flips
+  const isOpen = useAtomValue(alertIsForfeitRunAtom);
   const gt = useGT();
 
   return (
     <Alert
-      isOpen={alertMachineSnapshot.matches("forfeit-run")}
+      isOpen={isOpen}
       title={gt("Forfeit Run")}
       onOkayed={() =>
         runClientCommand(

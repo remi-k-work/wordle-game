@@ -15,29 +15,29 @@ import { HighScorePage } from "@/features/high-score/domain";
 // components
 import { PageHeader, PageHeaderSkeleton } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
-import {
-  BestRunTrophyCardChartSkeleton,
-  BrowseChartsSkeleton,
-  DistributionChartsSkeleton,
-  FrequencyChartsSkeleton,
-  TotalsSliderSkeleton,
-} from "@/features/telemetry/ui/charts";
+import { BrowseChartsSkeleton } from "@/features/telemetry/ui/charts/browse-charts";
+import { BestRunTrophyCardChartSkeleton } from "@/features/telemetry/ui/charts/best-run-trophy-card";
+import { TotalsSliderSkeleton } from "@/features/telemetry/ui/charts/totals-slider";
+import { DistributionChartsSkeleton } from "@/features/telemetry/ui/charts/distributions";
+import { FrequencyChartsSkeleton } from "@/features/telemetry/ui/charts/frequencies";
 
-// Heavy chart sections (recharts, embla) are split into separate chunks, keeping
-// them out of the initial bundle; each shows its existing skeleton while loading
-const BrowseCharts = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.BrowseCharts), {
+// Each heavy chart section (recharts, embla) loads its own chunk via a
+// concrete module path — a shared barrel import would fuse them all (plus
+// every other section) into one chunk, so e.g. mounting the embla slider
+// would also download recharts
+const BrowseCharts = dynamic(() => import("@/features/telemetry/ui/charts/browse-charts").then((m) => m.BrowseCharts), {
   loading: () => <BrowseChartsSkeleton />,
 });
-const BestRunTrophyCardChart = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.BestRunTrophyCardChart), {
+const BestRunTrophyCardChart = dynamic(() => import("@/features/telemetry/ui/charts/best-run-trophy-card").then((m) => m.BestRunTrophyCardChart), {
   loading: () => <BestRunTrophyCardChartSkeleton />,
 });
-const TotalsSlider = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.TotalsSlider), {
+const TotalsSlider = dynamic(() => import("@/features/telemetry/ui/charts/totals-slider").then((m) => m.TotalsSlider), {
   loading: () => <TotalsSliderSkeleton />,
 });
-const DistributionCharts = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.DistributionCharts), {
+const DistributionCharts = dynamic(() => import("@/features/telemetry/ui/charts/distributions").then((m) => m.DistributionCharts), {
   loading: () => <DistributionChartsSkeleton />,
 });
-const FrequencyCharts = dynamic(() => import("@/features/telemetry/ui/charts").then((m) => m.FrequencyCharts), {
+const FrequencyCharts = dynamic(() => import("@/features/telemetry/ui/charts/frequencies").then((m) => m.FrequencyCharts), {
   loading: () => <FrequencyChartsSkeleton />,
 });
 

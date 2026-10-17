@@ -1,7 +1,7 @@
 // services, features, and other libraries
-import { useAtom, useAtomValue } from "@effect/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { wordChallengeHasWonAtom } from "@/features/game/state";
-import { modalMachineAtom } from "@/state/modal";
+import { modalIsOpenAtom, modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";
@@ -18,13 +18,16 @@ import { XCircleIcon } from "@heroicons/react/24/outline";
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
 export function WinOrLoseModal() {
-  const [modalMachineSnapshot, modalMachineEvent] = useAtom(modalMachineAtom);
+  // Derived boolean atom: re-renders only when visibility actually flips
+  const isOpen = useAtomValue(modalIsOpenAtom("status"));
+  const modalMachineEvent = useAtomSet(modalMachineAtom);
+
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
   const hasWon = useAtomValue(wordChallengeHasWonAtom);
   const gt = useGT();
 
   return (
-    <Modal isOpen={modalMachineSnapshot.matches("status")} title={hasWon ? gt("You Win") : gt("Run Over")}>
+    <Modal isOpen={isOpen} title={hasWon ? gt("You Win") : gt("Run Over")}>
       {hasWon ? <YouWin /> : <Nevermind />}
 
       <section className={DIALOG_FOOTER_CLASSES}>

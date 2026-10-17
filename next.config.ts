@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["@base-ui/react", "motion", "gt-next"],
   },
 
+  // Keep the Postgres driver out of the server bundles: it is required at
+  // runtime only, and bundling it duplicates the driver into every
+  // DB-backed route chunk
+  serverExternalPackages: ["pg", "@effect/sql-pg"],
+
   images: {
     remotePatterns: [
       {

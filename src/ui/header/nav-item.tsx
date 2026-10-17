@@ -12,6 +12,19 @@ import { useMessages } from "gt-next";
 import type { Route } from "next";
 import type { ReactNode } from "react";
 
+// Module-level cache: nav patterns are static literals, so compile each one
+// exactly once instead of on every render (js-cache-function-results /
+// js-hoist-regexp). Non-global regexes are stateless, so sharing is safe
+const patternCache = new Map<string, RegExp>();
+const compilePattern = (match: string) => {
+  let regex = patternCache.get(match);
+  if (regex === undefined) {
+    regex = new RegExp(match);
+    patternCache.set(match, regex);
+  }
+  return regex;
+};
+
 export interface NavItemProps {
   href: Route;
   match: string;
@@ -24,9 +37,8 @@ export default function NavItem({ href, match, title, icon, isExternal = false }
   const pathname = usePathname();
   const messages = useMessages();
 
-  // Compile regex client-side
-  const regex = new RegExp(match);
-  const isActive = regex.test(pathname);
+  // Test the cached pattern against the current pathname
+  const isActive = compilePattern(match).test(pathname);
 
   return (
     <Link

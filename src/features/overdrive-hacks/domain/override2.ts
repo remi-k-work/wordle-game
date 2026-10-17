@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Match, Option } from "effect";
-import { generateSingleField2 } from "@/domain";
+import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { formatGuess, matchLanguage } from "@/features/game/domain";
 
 // types

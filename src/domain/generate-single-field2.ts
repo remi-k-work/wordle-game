@@ -1,8 +1,9 @@
 // services, features, and other libraries
 import { Cause, Effect, Option, Schema } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/unstable/ai";
-import { AiProviderError, makeFallbackPlan2 } from ".";
-import { formatTextForTTS } from "@/domain";
+import { AiProviderError } from "./errors";
+import { makeFallbackPlan2 } from "./fallback-plan2";
+import { formatTextForTTS } from "./formatters";
 
 // types
 interface GenerateSingleFieldOptions {

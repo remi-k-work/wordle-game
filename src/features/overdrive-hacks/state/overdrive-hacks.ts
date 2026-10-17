@@ -24,6 +24,7 @@ export const overdriveHacksTheOverrideAudioAtom = overdriveHacksMachineAtom.pipe
 // Derived boolean: subscribe to this instead of the full snapshot when only
 // the machine state (not context) is needed
 export const overdriveHacksIsApplyingOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("applyingOverrideHack")));
+export const overdriveHacksIsIdleAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("idle")));
 
 export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
   pipe(

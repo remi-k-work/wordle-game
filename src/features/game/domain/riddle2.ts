@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { generateSingleField2 } from "@/domain";
+import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { matchLanguage } from ".";
 
 // types

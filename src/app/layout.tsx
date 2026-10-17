@@ -7,12 +7,12 @@ import Image from "next/image";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { Analytics } from "@vercel/analytics/next";
 import { GTProvider, T } from "gt-next";
 import { getGT, getLocale } from "gt-next/server";
 
 // components
 import { ThemeProvider } from "next-themes";
+import { Analytics } from "@/ui/analytics";
 import { AtomRegistryProvider } from "@/ui/atom-registry-provider";
 import { Toastify } from "@/ui/toastify";
 import { Header } from "@/ui/header";
@@ -79,7 +79,7 @@ export default async function Layout({ children }: LayoutProps<"/">) {
           </ThemeProvider>
         </GTProvider>
 
-        <Analytics debug={false} />
+        <Analytics />
 
         <a
           href="https://www.remiforge.dev"

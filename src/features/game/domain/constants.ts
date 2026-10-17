@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Option } from "effect";
+import { HashSet, Option } from "effect";
 import { msg } from "gt-next";
 
 // types
@@ -66,6 +66,7 @@ export const INITIAL_WORD_CHALLENGE = {
   currentTurn: 1,
   startTime: Option.none(),
   wordScore: Option.none(),
+  greyLetters: HashSet.empty<string>(),
 } as const satisfies WordChallenge;
 
 export const INITIAL_RUN_SESSION = {

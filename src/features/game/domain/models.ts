@@ -90,4 +90,7 @@ export class WordChallenge extends Schema.Class<WordChallenge>("WordChallenge")(
   currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
   startTime: Schema.Option(Schema.DateTimeUtc),
   wordScore: Schema.Option(WordScore),
+  // Letters ruled out ("grey") by the submitted guesses — maintained at submit
+  // time so the per-keypress guard is an O(1) set lookup
+  greyLetters: Schema.HashSet(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(1)))),
 }) {}

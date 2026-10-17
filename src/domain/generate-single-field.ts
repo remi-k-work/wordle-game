@@ -2,7 +2,7 @@
 import { Effect } from "effect";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { AiSdkError } from ".";
+import { AiSdkError } from "./errors";
 
 // types
 import type { LanguageModel } from "ai";

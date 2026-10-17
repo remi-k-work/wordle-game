@@ -49,28 +49,34 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         if (spanBatch.length === 0) return;
         yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
 
-        yield* Effect.forEach(spanBatch, ({ name, attributes }) =>
-          Effect.gen(function* () {
-            // Convert the attributes map to a plain object for schema decoding and validation
-            const attributesObject = Object.fromEntries(attributes);
+        // The span inserts are independent of each other, so don't serialize
+        // them: run the whole batch concurrently instead of paying up to 50
+        // sequential RPC round-trips (async-parallel)
+        yield* Effect.forEach(
+          spanBatch,
+          ({ name, attributes }) =>
+            Effect.gen(function* () {
+              // Convert the attributes map to a plain object for schema decoding and validation
+              const attributesObject = Object.fromEntries(attributes);
 
-            yield* pipe(
-              Match.value(name),
-              Match.when("logWordWon", () =>
-                Effect.gen(function* () {
-                  const data = yield* Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject).pipe(Effect.orDie);
-                  yield* addRunWordEvent(data);
-                }).pipe(Effect.asVoid)
-              ),
-              Match.when("logRunCompleted", () =>
-                Effect.gen(function* () {
-                  const data = yield* Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject).pipe(Effect.orDie);
-                  yield* addArcadeRunSummary(data);
-                }).pipe(Effect.asVoid)
-              ),
-              Match.orElse(() => Effect.void)
-            );
-          })
+              yield* pipe(
+                Match.value(name),
+                Match.when("logWordWon", () =>
+                  Effect.gen(function* () {
+                    const data = yield* Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject).pipe(Effect.orDie);
+                    yield* addRunWordEvent(data);
+                  }).pipe(Effect.asVoid)
+                ),
+                Match.when("logRunCompleted", () =>
+                  Effect.gen(function* () {
+                    const data = yield* Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject).pipe(Effect.orDie);
+                    yield* addArcadeRunSummary(data);
+                  }).pipe(Effect.asVoid)
+                ),
+                Match.orElse(() => Effect.void)
+              );
+            }),
+          { concurrency: "unbounded" }
         );
       });
 

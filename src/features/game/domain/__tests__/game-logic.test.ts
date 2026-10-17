@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, DateTime, Duration, HashMap, Option } from "effect";
+import { Effect, DateTime, Duration, HashMap, HashSet, Option } from "effect";
 import { TestClock } from "effect/testing";
-import { calculateScore, computeKeypadState, calculatePotentialScore } from "..";
+import { calculateScore, computeGreyLetters, computeKeypadState, calculatePotentialScore } from "..";
 import { formatDuration } from "@/domain";
 
 describe("gameLogic", () => {
@@ -83,6 +83,35 @@ describe("gameLogic", () => {
       expect(Option.getOrNull(HashMap.get(keypad, "M"))).toBe("grey");
       expect(Option.getOrNull(HashMap.get(keypad, "P"))).toBe("green");
       expect(Option.getOrNull(HashMap.get(keypad, "R"))).toBe("grey");
+    });
+  });
+
+  describe("computeGreyLetters", () => {
+    it("collects letters absent from the secret word across all guesses", () => {
+      const greyLetters = computeGreyLetters("APPLE", ["AMPLE", "PAPER"]);
+      // AMPLE greys M; PAPER greys R — A, P, L, E exist in the secret and stay live
+      expect(HashSet.has(greyLetters, "M")).toBe(true);
+      expect(HashSet.has(greyLetters, "R")).toBe(true);
+      expect(HashSet.has(greyLetters, "A")).toBe(false);
+      expect(HashSet.has(greyLetters, "P")).toBe(false);
+      expect(HashSet.has(greyLetters, "L")).toBe(false);
+      expect(HashSet.has(greyLetters, "E")).toBe(false);
+    });
+
+    it("never greys a letter that exists in the secret word, no matter the guesses", () => {
+      const greyLetters = computeGreyLetters("APPLE", ["MELON", "ROLES", "TOMBS"]);
+      // M, N, O, R, S, T, B are absent from APPLE; every A/P/L/E occurrence is yellow/green
+      expect(HashSet.has(greyLetters, "N")).toBe(true);
+      expect(HashSet.has(greyLetters, "T")).toBe(true);
+      expect(HashSet.has(greyLetters, "A")).toBe(false);
+      expect(HashSet.has(greyLetters, "P")).toBe(false);
+      expect(HashSet.has(greyLetters, "L")).toBe(false);
+      expect(HashSet.has(greyLetters, "E")).toBe(false);
+    });
+
+    it("returns an empty set when no guesses exist yet", () => {
+      const greyLetters = computeGreyLetters("APPLE", []);
+      expect(HashSet.size(greyLetters)).toBe(0);
     });
   });
 

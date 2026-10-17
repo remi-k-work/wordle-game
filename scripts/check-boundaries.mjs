@@ -16,9 +16,11 @@
 // 2. This script (static, dependency-free). Run via `npm run lint:boundaries`.
 //
 // Checks:
-//  (a) deleted barrels stay deleted (`src/state/index.ts`, `src/hooks/index.ts`)
+//  (a) deleted barrels stay deleted (`src/state/index.ts`, `src/hooks/index.ts`,
+//      `src/features/telemetry/ui/charts/index.ts`)
 //  (b) no exact-barrel imports (`from "@/state"`, `from "@/hooks"`)
-//  (c) `src/domain/index.ts` must not re-export `./helpers` (server-only)
+//  (c) barrels must not re-export server-only/AI modules (they would become
+//      client-reachable through `export *`)
 //  (d) no `"use client"` module reaches a server-only module (transitive)
 //  (e) `server-only` markers present on server-only entry points
 
@@ -31,12 +33,21 @@ const SRC = join(ROOT, "src");
 
 // --- config -----------------------------------------------------------------
 
-const DELETED_BARRELS = ["src/state/index.ts", "src/hooks/index.ts"];
+const DELETED_BARRELS = ["src/state/index.ts", "src/hooks/index.ts", "src/features/telemetry/ui/charts/index.ts"];
 
 const FORBIDDEN_EXACT_IMPORTS = ["@/state", "@/hooks"];
 
-const DOMAIN_BARREL = "src/domain/index.ts";
-const DOMAIN_BARREL_FORBIDDEN = ["./helpers"];
+// Barrels must never `export *` from these paths: every barrel re-export is a
+// client-reachable edge, and these modules drag heavy/server-only dependency
+// chains (the AI generation stack) into any client bundle that touches the barrel.
+const BARREL_FORBIDDEN_REEXPORTS = [
+  {
+    barrel: "src/domain/index.ts",
+    forbidden: ["./helpers", "./fallback-plan", "./fallback-plan2", "./generate-single-field", "./generate-single-field2"],
+  },
+  { barrel: "src/features/game/domain/index.ts", forbidden: ["./riddle", "./riddle2"] },
+  { barrel: "src/features/overdrive-hacks/domain/index.ts", forbidden: ["./override", "./override2"] },
+];
 
 const SERVER_ONLY_MARKED = [
   "src/domain/helpers.ts",
@@ -56,9 +67,16 @@ const CLIENT_DENY_INTERNAL = [
   "src/services/open-router.ts",
 ];
 
-const CLIENT_DENY_EXTERNAL_PREFIXES = ["node:", "@effect/platform-node", "@effect/sql-pg", "@testcontainers/"];
+const CLIENT_DENY_EXTERNAL_PREFIXES = [
+  "node:",
+  "@effect/platform-node",
+  "@effect/sql-pg",
+  "@testcontainers/",
+  "@ai-sdk/",
+  "@effect/ai-openrouter",
+];
 
-const CLIENT_DENY_EXTERNAL_EXACT = ["next/server"];
+const CLIENT_DENY_EXTERNAL_EXACT = ["next/server", "ai", "zod"];
 
 // --- helpers -----------------------------------------------------------------
 
@@ -139,15 +157,23 @@ for (const [rel, src] of sources) {
   if (exactRe.test(src)) fail(`barrel import in ${rel}: import from "@/state" / "@/hooks" directly (use deep imports)`);
 }
 
-// --- (c) domain barrel ---------------------------------------------------------------
+// --- (c) barrel re-exports -------------------------------------------------------------
 
-const domainBarrel = sources.get(DOMAIN_BARREL);
-if (domainBarrel === undefined) {
-  fail(`${DOMAIN_BARREL} missing`);
-} else {
-  for (const forbidden of DOMAIN_BARREL_FORBIDDEN) {
-    if (domainBarrel.includes(forbidden)) {
-      fail(`${DOMAIN_BARREL} re-exports ${forbidden} (server-only: import from "@/domain/helpers" in server code)`);
+// Match real re-export statements (`export … from "SPEC"`), not comment text
+// that merely mentions a path. The closing quote makes each specifier exact,
+// so `./riddle` cannot match a re-export of `./riddle2`
+const exportFromRe = (specifier) =>
+  new RegExp(`export[^;]*?from\\s*["']${specifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`, "m");
+
+for (const { barrel, forbidden } of BARREL_FORBIDDEN_REEXPORTS) {
+  const src = sources.get(barrel);
+  if (src === undefined) {
+    fail(`${barrel} missing`);
+    continue;
+  }
+  for (const path of forbidden) {
+    if (exportFromRe(path).test(src)) {
+      fail(`${barrel} re-exports ${path} (server-only/heavy: import it directly from server code)`);
     }
   }
 }

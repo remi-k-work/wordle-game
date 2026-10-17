@@ -71,12 +71,13 @@ export const validatePageInputs = <A, S extends Schema.Constraint & { readonly T
 // `notFound()`/`unauthorized()` navigation helpers). Representing it as an
 // `Effect.gen` would only move the `await` into the caller
 export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageMain: Effect.Effect<A, E, ServerMainServices>) => {
-  // Explicitly defer to request time (Effect uses Date.now() internally)
-  await connection();
-
-  // Dynamic import breaks the static cycle helpers -> runtime-server. Keeping it
-  // lazy lets server modules (e.g. *-db) stay importable from both graphs
-  const { RuntimeServer } = await import("@/lib/runtime-server");
+  // Explicitly defer to request time (Effect uses Date.now() internally). The
+  // dynamic runtime-server import breaks the static cycle helpers ->
+  // runtime-server (keeping it lazy lets server modules, e.g. *-db, stay
+  // importable from both graphs) and runs in parallel with `connection()` —
+  // it only needs to resolve by the time `runPromise` is called, so don't
+  // serialize the two (async-parallel)
+  const [, { RuntimeServer }] = await Promise.all([connection(), import("@/lib/runtime-server")]);
 
   // We wrap in Effect.result to catch failures gracefully
   const pageMainResult = await RuntimeServer.runPromise(

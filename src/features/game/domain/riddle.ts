@@ -1,6 +1,8 @@
 // services, features, and other libraries
 import { Context, Effect } from "effect";
-import { AiSdkError, generateSingleField, makeFallbackPlan } from "@/domain";
+import { AiSdkError } from "@/domain/errors";
+import { generateSingleField } from "@/domain/generate-single-field";
+import { makeFallbackPlan } from "@/domain/fallback-plan";
 import { matchLanguage } from ".";
 
 // types

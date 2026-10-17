@@ -3,7 +3,8 @@ import "dotenv/config";
 // services, features, and other libraries
 import { Effect, Layer, Logger, Option } from "effect";
 import { NodeHttpClient, NodeRuntime, NodeServices } from "@effect/platform-node";
-import { generateSingleField2, OpenRouterClientLayer } from "@/domain";
+import { generateSingleField2 } from "@/domain/generate-single-field2";
+import { OpenRouterClientLayer } from "@/domain/fallback-plan2";
 
 // constants
 const RIDDLE_INSTRUCTIONS_EN = `

@@ -1,7 +1,7 @@
 // oxlint-disable effecttsgo/global-date
 
 // services, features, and other libraries
-import { Array, DateTime, HashMap, Option, pipe } from "effect";
+import { Array, DateTime, HashMap, HashSet, Option, pipe } from "effect";
 import { formatGuess, getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrongerColor } from ".";
 
 // types
@@ -52,4 +52,16 @@ export const computeKeypadState = (theSecretWord: TheSecretWord, wordleGuesses: 
     Array.reduce(HashMap.empty<string, Color>(), (acc: HashMap.HashMap<string, Color>, { tileKey, color }: { tileKey: string; color: Color }) =>
       HashMap.set(acc, tileKey, pickStrongerColor(Option.getOrNull(HashMap.get(acc, tileKey)) ?? undefined, color))
     )
+  );
+
+// Letters whose strongest color across all guesses is "grey" — the keypad keys
+// that are dead for the rest of the puzzle. The machine computes this once per
+// submission (see `submitGuess`) so the per-keypress guard stays a pure O(1)
+// set lookup instead of re-scanning the whole board on every keystroke
+export const computeGreyLetters = (theSecretWord: TheSecretWord, wordleGuesses: WordChallenge["wordleGuesses"]) =>
+  pipe(
+    computeKeypadState(theSecretWord, wordleGuesses),
+    HashMap.filter((color: Color) => color === "grey"),
+    HashMap.keys,
+    HashSet.fromIterable
   );

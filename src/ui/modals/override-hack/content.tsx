@@ -2,7 +2,12 @@
 import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
-import { overdriveHacksMachineAtom, overdriveHacksTheOverrideAtom, overdriveHacksTheOverrideAudioAtom } from "@/features/overdrive-hacks/state";
+import {
+  overdriveHacksIsApplyingOverrideAtom,
+  overdriveHacksIsIdleAtom,
+  overdriveHacksTheOverrideAtom,
+  overdriveHacksTheOverrideAudioAtom,
+} from "@/features/overdrive-hacks/state";
 
 // components
 import { T } from "gt-next";
@@ -13,12 +18,12 @@ import { SpeakButtonNatural, SpeakButtonRegular } from "@/ui/speak-button";
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
 export function Content() {
-  const overdriveHacksMachineSnapshot = useAtomValue(overdriveHacksMachineAtom);
   const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
   const theOverrideAudio = useAtomValue(overdriveHacksTheOverrideAudioAtom);
 
-  const isAwaiting = overdriveHacksMachineSnapshot.matches("idle");
-  const isLoading = overdriveHacksMachineSnapshot.matches("applyingOverrideHack");
+  // Derived boolean atoms: re-render only when the flags actually flip
+  const isAwaiting = useAtomValue(overdriveHacksIsIdleAtom);
+  const isLoading = useAtomValue(overdriveHacksIsApplyingOverrideAtom);
   const canSpeakRegular = Option.isSome(theOverride) && !isAwaiting && !isLoading;
   const canSpeakNatural = canSpeakRegular && Option.isSome(theOverrideAudio);
 
