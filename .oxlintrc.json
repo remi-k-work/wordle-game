@@ -43,6 +43,7 @@
     }
   },
   "rules": {
+    "effecttsgo/schema-class-missing-brand": "off",
     "effecttsgo/unstable-api-usage": "off",
     // --- Next.js core-web-vitals parity ---
     // Oxlint rule names drop the `@next/next` prefix.

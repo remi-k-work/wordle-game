@@ -74,5 +74,8 @@ export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData>("
   finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  createdAt: Schema.DateTimeUtcFromMillis,
+  // The pg client (v4 stable) decodes `timestamptz` columns as JS `Date`
+  // instances (it decoded epoch millis in the v4 beta), so the DB boundary
+  // schema must accept `Date` and turn it into a `DateTime.Utc`
+  createdAt: Schema.DateTimeUtcFromDate,
 }) {}
