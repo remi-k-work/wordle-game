@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, DateTime, Duration, Match, Option, pipe } from "effect";
+import { Array, DateTime, Duration, Match, Number, Option, pipe } from "effect";
 
 // types
 import type { Color, SolutionsLanguage, WordChallenge, WordScore } from "./models";
@@ -35,11 +35,13 @@ export const getElapsedSeconds = (startTime: WordChallenge["startTime"], endTime
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
 export const potentialScoreAsPercentage = (potentialScore: WordScore["wordScore"]) =>
-  Math.max(0, Math.min(100, Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100));
+  Number.clamp({ minimum: 0, maximum: 100 })(Math.sqrt(potentialScore / POTENTIAL_SCORE_RANGE.max) * 100);
 
 export const matchLanguage = <T>(language: SolutionsLanguage, en: T, pl: T): T =>
   Match.value(language).pipe(
     Match.when("En", () => en),
     Match.when("Pl", () => pl),
+    // `as T` is load-bearing: Match.exhaustive widens generic results to Unify<T>,
+    // which TypeScript cannot prove is assignable back to T
     Match.exhaustive
   ) as T;

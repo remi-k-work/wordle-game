@@ -9,6 +9,9 @@ import { dieOnDbFailure } from "@/domain/db-policy";
 // C1: single-pass conditional aggregation replaces two-CTE FULL OUTER JOIN.
 // FILTER computes personal/global in one JSONB scan. Row-equality validated
 // against e2e fixture. Words are stored uppercase in DB, so no UPPER() needed.
+//
+// NOTE: the `any` in `Schema.ConstraintCodec<any>` is load-bearing — see the
+// matching comment in make-histogram-distribution-query.ts.
 export const makeWordFrequencyQuery =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   <R extends Schema.ConstraintCodec<any>>(sql: SqlClient.SqlClient) =>

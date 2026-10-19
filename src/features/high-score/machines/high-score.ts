@@ -9,9 +9,10 @@ import { assign, setup, fromPromise, assertEvent } from "xstate";
 import { toastManager } from "@/ui/toastify";
 import { modalMachineAtom } from "@/state/modal";
 import { beatsTop10Tail } from "@/features/high-score/domain/helpers";
+import { AddHighScore } from "@/features/high-score/domain/models";
 
 // types
-import type { AddHighScore, HighScore, HighScoreMachineContext } from "@/features/high-score/domain/models";
+import type { HighScore, HighScoreMachineContext } from "@/features/high-score/domain/models";
 
 interface Top10HighScoresActorArgs {
   input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] };
@@ -40,7 +41,16 @@ const addHighScoreActor = fromPromise(({ input: { context }, signal }: AddHighSc
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const { addHighScore } = yield* RpcHighScoreClient;
-      return yield* addHighScore({ ...context, score: context.runScore, solutionsLang: context.solutionsLanguage } as const satisfies AddHighScore);
+      // Explicit field selection: the machine context carries non-wire fields
+      // (e.g. newHighScoreId) that must not ride into the request
+      return yield* addHighScore(
+        AddHighScore.make({
+          playerName: context.playerName,
+          score: context.runScore,
+          streak: context.streak,
+          solutionsLang: context.solutionsLanguage,
+        })
+      );
     }),
     { signal }
   )

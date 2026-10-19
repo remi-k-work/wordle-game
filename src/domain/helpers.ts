@@ -53,6 +53,11 @@ export const makeRpcHandler = <Rpcs extends Rpc.Any, LE>(
 // generation (avoiding rate limits and token usage) when the switch is off
 export const readAiSwitch = Config.Literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
 
+// Runs the AI-backed generation unless the AI switch is off, in which case the
+// cheap fallback is served instead (avoids rate limits and token usage)
+export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallback: Effect.Effect<A, E, R>) =>
+  Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
+
 // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
 export const validatePageInputs = <A, S extends Schema.Constraint & { readonly Type: A; readonly Encoded: PageInputsEncoded }>(
   schema: S,
@@ -95,8 +100,10 @@ export const runPageMainOrNavigate = async <A, E extends { _tag: string }>(pageM
     onFailure: (error): never =>
       pipe(
         Match.value(error._tag),
+        // ItemNotFoundError/UnauthorizedAccessError are semantic categories any
+        // page may raise; anything else re-throws for the error boundary
         Match.whenOr("InvalidPageInputsError", "ItemNotFoundError", () => notFound()),
-        Match.whenOr("UnauthorizedAccessError", "BetterAuthApiError", () => unauthorized()),
+        Match.when("UnauthorizedAccessError", () => unauthorized()),
         Match.orElse(() => {
           throw error;
         })

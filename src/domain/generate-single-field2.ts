@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Cause, Effect, Option, Schema } from "effect";
+import { Cause, Effect, Option, Predicate, Schema, String } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/ai";
 import { AiProviderError } from "./errors";
 import { makeFallbackPlan2 } from "./fallback-plan2";
@@ -12,6 +12,9 @@ interface GenerateSingleFieldOptions {
   readonly fieldName: string;
   readonly description: string;
 }
+
+// Surfaces a message from an unknown failure without assuming an Error shape
+const describeFailure = (cause: unknown): string => (Predicate.isObject(cause) && Predicate.isString(cause.message) ? cause.message : String.String(cause));
 
 // Raw single-field generation against whichever `LanguageModel` is in scope
 export const generateSingleField2 = Effect.fn("generateSingleField2")(
@@ -26,9 +29,8 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
     ]);
 
     return yield* languageModel.generateObject({ prompt, schema }).pipe(
-      Effect.map(({ value }) => value[fieldName]),
-      Effect.map(formatTextForTTS),
-      Effect.map((value) => Option.liftPredicate(value, (value) => value.length > 0)),
+      // Normalize for TTS and keep only non-empty output (an empty riddle is no riddle)
+      Effect.map(({ value }) => Option.liftPredicate(formatTextForTTS(value[fieldName]), String.isNonEmpty)),
       Effect.tapError((error) =>
         Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(Cause.fail(error))}`)
       )
@@ -37,6 +39,8 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
   Effect.withExecutionPlan(makeFallbackPlan2),
   Effect.mapError((error) => {
     if (AiError.isAiError(error)) return AiProviderError.fromAiError(error);
-    return new AiProviderError({ reason: new AiError.UnknownError({ description: String((error as Error)?.message ?? error) }) });
+    // The full fidelity of any non-AI failure was already logged above; surface
+    // its message (when present) in the normalized error
+    return new AiProviderError({ reason: new AiError.UnknownError({ description: describeFailure(error) }) });
   })
 );

@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { Config, Effect, ExecutionPlan, Layer, Schedule } from "effect";
+import { NodeHttpClient } from "@effect/platform-node";
 import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter";
 
 // Builds a single fallback step for the specified model
@@ -21,3 +22,7 @@ export const makeFallbackPlan2 = ExecutionPlan.make(
 export const OpenRouterClientLayer = Layer.unwrap(
   Config.Redacted("OPENROUTER_API_KEY").pipe(Effect.map((apiKey) => Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }))))
 );
+
+// The client layer above requires an HTTP transport; composing it here keeps
+// every consumer (AI-backed RPC handlers, proof scripts) on the same wiring
+export const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));

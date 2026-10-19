@@ -1,46 +1,26 @@
 import "server-only";
 
 // services, features, and other libraries
-import { Array, Effect, Layer, Option, Random } from "effect";
-import { NodeHttpClient } from "@effect/platform-node";
+import { Effect, Layer, Option } from "effect";
 import { RpcOverdriveHacks } from "./requests";
 import { generateOverride } from "@/features/overdrive-hacks/domain/override2";
-import { matchLanguage } from "@/features/game/domain/helpers";
-import { OpenRouter } from "@/services/open-router";
-import { OpenRouterClientLayer } from "@/domain/fallback-plan2";
-import { makeRpcHandler, readAiSwitch } from "@/domain/helpers";
-
-// constants
-import { VOICES_PL } from "@/domain/constants";
+import { OpenRouterClientWithHttp } from "@/domain/fallback-plan2";
+import { makeRpcHandler, withAiEnabled } from "@/domain/helpers";
+import { fetchSpeechAudio, OpenRouter } from "@/services/open-router";
 
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverride: ({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage }) =>
-    Effect.gen(function* () {
-      // Do not generate an override in the AI off mode to avoid rate limits and unnecessary token usage
-      const aiSwitch = yield* readAiSwitch;
-      if (aiSwitch === "off") return yield* Effect.succeedSome("No override available in the AI off mode.");
-      return yield* generateOverride(theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage);
-    }).pipe(
+    withAiEnabled(
+      generateOverride(theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage),
+      Effect.succeedSome("No override available in the AI off mode.")
+    ).pipe(
       Effect.tapError(Effect.logError),
       Effect.orElseSucceed(() => Option.none())
     ),
 
-  fetchOverrideAudio: ({ input, solutionsLanguage }) =>
-    Effect.gen(function* () {
-      const { generateSpeech } = yield* OpenRouter;
-      const randomIndex = yield* Random.nextIntBetween(0, VOICES_PL.length);
-      const voice = matchLanguage(solutionsLanguage, Option.none(), Array.get(VOICES_PL, randomIndex)).valueOrUndefined;
-
-      const { audioData } = yield* generateSpeech(voice === undefined ? { input } : { input, voice });
-
-      return yield* Effect.succeedSome(audioData);
-    }).pipe(
-      Effect.tapError(Effect.logError),
-      Effect.orElseSucceed(() => Option.none())
-    ),
+  fetchOverrideAudio: fetchSpeechAudio,
 });
 
-const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
 const RpcOverdriveHacksLayerWithOpenRouter = RpcOverdriveHacksLayer.pipe(Layer.provide(OpenRouterClientWithHttp), Layer.provide(OpenRouter.layer));
 
 export const handler = makeRpcHandler(RpcOverdriveHacks, "/api/rpc/overdrive-hacks", RpcOverdriveHacksLayerWithOpenRouter);

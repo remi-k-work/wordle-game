@@ -51,7 +51,7 @@ export const computeKeypadState = (theSecretWord: TheSecretWord, wordleGuesses: 
     wordleGuesses,
     Array.flatMap((guess) => formatGuess(theSecretWord, guess)),
     Array.reduce(HashMap.empty<string, Color>(), (acc: HashMap.HashMap<string, Color>, { tileKey, color }: { tileKey: string; color: Color }) =>
-      HashMap.set(acc, tileKey, pickStrongerColor(Option.getOrNull(HashMap.get(acc, tileKey)) ?? undefined, color))
+      HashMap.set(acc, tileKey, pickStrongerColor(Option.getOrUndefined(HashMap.get(acc, tileKey)), color))
     )
   );
 

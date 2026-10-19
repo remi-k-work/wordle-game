@@ -2,6 +2,9 @@
 import { Schema } from "effect";
 import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
+// constants
+import { MAX_TURNS } from "@/features/game/domain/constants";
+
 export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
   instanceId: Schema.Trim.check(Schema.isUUID()),
@@ -25,7 +28,7 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent>("AddRunWordEv
   runId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
   theSecretWord: TheSecretWord,
-  guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 }))),
+  guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS }))),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 

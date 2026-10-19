@@ -8,7 +8,7 @@ import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/fe
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { Color, Tile, WordleGrid } from "@/features/game/domain/models";
+import type { Color, Tile } from "@/features/game/domain/models";
 import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 
 // constants
@@ -50,7 +50,7 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
       const vowel = vowelByPosition.get(index);
       return vowel === undefined || tile.tileKey !== "" ? tile : ({ tileKey: vowel, color: "green" } as const satisfies Tile);
     })
-  ) as WordleGrid;
+  );
 });
 
 // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)

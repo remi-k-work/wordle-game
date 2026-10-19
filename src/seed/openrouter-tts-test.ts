@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Cause, Effect, FileSystem, Layer, Logger } from "effect";
+import { Array, Cause, Effect, FileSystem, Layer, Logger } from "effect";
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { OpenRouter } from "@/services/open-router";
 import { OpenRouterError } from "@/domain/errors";
@@ -28,18 +28,10 @@ const main = Effect.gen(function* () {
   const { generateSpeech } = yield* OpenRouter;
   const fs = yield* FileSystem.FileSystem;
 
+  // EN default voice + every PL voice, one case each
   const cases: Array<{ name: string; input: string; voice?: string }> = [
     { name: "en-random", input: EN_TEXT },
-    { name: "pl-voice-0", input: PL_TEXT, voice: VOICES_PL[0] },
-    { name: "pl-voice-1", input: PL_TEXT, voice: VOICES_PL[1] },
-    { name: "pl-voice-2", input: PL_TEXT, voice: VOICES_PL[2] },
-    { name: "pl-voice-3", input: PL_TEXT, voice: VOICES_PL[3] },
-    { name: "pl-voice-4", input: PL_TEXT, voice: VOICES_PL[4] },
-    { name: "pl-voice-5", input: PL_TEXT, voice: VOICES_PL[5] },
-    { name: "pl-voice-6", input: PL_TEXT, voice: VOICES_PL[6] },
-    { name: "pl-voice-7", input: PL_TEXT, voice: VOICES_PL[7] },
-    { name: "pl-voice-8", input: PL_TEXT, voice: VOICES_PL[8] },
-    { name: "pl-voice-9", input: PL_TEXT, voice: VOICES_PL[9] },
+    ...Array.map(VOICES_PL, (voice, index) => ({ name: `pl-voice-${index}`, input: PL_TEXT, voice })),
   ];
 
   for (const { name, input, voice } of cases) {

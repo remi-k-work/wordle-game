@@ -8,84 +8,25 @@ import { ChartsDB } from "@/features/telemetry/services/charts-db/charts-db";
 import { PgLive } from "@/lib/pg-live";
 import { makeRpcHandler } from "@/domain/helpers";
 
+// Every handler is a pass-through to the same DB service method, so the
+// service lookups are hoisted once and the handlers delegate point-free
+const telemetryDB = Effect.service(TelemetryDB);
+const chartsDB = Effect.service(ChartsDB);
+
 const RpcTelemetryLayer = RpcTelemetry.toLayer({
-  addGlobalPulse: (payload) =>
-    Effect.gen(function* () {
-      const telemetryDB = yield* TelemetryDB;
-      yield* telemetryDB.addGlobalPulse(payload);
-    }),
-
-  addArcadeRunSummary: (payload) =>
-    Effect.gen(function* () {
-      const telemetryDB = yield* TelemetryDB;
-      yield* telemetryDB.addArcadeRunSummary(payload);
-    }),
-
-  addRunWordEvent: (payload) =>
-    Effect.gen(function* () {
-      const telemetryDB = yield* TelemetryDB;
-      yield* telemetryDB.addRunWordEvent(payload);
-    }),
-
-  getGuessDistribution: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getGuessDistribution(payload);
-    }),
-
-  getTimeToSolveDistribution: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getTimeToSolveDistribution(payload);
-    }),
-
-  getArcadeStreakDistribution: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getArcadeStreakDistribution(payload);
-    }),
-
-  getOpeningGuessesFrequency: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getOpeningGuessesFrequency(payload);
-    }),
-
-  getFailedWordsFrequency: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getFailedWordsFrequency(payload);
-    }),
-
-  getRunDeathReasonFrequency: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getRunDeathReasonFrequency(payload);
-    }),
-
-  getAnyCounter: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getAnyCounter(payload);
-    }),
-
-  getAnyAvgStat: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getAnyAvgStat(payload);
-    }),
-
-  getHardestWordsLeaderboard: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getHardestWordsLeaderboard(payload);
-    }),
-
-  getBestRunTrophyCard: (payload) =>
-    Effect.gen(function* () {
-      const chartsDB = yield* ChartsDB;
-      return yield* chartsDB.getBestRunTrophyCard(payload);
-    }),
+  addGlobalPulse: (payload) => Effect.flatMap(telemetryDB, (db) => db.addGlobalPulse(payload)),
+  addArcadeRunSummary: (payload) => Effect.flatMap(telemetryDB, (db) => db.addArcadeRunSummary(payload)),
+  addRunWordEvent: (payload) => Effect.flatMap(telemetryDB, (db) => db.addRunWordEvent(payload)),
+  getGuessDistribution: (payload) => Effect.flatMap(chartsDB, (db) => db.getGuessDistribution(payload)),
+  getTimeToSolveDistribution: (payload) => Effect.flatMap(chartsDB, (db) => db.getTimeToSolveDistribution(payload)),
+  getArcadeStreakDistribution: (payload) => Effect.flatMap(chartsDB, (db) => db.getArcadeStreakDistribution(payload)),
+  getOpeningGuessesFrequency: (payload) => Effect.flatMap(chartsDB, (db) => db.getOpeningGuessesFrequency(payload)),
+  getFailedWordsFrequency: (payload) => Effect.flatMap(chartsDB, (db) => db.getFailedWordsFrequency(payload)),
+  getRunDeathReasonFrequency: (payload) => Effect.flatMap(chartsDB, (db) => db.getRunDeathReasonFrequency(payload)),
+  getAnyCounter: (payload) => Effect.flatMap(chartsDB, (db) => db.getAnyCounter(payload)),
+  getAnyAvgStat: (payload) => Effect.flatMap(chartsDB, (db) => db.getAnyAvgStat(payload)),
+  getHardestWordsLeaderboard: (payload) => Effect.flatMap(chartsDB, (db) => db.getHardestWordsLeaderboard(payload)),
+  getBestRunTrophyCard: (payload) => Effect.flatMap(chartsDB, (db) => db.getBestRunTrophyCard(payload)),
 }).pipe(Layer.provide(Layer.mergeAll(TelemetryDB.layer, ChartsDB.layer).pipe(Layer.provide(PgLive))));
 
 export const handler = makeRpcHandler(RpcTelemetry, "/api/rpc/telemetry", RpcTelemetryLayer);

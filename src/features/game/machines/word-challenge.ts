@@ -1,7 +1,7 @@
 // oxlint-disable effecttsgo/global-date typescript/no-misused-spread
 
 // services, features, and other libraries
-import { Array, DateTime, HashSet, Match, Option, String, Effect } from "effect";
+import { Array, DateTime, HashSet, Option, String, Effect } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -80,13 +80,8 @@ export const wordChallengeMachine = setup({
       const normalizedKey = event.pressedKey.toUpperCase();
       return {
         ...context,
-        currentGuessWord: Match.value(context.currentGuessWord).pipe(
-          Match.when(
-            (w) => String.length(w) < WORD_LENGTH,
-            (w) => w + normalizedKey
-          ),
-          Match.orElse((w) => w)
-        ),
+        // Letters can no longer be appended once the word has reached full length
+        currentGuessWord: String.length(context.currentGuessWord) < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
 
         // Lazily assign startTime on the very first letter typed
         // NOTE: `assign` is synchronous — `DateTime.now` (an Effect) is unavailable here.

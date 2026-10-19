@@ -1,7 +1,7 @@
 // oxlint-disable effecttsgo/global-date
 
 // services, features, and other libraries
-import { Array, DateTime, HashMap, Option, pipe } from "effect";
+import { Array, DateTime, HashMap, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
 import { calculatePotentialScore, computeKeypadState } from "@/features/game/domain/game-logic";
@@ -9,7 +9,7 @@ import { formatGuess } from "@/features/game/domain/formatters";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { Color } from "@/features/game/domain/models";
+import type { Color, Tile } from "@/features/game/domain/models";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
@@ -37,19 +37,19 @@ export const wordChallengePotentialScoreAtom = Atom.make((get) =>
   calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
 );
 
+// An empty row of unplayed tiles, e.g. for the rows below the current guess
+const emptyRow = (): Tile[] => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color }));
+
 // Derive the full 6x5 grid state for rendering based on completed guesses
 export const wordChallengeWordleGridAtom = Atom.make((get) =>
   Option.match(get(wordChallengeTheSecretWordAtom), {
-    onNone: () => Array.makeBy(MAX_TURNS, () => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color }))),
+    onNone: () => Array.makeBy(MAX_TURNS, emptyRow),
     onSome: (theSecretWord) =>
       Array.makeBy(MAX_TURNS, (rowIndex) =>
-        pipe(
-          Array.get(get(wordChallengeWordleGuessesAtom), rowIndex),
-          Option.match({
-            onNone: () => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color })),
-            onSome: (guess) => formatGuess(theSecretWord, guess),
-          })
-        )
+        Option.match(Array.get(get(wordChallengeWordleGuessesAtom), rowIndex), {
+          onNone: emptyRow,
+          onSome: (guess) => formatGuess(theSecretWord, guess),
+        })
       ),
   })
 );

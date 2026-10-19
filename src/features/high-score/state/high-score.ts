@@ -16,7 +16,6 @@ export const highScoreMachineAtom = createMachineAtom(highScoreMachine);
 export const highScorePlayerNameAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.playerName));
 export const highScoreRunScoreAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.runScore));
 export const highScoreStreakAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.streak));
-export const highScoreSolutionsLanguageAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.solutionsLanguage));
 export const highScoreNewHighScoreIdAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.newHighScoreId));
 
 // Derived boolean: subscribe to this instead of the full snapshot when only

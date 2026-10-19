@@ -47,18 +47,10 @@ export const calculateSonarTarget = (
 
     // Shuffle then pick exactly one vowel at random from equally-valid candidates
     const shuffled = yield* Random.shuffle(candidates);
-    const vowelOpt = Array.head(shuffled);
 
-    return Option.match(vowelOpt, {
-      onNone: () => Option.none(),
-      onSome: (vowel) =>
-        Option.some({
-          vowel,
-          // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
-          positions: pipe(
-            Array.makeBy(theSecretWord.length, (index) => (theSecretWord[index] === vowel ? index : -1)),
-            Array.filter((index) => index >= 0)
-          ),
-        }),
-    });
+    return Option.map(Array.head(shuffled), (vowel) => ({
+      vowel,
+      // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
+      positions: Array.getSomes(Array.makeBy(theSecretWord.length, (index) => (theSecretWord[index] === vowel ? Option.some(index) : Option.none()))),
+    }));
   });

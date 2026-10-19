@@ -38,7 +38,7 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
     Option.getOrElse(() => 0)
   );
 
-  return Array.mapAccum(rows, { personal: 0, global: 0 }, (prev, row) => {
+  const [, distribution] = Array.mapAccum(rows, { personal: 0, global: 0 }, (prev, row) => {
     const discretePersonal = row.personal - prev.personal;
     const discreteGlobal = row.global - prev.global;
 
@@ -46,5 +46,7 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
     const globalPct = totalGlobal > 0 ? Math.round((discreteGlobal / totalGlobal) * 100) : 0;
 
     return [{ personal: row.personal, global: row.global }, mapResult(row, discretePersonal, discreteGlobal, personalPct, globalPct)];
-  })[1];
+  });
+
+  return distribution;
 };

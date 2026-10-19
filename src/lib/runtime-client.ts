@@ -11,6 +11,9 @@ import { HubTracerLayer } from "@/features/telemetry/services/hub-tracer";
 import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 
+// One memo map shared by every runtime below (and by the atom runtime
+// factory): layers are built once and reused across runtimes instead of being
+// re-created per ManagedRuntime instance
 const sharedMemoMap = Layer.makeMemoMapUnsafe();
 const runtimeFactory = Atom.context({ memoMap: sharedMemoMap });
 

@@ -1,8 +1,15 @@
 // services, features, and other libraries
-import { Config, Context, Effect, flow, Layer, Schedule, Schema } from "effect";
+import { Array, Config, Context, Effect, Layer, Option, Random, Schedule, Schema, flow } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/http";
 import { SpeechRequest } from "@/domain/models";
 import { OpenRouterError } from "@/domain/errors";
+import { matchLanguage } from "@/features/game/domain/helpers";
+
+// types
+import type { SolutionsLanguage } from "@/features/game/domain/models";
+
+// constants
+import { VOICES_PL } from "@/domain/constants";
 
 export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
   make: Effect.gen(function* () {
@@ -38,8 +45,8 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
         // Decode response body as ArrayBuffer using the getter on the response object
         const arrayBuffer = yield* response.arrayBuffer;
 
-        // Convert the ArrayBuffer to a Uint8Array
-        const audioData = Buffer.from(arrayBuffer);
+        // View the ArrayBuffer as a plain Uint8Array (the wire format of WordMeta's audio fields)
+        const audioData = new Uint8Array(arrayBuffer);
 
         // Read header (headers are normalized to lowercase in Effect)
         const generationId = response.headers["x-generation-id"];
@@ -54,3 +61,24 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
 }) {
   static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(FetchHttpClient.layer));
 }
+
+// Shared TTS-audio RPC handler for every speech-capable group: generates speech
+// for a text input, picking a random "Top Recommended" Polish voice for the Pl
+// mode and OpenRouter's default voice for En. Audio is a non-critical
+// enrichment, so failures are logged and degrade to Option.none() instead of
+// failing the request
+export const fetchSpeechAudio = Effect.fnUntraced(
+  function* ({ input, solutionsLanguage }: { input: string; solutionsLanguage: SolutionsLanguage }) {
+    const { generateSpeech } = yield* OpenRouter;
+
+    // nextIntBetween's upper bound is inclusive, so the last valid index is length - 1
+    const randomIndex = yield* Random.nextIntBetween(0, VOICES_PL.length - 1);
+    const voice = matchLanguage(solutionsLanguage, Option.none(), Array.get(VOICES_PL, randomIndex)).valueOrUndefined;
+
+    const { audioData } = yield* generateSpeech(voice === undefined ? { input } : { input, voice });
+
+    return Option.some(audioData);
+  },
+  Effect.tapError(Effect.logError),
+  Effect.orElseSucceed(() => Option.none())
+);

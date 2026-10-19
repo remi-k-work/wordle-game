@@ -8,7 +8,7 @@ import type { TheSecretWord, Tile, WordChallenge } from "./models";
 // constants
 import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, SPEED_MULTIPLIER_RULES } from "./constants";
 
-// Maps a speed multiplier to a stable category identifier for UI presentation.
+// Maps a speed multiplier to a stable category identifier for UI presentation
 export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
 
 // Format the current guess word into an array of letter objects with color coding
@@ -22,24 +22,30 @@ export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChall
   );
 
   // Map characters directly to their correct colors, threading the pool through each step
-  return Array.mapAccum(guessChars, pool, (pool, char, i): [HashMap.HashMap<string, number>, Tile] => {
+  const [, tiles] = Array.mapAccum(guessChars, pool, (pool, char, i): [HashMap.HashMap<string, number>, Tile] => {
     if (char === secretChars[i]) return [pool, { tileKey: char, color: "green" }];
     const count = Option.getOrElse(HashMap.get(pool, char), () => 0);
     if (count > 0) return [HashMap.set(pool, char, count - 1), { tileKey: char, color: "yellow" }];
     return [pool, { tileKey: char, color: "grey" }];
-  })[1];
+  });
+
+  return tiles;
 };
 
 export const speedMultiplierToCategoryMessage = (speedMultiplier: number) =>
   Option.match(Option.fromNullishOr(speedMultiplierToCategory(speedMultiplier)), {
     onNone: () => msg("Unknown"),
-    onSome: (category) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[category as keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP],
+    onSome: (category) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[category],
   });
 
 export const speedMultiplierToCategoryEmoji = (speedMultiplier: number) =>
-  Option.match(Option.fromNullishOr(SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier]), {
+  Option.match(Option.fromNullishOr(speedMultiplierToCategory(speedMultiplier)), {
     onNone: () => "?",
-    onSome: (category) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[category as keyof typeof SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP],
+    onSome: (category) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[category],
   });
 
-export const maxSecondsToSpeedMultiplier = (maxSeconds: number | null) => SPEED_MULTIPLIER_RULES.find((rule) => rule.maxSeconds === maxSeconds)?.multiplier;
+export const maxSecondsToSpeedMultiplier = (maxSeconds: number | null) =>
+  Option.map(
+    Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.maxSeconds === maxSeconds),
+    (rule) => rule.multiplier
+  );

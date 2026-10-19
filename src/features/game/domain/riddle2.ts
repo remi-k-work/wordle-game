@@ -40,15 +40,18 @@ Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój r
 `;
 const RIDDLE_PROMPT_EN = "Craft the riddle now.";
 const RIDDLE_PROMPT_PL = "Stwórz zagadkę teraz.";
+const DESCRIPTION_EN = "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.";
+const DESCRIPTION_PL = "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.";
+
+// Builds the language-specific generation options for a riddle. Exported so the
+// OpenRouter proof script (src/seed/openrouter-plan-proof.ts) exercises the
+// exact same prompts as production (single source of truth)
+export const riddleGenerationOptions = (theSecretWord: string, solutionsLanguage: SolutionsLanguage) => ({
+  instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
+  prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
+  fieldName: "riddle",
+  description: matchLanguage(solutionsLanguage, DESCRIPTION_EN, DESCRIPTION_PL),
+});
 
 export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
-  generateSingleField2({
-    instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
-    prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
-    fieldName: "riddle",
-    description: matchLanguage(
-      solutionsLanguage,
-      "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.",
-      "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów."
-    ),
-  });
+  generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage));

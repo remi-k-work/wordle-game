@@ -1,5 +1,4 @@
 // services, features, and other libraries
-import { Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { createActor } from "xstate";
 import { inspect } from "@/machines/inspect";
@@ -29,10 +28,8 @@ export const createMachineAtom = <M extends AnyStateMachine>(
     // The generic machine type makes createActor's conditional `input` requirement undecidable;
     // the concrete call site still enforces this via the returned atom's typed surface
     const actorOptions = {
-      ...Option.match(Option.fromNullishOr(options.input), {
-        onNone: () => ({}) as Record<string, never>,
-        onSome: (input) => ({ input: input(get) }),
-      }),
+      // Resolve the input lazily here (inside the read function), so it may read from peer atoms
+      ...(options.input === undefined ? {} : { input: options.input(get) }),
       inspect,
     } as ActorOptions<M>;
 

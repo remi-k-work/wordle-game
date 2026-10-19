@@ -2,6 +2,9 @@
 import { Schema } from "effect";
 import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
+// constants
+import { MAX_TURNS } from "@/features/game/domain/constants";
+
 export class AnyChartArgs extends Schema.Class<AnyChartArgs>("AnyChartArgs")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
@@ -27,7 +30,7 @@ export class AnyAvgStatData extends AnyCounterData.extend<AnyAvgStatData>("AnyAv
 const Pct = Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))));
 
 export class GuessDistributionData extends AnyCounterData.extend<GuessDistributionData>("GuessDistributionData")({
-  turn: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: 6 })))),
+  turn: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS })))),
   personalPct: Pct,
   globalPct: Pct,
 }) {}
@@ -59,9 +62,9 @@ export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathR
 export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData>("HardestWordsLeaderboardData")({
   word: TheSecretWord,
   personalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  personalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
+  personalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS }))),
   globalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  globalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 6 }))),
+  globalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS }))),
 }) {}
 
 export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCardArgs>("BestRunTrophyCardArgs")({

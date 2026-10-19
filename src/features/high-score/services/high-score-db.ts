@@ -4,7 +4,6 @@ import { SqlClient, SqlSchema } from "effect/sql";
 import { HighScore, AddHighScore } from "@/features/high-score/domain/models";
 import { beatsTop10Tail } from "@/features/high-score/domain/helpers";
 import { SolutionsLanguage } from "@/features/game/domain/models";
-import { PgLive } from "@/lib/pg-live";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
@@ -44,5 +43,8 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
     } as const;
   }),
 }) {
-  static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(PgLive));
+  // Like TelemetryDB/ChartsDB, the service only requires SqlClient.SqlClient —
+  // the production driver (PgLive) is provided at composition time, keeping the
+  // service injectable with a test container
+  static readonly layer = Layer.effect(this, this.make);
 }

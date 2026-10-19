@@ -9,6 +9,13 @@ import { dieOnDbFailure } from "@/domain/db-policy";
 // differ per call-site. A2/A3: sentinel -1 pattern + GROUP BY join_boundary
 // preserves trailing cumulative total row (NULLIF back to NULL).
 // C1: single-pass conditional aggregation replaces two-CTE FULL OUTER JOIN.
+//
+// NOTE: the `any` in `Schema.ConstraintCodec<any>` is load-bearing. TS resolves
+// a generic schema parameter to its constraint (`Schema.Constraint`, whose
+// `Type`/`DecodingServices` are `unknown`) whenever the row type passes through
+// any generic inference hop (dieOnDbFailure, .pipe) — collapsing the decoded
+// rows to `unknown[]` and breaking every consumer. `any` is the only bound that
+// threads through; the runtime decode inside SqlSchema.findAll stays strict.
 export const makeHistogramDistributionQuery =
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   <R extends Schema.ConstraintCodec<any>>(sql: SqlClient.SqlClient) =>
