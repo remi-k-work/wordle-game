@@ -135,7 +135,7 @@ export const wordChallengeMachine = setup({
     onWordWon: ({ context }) =>
       runClientCommand(
         Effect.gen(function* () {
-          const wordScore = Option.getOrThrow(context.wordScore);
+          const wordScore = yield* Effect.fromOption(context.wordScore);
           yield* Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore });
         })
       ),

@@ -21,38 +21,37 @@ interface WordlistSyncOptions {
 // Shared program behind the four wordlist seed scripts (solutions/dictionary × En/Pl):
 // read the raw word lists, keep the 5-letter words uppercased and deduped, and
 // persist them as pretty-printed JSON
-export const makeWordlistSync = ({ inputs, output, doneMessage }: WordlistSyncOptions) =>
-  Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
+export const makeWordlistSync = Effect.fn("makeWordlistSync")(function* ({ inputs, output, doneMessage }: WordlistSyncOptions) {
+  const fs = yield* FileSystem.FileSystem;
 
-    yield* Effect.log("Reading the raw dictionary...");
+  yield* Effect.log("Reading the raw dictionary...");
 
-    // Read the entire dictionaries into memory
-    const rawTexts = yield* Effect.forEach(inputs, (input) => fs.readFileString(input, "utf8"));
+  // Read the entire dictionaries into memory
+  const rawTexts = yield* Effect.forEach(inputs, (input) => fs.readFileString(input, "utf8"));
 
-    yield* Effect.log("Processing and filtering words...");
+  yield* Effect.log("Processing and filtering words...");
 
-    // Parse, filter, and uppercase the words
-    const validWords = rawTexts.flatMap((rawText) =>
-      rawText
-        .split("\n")
-        .map((word) => word.trim().toUpperCase())
-        .filter((word) => word.length === 5)
-    );
+  // Parse, filter, and uppercase the words
+  const validWords = rawTexts.flatMap((rawText) =>
+    rawText
+      .split("\n")
+      .map((word) => word.trim().toUpperCase())
+      .filter((word) => word.length === 5)
+  );
 
-    // Deduplicate (just in case the raw file has duplicates)
-    const uniqueWords = Array.dedupe(validWords);
+  // Deduplicate (just in case the raw file has duplicates)
+  const uniqueWords = Array.dedupe(validWords);
 
-    yield* Effect.log(`Found ${uniqueWords.length} valid 5-letter words. Saving...`);
+  yield* Effect.log(`Found ${uniqueWords.length} valid 5-letter words. Saving...`);
 
-    // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
-    const wordlistJson = yield* Schema.encodeEffect(WordlistFromJson)(uniqueWords).pipe(
-      Effect.mapError((cause) => new WordlistJsonEncodeError({ file: output, cause })),
-      Effect.orDie
-    );
+  // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
+  const wordlistJson = yield* Schema.encodeEffect(WordlistFromJson)(uniqueWords).pipe(
+    Effect.mapError((cause) => new WordlistJsonEncodeError({ file: output, cause })),
+    Effect.orDie
+  );
 
-    // Write to the new JSON file
-    yield* fs.writeFileString(output, wordlistJson);
+  // Write to the new JSON file
+  yield* fs.writeFileString(output, wordlistJson);
 
-    yield* Effect.log(doneMessage);
-  });
+  yield* Effect.log(doneMessage);
+});

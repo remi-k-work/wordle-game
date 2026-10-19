@@ -38,14 +38,13 @@ export const computeEmpCandidates = (
 };
 
 // EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation
-export const calculateEmpTargets = (
+export const calculateEmpTargets = Effect.fnUntraced(function* (
   theSecretWord: TheSecretWord,
   wordleGuesses: ReadonlyArray<TheSecretWord>,
   keypad: Keypad,
   empNukedLetters: ReadonlyArray<string>
-) =>
-  Effect.gen(function* () {
-    const candidates = computeEmpCandidates(theSecretWord, wordleGuesses, keypad, empNukedLetters);
-    if (candidates.length < EMP_LETTER_COUNT) return Option.none();
-    return Option.some(Array.take(EMP_LETTER_COUNT)(yield* Random.shuffle(candidates)));
-  });
+) {
+  const candidates = computeEmpCandidates(theSecretWord, wordleGuesses, keypad, empNukedLetters);
+  if (candidates.length < EMP_LETTER_COUNT) return Option.none();
+  return Option.some(Array.take(EMP_LETTER_COUNT)(yield* Random.shuffle(candidates)));
+});

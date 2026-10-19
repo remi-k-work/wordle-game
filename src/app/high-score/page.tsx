@@ -49,15 +49,14 @@ export const metadata: Metadata = {
   title: "Wordle Overdrive ► High Score",
 };
 
-const main = ({ params, searchParams }: PageProps<"/high-score">) =>
-  Effect.gen(function* () {
-    // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
-    const {
-      searchParams: { sl },
-    } = yield* validatePageInputs(HighScorePage, { params, searchParams });
+const main = Effect.fnUntraced(function* ({ params, searchParams }: PageProps<"/high-score">) {
+  // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
+  const {
+    searchParams: { sl },
+  } = yield* validatePageInputs(HighScorePage, { params, searchParams });
 
-    return { sl } as const;
-  });
+  return { sl } as const;
+});
 
 // Page remains the fast, static shell
 export default function Page({ params, searchParams }: PageProps<"/high-score">) {

@@ -44,9 +44,9 @@ const applyEmpHackActor = fromPromise(({ input: { empNukedLetters }, signal }: A
       const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("emp"));
       if (!canApplyHack) return Option.none();
 
-      const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
+      const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
       const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-      const keypad = Option.getOrThrow(yield* Atom.get(gameDataKeypadAtom));
+      const keypad = yield* Effect.fromOption(yield* Atom.get(gameDataKeypadAtom));
 
       const empTargets = yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
 
@@ -66,7 +66,7 @@ const applySonarHackActor = fromPromise(({ input: { sonarReveals }, signal }: Ap
       const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("sonar"));
       if (!canApplyHack) return Option.none();
 
-      const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
+      const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
       const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
       const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
@@ -93,7 +93,7 @@ const applyOverrideHackActor = fromPromise(({ signal }: { signal: AbortSignal })
       const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("override"));
       if (!canApplyHack) return Option.none();
 
-      const theSecretWord = Option.getOrThrow(yield* Atom.get(wordChallengeTheSecretWordAtom));
+      const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
       const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
       const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
       const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);

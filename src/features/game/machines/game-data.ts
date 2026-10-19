@@ -49,7 +49,7 @@ const selectSecretWordActor = fromPromise(({ input: { solutions }, signal }: Sel
   RuntimeClient.runPromise(
     Effect.gen(function* () {
       const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
-      return Option.getOrThrow(Array.get(solutions, randomIndex)).toUpperCase();
+      return (yield* Effect.fromOption(Array.get(solutions, randomIndex))).toUpperCase();
     }),
     { signal }
   )

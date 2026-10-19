@@ -35,22 +35,21 @@ export const computeSonarCandidates = (
   );
 };
 
-export const calculateSonarTarget = (
+export const calculateSonarTarget = Effect.fnUntraced(function* (
   theSecretWord: TheSecretWord,
   wordleGuesses: ReadonlyArray<TheSecretWord>,
   vowels: ReadonlyArray<SonarReveal["vowel"]>,
   alreadyRevealedVowels: ReadonlyArray<SonarReveal["vowel"]>
-) =>
-  Effect.gen(function* () {
-    const candidates = computeSonarCandidates(theSecretWord, wordleGuesses, vowels, alreadyRevealedVowels);
-    if (candidates.length === 0) return Option.none();
+) {
+  const candidates = computeSonarCandidates(theSecretWord, wordleGuesses, vowels, alreadyRevealedVowels);
+  if (candidates.length === 0) return Option.none();
 
-    // Shuffle then pick exactly one vowel at random from equally-valid candidates
-    const shuffled = yield* Random.shuffle(candidates);
+  // Shuffle then pick exactly one vowel at random from equally-valid candidates
+  const shuffled = yield* Random.shuffle(candidates);
 
-    return Option.map(Array.head(shuffled), (vowel) => ({
-      vowel,
-      // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
-      positions: Array.getSomes(Array.makeBy(theSecretWord.length, (index) => (theSecretWord[index] === vowel ? Option.some(index) : Option.none()))),
-    }));
-  });
+  return Option.map(Array.head(shuffled), (vowel) => ({
+    vowel,
+    // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
+    positions: Array.getSomes(Array.makeBy(theSecretWord.length, (index) => (theSecretWord[index] === vowel ? Option.some(index) : Option.none()))),
+  }));
+});

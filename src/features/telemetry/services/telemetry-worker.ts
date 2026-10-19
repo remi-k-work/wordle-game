@@ -40,76 +40,64 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const instanceId = yield* crypto.randomUUIDv4();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
-    const processSpanBatch = (spanBatch: ReadonlyArray<Tracer.Span>) =>
-      Effect.gen(function* () {
-        if (spanBatch.length === 0) return;
-        yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
+    const processSpanBatch = Effect.fnUntraced(function* (spanBatch: ReadonlyArray<Tracer.Span>) {
+      if (spanBatch.length === 0) return;
+      yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
 
-        // The span inserts are independent of each other, so don't serialize
-        // them: run the whole batch concurrently instead of paying up to 50
-        // sequential RPC round-trips (async-parallel)
-        yield* Effect.forEach(
-          spanBatch,
-          ({ name, attributes }) =>
-            // Convert the attributes map to a plain object for schema decoding and validation
-            processSpan(name, Object.fromEntries(attributes)).pipe(
-              // Telemetry is non-critical: a malformed event or a failed insert
-              // is logged and dropped instead of killing the background stream
-              // for the rest of the session
-              Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Dropping span event:", cause))
-            ),
-          { concurrency: "unbounded" }
-        );
-      });
+      // The span inserts are independent of each other, so don't serialize
+      // them: run the whole batch concurrently instead of paying up to 50
+      // sequential RPC round-trips (async-parallel)
+      yield* Effect.forEach(
+        spanBatch,
+        ({ name, attributes }) =>
+          // Convert the attributes map to a plain object for schema decoding and validation
+          processSpan(name, Object.fromEntries(attributes)).pipe(
+            // Telemetry is non-critical: a malformed event or a failed insert
+            // is logged and dropped instead of killing the background stream
+            // for the rest of the session
+            Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Dropping span event:", cause))
+          ),
+        { concurrency: "unbounded" }
+      );
+    });
 
     // Decodes a span's attributes and forwards the event through the matching RPC
     const processSpan = (name: string, attributesObject: Record<string, unknown>) =>
       pipe(
         Match.value(name),
-        Match.when("logWordWon", () =>
-          Effect.gen(function* () {
-            const data = yield* Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject);
-            yield* addRunWordEvent(data);
-          }).pipe(Effect.asVoid)
-        ),
-        Match.when("logRunCompleted", () =>
-          Effect.gen(function* () {
-            const data = yield* Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject);
-            yield* addArcadeRunSummary(data);
-          }).pipe(Effect.asVoid)
-        ),
+        Match.when("logWordWon", () => Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
+        Match.when("logRunCompleted", () => Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary))),
         Match.orElse(() => Effect.void)
       );
 
-    const processMetrics = (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) =>
-      Effect.gen(function* () {
-        if (snapshots.length === 0) return;
-        yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
+    const processMetrics = Effect.fnUntraced(function* (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) {
+      if (snapshots.length === 0) return;
+      yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
-        // A snapshot that fails to decode is logged and skipped (Option.none)
-        // so one malformed metric cannot kill the processor stream
-        const globalPulseRecords = Array.getSomes(
-          yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state }) =>
-            Effect.gen(function* () {
-              return yield* Schema.decodeUnknownEffect(AddGlobalPulse)({
-                sessionId: attributes?.["sessionId"],
-                instanceId,
-                solutionsLanguage: attributes?.["solutionsLanguage"],
-                metricName,
-                // We need to stringify the metric payload in order for equals to work (for stream deduping)
-                metricPayload: yield* Schema.encodeEffect(MetricPayloadFormJson)(normalizeMetricPayload(state)),
-              }).pipe(Effect.tapError(Effect.logError), Effect.option);
-            })
-          )
+      // A snapshot that fails to decode is logged and skipped (Option.none)
+      // so one malformed metric cannot kill the processor stream
+      const globalPulseRecords = Array.getSomes(
+        yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state }) =>
+          Effect.gen(function* () {
+            return yield* Schema.decodeUnknownEffect(AddGlobalPulse)({
+              sessionId: attributes?.["sessionId"],
+              instanceId,
+              solutionsLanguage: attributes?.["solutionsLanguage"],
+              metricName,
+              // We need to stringify the metric payload in order for equals to work (for stream deduping)
+              metricPayload: yield* Schema.encodeEffect(MetricPayloadFormJson)(normalizeMetricPayload(state)),
+            }).pipe(Effect.tapError(Effect.logError), Effect.option);
+          })
+        )
+      );
+
+      if (globalPulseRecords.length > 0) {
+        yield* addGlobalPulse([...globalPulseRecords]).pipe(
+          // Same non-critical policy: log the failure and let the next pulse retry
+          Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Failed to insert global pulses:", cause))
         );
-
-        if (globalPulseRecords.length > 0) {
-          yield* addGlobalPulse([...globalPulseRecords]).pipe(
-            // Same non-critical policy: log the failure and let the next pulse retry
-            Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Failed to insert global pulses:", cause))
-          );
-        }
-      });
+      }
+    });
 
     // --- Stream 1: Spans ---
     const spanProcessor = Stream.fromPubSub(spanPubSub).pipe(Stream.groupedWithin(50, Duration.seconds(5)), Stream.runForEach(processSpanBatch));

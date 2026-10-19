@@ -18,11 +18,11 @@ const sharedAttributes = Effect.gen(function* () {
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSession, wordChallenge: WordChallenge) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrThrow(runSession.runId);
+  const runId = yield* Effect.fromOption(runSession.runId);
   const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-  const theSecretWord = Option.getOrThrow(wordChallenge.theSecretWord);
+  const theSecretWord = yield* Effect.fromOption(wordChallenge.theSecretWord);
   const currentTurn = wordChallenge.currentTurn;
-  const wordScore = Option.getOrThrow(wordChallenge.wordScore);
+  const wordScore = yield* Effect.fromOption(wordChallenge.wordScore);
   const guessedTurn = currentTurn - 1;
 
   // Enrich the span itself with searchable attributes (stream 1 -> run_word_event)
@@ -32,9 +32,9 @@ export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSess
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
 export const logRunCompleted = Effect.fn("logRunCompleted")(function* (runSession: RunSession, wordChallenge: WordChallenge, deathReason: RunDeathReason) {
   // Extract all the necessary attributes that will offer additional context for our span
-  const runId = Option.getOrThrow(runSession.runId);
+  const runId = yield* Effect.fromOption(runSession.runId);
   const { sessionId, solutionsLanguage } = yield* sharedAttributes;
-  const theSecretWord = Option.getOrThrow(wordChallenge.theSecretWord);
+  const theSecretWord = yield* Effect.fromOption(wordChallenge.theSecretWord);
   const failedOnWord = deathReason === "Guesses" ? theSecretWord : "N/A";
   const finalScore = runSession.runScore;
   const finalStreak = runSession.streak;
@@ -92,7 +92,7 @@ export const trackForfeitedRun = Effect.fnUntraced(function* (runSession: RunSes
 export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
   const { sessionId, solutionsLanguage } = yield* sharedAttributes;
   const currentTurn = wordChallenge.currentTurn;
-  const wordScore = Option.getOrThrow(wordChallenge.wordScore);
+  const wordScore = yield* Effect.fromOption(wordChallenge.wordScore);
   const guessedTurn = currentTurn - 1;
 
   yield* Metric.update(metrics.guessesToWin.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), guessedTurn);
@@ -108,7 +108,7 @@ export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession,
 export const trackWordLost = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
   const { sessionId, solutionsLanguage } = yield* sharedAttributes;
   const streak = runSession.streak;
-  const theSecretWord = Option.getOrThrow(wordChallenge.theSecretWord);
+  const theSecretWord = yield* Effect.fromOption(wordChallenge.theSecretWord);
 
   yield* Metric.update(metrics.gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
   yield* Metric.update(metrics.arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);

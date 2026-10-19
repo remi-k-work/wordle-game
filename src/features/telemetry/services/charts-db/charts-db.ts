@@ -22,57 +22,54 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   // decode. There is no per-chart graceful degradation; all failures become
   // RPC 500s. This is intentional and uniform across every method here —
   // telemetry charts are best-effort. Do NOT introduce per-chart catch
-  // branches that disagree with this policy.
+  // branches that disagree with this policy
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
 
-    const getGuessDistribution = (request: AnyChartArgs) =>
-      Effect.gen(function* () {
-        const rows = yield* guessDistributionQuery(sql)(request);
+    const getGuessDistribution = Effect.fn("getGuessDistribution")(function* (request: AnyChartArgs) {
+      const rows = yield* guessDistributionQuery(sql)(request);
 
-        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-          turn: row.turn,
-          personal,
-          global,
-          personalPct,
-          globalPct,
-        })).filter((row) => row.turn !== null);
+      const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
+        turn: row.turn,
+        personal,
+        global,
+        personalPct,
+        globalPct,
+      })).filter((row) => row.turn !== null);
 
-        // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
-      });
+      // Decode against the strict schema, as recommended for final domain mapping
+      return yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
+    });
 
-    const getTimeToSolveDistribution = (request: AnyChartArgs) =>
-      Effect.gen(function* () {
-        const rows = yield* timeToSolveDistributionQuery(sql)(request);
+    const getTimeToSolveDistribution = Effect.fn("getTimeToSolveDistribution")(function* (request: AnyChartArgs) {
+      const rows = yield* timeToSolveDistributionQuery(sql)(request);
 
-        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-          maxSeconds: row.maxSeconds,
-          personal,
-          global,
-          personalPct,
-          globalPct,
-        }));
+      const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
+        maxSeconds: row.maxSeconds,
+        personal,
+        global,
+        personalPct,
+        globalPct,
+      }));
 
-        // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(Effect.orDie);
-      });
+      // Decode against the strict schema, as recommended for final domain mapping
+      return yield* Schema.decodeEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(Effect.orDie);
+    });
 
-    const getArcadeStreakDistribution = (request: AnyChartArgs) =>
-      Effect.gen(function* () {
-        const rows = yield* arcadeStreakDistributionQuery(sql)(request);
+    const getArcadeStreakDistribution = Effect.fn("getArcadeStreakDistribution")(function* (request: AnyChartArgs) {
+      const rows = yield* arcadeStreakDistributionQuery(sql)(request);
 
-        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-          streak: row.streak,
-          personal,
-          global,
-          personalPct,
-          globalPct,
-        }));
+      const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
+        streak: row.streak,
+        personal,
+        global,
+        personalPct,
+        globalPct,
+      }));
 
-        // Decode against the strict schema, as recommended for final domain mapping
-        return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(Effect.orDie);
-      });
+      // Decode against the strict schema, as recommended for final domain mapping
+      return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(Effect.orDie);
+    });
 
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
     const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);

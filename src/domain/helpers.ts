@@ -59,16 +59,15 @@ export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallbac
   Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
 
 // Safely validate next.js route inputs (`params` and `searchParams`) against a schema; return typed data or trigger a 404 on failure
-export const validatePageInputs = <A, S extends Schema.Constraint & { readonly Type: A; readonly Encoded: PageInputsEncoded }>(
+export const validatePageInputs = Effect.fnUntraced(function* <A, S extends Schema.Constraint & { readonly Type: A; readonly Encoded: PageInputsEncoded }>(
   schema: S,
   { params, searchParams }: PageInputPromises
-) =>
-  Effect.gen(function* () {
-    const [p, sp] = yield* Effect.all([Effect.promise(() => params), Effect.promise(() => searchParams)], { concurrency: 2 });
-    return yield* Schema.decodeEffect(schema)({ params: p, searchParams: sp }).pipe(
-      Effect.mapError((cause) => new InvalidPageInputsError({ message: "Invalid page inputs", cause }))
-    );
-  });
+) {
+  const [p, sp] = yield* Effect.all([Effect.promise(() => params), Effect.promise(() => searchParams)], { concurrency: 2 });
+  return yield* Schema.decodeEffect(schema)({ params: p, searchParams: sp }).pipe(
+    Effect.mapError((cause) => new InvalidPageInputsError({ message: "Invalid page inputs", cause }))
+  );
+});
 
 // Execute the main effect for the page, map known errors to the subsequent navigation helpers, and return the payload
 // NOTE: intentionally `async` — this bridges Effect into the async Server Component

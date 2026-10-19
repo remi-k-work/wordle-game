@@ -78,7 +78,7 @@ export const runSessionMachine = setup({
       runClientCommand(
         Effect.gen(function* () {
           const now = yield* DateTime.now;
-          const runId = Option.getOrThrow(context.runId);
+          const runId = yield* Effect.fromOption(context.runId);
           const createdAt = Option.getOrElse(context.createdAt, () => now);
           yield* Atom.set(
             runResultAtom,
