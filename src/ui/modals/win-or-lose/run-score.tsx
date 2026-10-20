@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
-import { useLocale } from "gt-next";
+import { useLocale } from "gt-tanstack-start";
 import { useAtomValue } from "@effect/atom-react";
 import {
   runSessionBestRunScoreAtom,
@@ -19,7 +19,7 @@ import {
 import { formatDuration } from "@/domain/formatters";
 
 // components
-import { T } from "gt-next";
+import { T } from "gt-react";
 import { RunStat } from "./run-stat";
 
 // assets

@@ -1,9 +1,7 @@
-"use client";
+// The dialog body only ever mounts inside an open modal (client-side interaction),
+// so there is no code-splitting to preserve: import it directly
+import VoiceSettingsBody from "./voice-settings";
 
-// next
-import dynamic from "next/dynamic";
-
-// components
-import { VoiceSettingsSkeleton } from "./voice-settings";
-
-export const VoiceSettings = dynamic(() => import("./voice-settings"), { ssr: false, loading: () => <VoiceSettingsSkeleton /> });
+export function VoiceSettings() {
+  return <VoiceSettingsBody />;
+}

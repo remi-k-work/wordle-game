@@ -1,6 +1,6 @@
 // components
 import { Button } from "@base-ui/react";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 // assets
 import { PrevIcon } from "@/assets/icons";

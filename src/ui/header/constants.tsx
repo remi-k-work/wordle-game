@@ -1,6 +1,6 @@
 // assets
 import { HomeModernIcon, PuzzlePieceIcon, TrophyIcon } from "@heroicons/react/24/outline";
-import { msg } from "gt-next";
+import { msg } from "gt-tanstack-start";
 
 // constants
 export const NAV_ITEMS = [

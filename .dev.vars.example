@@ -1,0 +1,7 @@
+# Worker-scoped vars for `vite dev` (the Cloudflare plugin runs SSR in workerd and
+# feeds these to process.env). Copy to `.dev.vars` (gitignored) after cloning.
+ENV="local"
+AI_SWITCH="off"
+DATABASE_URL="postgresql://test:test@localhost:5432/wordle-overdrive"
+# Optional: only needed with AI_SWITCH="on"
+# OPENROUTER_API_KEY="***"

@@ -1,7 +1,7 @@
 // components
 import { BarChart } from "recharts";
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { SectionHeader } from "@/ui/section-header";
 
 // types
 import type { ReactNode } from "react";
@@ -46,11 +46,6 @@ export function HorizontalBarEmpty({ title, message }: { title: string; message:
   );
 }
 
-export function HorizontalBarSkeleton({ title }: { title: string }) {
-  return (
-    <>
-      <SectionHeaderSkeleton title={title} />
-      <div className="h-96 w-full lg:h-192" />
-    </>
-  );
-}
+// The skeleton moved to ./horizontal-bar-skeleton so route-level Suspense fallbacks
+// never statically bundle recharts; re-exported here for existing consumers
+export { HorizontalBarSkeleton } from "./horizontal-bar-skeleton";

@@ -1,8 +1,5 @@
-// next
-import Image from "next/image";
-
 // services, features, and other libraries
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // components
 import { CloseModalButton } from "@/ui/modal-close-button";
@@ -13,7 +10,7 @@ import hero from "@/assets/hero.webp";
 export function Content() {
   return (
     <article className="mx-auto max-w-prose space-y-9">
-      <Image src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
+      <img src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
 
       <T>
         <p>

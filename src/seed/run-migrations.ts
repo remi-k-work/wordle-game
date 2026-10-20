@@ -5,7 +5,7 @@ import { Effect, Layer, Logger } from "effect";
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
 import { Migrator } from "effect/sql";
 import { PgMigrator } from "@effect/sql-pg";
-import { connectConfig, makePgClientLayer } from "@/lib/pg-live";
+import { connectConfig, makePgClientLayer } from "@/lib/pg.server";
 
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer);
 

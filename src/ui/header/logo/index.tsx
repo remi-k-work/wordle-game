@@ -1,11 +1,11 @@
 "use client";
 
-// next
-import Link from "next/link";
+// tanstack
+import { Link } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { motion } from "motion/react";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 // assets
 import { LogoIcon } from "@/assets/icons";
@@ -21,7 +21,7 @@ export default function Logo() {
   return (
     <MotionLink
       className="flex-none"
-      href="/"
+      to="/"
       title={gt("Wordle Overdrive")}
       whileHover={{ rotate: -6, scale: motionTokens.scale.pop }}
       transition={springs.snappy}

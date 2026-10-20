@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Option } from "effect";
 
 // components
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // types
 interface RiddleTextProps {

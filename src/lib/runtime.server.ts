@@ -1,0 +1,12 @@
+
+// services, features, and other libraries
+import { Layer, Logger, ManagedRuntime } from "effect";
+import { HighScoreDB } from "@/features/high-score/services/high-score-db";
+import { PgLive } from "@/lib/pg.server";
+
+const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), HighScoreDB.layer).pipe(Layer.provide(PgLive));
+
+// The services a server page-main may require: exactly what RuntimeServer provides
+export type ServerMainServices = Layer.Success<typeof MainLayer>;
+
+export const RuntimeServer = ManagedRuntime.make(MainLayer);

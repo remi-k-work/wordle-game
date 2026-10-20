@@ -2,7 +2,7 @@
 
 // services, features, and other libraries
 import { useBrowseCharts } from "@/features/telemetry/hooks/use-browse-charts";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 // components
 import { BrowseChartsShell } from "./browse-charts-shell";
@@ -21,8 +21,6 @@ export function BrowseCharts() {
   );
 }
 
-export function BrowseChartsSkeleton() {
-  const gt = useGT();
-
-  return <BrowseChartsShell label={gt("Switch Chart Vocabulary Language")} checked={false} disabled onCheckedChange={() => {}} />;
-}
+// The skeleton moved to ./skeleton so route-level Suspense fallbacks never bundle
+// the chart-swap machine; re-exported here so the module's public API is unchanged
+export { BrowseChartsSkeleton } from "./skeleton";

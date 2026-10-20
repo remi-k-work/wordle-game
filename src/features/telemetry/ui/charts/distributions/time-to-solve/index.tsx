@@ -5,14 +5,15 @@ import { useCallback } from "react";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
-import { msg, useGT, useMessages } from "gt-next";
+import { msg, useGT, useMessages } from "gt-tanstack-start";
 import { timeToSolveDistributionAtom } from "@/features/telemetry/state/charts";
 import { XAxis } from "recharts";
 import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";
 
 // components
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { DistributionEmpty, DistributionFrame, DistributionSkeleton } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionEmpty, DistributionFrame } from "@/features/telemetry/ui/charts/distribution-shell";
+import { TimeToSolveDistributionChartSkeleton } from "./skeleton";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -66,8 +67,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
     .render();
 }
 
-export function TimeToSolveDistributionChartSkeleton() {
-  const gt = useGT();
-
-  return <DistributionSkeleton title={gt("Time taken to solve a word")} />;
-}
+// The skeleton lives in ./skeleton so route-level Suspense fallbacks never
+// statically bundle recharts; imported here for the waiting/failure states of the
+// live chart and re-exported so the module's public API is unchanged
+export { TimeToSolveDistributionChartSkeleton };

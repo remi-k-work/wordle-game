@@ -1,6 +1,6 @@
 // components
 import { RunScore } from "@/ui/modals/win-or-lose/run-score";
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 export function Content() {
   return (

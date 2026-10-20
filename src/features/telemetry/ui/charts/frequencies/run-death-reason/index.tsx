@@ -4,12 +4,12 @@ import { useCallback } from "react";
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state/charts";
 
 // components
-import { SectionHeaderSkeleton } from "@/ui/section-header";
 import { ChartBody } from "./chart-body";
+import { RunDeathReasonFrequencyChartSkeleton } from "./skeleton";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -41,13 +41,7 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
     .render();
 }
 
-export function RunDeathReasonFrequencyChartSkeleton() {
-  const gt = useGT();
-
-  return (
-    <>
-      <SectionHeaderSkeleton title={gt("Reasons why an arcade run ended")} />
-      <div className="mx-auto size-86 w-full lg:size-172" />
-    </>
-  );
-}
+// The skeleton lives in ./skeleton so route-level Suspense fallbacks never
+// statically bundle recharts; imported here for the waiting/failure states of the
+// live chart and re-exported so the module's public API is unchanged
+export { RunDeathReasonFrequencyChartSkeleton };

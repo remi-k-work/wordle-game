@@ -1,5 +1,6 @@
 // components
-import { T, useMessages } from "gt-next";
+import { useMessages } from "gt-tanstack-start";
+import { T } from "gt-react";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { StatCard, StatCardSkeleton } from "@/ui/stat-card";
 

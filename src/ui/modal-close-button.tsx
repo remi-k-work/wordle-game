@@ -5,7 +5,7 @@ import { modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";

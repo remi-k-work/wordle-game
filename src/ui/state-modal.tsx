@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { modalIsOpenAtom } from "@/state/modal";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 // components
 import { Modal } from "@/ui/modal";
@@ -17,7 +17,7 @@ interface StateModalProps {
 }
 
 // Replaces the four copy-pasted `matches(key)+Modal+Content` wrappers with a
-// single state-driven shell. Title keys stay static literals for gt-next
+// single state-driven shell. Title keys stay static literal source words; the GT
 // extraction. Each shell subscribes to its own derived boolean atom, so only
 // the modal whose visibility flipped re-renders on open/close transitions
 export function StateModal({ state, titleKey, children }: StateModalProps) {

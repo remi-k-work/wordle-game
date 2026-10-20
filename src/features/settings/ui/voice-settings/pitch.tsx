@@ -3,7 +3,7 @@ import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsVoicePitchAtom } from "@/features/settings/state/game-settings";
 
 // components
-import { T } from "gt-next";
+import { T } from "gt-react";
 import { VoiceSliderField, VoiceSliderSkeleton } from "./voice-slider";
 
 export function Pitch() {

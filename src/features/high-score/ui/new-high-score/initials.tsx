@@ -7,7 +7,7 @@ import { highScoreIsSubmittingAtom, highScoreMachineAtom } from "@/features/high
 
 // components
 import { Button, Input } from "@base-ui/react";
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // assets
 import { SpinnerIcon } from "@/assets/icons";

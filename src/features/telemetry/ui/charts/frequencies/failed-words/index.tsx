@@ -4,13 +4,14 @@ import { useCallback } from "react";
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 import { failedWordsFrequencyAtom } from "@/features/telemetry/state/charts";
 import { XAxis, YAxis } from "recharts";
 
 // components
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { HorizontalBarEmpty, HorizontalBarFrame, HorizontalBarSkeleton } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HorizontalBarEmpty, HorizontalBarFrame } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { FailedWordsFrequencyChartSkeleton } from "./skeleton";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -54,8 +55,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
     .render();
 }
 
-export function FailedWordsFrequencyChartSkeleton() {
-  const gt = useGT();
-
-  return <HorizontalBarSkeleton title={gt("Words that players failed to guess")} />;
-}
+// The skeleton lives in ./skeleton so route-level Suspense fallbacks never
+// statically bundle recharts; imported here for the waiting/failure states of the
+// live chart and re-exported so the module's public API is unchanged
+export { FailedWordsFrequencyChartSkeleton };

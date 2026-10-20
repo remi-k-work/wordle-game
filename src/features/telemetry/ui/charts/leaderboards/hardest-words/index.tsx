@@ -4,14 +4,15 @@ import { useCallback } from "react";
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state/charts";
 import { XAxis, YAxis } from "recharts";
 import { formatSeconds } from "@/domain/formatters";
 
 // components
 import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { HorizontalBarEmpty, HorizontalBarFrame, HorizontalBarSkeleton } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HorizontalBarEmpty, HorizontalBarFrame } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HardestWordsLeaderboardChartSkeleton } from "./skeleton";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -72,8 +73,7 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
     .render();
 }
 
-export function HardestWordsLeaderboardChartSkeleton() {
-  const gt = useGT();
-
-  return <HorizontalBarSkeleton title={gt("Hardest words by average solve time")} />;
-}
+// The skeleton lives in ./skeleton so route-level Suspense fallbacks never
+// statically bundle recharts; imported here for the waiting/failure states of the
+// live chart and re-exported so the module's public API is unchanged
+export { HardestWordsLeaderboardChartSkeleton };

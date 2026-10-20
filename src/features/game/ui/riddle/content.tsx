@@ -10,7 +10,7 @@ import {
 } from "@/features/game/state/word-meta";
 
 // components
-import { T } from "gt-next";
+import { T } from "gt-react";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 import { SpeakButtonNatural, SpeakButtonNaturalSkeleton, SpeakButtonRegular, SpeakButtonRegularSkeleton } from "@/ui/speak-button";
 import { RiddleText, RiddleTextSkeleton } from "./riddle-text";

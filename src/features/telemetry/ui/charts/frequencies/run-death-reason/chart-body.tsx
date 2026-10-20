@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 
 // services, features, and other libraries
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 import { Legend, PieChart, Pie, Sector } from "recharts";
 
 // components

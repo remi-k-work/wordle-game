@@ -7,9 +7,9 @@ import { Effect } from "effect";
 // silently degrading. Keeping the policy here prevents the per-call-site duplicated
 // `tapError(...) + catchTags({...})` chain from drifting
 //
-// NOTE: no `server-only` marker here (unlike domain/helpers.ts): this module is
+// NOTE: no `server-only` marker here (unlike domain/helpers.server.ts): this module is
 // shared with vitest e2e suites and tsx scripts, which resolve `server-only` to
 // its throwing default export. Everything here must stay pure Effect — no
-// next/server, no runtime-server, no pg-live
+// TanStack server routes, no runtime.server, no pg.server
 export const dieOnDbFailure = <A, E extends { _tag: string }, R>(effect: Effect.Effect<A, E, R>) =>
   effect.pipe(Effect.tapError(Effect.logError), Effect.catchTags({ SchemaError: Effect.die, SqlError: Effect.die, NoSuchElementError: Effect.die }));

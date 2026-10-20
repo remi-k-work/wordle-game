@@ -4,7 +4,8 @@
 import { useState } from "react";
 
 // services, features, and other libraries
-import { T, Var, useGT, useLocale, useMessages } from "gt-next";
+import { useGT, useLocale, useMessages } from "gt-tanstack-start";
+import { T, Var } from "gt-react";
 import { calculatePotentialScore } from "@/features/game/domain/game-logic";
 import { getBasePointsPerTurn, getSpeedMultiplier, potentialScoreAsPercentage } from "@/features/game/domain/helpers";
 import { speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";

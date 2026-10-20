@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Config, Effect, ExecutionPlan, Layer, Schedule } from "effect";
-import { NodeHttpClient } from "@effect/platform-node";
+import { FetchHttpClient } from "effect/http";
 import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter";
 
 // Builds a single fallback step for the specified model
@@ -24,5 +24,6 @@ export const OpenRouterClientLayer = Layer.unwrap(
 );
 
 // The client layer above requires an HTTP transport; composing it here keeps
-// every consumer (AI-backed RPC handlers, proof scripts) on the same wiring
-export const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(NodeHttpClient.layerUndici));
+// every consumer (AI-backed RPC handlers, proof scripts) on the same wiring.
+// The transport is the fetch-backed HttpClient (workers runtime has no undici)
+export const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(FetchHttpClient.layer));

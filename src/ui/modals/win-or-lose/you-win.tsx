@@ -7,7 +7,7 @@ import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChall
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
 import { RunScore } from "./run-score";
 import { SecretWordReveal } from "./secret-word";
-import { T, Var } from "gt-next";
+import { T, Var } from "gt-react";
 
 export function YouWin() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);

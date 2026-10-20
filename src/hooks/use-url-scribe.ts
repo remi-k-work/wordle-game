@@ -1,83 +1,63 @@
 // react
 import { useCallback } from "react";
 
-// next
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-
-// services, features, and other libraries
-import { Match } from "effect";
-
-// types
-import type { Route } from "next";
+// tanstack
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 // Define a more convenient type for the params object
 type QueryValue = Readonly<string | number | (string | number)[]>;
 type QueryParams = Readonly<Record<string, QueryValue>>;
 
 // Define the overload signatures interface
-interface CreateHrefFn {
-  (newRoute: Route): Route;
-  (paramsToSet: QueryParams): Route;
-  (newRoute: Route, paramsToSet: QueryParams): Route;
-}
-
 interface NavigateFn {
-  (newRoute: Route): void;
+  (newRoute: string): void;
   (paramsToSet: QueryParams): void;
-  (newRoute: Route, paramsToSet: QueryParams): void;
+  (newRoute: string, paramsToSet: QueryParams): void;
 }
 
-// Merges `paramsToSet` into the current search params, handling array values (joined with `,`), empty-string deletion, and numeric coercion
-function applyParams(params: URLSearchParams, paramsToSet: QueryParams): void {
-  for (const [key, value] of Object.entries(paramsToSet)) {
-    Match.value(value).pipe(
-      Match.when(Array.isArray, (arr) => {
-        if (arr.length > 0) params.set(key, arr.join(","));
-        else params.delete(key);
-      }),
-      Match.when(Match.string, (str) => {
-        if (str.trim().length > 0) params.set(key, str);
-        else params.delete(key);
-      }),
-      Match.orElse((other) => params.set(key, String(other)))
-    );
-  }
-}
-
-// A hook to easily create new route strings with updated search parameters (it preserves existing search params)
+// A hook to programmatically navigate to a new url with updated search parameters
+// (it preserves existing search params: TanStack Router keeps the current search
+// unless the key is explicitly overwritten by `paramsToSet`)
 export function useUrlScribe() {
-  // Access next.js routing utilities
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const navigateFn = useNavigate();
 
-  // Builds a new href string by adding/updating the provided search params
-  const createHref = useCallback(
-    (arg1?: Route | QueryParams, arg2?: QueryParams): Route => {
-      // Create a mutable copy of the current search params
-      const params = new URLSearchParams(searchParams.toString());
+  // The raw query-string tail of the current location, as a stable URLSearchParams
+  // snapshot (consumers re-sync only when the actual query changes)
+  const searchParams = useRouterState({
+    select: ({ location }) => new URLSearchParams(location.searchStr),
+  });
 
-      // Detect if the first arg is a Route (string) or QueryParams (object)
-      const newRoute = typeof arg1 === "string" ? arg1 : undefined;
-      const paramsToSet = typeof arg1 === "string" ? arg2 : arg1;
-
-      // Only modify params if an object was provided
-      if (paramsToSet) applyParams(params, paramsToSet);
-
-      // Return the new href and do not include the search params if they are empty (the "?" becomes unnecessary)
-      const query = params.toString();
-      const base = newRoute ?? pathname;
-      return (query.length > 0 ? `${base}?${query}` : base) as Route;
-    },
-    [pathname, searchParams]
-  );
+  // Merges `paramsToSet` into the current search, mirroring the old URLSearchParams
+  // behavior: values are stringified (arrays joined with `,`) and empty strings delete
+  const applyParams = (current: Record<string, string | undefined>, values: QueryParams): Record<string, string | undefined> => {
+    const next = { ...current };
+    for (const [key, value] of Object.entries(values)) {
+      const serialized = typeof value === "string" ? value : typeof value === "number" ? String(value) : value.join(",");
+      if (serialized === "") delete next[key];
+      else next[key] = serialized;
+    }
+    return next;
+  };
 
   // Programmatically navigates to a new url with updated search params
   const navigate = useCallback(
-    (arg1?: Route | QueryParams, arg2?: QueryParams) => router.push(createHref(arg1, arg2), { scroll: false }),
-    [router, createHref]
+    (arg1?: string | QueryParams, arg2?: QueryParams) => {
+      // Detect if the first arg is a route (string) or query params (object)
+      const newRoute = typeof arg1 === "string" ? arg1 : undefined;
+      const paramsToSet = typeof arg1 === "string" ? arg2 : arg1;
+
+      // Search updates merge into the existing url state; only modified keys change.
+      // (One cast, exactly here: navigate's search reducer is typed against the
+      // router registry, while the hook keeps the loose QueryParams contract the
+      // browse-charts machine passes raw string values through)
+      void navigateFn({
+        to: newRoute,
+        search: (prev: Record<string, string | undefined>) => applyParams(prev, paramsToSet ?? {}),
+      } as unknown as Parameters<typeof navigateFn>[0]);
+    },
+    [navigateFn]
   );
 
   // We cast the functions to the appropriate types, which ensures that components using the hook see the nice, strict overloads
-  return { createHref: createHref as CreateHrefFn, navigate: navigate as NavigateFn, searchParams } as const;
+  return { navigate: navigate as NavigateFn, searchParams } as const;
 }

@@ -3,7 +3,7 @@
 // services, features, and other libraries
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 // components
 import { Button } from "@base-ui/react";

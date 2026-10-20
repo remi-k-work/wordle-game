@@ -1,15 +1,14 @@
 "use client";
 
-// next
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+// tanstack
+import { Link, useRouterState } from "@tanstack/react-router";
+import type { LinkProps } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useMessages } from "gt-next";
+import { useMessages } from "gt-tanstack-start";
 
 // types
-import type { Route } from "next";
 import type { ReactNode } from "react";
 
 // Module-level cache: nav patterns are static literals, so compile each one
@@ -26,7 +25,7 @@ const compilePattern = (match: string) => {
 };
 
 export interface NavItemProps {
-  href: Route;
+  href: LinkProps["to"];
   match: string;
   title: string;
   icon: ReactNode;
@@ -34,7 +33,7 @@ export interface NavItemProps {
 }
 
 export default function NavItem({ href, match, title, icon, isExternal = false }: NavItemProps) {
-  const pathname = usePathname();
+  const pathname = useRouterState({ select: ({ location }) => location.pathname });
   const messages = useMessages();
 
   // Test the cached pattern against the current pathname
@@ -42,9 +41,8 @@ export default function NavItem({ href, match, title, icon, isExternal = false }
 
   return (
     <Link
-      href={href}
+      to={href}
       title={messages(title)}
-      prefetch={!isExternal}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
@@ -61,9 +59,8 @@ export default function NavItem({ href, match, title, icon, isExternal = false }
 export function NavItemSkeleton({ href, title, icon, isExternal = false }: NavItemProps) {
   return (
     <Link
-      href={href}
+      to={href}
       title={title}
-      prefetch={!isExternal}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
       className="border bg-secondary p-1 [&>svg]:size-11"

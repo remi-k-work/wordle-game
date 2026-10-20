@@ -14,7 +14,8 @@ import { modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";
-import { T, Var, useGT, useLocale } from "gt-next";
+import { useGT, useLocale } from "gt-tanstack-start";
+import { T, Var } from "gt-react";
 import { GamePopover } from "@/ui/game-popover";
 
 // assets

@@ -4,12 +4,12 @@
 import { useMemo } from "react";
 
 // components
-import { T } from "gt-next";
-import { ChartTabs, ChartTabsSkeleton } from "@/features/telemetry/ui/charts/chart-tabs";
-import { OpeningGuessesFrequencyChart, OpeningGuessesFrequencyChartSkeleton } from "./opening-guesses";
-import { FailedWordsFrequencyChart, FailedWordsFrequencyChartSkeleton } from "./failed-words";
-import { RunDeathReasonFrequencyChart, RunDeathReasonFrequencyChartSkeleton } from "./run-death-reason";
-import { HardestWordsLeaderboardChart, HardestWordsLeaderboardChartSkeleton } from "@/features/telemetry/ui/charts/leaderboards/hardest-words";
+import { T } from "gt-react";
+import { ChartTabs } from "@/features/telemetry/ui/charts/chart-tabs";
+import { OpeningGuessesFrequencyChart } from "./opening-guesses";
+import { FailedWordsFrequencyChart } from "./failed-words";
+import { RunDeathReasonFrequencyChart } from "./run-death-reason";
+import { HardestWordsLeaderboardChart } from "@/features/telemetry/ui/charts/leaderboards/hardest-words";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -48,16 +48,7 @@ export function FrequencyCharts({ solutionsLanguage }: FrequencyChartsProps) {
   return <ChartTabs defaultValue="firstWords" tabs={tabs} />;
 }
 
-export function FrequencyChartsSkeleton() {
-  const tabs = useMemo(
-    () => [
-      { value: "firstWords", skeleton: <OpeningGuessesFrequencyChartSkeleton /> },
-      { value: "missedWords", skeleton: <FailedWordsFrequencyChartSkeleton /> },
-      { value: "runDeaths", skeleton: <RunDeathReasonFrequencyChartSkeleton /> },
-      { value: "hardestWords", skeleton: <HardestWordsLeaderboardChartSkeleton /> },
-    ],
-    []
-  );
-
-  return <ChartTabsSkeleton defaultValue="firstWords" tabs={tabs} />;
-}
+// The skeleton moved to ./skeleton so route-level Suspense fallbacks never
+// statically bundle recharts; re-exported here so the module's public API is
+// unchanged
+export { FrequencyChartsSkeleton } from "./skeleton";

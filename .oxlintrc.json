@@ -5,14 +5,13 @@
   "extends": [
     "./node_modules/@effect/tsgo/oxlint-presets/recommended.json"
   ],
-  // Tight scope: closest clean equivalent of `eslint-config-next/core-web-vitals`
-  // + `eslint-config-next/typescript` (react, react-hooks, nextjs, jsx-a11y,
-  // typescript, import, vitest). No unicorn/oxc extras, no JS-plugin compat layer.
+  // Tight scope: react, react-hooks, jsx-a11y, typescript, import, vitest (the
+  // closest clean equivalent of `eslint-config-next/core-web-vitals` is kept by
+  // the plugin set; the nextjs plugin itself is gone with Next.js).
   "plugins": [
     "eslint",
     "typescript",
     "react",
-    "nextjs",
     "jsx-a11y",
     "import",
     "vitest"
@@ -28,9 +27,8 @@
   // Mirrors the old eslint.config.mjs globalIgnores plus local scratch/dict files.
   // node_modules and .git are ignored by default; .gitignore is respected automatically.
   "ignorePatterns": [
-    ".next/**",
-    "out/**",
-    "build/**",
+    "dist/**",
+    ".wrangler/**",
     "next-env.d.ts",
     ".repos/**",
     "_scratchpad/**",

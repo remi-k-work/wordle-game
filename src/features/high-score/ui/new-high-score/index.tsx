@@ -4,7 +4,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { highScoreIsFormVisibleAtom } from "@/features/high-score/state/high-score";
 import { motion, AnimatePresence } from "motion/react";
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // components
 import { Initials } from "./initials";

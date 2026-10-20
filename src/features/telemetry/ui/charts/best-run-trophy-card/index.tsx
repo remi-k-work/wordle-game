@@ -3,11 +3,11 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
-import { msg, useMessages } from "gt-next";
+import { msg, useMessages } from "gt-tanstack-start";
 import { bestRunTrophyCardAtom } from "@/features/telemetry/state/charts";
 
 // components
-import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { SectionHeader } from "@/ui/section-header";
 import { BestRunCard, BestRunCardSkeleton } from "./best-run-card";
 
 // types
@@ -42,16 +42,7 @@ export function BestRunTrophyCardChart({ solutionsLanguage }: BestRunTrophyCardC
   );
 }
 
-export function BestRunTrophyCardChartSkeleton() {
-  const messages = useMessages();
-
-  return (
-    <>
-      <SectionHeaderSkeleton title={messages(msg("The best run trophy card"))} />
-      <article className="mb-8 grid grid-cols-1 grid-rows-7 gap-1 space-y-4 sm:grid-cols-2 sm:gap-2 sm:space-y-0">
-        <BestRunCardSkeleton Tag="header" variant="primary" title={messages(msg("Your Personal Best"))} />
-        <BestRunCardSkeleton Tag="footer" variant="secondary" title={messages(msg("Global Best"))} />
-      </article>
-    </>
-  );
-}
+// The skeleton moved to ./skeleton so route-level Suspense fallbacks never bundle
+// the trophy-card data graph; re-exported here so the module's public API is
+// unchanged
+export { BestRunTrophyCardChartSkeleton } from "./skeleton";

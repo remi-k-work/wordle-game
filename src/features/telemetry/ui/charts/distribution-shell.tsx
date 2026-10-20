@@ -1,7 +1,7 @@
 // components
 import { ComposedChart } from "recharts";
 import { InfoLine } from "@/ui/info-line";
-import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
+import { SectionHeader } from "@/ui/section-header";
 
 // types
 import type { ReactNode } from "react";
@@ -38,11 +38,6 @@ export function DistributionEmpty({ title, message }: { title: string; message: 
   );
 }
 
-export function DistributionSkeleton({ title }: { title: string }) {
-  return (
-    <>
-      <SectionHeaderSkeleton title={title} />
-      <div className="h-96 w-full lg:h-192" />
-    </>
-  );
-}
+// The skeleton moved to ./distribution-skeleton so route-level Suspense fallbacks
+// never statically bundle recharts; re-exported here for existing consumers
+export { DistributionSkeleton } from "./distribution-skeleton";

@@ -6,7 +6,8 @@ import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/fe
 
 // components
 import { Button } from "@base-ui/react";
-import { T, useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
+import { T } from "gt-react";
 
 // assets
 import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";

@@ -1,16 +1,26 @@
 "use client";
 
-// next
-import dynamic from "next/dynamic";
+// react
+import { Suspense, lazy } from "react";
 
 // components
 import { Button } from "@base-ui/react";
-import { useGT } from "gt-next";
-
-// assets
 import { SunIcon } from "@heroicons/react/24/outline";
+import { useGT } from "gt-tanstack-start";
 
-export const ThemeChanger = dynamic(() => import("./theme-changer"), { ssr: false, loading: () => <ThemeChangerSkeleton /> });
+const ThemeChangerChunk = lazy(() => import("./theme-changer"));
+
+export function ThemeChanger() {
+  // Client-only toggle: next-themes resolves nothing on the server, so the shell
+  // renders the disabled skeleton and the swap happens after hydration / chunk load
+  if (typeof window === "undefined") return <ThemeChangerSkeleton />;
+
+  return (
+    <Suspense fallback={<ThemeChangerSkeleton />}>
+      <ThemeChangerChunk />
+    </Suspense>
+  );
+}
 
 export function ThemeChangerSkeleton() {
   const gt = useGT();

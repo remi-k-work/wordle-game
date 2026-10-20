@@ -4,11 +4,11 @@
 import { useMemo } from "react";
 
 // components
-import { T } from "gt-next";
-import { ChartTabs, ChartTabsSkeleton } from "@/features/telemetry/ui/charts/chart-tabs";
-import { GuessDistributionChart, GuessDistributionChartSkeleton } from "./guess";
-import { TimeToSolveDistributionChart, TimeToSolveDistributionChartSkeleton } from "./time-to-solve";
-import { ArcadeStreakDistributionChart, ArcadeStreakDistributionChartSkeleton } from "./arcade-streak";
+import { T } from "gt-react";
+import { ChartTabs } from "@/features/telemetry/ui/charts/chart-tabs";
+import { GuessDistributionChart } from "./guess";
+import { TimeToSolveDistributionChart } from "./time-to-solve";
+import { ArcadeStreakDistributionChart } from "./arcade-streak";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -42,15 +42,7 @@ export function DistributionCharts({ solutionsLanguage }: DistributionChartsProp
   return <ChartTabs defaultValue="guesses" tabs={tabs} />;
 }
 
-export function DistributionChartsSkeleton() {
-  const tabs = useMemo(
-    () => [
-      { value: "guesses", skeleton: <GuessDistributionChartSkeleton /> },
-      { value: "time", skeleton: <TimeToSolveDistributionChartSkeleton /> },
-      { value: "streak", skeleton: <ArcadeStreakDistributionChartSkeleton /> },
-    ],
-    []
-  );
-
-  return <ChartTabsSkeleton defaultValue="guesses" tabs={tabs} />;
-}
+// The skeleton moved to ./skeleton so route-level Suspense fallbacks never
+// statically bundle recharts; re-exported here so the module's public API is
+// unchanged
+export { DistributionChartsSkeleton } from "./skeleton";

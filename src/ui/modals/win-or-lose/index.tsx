@@ -5,7 +5,8 @@ import { modalIsOpenAtom, modalMachineAtom } from "@/state/modal";
 
 // components
 import { Button } from "@base-ui/react";
-import { T, useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
+import { T } from "gt-react";
 import { Modal } from "@/ui/modal";
 import { YouWin } from "./you-win";
 import { Nevermind } from "./nevermind";

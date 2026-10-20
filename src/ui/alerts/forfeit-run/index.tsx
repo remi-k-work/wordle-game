@@ -10,7 +10,7 @@ import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 // components
 import { Alert } from "@/ui/alert";
 import { Content } from "./content";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 export function ForfeitRunAlert() {
   // Derived boolean atom: re-renders only when visibility actually flips

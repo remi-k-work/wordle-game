@@ -7,7 +7,8 @@ import { matchLanguage } from "@/features/game/domain/helpers";
 
 // components
 import { Select } from "@base-ui/react";
-import { T, useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
+import { T } from "gt-react";
 
 // assets
 import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";

@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
-import { useGT, useLocale } from "gt-next";
+import { useGT, useLocale } from "gt-tanstack-start";
 import { formatSeconds } from "@/domain/formatters";
 
 // components

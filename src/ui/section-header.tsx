@@ -3,7 +3,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
-import { useMessages } from "gt-next";
+import { useMessages } from "gt-tanstack-start";
 
 // types
 interface SectionHeaderProps {

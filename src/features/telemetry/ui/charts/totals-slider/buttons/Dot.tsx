@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 // components
 import { Button } from "@base-ui/react";
-import { useGT } from "gt-next";
+import { useGT } from "gt-tanstack-start";
 
 // assets
 import { ViewfinderCircleIcon as ViewfinderCircleIconS } from "@heroicons/react/24/solid";

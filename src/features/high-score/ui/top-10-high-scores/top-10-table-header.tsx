@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // components
 import { TableHead, TableHeader, TableRow } from "@/ui/table";

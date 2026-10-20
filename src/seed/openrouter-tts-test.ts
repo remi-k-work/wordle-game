@@ -3,7 +3,7 @@ import "dotenv/config";
 // services, features, and other libraries
 import { Array, Cause, Effect, FileSystem, Layer, Logger } from "effect";
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
-import { OpenRouter } from "@/services/open-router";
+import { OpenRouter } from "@/services/open-router.server";
 import { OpenRouterError } from "@/domain/errors";
 
 // constants

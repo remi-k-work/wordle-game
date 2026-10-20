@@ -7,7 +7,7 @@ import { wordChallengeTheSecretWordAtom } from "@/features/game/state/word-chall
 import { RunScore } from "./run-score";
 import { SecretWordReveal } from "./secret-word";
 import { NewHighScore } from "@/features/high-score/ui/new-high-score";
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 export function Nevermind() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);

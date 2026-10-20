@@ -10,7 +10,7 @@ import {
 } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
-import { T } from "gt-next";
+import { T } from "gt-react";
 import { CloseModalButton } from "@/ui/modal-close-button";
 import { SpeakButtonNatural, SpeakButtonRegular } from "@/ui/speak-button";
 

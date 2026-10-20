@@ -4,7 +4,7 @@ import { alertMachineAtom } from "@/state/alert";
 
 // components
 import { AlertDialog } from "@base-ui/react";
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 // assets
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";

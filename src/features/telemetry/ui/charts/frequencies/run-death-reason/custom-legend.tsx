@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { T } from "gt-next";
+import { T } from "gt-react";
 
 export const CustomLegend = () => (
   <div className="flex flex-col items-center font-sans text-text-2">

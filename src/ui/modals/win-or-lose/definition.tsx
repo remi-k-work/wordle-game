@@ -4,7 +4,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { wordMetaWordDefinitionAtom, wordMetaWordDefinitionAudioAtom } from "@/features/game/state/word-meta";
 
 // components
-import { T } from "gt-next";
+import { T } from "gt-react";
 import { SpeakButtonNatural, SpeakButtonRegular } from "@/ui/speak-button";
 
 // constants
