@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";

@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { highScoreIsFormVisibleAtom } from "@/features/high-score/state/high-score";

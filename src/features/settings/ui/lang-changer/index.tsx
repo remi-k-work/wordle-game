@@ -10,7 +10,8 @@ import { useGT } from "gt-tanstack-start";
 import { T } from "gt-react";
 
 // assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
+import { PlFlagIcon } from "@/assets/icons/pl-flag";
+import { UsFlagIcon } from "@/assets/icons/us-flag";
 
 // types
 interface LangChangerProps {

@@ -1,5 +1,3 @@
-"use client";
-
 // react
 import { useCallback } from "react";
 
@@ -9,9 +7,9 @@ import { useEmblaSelect } from "./hooks/use-embla-select";
 
 // components
 import { Slide } from "./slide";
-import { Dot } from "./buttons/Dot";
-import { Next } from "./buttons/Next";
-import { Prev } from "./buttons/Prev";
+import { Dot } from "./buttons/dot";
+import { Next } from "./buttons/next";
+import { Prev } from "./buttons/prev";
 import { AnyAvgStatChart } from "@/features/telemetry/ui/charts/any-avg-stat";
 import { AnyCounterChart } from "@/features/telemetry/ui/charts/any-counter";
 import { TOTALS_SLIDES, TotalsSlideSkeleton, type TotalsSlideSpec } from "./skeleton";

@@ -1,8 +1,5 @@
-"use client";
-
 // tanstack
 import { Link, useRouterState } from "@tanstack/react-router";
-import type { LinkProps } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
@@ -10,6 +7,15 @@ import { useMessages } from "gt-tanstack-start";
 
 // types
 import type { ReactNode } from "react";
+import type { LinkProps } from "@tanstack/react-router";
+
+interface NavItemProps {
+  href: LinkProps["to"];
+  match: string;
+  title: string;
+  icon: ReactNode;
+  isExternal?: boolean;
+}
 
 // Module-level cache: nav patterns are static literals, so compile each one
 // exactly once instead of on every render (js-cache-function-results /
@@ -23,14 +29,6 @@ const compilePattern = (match: string) => {
   }
   return regex;
 };
-
-export interface NavItemProps {
-  href: LinkProps["to"];
-  match: string;
-  title: string;
-  icon: ReactNode;
-  isExternal?: boolean;
-}
 
 export default function NavItem({ href, match, title, icon, isExternal = false }: NavItemProps) {
   const pathname = useRouterState({ select: ({ location }) => location.pathname });

@@ -11,7 +11,7 @@ import { GamePopover } from "@/ui/game-popover";
 import { Content } from "./content";
 
 // assets
-import { SpinnerIcon } from "@/assets/icons";
+import { SpinnerIcon } from "@/assets/icons/spinner";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 
 export function RiddlePopover() {

@@ -1,5 +1,3 @@
-"use client";
-
 // react
 import { Suspense, lazy } from "react";
 

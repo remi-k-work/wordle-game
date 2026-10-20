@@ -1,5 +1,3 @@
-"use client";
-
 // components
 import { Toast } from "@base-ui/react";
 import { ToastList } from "./toast-list";

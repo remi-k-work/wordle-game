@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "motion/react";

@@ -1,5 +1,3 @@
-"use client";
-
 // tanstack
 import { Link } from "@tanstack/react-router";
 
@@ -8,7 +6,7 @@ import { motion } from "motion/react";
 import { useGT } from "gt-tanstack-start";
 
 // assets
-import { LogoIcon } from "@/assets/icons";
+import { LogoIcon } from "@/assets/icons/logo";
 
 // constants
 import { motionTokens, springs } from "@/lib/motion-tokens";

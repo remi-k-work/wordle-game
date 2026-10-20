@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { motion } from "motion/react";
 
@@ -14,24 +12,24 @@ interface RevealOnScrollProps {
 // constants
 import { motionTokens, springs } from "@/lib/motion-tokens";
 
-const containerVariants = {
+const CONTAINER_VARIANTS = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08, delayChildren: motionTokens.duration.normal } },
-};
+} as const;
 
-const itemVariants = {
+const ITEM_VARIANTS = {
   hidden: { opacity: 0, y: motionTokens.distance.md },
   visible: { opacity: 1, y: 0, transition: springs.gentle },
-};
+} as const;
 
 export function RevealOnScroll({ children, staggerChildren = false }: RevealOnScrollProps) {
   if (staggerChildren) {
     const arr = Array.isArray(children) ? children : [children];
 
     return (
-      <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}>
+      <motion.div variants={CONTAINER_VARIANTS} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}>
         {arr.map((child, index) => (
-          <motion.div key={index} variants={itemVariants}>
+          <motion.div key={index} variants={ITEM_VARIANTS}>
             {child}
           </motion.div>
         ))}

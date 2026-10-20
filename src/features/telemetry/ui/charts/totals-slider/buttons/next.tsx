@@ -3,7 +3,7 @@ import { Button } from "@base-ui/react";
 import { useGT } from "gt-tanstack-start";
 
 // assets
-import { NextIcon } from "@/assets/icons";
+import { NextIcon } from "@/assets/icons/next";
 
 interface NextProps {
   disabled: boolean;

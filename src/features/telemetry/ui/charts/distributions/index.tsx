@@ -1,5 +1,3 @@
-"use client";
-
 // react
 import { useMemo } from "react";
 

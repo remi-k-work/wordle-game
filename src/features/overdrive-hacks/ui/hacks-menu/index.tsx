@@ -19,7 +19,7 @@ import { T, Var } from "gt-react";
 import { GamePopover } from "@/ui/game-popover";
 
 // assets
-import { SpinnerIcon } from "@/assets/icons";
+import { SpinnerIcon } from "@/assets/icons/spinner";
 import { LifebuoyIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 // types

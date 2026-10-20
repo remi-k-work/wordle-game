@@ -3,9 +3,9 @@ import { msg } from "gt-tanstack-start";
 
 // components
 import { SLIDE_CLASS } from "./slide";
-import { DotSkeleton } from "./buttons/Dot";
-import { NextSkeleton } from "./buttons/Next";
-import { PrevSkeleton } from "./buttons/Prev";
+import { DotSkeleton } from "./buttons/dot";
+import { NextSkeleton } from "./buttons/next";
+import { PrevSkeleton } from "./buttons/prev";
 import { AnyAvgStatChartSkeleton } from "@/features/telemetry/ui/charts/any-avg-stat";
 import { AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts/any-counter";
 
@@ -15,7 +15,7 @@ import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/servic
 type TotalsSlideSpec =
   | { kind: "counter"; counterName: AnyCounterArgs["counterName"]; title: string; personalHeader: string }
   | {
-      kind: "avg",
+      kind: "avg";
       statColumn: AnyAvgStatArgs["statColumn"];
       statTable: AnyAvgStatArgs["statTable"];
       title: string;

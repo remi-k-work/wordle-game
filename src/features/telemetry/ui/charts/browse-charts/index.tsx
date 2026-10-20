@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { useBrowseCharts } from "@/features/telemetry/hooks/use-browse-charts";
 import { useGT } from "gt-tanstack-start";

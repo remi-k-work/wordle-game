@@ -5,7 +5,8 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@base-ui/react";
 
 // assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
+import { PlFlagIcon } from "@/assets/icons/pl-flag";
+import { UsFlagIcon } from "@/assets/icons/us-flag";
 
 // types
 interface BrowseChartsShellProps {

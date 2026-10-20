@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { RegistryContext, scheduleTask } from "@effect/atom-react";
 import { AtomRegistry } from "effect/reactivity";

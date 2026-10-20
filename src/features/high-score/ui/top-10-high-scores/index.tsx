@@ -1,5 +1,3 @@
-"use client";
-
 // react
 import { useEffect } from "react";
 
@@ -19,7 +17,8 @@ import { Table, TableBody, TableCell, TableRow } from "@/ui/table";
 import { Top10TableHeader } from "./top-10-table-header";
 
 // assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
+import { PlFlagIcon } from "@/assets/icons/pl-flag";
+import { UsFlagIcon } from "@/assets/icons/us-flag";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";

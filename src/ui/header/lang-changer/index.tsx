@@ -1,5 +1,3 @@
-"use client";
-
 // react
 import { useTransition } from "react";
 
@@ -14,7 +12,8 @@ import { useGT, useLocale, useSetLocale } from "gt-tanstack-start";
 import { Button } from "@base-ui/react";
 
 // assets
-import { PlFlagIcon, UsFlagIcon } from "@/assets/icons";
+import { PlFlagIcon } from "@/assets/icons/pl-flag";
+import { UsFlagIcon } from "@/assets/icons/us-flag";
 
 // constants
 import { springs } from "@/lib/motion-tokens";
@@ -43,12 +42,7 @@ export function LangChanger() {
   }
 
   return (
-    <Button
-      className="button p-1"
-      title={gt("Select Website Language")}
-      disabled={isPending}
-      onClick={handleLangToggled}
-    >
+    <Button className="button p-1" title={gt("Select Website Language")} disabled={isPending} onClick={handleLangToggled}>
       {/* The flag flips over to the other language instead of swapping out from under the pointer;
           `initial={false}` keeps the server markup (and the hydration render) free of any rotation */}
       <AnimatePresence mode="wait" initial={false}>

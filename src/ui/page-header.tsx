@@ -1,5 +1,3 @@
-"use client";
-
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";

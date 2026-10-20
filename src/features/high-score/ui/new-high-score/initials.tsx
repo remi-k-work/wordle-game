@@ -10,7 +10,7 @@ import { Button, Input } from "@base-ui/react";
 import { T } from "gt-react";
 
 // assets
-import { SpinnerIcon } from "@/assets/icons";
+import { SpinnerIcon } from "@/assets/icons/spinner";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 export function Initials() {

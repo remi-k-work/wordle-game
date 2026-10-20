@@ -1,5 +1,3 @@
-"use client";
-
 // components
 import { HelpModal } from "./help";
 import { HighScoreModal } from "./high-score";
