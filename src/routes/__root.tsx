@@ -1,4 +1,4 @@
-import "@/styles/globals.css";
+import "@/assets/styles/globals.css";
 
 // tanstack
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";

@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 /* custom styles and animations */
-@import "../assets/styles/flip.css";
-@import "../assets/styles/bounce.css";
-@import "../assets/styles/wiggle.css";
+@import "./flip.css";
+@import "./bounce.css";
+@import "./wiggle.css";
 
 @custom-variant dark (&:is(.dark *));
 
