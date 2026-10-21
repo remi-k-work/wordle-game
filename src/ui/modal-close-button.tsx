@@ -4,7 +4,7 @@ import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state/modal";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { T } from "gt-react";
 
 // assets

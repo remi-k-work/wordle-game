@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useGT } from "gt-tanstack-start";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 
 // assets
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";

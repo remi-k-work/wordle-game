@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useGT, useLocale, useSetLocale } from "gt-tanstack-start";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 
 // assets
 import { PlFlagIcon } from "@/assets/icons/pl-flag";

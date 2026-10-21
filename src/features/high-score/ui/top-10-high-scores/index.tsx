@@ -15,6 +15,7 @@ import { T } from "gt-react";
 import { InfoLine } from "@/ui/info-line";
 import { Table, TableBody, TableCell, TableRow } from "@/ui/table";
 import { Top10TableHeader } from "./top-10-table-header";
+import { Top10HighScoresSkeleton } from "./skeleton";
 
 // assets
 import { PlFlagIcon } from "@/assets/icons/pl-flag";
@@ -30,12 +31,12 @@ interface Top10HighScoresProps {
 // constants
 import { motionTokens, springs } from "@/lib/motion-tokens";
 
-const containerVariants = {
+const CONTAINER_VARIANTS = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.05, delayChildren: motionTokens.duration.fast } },
 } as const;
 
-const rowVariants = {
+const ROW_VARIANTS = {
   hidden: { opacity: 0, y: motionTokens.distance.sm },
   visible: { opacity: 1, y: 0, transition: springs.gentle },
 } as const;
@@ -64,13 +65,13 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
       ) : (
         <Table>
           <Top10TableHeader />
-          <MotionTableBody variants={containerVariants} initial="hidden" animate="visible">
+          <MotionTableBody variants={CONTAINER_VARIANTS} initial="hidden" animate="visible">
             {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
               <MotionTableRow
                 key={id}
                 id={id === newHighScoreId.valueOrUndefined ? "newHighScoreRow" : undefined}
                 className={cn("odd:bg-surface-2", id === newHighScoreId.valueOrUndefined && "animate-wiggle bg-accent odd:bg-accent")}
-                variants={rowVariants}
+                variants={ROW_VARIANTS}
               >
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{playerName}</TableCell>
@@ -90,31 +91,4 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
       )
     )
     .render();
-}
-
-const TOP10_SKELETON_ROWS = [...Array(10)].map((_, index: number) => (
-  <TableRow key={index} className="odd:bg-surface-2">
-    <TableCell>{index + 1}</TableCell>
-    <TableCell>
-      <div className="mx-auto h-4 w-12 animate-pulse bg-accent" />
-    </TableCell>
-    <TableCell className="bg-accent/30">
-      <div className="mx-auto h-4 w-16 animate-pulse bg-accent" />
-    </TableCell>
-    <TableCell className="bg-destructive/30">
-      <div className="mx-auto h-4 w-8 animate-pulse bg-accent" />
-    </TableCell>
-    <TableCell>
-      <div className="mx-auto size-11 animate-pulse bg-accent" />
-    </TableCell>
-  </TableRow>
-));
-
-export function Top10HighScoresSkeleton() {
-  return (
-    <Table>
-      <Top10TableHeader />
-      <TableBody>{TOP10_SKELETON_ROWS}</TableBody>
-    </Table>
-  );
 }

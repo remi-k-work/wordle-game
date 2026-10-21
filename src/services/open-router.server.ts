@@ -10,6 +10,11 @@ import type { SolutionsLanguage } from "@/features/game/domain/models";
 // constants
 import { VOICES_PL } from "@/domain/constants";
 
+// Compiled once at module scope instead of on every speech request
+// (js-cache-function-results)
+const decodeSpeechRequest = Schema.decodeEffect(SpeechRequest);
+const isOpenRouterError = Schema.is(OpenRouterError);
+
 export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
   make: Effect.gen(function* () {
     const apiKey = yield* Config.Redacted("OPENROUTER_API_KEY");
@@ -28,7 +33,7 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
       function* ({ input, voice }: { readonly input: string; readonly voice?: string }) {
         // Decode and validate the text and optional voice at the service boundary
         // (`optionalKey` requires the key to be absent, not explicitly `undefined`)
-        const speechRequest = yield* Schema.decodeEffect(SpeechRequest)(voice === undefined ? { input } : { input, voice });
+        const speechRequest = yield* decodeSpeechRequest(voice === undefined ? { input } : { input, voice });
 
         // Execute request
         const request = yield* HttpClientRequest.bodyJson(speechRequest)(HttpClientRequest.post("/audio/speech"));
@@ -55,7 +60,7 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
 
         return { audioData, generationId } as const;
       },
-      Effect.mapError((cause) => (Schema.is(OpenRouterError)(cause) ? cause : new OpenRouterError({ cause })))
+      Effect.mapError((cause) => (isOpenRouterError(cause) ? cause : new OpenRouterError({ cause })))
     );
 
     return { generateSpeech } as const;

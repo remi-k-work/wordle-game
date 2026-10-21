@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 // components
-import { Popover } from "@base-ui/react";
+import { Popover } from "@base-ui/react/popover";
 
 // types
 import type { ReactNode } from "react";
@@ -26,7 +26,7 @@ const POPOVER_POPUP_CLASSES = cn(
 
 // Shared popover chrome for the in-game toolbar (hacks menu, riddle, game
 // menu). Keeps trigger hover behavior, positioning, and enter/exit styling
-// identical without copy-pasting Portal/Positioner/Popup scaffolding.
+// identical without copy-pasting Portal/Positioner/Popup scaffolding
 export function GamePopover({ title, trigger, open, onOpenChange, children, wide = false }: GamePopoverProps) {
   return (
     <Popover.Root open={open} onOpenChange={onOpenChange}>

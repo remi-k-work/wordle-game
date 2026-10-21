@@ -2,13 +2,14 @@
 import { cn } from "@/lib/utils";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { useGT } from "gt-tanstack-start";
 
 // assets
 import { ViewfinderCircleIcon as ViewfinderCircleIconS } from "@heroicons/react/24/solid";
 import { ViewfinderCircleIcon as ViewfinderCircleIconO } from "@heroicons/react/24/outline";
 
+// types
 interface DotProps {
   index: number;
   selected: boolean;

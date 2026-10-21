@@ -25,14 +25,18 @@ const SEGMENT_VARIANTS = {
 const MotionH1 = motion.create("h1");
 const MotionH2 = motion.create("h2");
 
+// Hoisted so they are compiled once instead of per render (js-hoist-regexp)
+const WORD_SPLIT_RE = /(\s+)/;
+const WHITESPACE_RE = /^\s+$/;
+
 export function RevealTitle({ className, Tag = "h1", title, unit = "word" }: RevealTitleProps) {
-  const segments = unit === "char" ? Array.from(title) : title.split(/(\s+)/);
+  const segments = unit === "char" ? Array.from(title) : title.split(WORD_SPLIT_RE);
   const MotionTag = Tag === "h1" ? MotionH1 : MotionH2;
 
   return (
     <MotionTag className={className} variants={CONTAINER_VARIANTS} initial="hidden" animate="visible" aria-label={title}>
       {segments.map((segment, index) =>
-        /^\s+$/.test(segment) ? (
+        WHITESPACE_RE.test(segment) ? (
           <span key={index} aria-hidden="true">
             {segment}
           </span>

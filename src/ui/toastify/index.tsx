@@ -1,5 +1,5 @@
 // components
-import { Toast } from "@base-ui/react";
+import { Toast } from "@base-ui/react/toast";
 import { ToastList } from "./toast-list";
 
 // types

@@ -8,7 +8,7 @@ import { ClientOnly } from "@tanstack/react-router";
 import { useGT } from "gt-tanstack-start";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 
 const ThemeChangerChunk = lazy(() => import("./theme-changer"));
 

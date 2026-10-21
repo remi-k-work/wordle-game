@@ -1,5 +1,5 @@
 // components
-import { Toast } from "@base-ui/react";
+import { Toast } from "@base-ui/react/toast";
 
 // assets
 import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline";

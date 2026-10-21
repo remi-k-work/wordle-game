@@ -10,7 +10,7 @@ import { speedMultiplierToCategoryMessage } from "@/features/game/domain/formatt
 import { formatSeconds } from "@/domain/formatters";
 
 // components
-import { Progress } from "@base-ui/react";
+import { Progress } from "@base-ui/react/progress";
 import { SimulatorSlider } from "./simulator-slider";
 
 // types

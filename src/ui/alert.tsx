@@ -3,7 +3,7 @@ import { useAtomSet } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state/alert";
 
 // components
-import { AlertDialog } from "@base-ui/react";
+import { AlertDialog } from "@base-ui/react/alert-dialog";
 import { T } from "gt-react";
 
 // assets

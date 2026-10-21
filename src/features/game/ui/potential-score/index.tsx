@@ -8,7 +8,7 @@ import { potentialScoreAsPercentage } from "@/features/game/domain/helpers";
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 
 // components
-import { Progress } from "@base-ui/react";
+import { Progress } from "@base-ui/react/progress";
 
 // constants
 import { motionTokens, springs } from "@/lib/motion-tokens";

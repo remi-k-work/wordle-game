@@ -7,7 +7,7 @@ import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { useGameFlowVariant } from "@/features/game/hooks/use-game-flow-variant";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { useGT } from "gt-tanstack-start";
 import { T } from "gt-react";
 import { FlowShell } from "./flow-shell";

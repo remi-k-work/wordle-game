@@ -5,7 +5,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { T, msg, useGT } from "gt-tanstack-start";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
 import { PageHeader } from "@/ui/page-header";
 import { SectionHeader } from "@/ui/section-header";
@@ -32,7 +32,7 @@ function Home() {
         )}
       />
       <RevealOnScroll>
-        <img src={hero} loading="eager" alt={gt("Wordle Overdrive")} className="h-auto w-full" />
+        <img src={hero} loading="eager" fetchPriority="high" alt={gt("Wordle Overdrive")} className="h-auto w-full" />
       </RevealOnScroll>
       <RevealOnScroll>
         <Button
@@ -49,12 +49,7 @@ function Home() {
 
       <RevealOnScroll staggerChildren>
         <SectionHeader title={msg("The Continuous Arcade Run (Accumulation vs. Wipeout)")} />
-        <img
-          src={pillar1}
-          loading="lazy"
-          alt={gt("The Continuous Arcade Run (Accumulation vs. Wipeout)")}
-          className="mx-auto h-auto w-full max-w-379"
-        />
+        <img src={pillar1} loading="lazy" alt={gt("The Continuous Arcade Run (Accumulation vs. Wipeout)")} className="mx-auto h-auto w-full max-w-379" />
         <br />
         <T>
           <p className="mx-auto px-1 text-center sm:text-xl lg:text-2xl">
@@ -74,12 +69,7 @@ function Home() {
 
       <RevealOnScroll staggerChildren>
         <SectionHeader title={msg("Bleeding Potential (Hunt Efficiently)")} />
-        <img
-          src={pillar2}
-          loading="lazy"
-          alt={gt("Bleeding Potential (Hunt Efficiently)")}
-          className="mx-auto h-auto w-full max-w-379"
-        />
+        <img src={pillar2} loading="lazy" alt={gt("Bleeding Potential (Hunt Efficiently)")} className="mx-auto h-auto w-full max-w-379" />
         <br />
         <T>
           <p className="mx-auto px-1 text-center sm:text-xl lg:text-2xl">
@@ -105,12 +95,7 @@ function Home() {
 
       <RevealOnScroll staggerChildren>
         <SectionHeader title={msg("Survival Tools (AI Riddles & Smart Keypad)")} />
-        <img
-          src={pillar3}
-          loading="lazy"
-          alt={gt("Survival Tools (AI Riddles & Smart Keypad)")}
-          className="mx-auto h-auto w-full max-w-379"
-        />
+        <img src={pillar3} loading="lazy" alt={gt("Survival Tools (AI Riddles & Smart Keypad)")} className="mx-auto h-auto w-full max-w-379" />
         <br />
         <T>
           <p className="mx-auto px-1 text-center sm:text-xl lg:text-2xl">

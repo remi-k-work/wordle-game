@@ -6,7 +6,7 @@ import { useSpeechVoices } from "@/hooks/use-speech-voices";
 import { matchLanguage } from "@/features/game/domain/helpers";
 
 // components
-import { Select } from "@base-ui/react";
+import { Select } from "@base-ui/react/select";
 import { useGT } from "gt-tanstack-start";
 import { T } from "gt-react";
 

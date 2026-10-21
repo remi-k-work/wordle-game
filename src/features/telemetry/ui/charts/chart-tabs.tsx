@@ -5,7 +5,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 // components
-import { Tabs } from "@base-ui/react";
+import { Tabs } from "@base-ui/react/tabs";
 import { ChartTab, ChartTabSkeleton } from "@/ui/chart-tab";
 import { ChartPanel, ChartPanelSkeleton } from "@/ui/chart-panel";
 

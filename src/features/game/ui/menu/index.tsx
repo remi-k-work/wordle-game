@@ -6,7 +6,7 @@ import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state/modal";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { useGT } from "gt-tanstack-start";
 import { T } from "gt-react";
 import { GamePopover } from "@/ui/game-popover";

@@ -3,7 +3,7 @@ import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state/modal";
 
 // components
-import { Dialog } from "@base-ui/react";
+import { Dialog } from "@base-ui/react/dialog";
 import { RevealTitle } from "@/ui/reveal-title";
 
 // types

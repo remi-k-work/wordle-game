@@ -1,5 +1,5 @@
 // react
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 // tanstack
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -15,29 +15,30 @@ interface NavigateFn {
   (newRoute: string, paramsToSet: QueryParams): void;
 }
 
+// Merges `paramsToSet` into the current search, mirroring the old URLSearchParams
+// behavior: values are stringified (arrays joined with `,`) and empty strings delete
+const applyParams = (current: Record<string, string | undefined>, values: QueryParams): Record<string, string | undefined> => {
+  const next = { ...current };
+  for (const [key, value] of Object.entries(values)) {
+    const serialized = typeof value === "string" ? value : typeof value === "number" ? String(value) : value.join(",");
+    if (serialized === "") delete next[key];
+    else next[key] = serialized;
+  }
+  return next;
+};
+
 // A hook to programmatically navigate to a new url with updated search parameters
 // (it preserves existing search params: TanStack Router keeps the current search
 // unless the key is explicitly overwritten by `paramsToSet`)
 export function useUrlScribe() {
   const navigateFn = useNavigate();
 
-  // The raw query-string tail of the current location, as a stable URLSearchParams
-  // snapshot (consumers re-sync only when the actual query changes)
-  const searchParams = useRouterState({
-    select: ({ location }) => new URLSearchParams(location.searchStr),
-  });
-
-  // Merges `paramsToSet` into the current search, mirroring the old URLSearchParams
-  // behavior: values are stringified (arrays joined with `,`) and empty strings delete
-  const applyParams = (current: Record<string, string | undefined>, values: QueryParams): Record<string, string | undefined> => {
-    const next = { ...current };
-    for (const [key, value] of Object.entries(values)) {
-      const serialized = typeof value === "string" ? value : typeof value === "number" ? String(value) : value.join(",");
-      if (serialized === "") delete next[key];
-      else next[key] = serialized;
-    }
-    return next;
-  };
+  // Subscribe to the primitive query string, then parse it into a URLSearchParams
+  // memoized on that string (rerender-dependencies: selecting the parsed object
+  // directly would allocate a fresh identity on every router-store notification
+  // and re-render consumers on unrelated navigations)
+  const searchStr = useRouterState({ select: ({ location }) => location.searchStr });
+  const searchParams = useMemo(() => new URLSearchParams(searchStr), [searchStr]);
 
   // Programmatically navigates to a new url with updated search params
   const navigate = useCallback(

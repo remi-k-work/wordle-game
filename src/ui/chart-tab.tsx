@@ -1,5 +1,5 @@
 // components
-import { Tabs } from "@base-ui/react";
+import { Tabs } from "@base-ui/react/tabs";
 
 // types
 import type { ReactNode } from "react";

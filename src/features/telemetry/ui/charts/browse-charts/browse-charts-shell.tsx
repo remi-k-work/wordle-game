@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 // components
-import { Switch } from "@base-ui/react";
+import { Switch } from "@base-ui/react/switch";
 
 // assets
 import { PlFlagIcon } from "@/assets/icons/pl-flag";

@@ -8,7 +8,7 @@ import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { Toolbar, ToolbarSkeleton } from "./toolbar";
 import { KeypadPool, KeypadPoolSkeleton } from "./keypad-pool";
 

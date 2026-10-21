@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { FlowLabel } from "./flow-label";
 
 // types

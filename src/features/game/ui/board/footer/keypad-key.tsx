@@ -5,7 +5,7 @@ import { memo } from "react";
 import { motion } from "motion/react";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 
 // types
 import type { Color } from "@/features/game/domain/models";

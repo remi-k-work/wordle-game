@@ -86,6 +86,9 @@ export const ROOT_HEAD = {
     { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", href: "/apple-icon.png" },
     { rel: "manifest", href: "/manifest.webmanifest" },
+    // The footer links out to the portfolio site and loads its thumbnail image
+    // (rendering-resource-hints)
+    { rel: "preconnect", href: "https://www.remiforge.dev" },
   ],
 };
 
@@ -158,6 +161,7 @@ function FooterLink() {
         height="630"
         alt={gt("RemiForge Portfolio")}
         loading="lazy"
+        decoding="async"
         className="aspect-1200/630 h-auto w-32 flex-none rounded-lg object-cover"
       />
       <div className="min-w-56 flex-1">

@@ -5,7 +5,7 @@ import { usePlayAudioBuffer } from "@/hooks/use-play-audio-buffer";
 import { useSpeakText } from "@/hooks/use-speak-text";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 
 // assets
 import { SpeakerWaveIcon } from "@heroicons/react/24/outline";

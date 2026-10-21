@@ -165,7 +165,10 @@ export const overdriveHacksMachine = setup({
     forwardKeyPress: ({ context, event }) => {
       assertEvent(event, "input.keyPressed");
       const normalizedKey = event.pressedKey.toUpperCase();
-      if (context.empNukedLetters.includes(normalizedKey)) return;
+      // The nuked list is empty for nearly every keystroke, so skip the scan then
+      // (js-length-check-first; word-challenge's greyLetters keeps a HashSet for the
+      // same reason, but this list holds at most a handful of letters per run)
+      if (context.empNukedLetters.length > 0 && context.empNukedLetters.includes(normalizedKey)) return;
 
       void runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },

@@ -11,8 +11,8 @@ import { HighScorePage } from "@/features/high-score/domain/models";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 // components
-import { PageHeader, PageHeaderSkeleton } from "@/ui/page-header";
-import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
+import { PageHeader } from "@/ui/page-header";
+import { Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores/skeleton";
 
 // Skeletons live in dedicated recharts-free modules (see the per-module ./skeleton
 // files) so this statically-bundled route chunk stays lean; the real chart sections
@@ -31,6 +31,10 @@ const BestRunTrophyCardChart = lazy(() => import("@/features/telemetry/ui/charts
 const TotalsSlider = lazy(() => import("@/features/telemetry/ui/charts/totals-slider").then((m) => ({ default: m.TotalsSlider })));
 const DistributionCharts = lazy(() => import("@/features/telemetry/ui/charts/distributions").then((m) => ({ default: m.DistributionCharts })));
 const FrequencyCharts = lazy(() => import("@/features/telemetry/ui/charts/frequencies").then((m) => ({ default: m.FrequencyCharts })));
+
+// The top-10 table lazily loads too: its module pulls in the motion runtime, which
+// would otherwise land in this statically-bundled route chunk (bundle-dynamic-imports)
+const Top10HighScores = lazy(() => import("@/features/high-score/ui/top-10-high-scores").then((m) => ({ default: m.Top10HighScores })));
 
 export const Route = createFileRoute("/high-score")({
   // The same page schema that validates the route inputs
@@ -60,12 +64,9 @@ export const Route = createFileRoute("/high-score")({
 
 function HighScore() {
   const { sl } = Route.useLoaderData();
-  return (
-    // Page remains the fast, static shell
-    <Suspense fallback={<PageSkeleton />}>
-      <PageContent solutionsLanguage={sl} />
-    </Suspense>
-  );
+  // PageContent is synchronous; every lazily-loading section below carries its own
+  // Suspense boundary, so no outer fallback is needed
+  return <PageContent solutionsLanguage={sl} />;
 }
 
 function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLanguage }) {
@@ -78,7 +79,9 @@ function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLangua
       <Suspense fallback={<BrowseChartsSkeleton />}>
         <BrowseCharts />
       </Suspense>
-      <Top10HighScores solutionsLanguage={solutionsLanguage} />
+      <Suspense fallback={<Top10HighScoresSkeleton />}>
+        <Top10HighScores solutionsLanguage={solutionsLanguage} />
+      </Suspense>
       <Suspense fallback={<BestRunTrophyCardChartSkeleton />}>
         <BestRunTrophyCardChart solutionsLanguage={solutionsLanguage} />
       </Suspense>
@@ -91,23 +94,6 @@ function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLangua
       <Suspense fallback={<FrequencyChartsSkeleton />}>
         <FrequencyCharts solutionsLanguage={solutionsLanguage} />
       </Suspense>
-    </article>
-  );
-}
-
-function PageSkeleton() {
-  return (
-    <article className="mx-auto w-full max-w-384">
-      <PageHeaderSkeleton
-        title={msg("High Score & Charts")}
-        description={msg("The following section displays the top 10 scores, along with various informative game charts.")}
-      />
-      <BrowseChartsSkeleton />
-      <Top10HighScoresSkeleton />
-      <BestRunTrophyCardChartSkeleton />
-      <TotalsSliderSkeleton />
-      <DistributionChartsSkeleton />
-      <FrequencyChartsSkeleton />
     </article>
   );
 }

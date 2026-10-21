@@ -1,10 +1,11 @@
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { useGT } from "gt-tanstack-start";
 
 // assets
 import { PrevIcon } from "@/assets/icons/prev";
 
+// types
 interface PrevProps {
   disabled: boolean;
   onPrev: () => void;

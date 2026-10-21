@@ -13,7 +13,7 @@ import {
 import { modalMachineAtom } from "@/state/modal";
 
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { useGT, useLocale } from "gt-tanstack-start";
 import { T, Var } from "gt-react";
 import { GamePopover } from "@/ui/game-popover";

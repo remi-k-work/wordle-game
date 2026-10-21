@@ -1,5 +1,5 @@
 // components
-import { Slider } from "@base-ui/react";
+import { Slider } from "@base-ui/react/slider";
 
 // types
 interface SimulatorSliderProps {

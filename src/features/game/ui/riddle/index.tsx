@@ -1,5 +1,5 @@
 // components
-import { Button } from "@base-ui/react";
+import { Button } from "@base-ui/react/button";
 import { Content, ContentSkeleton } from "./content";
 import { RiddlePopover } from "./riddle-popover";
 
