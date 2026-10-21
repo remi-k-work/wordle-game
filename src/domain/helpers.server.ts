@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Config, Effect, Layer } from "effect";
+import { Config, Effect, Layer, Scheduler } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
@@ -7,10 +7,30 @@ import { RpcLogger } from "@/services/rpc-logger";
 // types
 import type { Rpc } from "effect/rpc";
 
+const isWorkerd = typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
+
+// Belt-and-braces for workerd: the default async scheduler dispatches fibers
+// through setImmediate timers owned by the request that first scheduled them,
+// so any fiber outliving that request dies with "Cannot call this
+// AsyncLocalStorage bound function outside of the request in which it was
+// created". The sync scheduler dispatches via microtasks, which are not
+// request-owned. (See Scheduler.MixedScheduler and the Workers recipe on
+// HttpRouter.toWebHandler; the per-request runtime below is the primary fix.)
+const SyncScheduler = Layer.succeed(Scheduler.Scheduler, new Scheduler.MixedScheduler("sync"));
+
 // Builds the web handler for an RPC group's HTTP route. disableFatalDefects serializes defects
 // as an Exit instead of closing the connection; disableTracing is deliberate (no tracer configured)
 // The handlers layer claims Rpc.ServicesServer too: the schema services those requirements resolve
 // to for a concrete group are already covered, and the claim is checked at each call site
+//
+// On workerd the handler builds the router into a fresh runtime per request and
+// disposes it after the response: request-created sockets are destroyed when the
+// request ends (a shared pool's connections go stale and reusing them hangs), and
+// shared schedulers/timers are AsyncLocalStorage-bound to their creating request.
+// A per-request runtime gives the PG connection, the pool and every fiber they
+// spawn exactly the request's lifetime — the same one-client-per-request shape
+// Cloudflare documents for Hyperdrive. Node has neither constraint, so it keeps a
+// single module-scoped handler
 export const makeRpcHandler = <Rpcs extends Rpc.Any, LE>(
   group: RpcGroup.RpcGroup<Rpcs>,
   path: HttpRouter.PathInput,
@@ -22,7 +42,24 @@ export const makeRpcHandler = <Rpcs extends Rpc.Any, LE>(
     protocol: "http",
     disableFatalDefects: true,
     disableTracing: true,
-  }).pipe(Layer.provide(Layer.mergeAll(handlersLayer, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices, RpcLogger.layer)));
+  }).pipe(
+    Layer.provide(Layer.mergeAll(handlersLayer, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices, RpcLogger.layer)),
+    Layer.provideMerge(SyncScheduler)
+  );
+
+  if (isWorkerd) {
+    // The handler's `context` parameter stays a required, unresolved generic inside
+    // this function (it resolves to optional at the concrete route call sites, which
+    // type-check), and the runtime handler treats a missing context as empty — the
+    // single-argument call is sound
+    return {
+      handler: (request: Request) => {
+        const app = HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });
+        const dispatch = app.handler as (request: Request, context?: unknown) => Promise<Response>;
+        return dispatch(request).finally(app.dispose);
+      },
+    };
+  }
 
   return HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });
 };

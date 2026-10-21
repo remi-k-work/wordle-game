@@ -1,22 +1,27 @@
 // react
 import { Suspense, lazy } from "react";
 
+// tanstack
+import { ClientOnly } from "@tanstack/react-router";
+
+// services, features, and other libraries
+import { useGT } from "gt-tanstack-start";
+
 // components
 import { Button } from "@base-ui/react";
-import { SunIcon } from "@heroicons/react/24/outline";
-import { useGT } from "gt-tanstack-start";
 
 const ThemeChangerChunk = lazy(() => import("./theme-changer"));
 
-export function ThemeChanger() {
-  // Client-only toggle: next-themes resolves nothing on the server, so the shell
-  // renders the disabled skeleton and the swap happens after hydration / chunk load
-  if (typeof window === "undefined") return <ThemeChangerSkeleton />;
+// assets
+import { SunIcon } from "@heroicons/react/24/outline";
 
+export function ThemeChanger() {
   return (
-    <Suspense fallback={<ThemeChangerSkeleton />}>
-      <ThemeChangerChunk />
-    </Suspense>
+    <ClientOnly fallback={<ThemeChangerSkeleton />}>
+      <Suspense fallback={<ThemeChangerSkeleton />}>
+        <ThemeChangerChunk />
+      </Suspense>
+    </ClientOnly>
   );
 }
 

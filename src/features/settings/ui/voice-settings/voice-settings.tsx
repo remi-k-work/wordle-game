@@ -5,7 +5,7 @@ import { Rate, RateSkeleton } from "./rate";
 import { Pitch, PitchSkeleton } from "./pitch";
 import { Riddle, RiddleSkeleton } from "@/features/game/ui/riddle";
 
-export default function VoiceSettings() {
+export function VoiceSettings() {
   return (
     <article className="bg-surface-2 p-3 text-start">
       <Voice />

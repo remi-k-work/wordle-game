@@ -5,8 +5,8 @@ import { Suspense } from "react";
 import { cn } from "@/lib/utils";
 
 // components
-import Logo from "./logo";
-import NavItem, { NavItemSkeleton } from "./nav-item";
+import { Logo } from "./logo";
+import { NavItem, NavItemSkeleton } from "./nav-item";
 import { ThemeChanger, ThemeChangerSkeleton } from "./theme-changer";
 import { LangChanger, LangChangerSkeleton } from "./lang-changer";
 

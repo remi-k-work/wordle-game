@@ -1,4 +1,3 @@
-
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
 import { RpcTelemetry } from "./requests";

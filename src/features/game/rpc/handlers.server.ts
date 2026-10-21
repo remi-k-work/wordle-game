@@ -1,4 +1,3 @@
-
 // services, features, and other libraries
 import { Effect, HashSet, Layer, Option, Schema } from "effect";
 import { RpcGame } from "./requests";

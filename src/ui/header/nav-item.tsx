@@ -30,7 +30,7 @@ const compilePattern = (match: string) => {
   return regex;
 };
 
-export default function NavItem({ href, match, title, icon, isExternal = false }: NavItemProps) {
+export function NavItem({ href, match, title, icon, isExternal = false }: NavItemProps) {
   const pathname = useRouterState({ select: ({ location }) => location.pathname });
   const messages = useMessages();
 

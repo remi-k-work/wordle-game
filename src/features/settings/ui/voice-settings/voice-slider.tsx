@@ -15,6 +15,15 @@ interface VoiceSliderFieldProps {
   onValueChange: (value: number) => void;
 }
 
+interface VoiceSliderSkeletonProps {
+  name: string;
+  label: ReactNode;
+  min: number;
+  max: number;
+  step: number;
+  skeletonValue?: number;
+}
+
 // Single chrome for Volume/Rate/Pitch — only range, value, and event differ.
 export function VoiceSliderField({ name, label, min, max, step, value, disabled = false, onValueChange }: VoiceSliderFieldProps) {
   return (
@@ -38,15 +47,6 @@ export function VoiceSliderField({ name, label, min, max, step, value, disabled 
       </Slider.Control>
     </Slider.Root>
   );
-}
-
-interface VoiceSliderSkeletonProps {
-  name: string;
-  label: ReactNode;
-  min: number;
-  max: number;
-  step: number;
-  skeletonValue?: number;
 }
 
 export function VoiceSliderSkeleton({ name, label, min, max, step, skeletonValue = 1 }: VoiceSliderSkeletonProps) {

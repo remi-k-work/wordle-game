@@ -13,7 +13,7 @@ import { motionTokens, springs } from "@/lib/motion-tokens";
 
 const MotionLink = motion.create(Link);
 
-export default function Logo() {
+export function Logo() {
   const gt = useGT();
 
   return (

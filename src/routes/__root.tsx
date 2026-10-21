@@ -58,9 +58,9 @@ export const ROOT_HEAD = {
     { name: "keywords", content: KEYWORDS },
     { name: "google", content: "notranslate" },
 
-    // iOS "Add to Home Screen": launch in a standalone window without Safari's URL bar.
-    // The Web App Manifest (routes/manifest[.]webmanifest) covers Android Chrome.
-    { name: "apple-mobile-web-app-capable", content: "yes" },
+    // iOS "Add to Home Screen": launch in a standalone window without Safari's URL bar
+    // The Web App Manifest (routes/manifest[.]webmanifest) covers Android Chrome
+    { name: "mobile-web-app-capable", content: "yes" },
     { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
     { name: "apple-mobile-web-app-title", content: "Wordle Overdrive" },
 

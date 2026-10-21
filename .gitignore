@@ -37,3 +37,6 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# tanstack cli generated artifacts
+/.tanstack/
