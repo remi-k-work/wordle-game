@@ -20,7 +20,7 @@ export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: b
   PgClient.layer({
     ...pgConfig,
     url: databaseUrl,
-    ssl,
+    // ssl,
     idleTimeout: "10 seconds",
     connectTimeout: "10 seconds",
     ...(isWorkerd ? { connectionTTL: "0 seconds" as const } : {}),
