@@ -1,11 +1,12 @@
 // oxlint-disable typescript/no-misused-spread
 
 // services, features, and other libraries
-import { Array, Effect, Option, Random } from "effect";
+import { Effect, Option, Random } from "effect";
 import { Atom } from "effect/reactivity";
-import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
+import { effectActor } from "@/lib/effect-actor";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { assign, setup, fromPromise } from "xstate";
+import { assign, setup } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 import { wordMetaMachineAtom } from "@/features/game/state/word-meta";
@@ -14,46 +15,33 @@ import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/over
 // types
 import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
-interface OnLoadingActorArgs {
-  input: { solutionsLanguage?: SolutionsLanguage };
-  signal: AbortSignal;
+interface OnLoadingInput {
+  solutionsLanguage?: SolutionsLanguage;
 }
 
-interface SelectSecretWordActorArgs {
-  input: { solutions: Option.Option.Value<GameData["solutions"]> };
-  signal: AbortSignal;
+interface SelectSecretWordInput {
+  solutions: Option.Option.Value<GameData["solutions"]>;
 }
 
 // constants
 import { INITIAL_GAME_DATA } from "@/features/game/domain/constants";
 
 // Load the needed game data and create the dictionary of valid words
-const onLoadingActor = fromPromise(({ input, signal }: OnLoadingActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const solutionsLanguage = input.solutionsLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
+const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: OnLoadingInput) =>
+  Effect.gen(function* () {
+    const solutionsLanguage = requestedLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
 
-      const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
-      const { solutions, dictionary, keypad } = yield* Effect.all(
-        { solutions: fetchSolutions({ solutionsLanguage }), dictionary: fetchDictionary({ solutionsLanguage }), keypad: fetchKeypad({ solutionsLanguage }) },
-        { concurrency: 3 }
-      );
+    const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
+    const { solutions, dictionary, keypad } = yield* Effect.all(
+      { solutions: fetchSolutions({ solutionsLanguage }), dictionary: fetchDictionary({ solutionsLanguage }), keypad: fetchKeypad({ solutionsLanguage }) },
+      { concurrency: 3 }
+    );
 
-      return { solutions, dictionary, keypad } as const satisfies GameData;
-    }),
-    { signal }
-  )
+    return { solutions, dictionary, keypad } as const satisfies GameData;
+  })
 );
 
-const selectSecretWordActor = fromPromise(({ input: { solutions }, signal }: SelectSecretWordActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const randomIndex = yield* Random.nextIntBetween(0, solutions.length);
-      return (yield* Effect.fromOption(Array.get(solutions, randomIndex))).toUpperCase();
-    }),
-    { signal }
-  )
-);
+const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) => Random.choice(solutions));
 
 export const gameDataMachine = setup({
   types: {} as {

@@ -5,6 +5,9 @@ import { msg } from "gt-tanstack-start";
 // types
 import type { Color, GameData, RunSession, WordChallenge, WordMeta } from "./models";
 
+// Stable category identifiers for UI presentation (the message map above is the source of truth)
+export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP;
+
 // constants
 export const WORD_LENGTH = 5;
 export const MAX_TURNS = 6;
@@ -15,12 +18,27 @@ export const BASE_POINTS_PER_TURN_MAP: Readonly<Partial<Record<number, number>>>
 // Annotated (not cast): Record<Color, number> enforces that every color has a priority and rejects unknown keys
 export const COLOR_PRIORITY: Readonly<Record<Color, number>> = { grey: 0, yellow: 1, green: 2, red: 3, "": -1 };
 
+export const SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP = {
+  "speed-demon": msg("🚀 Speed Demon"),
+  "quick-thinker": msg("⚡ Quick Thinker"),
+  "average-pacer": msg("⏱️ Average Pacer"),
+  "slow-learner": msg("🐌 Slow Learner"),
+} as const;
+
+// Each rule owns both its multiplier and its presentation category, so the two cannot drift apart
 export const SPEED_MULTIPLIER_RULES = [
-  { maxSeconds: 30, multiplier: 1.5 },
-  { maxSeconds: 60, multiplier: 1.2 },
-  { maxSeconds: 180, multiplier: 1.0 },
-  { maxSeconds: Infinity, multiplier: 0.8 },
-] as const;
+  { maxSeconds: 30, multiplier: 1.5, category: "speed-demon" },
+  { maxSeconds: 60, multiplier: 1.2, category: "quick-thinker" },
+  { maxSeconds: 180, multiplier: 1.0, category: "average-pacer" },
+  { maxSeconds: Infinity, multiplier: 0.8, category: "slow-learner" },
+] as const satisfies ReadonlyArray<{ readonly maxSeconds: number; readonly multiplier: number; readonly category: SpeedMultiplierCategory }>;
+
+export const SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP = {
+  "speed-demon": "🚀",
+  "quick-thinker": "⚡",
+  "average-pacer": "⏱️",
+  "slow-learner": "🐌",
+} as const satisfies Readonly<Record<SpeedMultiplierCategory, string>>;
 
 export const POTENTIAL_SCORE_RANGE = {
   min: Math.round(
@@ -32,30 +50,6 @@ export const POTENTIAL_SCORE_RANGE = {
       Math.max(...SPEED_MULTIPLIER_RULES.map(({ multiplier }) => multiplier))
   ),
 } as const;
-
-export const SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP = {
-  "speed-demon": msg("🚀 Speed Demon"),
-  "quick-thinker": msg("⚡ Quick Thinker"),
-  "average-pacer": msg("⏱️ Average Pacer"),
-  "slow-learner": msg("🐌 Slow Learner"),
-} as const;
-
-// Stable category identifiers for UI presentation (the message map above is the source of truth)
-export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP;
-
-export const SPEED_MULTIPLIER_CATEGORY_MAP: Readonly<Partial<Record<number, SpeedMultiplierCategory>>> = {
-  1.5: "speed-demon",
-  1.2: "quick-thinker",
-  1.0: "average-pacer",
-  0.8: "slow-learner",
-};
-
-export const SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP: Readonly<Record<SpeedMultiplierCategory, string>> = {
-  "speed-demon": "🚀",
-  "quick-thinker": "⚡",
-  "average-pacer": "⏱️",
-  "slow-learner": "🐌",
-};
 
 export const INITIAL_GAME_DATA = {
   solutions: Option.none(),

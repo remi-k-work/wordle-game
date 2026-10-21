@@ -3,15 +3,16 @@
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
-import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
+import { effectActor } from "@/lib/effect-actor";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
-import { setup, assign, fromPromise, assertEvent } from "xstate";
+import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { wordChallengeMachineAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from "@/features/game/state/word-challenge";
 import { wordMetaTheRiddleAtom, wordMetaWordDefinitionAtom } from "@/features/game/state/word-meta";
-import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/can-apply";
 import { calculateEmpTargets } from "@/features/overdrive-hacks/domain/emp";
 import { calculateSonarTarget } from "@/features/overdrive-hacks/domain/sonar";
 import { modalMachineAtom } from "@/state/modal";
@@ -19,109 +20,94 @@ import { modalMachineAtom } from "@/state/modal";
 // types
 import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 
-interface ApplyEmpHackActorArgs {
-  input: { empNukedLetters: OverdriveHacks["empNukedLetters"] };
-  signal: AbortSignal;
+interface ApplyEmpHackInput {
+  empNukedLetters: OverdriveHacks["empNukedLetters"];
 }
 
-interface ApplySonarHackActorArgs {
-  input: { sonarReveals: OverdriveHacks["sonarReveals"] };
-  signal: AbortSignal;
+interface ApplySonarHackInput {
+  sonarReveals: OverdriveHacks["sonarReveals"];
 }
 
-interface FetchOverrideAudioActorArgs {
-  input: { theOverride: OverdriveHacks["theOverride"] };
-  signal: AbortSignal;
+interface FetchOverrideAudioInput {
+  theOverride: OverdriveHacks["theOverride"];
 }
 
 // constants
 import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
-const applyEmpHackActor = fromPromise(({ input: { empNukedLetters }, signal }: ApplyEmpHackActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-      const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("emp"));
-      if (!canApplyHack) return Option.none();
+const applyEmpHackActor = effectActor(({ empNukedLetters }: ApplyEmpHackInput) =>
+  Effect.gen(function* () {
+    // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
+    const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("emp"));
+    if (!canApplyHack) return Option.none();
 
-      const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
-      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-      const keypad = yield* Effect.fromOption(yield* Atom.get(gameDataKeypadAtom));
+    const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
+    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+    const keypad = yield* Effect.fromOption(yield* Atom.get(gameDataKeypadAtom));
 
-      const empTargets = yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
+    const empTargets = yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
 
-      // Charge the player's run score for the hack, if applicable
-      if (Option.isSome(empTargets)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("emp") });
+    // Charge the player's run score for the hack, if applicable
+    if (Option.isSome(empTargets)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("emp") });
 
-      return empTargets;
-    }),
-    { signal }
-  )
+    return empTargets;
+  })
 );
 
-const applySonarHackActor = fromPromise(({ input: { sonarReveals }, signal }: ApplySonarHackActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-      const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("sonar"));
-      if (!canApplyHack) return Option.none();
+const applySonarHackActor = effectActor(({ sonarReveals }: ApplySonarHackInput) =>
+  Effect.gen(function* () {
+    // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
+    const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("sonar"));
+    if (!canApplyHack) return Option.none();
 
-      const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
-      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+    const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
+    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-      const sonarTarget = yield* calculateSonarTarget(
-        theSecretWord,
-        wordleGuesses,
-        VOWELS_BY_LANGUAGE[solutionsLanguage],
-        sonarReveals.map((reveal) => reveal.vowel)
-      );
+    const sonarTarget = yield* calculateSonarTarget(
+      theSecretWord,
+      wordleGuesses,
+      VOWELS_BY_LANGUAGE[solutionsLanguage],
+      sonarReveals.map((reveal) => reveal.vowel)
+    );
 
-      // Charge the player's run score for the hack, if applicable
-      if (Option.isSome(sonarTarget)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("sonar") });
+    // Charge the player's run score for the hack, if applicable
+    if (Option.isSome(sonarTarget)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("sonar") });
 
-      return sonarTarget;
-    }),
-    { signal }
-  )
+    return sonarTarget;
+  })
 );
 
-const applyOverrideHackActor = fromPromise(({ signal }: { signal: AbortSignal }) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-      const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("override"));
-      if (!canApplyHack) return Option.none();
+const applyOverrideHackActor = effectActor(() =>
+  Effect.gen(function* () {
+    // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
+    const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("override"));
+    if (!canApplyHack) return Option.none();
 
-      const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
-      const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
-      const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
-      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+    const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
+    const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
+    const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
+    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-      const { fetchOverride } = yield* RpcOverdriveHacksClient;
-      const theOverride = yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
+    const { fetchOverride } = yield* RpcOverdriveHacksClient;
+    const theOverride = yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
 
-      // Charge the player's run score for the hack, if applicable
-      if (Option.isSome(theOverride)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
+    // Charge the player's run score for the hack, if applicable
+    if (Option.isSome(theOverride)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
 
-      return theOverride;
-    }),
-    { signal }
-  )
+    return theOverride;
+  })
 );
 
-const fetchOverrideAudioActor = fromPromise(({ input: { theOverride }, signal }: FetchOverrideAudioActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+const fetchOverrideAudioActor = effectActor(({ theOverride }: FetchOverrideAudioInput) =>
+  Effect.gen(function* () {
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-      const { fetchOverrideAudio } = yield* RpcOverdriveHacksClient;
-      if (Option.isNone(theOverride)) return Option.none();
-      return yield* fetchOverrideAudio({ input: theOverride.value, solutionsLanguage });
-    }),
-    { signal }
-  )
+    const { fetchOverrideAudio } = yield* RpcOverdriveHacksClient;
+    if (Option.isNone(theOverride)) return Option.none();
+    return yield* fetchOverrideAudio({ input: theOverride.value, solutionsLanguage });
+  })
 );
 
 export const overdriveHacksMachine = setup({

@@ -7,22 +7,16 @@ import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features
 // types
 import type { Tracer } from "effect";
 
-const normalizeMetricPayload = (payload: Metric.Metric.Snapshot["state"]) =>
+const normalizeMetricPayload = (snapshot: Metric.Metric.Snapshot) =>
   pipe(
-    Match.value(payload),
-    Match.when(
-      (state): state is Metric.FrequencyState => "occurrences" in state,
-      ({ occurrences }) => ({ occurrences: Object.fromEntries(occurrences) })
-    ),
-    Match.when(
-      (state): state is Metric.CounterState<number | bigint> => "incremental" in state,
-      (state) => ({ ...state, count: typeof state.count === "bigint" ? state.count.toString() : state.count })
-    ),
-    Match.when(
-      (state): state is Metric.GaugeState<number | bigint> => "value" in state,
-      (state) => ({ value: typeof state.value === "bigint" ? state.value.toString() : state.value })
-    ),
-    Match.orElse((state) => state)
+    Match.value(snapshot),
+    Match.when({ type: "Frequency" }, ({ state }) => ({ occurrences: Object.fromEntries(state.occurrences) })),
+    Match.when({ type: "Counter" }, ({ state }) => ({
+      ...state,
+      count: typeof state.count === "bigint" ? state.count.toString() : state.count,
+    })),
+    Match.when({ type: "Gauge" }, ({ state }) => ({ value: typeof state.value === "bigint" ? state.value.toString() : state.value })),
+    Match.orElse(({ state }) => state)
   );
 
 // fromJsonString combines JSON.parse + schema decoding (and JSON.stringify + encoding on the way back)
@@ -77,15 +71,16 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
       // A snapshot that fails to decode is logged and skipped (Option.none)
       // so one malformed metric cannot kill the processor stream
       const globalPulseRecords = Array.getSomes(
-        yield* Effect.forEach(snapshots, ({ id: metricName, attributes, state }) =>
+        yield* Effect.forEach(snapshots, (snapshot) =>
           Effect.gen(function* () {
+            const { id: metricName, attributes } = snapshot;
             return yield* Schema.decodeUnknownEffect(AddGlobalPulse)({
               sessionId: attributes?.["sessionId"],
               instanceId,
               solutionsLanguage: attributes?.["solutionsLanguage"],
               metricName,
               // We need to stringify the metric payload in order for equals to work (for stream deduping)
-              metricPayload: yield* Schema.encodeEffect(MetricPayloadFormJson)(normalizeMetricPayload(state)),
+              metricPayload: yield* Schema.encodeEffect(MetricPayloadFormJson)(normalizeMetricPayload(snapshot)),
             }).pipe(Effect.tapError(Effect.logError), Effect.option);
           })
         )

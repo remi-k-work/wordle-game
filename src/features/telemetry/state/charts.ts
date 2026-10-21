@@ -1,7 +1,7 @@
 // oxlint-disable typescript/no-misused-spread
 
 // services, features, and other libraries
-import { Effect, Option } from "effect";
+import { Effect } from "effect";
 import { Atom } from "effect/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -12,7 +12,7 @@ import type { SolutionsLanguage } from "@/features/game/domain/models";
 import type { AnyAvgStatArgs, AnyCounterArgs, BestRunTrophyCardArgs } from "@/features/telemetry/services/charts-db/models";
 
 // Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
-const nullToInfinity = (value: number | null) => Option.getOrElse(Option.fromNullOr(value), () => Infinity);
+const nullToInfinity = (value: number | null) => value ?? Infinity;
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   RuntimeAtom.atom(

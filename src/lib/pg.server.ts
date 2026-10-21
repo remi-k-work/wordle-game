@@ -16,7 +16,7 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.cam
 // scheduler (see domain/helpers.server.ts) — both fixes are required
 const isWorkerd = typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
 
-export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: boolean | object) =>
+export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: PgClient.PgPoolConfig["ssl"]) =>
   PgClient.layer({
     ...pgConfig,
     url: databaseUrl,
@@ -29,7 +29,7 @@ export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: b
 // Resolves the connection options shared by the live client layer and the migration runner:
 // `ENV` drives SSL, `DATABASE_URL` is always read from the redacted config
 export const connectConfig = Effect.gen(function* () {
-  const env = yield* Config.Literal("local", "ENV").pipe(Config.orElse(() => Config.succeed("prod" as const)));
+  const env = yield* Config.Literals(["local", "prod"], "ENV").pipe(Config.withDefault("prod"));
   const ssl = env !== "local" ? { rejectUnauthorized: false } : false;
   const databaseUrl = yield* Config.Redacted("DATABASE_URL");
 

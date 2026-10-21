@@ -6,10 +6,13 @@ import { msg } from "gt-tanstack-start";
 import type { TheSecretWord, Tile, WordChallenge } from "./models";
 
 // constants
-import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, SPEED_MULTIPLIER_RULES } from "./constants";
+import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, SPEED_MULTIPLIER_RULES } from "./constants";
+
+const speedMultiplierRule = (speedMultiplier: number) => Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.multiplier === speedMultiplier);
 
 // Maps a speed multiplier to a stable category identifier for UI presentation
-export const speedMultiplierToCategory = (speedMultiplier: number) => SPEED_MULTIPLIER_CATEGORY_MAP[speedMultiplier];
+export const speedMultiplierToCategory = (speedMultiplier: number) =>
+  Option.getOrUndefined(Option.map(speedMultiplierRule(speedMultiplier), (rule) => rule.category));
 
 // Format the current guess word into an array of letter objects with color coding
 export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChallenge["wordleGuesses"][number]): Tile[] => {
@@ -33,15 +36,15 @@ export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChall
 };
 
 export const speedMultiplierToCategoryMessage = (speedMultiplier: number) =>
-  Option.match(Option.fromNullishOr(speedMultiplierToCategory(speedMultiplier)), {
+  Option.match(speedMultiplierRule(speedMultiplier), {
     onNone: () => msg("Unknown"),
-    onSome: (category) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[category],
+    onSome: (rule) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[rule.category],
   });
 
 export const speedMultiplierToCategoryEmoji = (speedMultiplier: number) =>
-  Option.match(Option.fromNullishOr(speedMultiplierToCategory(speedMultiplier)), {
+  Option.match(speedMultiplierRule(speedMultiplier), {
     onNone: () => "?",
-    onSome: (category) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[category],
+    onSome: (rule) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[rule.category],
   });
 
 export const maxSecondsToSpeedMultiplier = (maxSeconds: number | null) =>

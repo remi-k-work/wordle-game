@@ -7,6 +7,7 @@ import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/gam
 
 // types
 import type { RunDeathReason, RunSession, WordChallenge } from "@/features/game/domain/models";
+type SharedAttributes = Effect.Success<typeof sharedAttributes>;
 
 // The attribute pair every tracker annotates its span/metric with: the current session id and the active solutions language
 const sharedAttributes = Effect.gen(function* () {
@@ -14,6 +15,10 @@ const sharedAttributes = Effect.gen(function* () {
   const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
   return { sessionId, solutionsLanguage } as const;
 });
+
+// Record one update against a metric, tagged with the current session attributes
+const trackMetric = <Input>(attributes: SharedAttributes, metric: Metric.Metric<Input, unknown>, input: Input) =>
+  Metric.update(metric.pipe(Metric.withAttributes(attributes)), input);
 
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSession, wordChallenge: WordChallenge) {
@@ -50,39 +55,39 @@ export const logRunCompleted = Effect.fn("logRunCompleted")(function* (runSessio
 
 // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
 export const trackInvalidGuessSubmitted = Effect.gen(function* () {
-  const { sessionId, solutionsLanguage } = yield* sharedAttributes;
-  yield* Metric.update(metrics.invalidGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
+  const attributes = yield* sharedAttributes;
+  yield* trackMetric(attributes, metrics.invalidGuesses, 1);
 });
 
 // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
 export const trackValidGuessSubmitted = Effect.fnUntraced(function* (wordChallenge: WordChallenge) {
-  const { sessionId, solutionsLanguage } = yield* sharedAttributes;
+  const attributes = yield* sharedAttributes;
   const currentGuessWord = wordChallenge.currentGuessWord;
   const currentTurn = wordChallenge.currentTurn;
 
-  yield* Metric.update(metrics.validGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
+  yield* trackMetric(attributes, metrics.validGuesses, 1);
 
   // Track the opening guess for the very first valid submission of the game
-  if (currentTurn === 1) yield* Metric.update(metrics.openingGuesses.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), currentGuessWord);
+  if (currentTurn === 1) yield* trackMetric(attributes, metrics.openingGuesses, currentGuessWord);
 });
 
 // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
 export const trackStartedNewRun = Effect.gen(function* () {
-  const { sessionId, solutionsLanguage } = yield* sharedAttributes;
-  yield* Metric.update(metrics.runsStarted.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
+  const attributes = yield* sharedAttributes;
+  yield* trackMetric(attributes, metrics.runsStarted, 1);
 });
 
 // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
 export const trackForfeitedRun = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
-  const { sessionId, solutionsLanguage } = yield* sharedAttributes;
+  const attributes = yield* sharedAttributes;
   const runId = runSession.runId;
   const streak = runSession.streak;
 
   // If the run has not started yet, there is nothing to track
   if (Option.isNone(runId)) return;
 
-  yield* Metric.update(metrics.arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);
-  yield* Metric.update(metrics.runDeathReason.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), "Forfeit");
+  yield* trackMetric(attributes, metrics.arcadeRunLength, streak);
+  yield* trackMetric(attributes, metrics.runDeathReason, "Forfeit");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
   yield* logRunCompleted(runSession, wordChallenge, "Forfeit");
@@ -90,15 +95,15 @@ export const trackForfeitedRun = Effect.fnUntraced(function* (runSession: RunSes
 
 // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
 export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
-  const { sessionId, solutionsLanguage } = yield* sharedAttributes;
+  const attributes = yield* sharedAttributes;
   const currentTurn = wordChallenge.currentTurn;
   const wordScore = yield* Effect.fromOption(wordChallenge.wordScore);
   const guessedTurn = currentTurn - 1;
 
-  yield* Metric.update(metrics.guessesToWin.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), guessedTurn);
-  yield* Metric.update(metrics.timeToSolve.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), Math.floor(wordScore.timeSeconds));
-  yield* Metric.update(metrics.gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
-  if (guessedTurn === 1) yield* Metric.update(metrics.perfectGames.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
+  yield* trackMetric(attributes, metrics.guessesToWin, guessedTurn);
+  yield* trackMetric(attributes, metrics.timeToSolve, Math.floor(wordScore.timeSeconds));
+  yield* trackMetric(attributes, metrics.gamesPlayed, 1);
+  if (guessedTurn === 1) yield* trackMetric(attributes, metrics.perfectGames, 1);
 
   // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
   yield* logWordWon(runSession, wordChallenge);
@@ -106,14 +111,14 @@ export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession,
 
 // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
 export const trackWordLost = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
-  const { sessionId, solutionsLanguage } = yield* sharedAttributes;
+  const attributes = yield* sharedAttributes;
   const streak = runSession.streak;
   const theSecretWord = yield* Effect.fromOption(wordChallenge.theSecretWord);
 
-  yield* Metric.update(metrics.gamesPlayed.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), 1);
-  yield* Metric.update(metrics.arcadeRunLength.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), streak);
-  yield* Metric.update(metrics.failedWords.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), theSecretWord);
-  yield* Metric.update(metrics.runDeathReason.pipe(Metric.withAttributes({ sessionId, solutionsLanguage })), "Guesses");
+  yield* trackMetric(attributes, metrics.gamesPlayed, 1);
+  yield* trackMetric(attributes, metrics.arcadeRunLength, streak);
+  yield* trackMetric(attributes, metrics.failedWords, theSecretWord);
+  yield* trackMetric(attributes, metrics.runDeathReason, "Guesses");
 
   // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
   yield* logRunCompleted(runSession, wordChallenge, "Guesses");

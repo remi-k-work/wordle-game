@@ -3,76 +3,69 @@
 // services, features, and other libraries
 import { Effect, Option, Result } from "effect";
 import { Atom } from "effect/reactivity";
-import { RuntimeClient } from "@/lib/runtime-client";
+import { effectActor } from "@/lib/effect-actor";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { assign, setup, fromPromise, assertEvent } from "xstate";
+import { assign, setup, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // types
 import type { TheSecretWord, WordMeta } from "@/features/game/domain/models";
 
-interface OnLoadingActorArgs {
-  input: { theSecretWord: TheSecretWord };
-  signal: AbortSignal;
+interface OnLoadingInput {
+  theSecretWord: TheSecretWord;
 }
 
-interface FetchAudioActorArgs {
-  input: { theRiddle: WordMeta["theRiddle"]; wordDefinition: WordMeta["wordDefinition"] };
-  signal: AbortSignal;
+interface FetchAudioInput {
+  theRiddle: WordMeta["theRiddle"];
+  wordDefinition: WordMeta["wordDefinition"];
 }
 
 // constants
 import { INITIAL_WORD_META } from "@/features/game/domain/constants";
 
-const onLoadingActor = fromPromise(({ input: { theSecretWord }, signal }: OnLoadingActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+const onLoadingActor = effectActor(({ theSecretWord }: OnLoadingInput) =>
+  Effect.gen(function* () {
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-      // Load both pieces of metadata independently; we use "result" mode so a failure in one request does not interrupt the other request
-      const { fetchRiddle, fetchDefinition } = yield* RpcGameClient;
-      const { theRiddleResult, wordDefinitionResult } = yield* Effect.all(
-        { theRiddleResult: fetchRiddle({ theSecretWord, solutionsLanguage }), wordDefinitionResult: fetchDefinition({ solutionsLanguage, theSecretWord }) },
-        { mode: "result", concurrency: 2 }
-      );
+    // Load both pieces of metadata independently; we use "result" mode so a failure in one request does not interrupt the other request
+    const { fetchRiddle, fetchDefinition } = yield* RpcGameClient;
+    const { theRiddleResult, wordDefinitionResult } = yield* Effect.all(
+      { theRiddleResult: fetchRiddle({ theSecretWord, solutionsLanguage }), wordDefinitionResult: fetchDefinition({ solutionsLanguage, theSecretWord }) },
+      { mode: "result", concurrency: 2 }
+    );
 
-      const theRiddle = Result.getOrElse(theRiddleResult, Option.none);
-      const wordDefinition = Result.getOrElse(wordDefinitionResult, Option.none);
+    const theRiddle = Result.getOrElse(theRiddleResult, Option.none);
+    const wordDefinition = Result.getOrElse(wordDefinitionResult, Option.none);
 
-      // Riddles and definitions are optional enrichments; failed requests are converted into Option.none() instead of failing the entire actor
-      return { theRiddle, wordDefinition } as const satisfies Omit<WordMeta, "theRiddleAudio" | "wordDefinitionAudio">;
-    }),
-    { signal }
-  )
+    // Riddles and definitions are optional enrichments; failed requests are converted into Option.none() instead of failing the entire actor
+    return { theRiddle, wordDefinition } as const satisfies Omit<WordMeta, "theRiddleAudio" | "wordDefinitionAudio">;
+  })
 );
 
-const fetchAudioActor = fromPromise(({ input: { theRiddle, wordDefinition }, signal }: FetchAudioActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+const fetchAudioActor = effectActor(({ theRiddle, wordDefinition }: FetchAudioInput) =>
+  Effect.gen(function* () {
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-      // Both TTS fetches are independent (inputs already in context), so run them
-      // concurrently; we use "result" mode so a failure in one request does not
-      // interrupt the other request. Each branch short-circuits to Option.none()
-      // when its text is missing
-      const { fetchRiddleAudio, fetchWordDefinitionAudio } = yield* RpcGameClient;
-      const { theRiddleAudioResult, wordDefinitionAudioResult } = yield* Effect.all(
-        {
-          theRiddleAudioResult: Option.isNone(theRiddle) ? Effect.succeedNone : fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage }),
-          wordDefinitionAudioResult: Option.isNone(wordDefinition)
-            ? Effect.succeedNone
-            : fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage }),
-        },
-        { mode: "result", concurrency: 2 }
-      );
+    // Both TTS fetches are independent (inputs already in context), so run them
+    // concurrently; we use "result" mode so a failure in one request does not
+    // interrupt the other request. Each branch short-circuits to Option.none()
+    // when its text is missing
+    const { fetchRiddleAudio, fetchWordDefinitionAudio } = yield* RpcGameClient;
+    const { theRiddleAudioResult, wordDefinitionAudioResult } = yield* Effect.all(
+      {
+        theRiddleAudioResult: Option.isNone(theRiddle) ? Effect.succeedNone : fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage }),
+        wordDefinitionAudioResult: Option.isNone(wordDefinition)
+          ? Effect.succeedNone
+          : fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage }),
+      },
+      { mode: "result", concurrency: 2 }
+    );
 
-      const theRiddleAudio = Result.getOrElse(theRiddleAudioResult, Option.none);
-      const wordDefinitionAudio = Result.getOrElse(wordDefinitionAudioResult, Option.none);
+    const theRiddleAudio = Result.getOrElse(theRiddleAudioResult, Option.none);
+    const wordDefinitionAudio = Result.getOrElse(wordDefinitionAudioResult, Option.none);
 
-      return { theRiddleAudio, wordDefinitionAudio } as const satisfies Pick<WordMeta, "theRiddleAudio" | "wordDefinitionAudio">;
-    }),
-    { signal }
-  )
+    return { theRiddleAudio, wordDefinitionAudio } as const satisfies Pick<WordMeta, "theRiddleAudio" | "wordDefinitionAudio">;
+  })
 );
 
 export const wordMetaMachine = setup({

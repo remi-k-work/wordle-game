@@ -2,17 +2,13 @@
 import { Array, HashMap, pipe } from "effect";
 import { Atom } from "effect/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
-import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
-import { runSessionRunScoreAtom } from "@/features/game/state/run-session";
 import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 import type { Color, Tile } from "@/features/game/domain/models";
-import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 
-// constants
-import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
+export { overdriveHacksCanApplyHackAtom } from "./can-apply";
 
 // The overdrive hacks machine is now a living actor inside the effect atom
 export const overdriveHacksMachineAtom = createMachineAtom(overdriveHacksMachine);
@@ -52,12 +48,3 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
     })
   );
 });
-
-// Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-export const overdriveHacksCanApplyHackAtom = Atom.family((overdriveHackId: OverdriveHackId) =>
-  Atom.make((get) => {
-    const gameFlowMachineSnapshot = get(gameFlowMachineAtom);
-    const runScore = get(runSessionRunScoreAtom);
-    return gameFlowMachineSnapshot.matches("playing") && runScore >= OVERDRIVE_HACK_COST(overdriveHackId);
-  })
-);

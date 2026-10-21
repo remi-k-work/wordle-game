@@ -18,9 +18,12 @@ const trophyValue = BestRunTrophyCardData.make({
 });
 
 const sentinelValue = BestRunTrophyCardData.make({
-  ...trophyValue,
   deathReason: "Forfeit",
   failedOnWord: "N/A",
+  finalScore: trophyValue.finalScore,
+  finalStreak: trophyValue.finalStreak,
+  durationSeconds: trophyValue.durationSeconds,
+  createdAt: trophyValue.createdAt,
 });
 
 describe("trophy card RPC wire schemas", () => {

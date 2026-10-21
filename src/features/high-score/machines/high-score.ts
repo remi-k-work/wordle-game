@@ -3,9 +3,10 @@
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
-import { RuntimeClient, runClientCommand } from "@/lib/runtime-client";
+import { runClientCommand } from "@/lib/runtime-client";
+import { effectActor } from "@/lib/effect-actor";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
-import { assign, setup, fromPromise, assertEvent } from "xstate";
+import { assign, setup, assertEvent } from "xstate";
 import { toastManager } from "@/ui/toastify";
 import { modalMachineAtom } from "@/state/modal";
 import { beatsTop10Tail } from "@/features/high-score/domain/helpers";
@@ -14,46 +15,38 @@ import { AddHighScore } from "@/features/high-score/domain/models";
 // types
 import type { HighScore, HighScoreMachineContext } from "@/features/high-score/domain/models";
 
-interface Top10HighScoresActorArgs {
-  input: { solutionsLanguage: HighScoreMachineContext["solutionsLanguage"] };
-  signal: AbortSignal;
+interface Top10HighScoresInput {
+  solutionsLanguage: HighScoreMachineContext["solutionsLanguage"];
 }
 
-interface AddHighScoreActorArgs {
-  input: { context: HighScoreMachineContext };
-  signal: AbortSignal;
+interface AddHighScoreInput {
+  context: HighScoreMachineContext;
 }
 
 // constants
 import { INITIAL_HIGH_SCORE_CONTEXT } from "@/features/high-score/domain/constants";
 
-const top10HighScoresActor = fromPromise(({ input: { solutionsLanguage }, signal }: Top10HighScoresActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const { top10HighScores } = yield* RpcHighScoreClient;
-      return yield* top10HighScores(solutionsLanguage);
-    }),
-    { signal }
-  )
+const top10HighScoresActor = effectActor(({ solutionsLanguage }: Top10HighScoresInput) =>
+  Effect.gen(function* () {
+    const { top10HighScores } = yield* RpcHighScoreClient;
+    return yield* top10HighScores(solutionsLanguage);
+  })
 );
 
-const addHighScoreActor = fromPromise(({ input: { context }, signal }: AddHighScoreActorArgs) =>
-  RuntimeClient.runPromise(
-    Effect.gen(function* () {
-      const { addHighScore } = yield* RpcHighScoreClient;
-      // Explicit field selection: the machine context carries non-wire fields
-      // (e.g. newHighScoreId) that must not ride into the request
-      return yield* addHighScore(
-        AddHighScore.make({
-          playerName: context.playerName,
-          score: context.runScore,
-          streak: context.streak,
-          solutionsLang: context.solutionsLanguage,
-        })
-      );
-    }),
-    { signal }
-  )
+const addHighScoreActor = effectActor(({ context }: AddHighScoreInput) =>
+  Effect.gen(function* () {
+    const { addHighScore } = yield* RpcHighScoreClient;
+    // Explicit field selection: the machine context carries non-wire fields
+    // (e.g. newHighScoreId) that must not ride into the request
+    return yield* addHighScore(
+      AddHighScore.make({
+        playerName: context.playerName,
+        score: context.runScore,
+        streak: context.streak,
+        solutionsLang: context.solutionsLanguage,
+      })
+    );
+  })
 );
 
 export const highScoreMachine = setup({

@@ -3,6 +3,9 @@ import { Effect, Schema } from "effect";
 import { SolutionsLanguage } from "@/features/game/domain/models";
 import { BasePage } from "@/domain/models";
 
+// types
+export type HighScoreMachineContext = typeof HighScoreMachineContext.Type;
+
 // Represents the high score entry for a player
 export class HighScore extends Schema.Class<HighScore>("HighScore")({
   id: Schema.Int.check(Schema.isGreaterThan(0)),
@@ -24,13 +27,13 @@ export class AddHighScore extends Schema.Class<AddHighScore>("AddHighScore")({
   solutionsLang: HighScore.fields.solutionsLang,
 }) {}
 
-export class HighScoreMachineContext extends Schema.Class<HighScoreMachineContext>("HighScoreMachineContext")({
+export const HighScoreMachineContext = Schema.Struct({
   playerName: HighScore.fields.playerName,
   runScore: HighScore.fields.score,
   streak: HighScore.fields.streak,
   solutionsLanguage: HighScore.fields.solutionsLang,
   newHighScoreId: Schema.Option(HighScore.fields.id),
-}) {}
+});
 
 // The high score page with all its inputs (params and searchParams)
 export class HighScorePage extends BasePage.extend<HighScorePage>("HighScorePage")({

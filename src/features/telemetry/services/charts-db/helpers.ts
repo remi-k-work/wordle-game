@@ -1,14 +1,14 @@
 // services, features, and other libraries
-import { Array, Option, pipe } from "effect";
+import { Array, Option } from "effect";
 
 // Telemetry stores histograms in cumulative form because they are easy to
 // aggregate in SQL. This helper converts cumulative buckets back into a
 // discrete distribution suitable for charting and derives percentages from
-// the final cumulative total.
+// the final cumulative total
 
 /**
  * Converts an array of cumulative histogram rows into discrete per-bucket
- * counts and their percentage of the total.
+ * counts and their percentage of the total
  *
  * Invariants the caller MUST uphold (two-layer, both load-bearing):
  * 1. `rows` are ordered by bucket ascending — e.g. `ORDER BY turn/streak/
@@ -17,26 +17,19 @@ import { Array, Option, pipe } from "effect";
  * 2. The final row holds the maximum cumulative total. The SQL emits a
  *    trailing `[null, N]` bucket (see D1) and orders it last; this row is the
  *    percentage denominator. Callers that filter the NULL row out for display
- *    must do so AFTER this helper runs (see charts-db.ts getGuessDistribution).
+ *    must do so AFTER this helper runs (see charts-db.ts getGuessDistribution)
  *
  * Not replaced with `Math.max(...)` — the helper sits on a hot path and the
  * single `rows.map(...)` over the already-ordered array is cheap enough that
- * adding a second pass to hunt for the max is wasteful.
+ * adding a second pass to hunt for the max is wasteful
  */
 export const cumulativeToDistribution = <T extends { personal: number; global: number }, TResult>(
   rows: readonly T[],
   mapResult: (row: T, discretePersonal: number, discreteGlobal: number, personalPct: number, globalPct: number) => TResult
 ): TResult[] => {
-  const totalPersonal = pipe(
-    Array.last(rows),
-    Option.map((row) => row.personal),
-    Option.getOrElse(() => 0)
-  );
-  const totalGlobal = pipe(
-    Array.last(rows),
-    Option.map((row) => row.global),
-    Option.getOrElse(() => 0)
-  );
+  const lastRow = Array.last(rows);
+  const totalPersonal = Option.match(lastRow, { onNone: () => 0, onSome: (row) => row.personal });
+  const totalGlobal = Option.match(lastRow, { onNone: () => 0, onSome: (row) => row.global });
 
   const [, distribution] = Array.mapAccum(rows, { personal: 0, global: 0 }, (prev, row) => {
     const discretePersonal = row.personal - prev.personal;

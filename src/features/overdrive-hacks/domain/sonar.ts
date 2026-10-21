@@ -42,14 +42,14 @@ export const calculateSonarTarget = Effect.fnUntraced(function* (
   alreadyRevealedVowels: ReadonlyArray<SonarReveal["vowel"]>
 ) {
   const candidates = computeSonarCandidates(theSecretWord, wordleGuesses, vowels, alreadyRevealedVowels);
-  if (candidates.length === 0) return Option.none();
+  if (!Array.isReadonlyArrayNonEmpty(candidates)) return Option.none();
 
-  // Shuffle then pick exactly one vowel at random from equally-valid candidates
-  const shuffled = yield* Random.shuffle(candidates);
+  // Pick exactly one vowel at random from the equally-valid candidates
+  const vowel = yield* Random.choice(candidates);
 
-  return Option.map(Array.head(shuffled), (vowel) => ({
+  return Option.some({
     vowel,
     // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
-    positions: Array.getSomes(Array.makeBy(theSecretWord.length, (index) => (theSecretWord[index] === vowel ? Option.some(index) : Option.none()))),
-  }));
+    positions: Array.flatMap(Array.fromIterable(theSecretWord), (letter, index) => (letter === vowel ? [index] : [])),
+  });
 });

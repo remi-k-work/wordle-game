@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { Effect, HashSet, Layer, Option, Schema } from "effect";
 import { RpcGame } from "./requests";
+import { Keypad, TheSecretWord } from "@/features/game/domain/models";
 import { matchLanguage } from "@/features/game/domain/helpers";
 import { generateRiddle } from "@/features/game/domain/riddle2";
 import { formatTextForTTS } from "@/domain/formatters";
@@ -26,17 +27,25 @@ const Definitions = Schema.Record(Schema.String, Schema.String);
 const DEFINITIONS_EN = Schema.decodeSync(Definitions)(definitionsEnJson);
 const DEFINITIONS_PL = Schema.decodeSync(Definitions)(definitionsPlJson);
 
+// Validate the smaller build-time assets once at module scope (fail fast on a malformed asset)
+// The 30,000+ word dictionaries are trusted as-is: re-validating every entry would add
+// significant cold-start work for an asset already produced by our own build scripts
+const SOLUTIONS_EN = Schema.decodeSync(Schema.Array(TheSecretWord))(solutionsEnJson);
+const SOLUTIONS_PL = Schema.decodeSync(Schema.Array(TheSecretWord))(solutionsPlJson);
+const KEYPAD_EN = Schema.decodeSync(Keypad)(keypadEnJson);
+const KEYPAD_PL = Schema.decodeSync(Keypad)(keypadPlJson);
+
 // Built once at module scope: hashing 30,000+ words into a HashSet is far too
 // expensive to repeat on every request (server-hoist-static-io)
 const DICTIONARY_EN = HashSet.fromIterable(dictionaryEnJson);
 const DICTIONARY_PL = HashSet.fromIterable(dictionaryPlJson);
 
 const RpcGameLayer = RpcGame.toLayer({
-  fetchSolutions: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, solutionsEnJson, solutionsPlJson)),
+  fetchSolutions: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, SOLUTIONS_EN, SOLUTIONS_PL)),
 
   // This is the more forgiving dictionary of valid words we can enter (no lemmas only) (HashSet for O(1) lookups)
   fetchDictionary: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, DICTIONARY_EN, DICTIONARY_PL)),
-  fetchKeypad: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, keypadEnJson, keypadPlJson)),
+  fetchKeypad: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, KEYPAD_EN, KEYPAD_PL)),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
     withAiEnabled(generateRiddle(theSecretWord, solutionsLanguage), Effect.succeedSome("No riddle available in the AI off mode.")).pipe(

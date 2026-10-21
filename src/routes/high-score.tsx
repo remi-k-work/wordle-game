@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { Schema } from "effect";
+import { Option, Schema } from "effect";
 import { msg } from "gt-tanstack-start";
 import { HighScorePage } from "@/features/high-score/domain/models";
 
@@ -13,6 +13,7 @@ import type { SolutionsLanguage } from "@/features/game/domain/models";
 // components
 import { PageHeader, PageHeaderSkeleton } from "@/ui/page-header";
 import { Top10HighScores, Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores";
+
 // Skeletons live in dedicated recharts-free modules (see the per-module ./skeleton
 // files) so this statically-bundled route chunk stays lean; the real chart sections
 // import lazily below and stream in under their exact skeleton placeholders
@@ -26,20 +27,16 @@ import { FrequencyChartsSkeleton } from "@/features/telemetry/ui/charts/frequenc
 // module path — a shared barrel import would fuse them all (plus every other section)
 // into one chunk, so e.g. mounting the embla slider would also download recharts
 const BrowseCharts = lazy(() => import("@/features/telemetry/ui/charts/browse-charts").then((m) => ({ default: m.BrowseCharts })));
-const BestRunTrophyCardChart = lazy(() =>
-  import("@/features/telemetry/ui/charts/best-run-trophy-card").then((m) => ({ default: m.BestRunTrophyCardChart }))
-);
+const BestRunTrophyCardChart = lazy(() => import("@/features/telemetry/ui/charts/best-run-trophy-card").then((m) => ({ default: m.BestRunTrophyCardChart })));
 const TotalsSlider = lazy(() => import("@/features/telemetry/ui/charts/totals-slider").then((m) => ({ default: m.TotalsSlider })));
-const DistributionCharts = lazy(() =>
-  import("@/features/telemetry/ui/charts/distributions").then((m) => ({ default: m.DistributionCharts }))
-);
+const DistributionCharts = lazy(() => import("@/features/telemetry/ui/charts/distributions").then((m) => ({ default: m.DistributionCharts })));
 const FrequencyCharts = lazy(() => import("@/features/telemetry/ui/charts/frequencies").then((m) => ({ default: m.FrequencyCharts })));
 
 export const Route = createFileRoute("/high-score")({
-  // The same page schema the Effect page-main validated next.js route inputs against.
+  // The same page schema that validates the route inputs
   // validateSearch only extracts the typed URL state (without throwing: router-core turns
   // errors thrown here into SearchParamError, not a 404); the strict decode — and the hard
-  // 404 on invalid `?sl=`, mirroring InvalidPageInputsError → notFound() — happens in the loader
+  // 404 on invalid `?sl=` — happens in the loader
   validateSearch: (search: { sl?: unknown }) => ({
     sl: typeof search.sl === "string" ? search.sl : undefined,
   }),
@@ -49,14 +46,9 @@ export const Route = createFileRoute("/high-score")({
   loaderDeps: ({ search: { sl } }) => ({ sl }),
 
   loader: ({ deps }) => {
-    try {
-      const {
-        searchParams: { sl },
-      } = Schema.decodeUnknownSync(HighScorePage)({ params: {}, searchParams: { sl: deps.sl } });
-      return { sl } as const;
-    } catch {
-      throw notFound();
-    }
+    const page = Schema.decodeUnknownOption(HighScorePage)({ params: {}, searchParams: { sl: deps.sl } });
+    if (Option.isNone(page)) throw notFound();
+    return { sl: page.value.searchParams.sl } as const;
   },
 
   head: () => ({

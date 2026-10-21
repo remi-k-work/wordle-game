@@ -1,12 +1,12 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
 
-// Page inputs (params and searchParams). Next.js route inputs are always
-// strings, arrays of strings, or absent — no numeric members are needed
+// Page inputs (params and searchParams). Route inputs are always strings,
+// arrays of strings, or absent — no numeric members are needed
 const PageParams = Schema.Record(Schema.Trim, Schema.Trim);
 const PageSearchParams = Schema.Record(Schema.Trim, Schema.Union([Schema.Trim, Schema.Array(Schema.Trim), Schema.Undefined]));
 
-// Represents the base page in next.js
+// Represents the base route/page inputs
 export class BasePage extends Schema.Class<BasePage>("BasePage")({
   params: PageParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
   searchParams: PageSearchParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),

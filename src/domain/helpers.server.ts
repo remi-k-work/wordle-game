@@ -73,7 +73,7 @@ export const routeHandler =
 
 // Reads the AI switch from Config, defaulting to "on". AI-backed RPCs call this to skip expensive
 // generation (avoiding rate limits and token usage) when the switch is off
-export const readAiSwitch = Config.Literal("off", "AI_SWITCH").pipe(Config.orElse(() => Config.succeed("on" as const)));
+export const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Config.withDefault("on"));
 
 // Runs the AI-backed generation unless the AI switch is off, in which case the
 // cheap fallback is served instead (avoids rate limits and token usage)

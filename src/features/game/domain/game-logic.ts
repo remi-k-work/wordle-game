@@ -33,14 +33,7 @@ export function calculatePotentialScore(
   now?: DateTime.Utc
 ) {
   const elapsedSeconds =
-    typeof startTimeOrSeconds === "number"
-      ? startTimeOrSeconds
-      : getElapsedSeconds(
-          startTimeOrSeconds,
-          // NOTE: sync pure function — no Effect runtime for `Clock`/`DateTime.now`.
-          // Callers in effectful contexts pass `now` explicitly; this is only the fallback.
-          Option.getOrElse(Option.fromNullishOr(now), () => DateTime.makeUnsafe(Date.now()))
-        );
+    typeof startTimeOrSeconds === "number" ? startTimeOrSeconds : getElapsedSeconds(startTimeOrSeconds, now ?? DateTime.makeUnsafe(Date.now()));
   return Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds));
 }
 
