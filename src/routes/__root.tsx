@@ -78,7 +78,7 @@ export const ROOT_HEAD = {
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: TITLE },
     { name: "twitter:description", content: SITE_DESCRIPTION },
-    { name: "twitter:image", content: `${ORIGIN}/twitter-image.jpg` },
+    { name: "twitter:image", content: `${ORIGIN}/opengraph-image.jpg` },
     { name: "twitter:image:alt", content: SITE_DESCRIPTION },
   ],
   links: [
