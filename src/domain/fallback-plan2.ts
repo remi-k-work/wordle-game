@@ -12,7 +12,6 @@ const step = (model: string, config: typeof OpenRouterLanguageModel.Config.Servi
 
 // Builds the shared fallback ladder for any LanguageModel service
 export const makeFallbackPlan2 = ExecutionPlan.make(
-  step("openrouter/auto", { strictJsonSchema: true, reasoning_effort: "low" }),
   step("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   step("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   step("openrouter/free", { strictJsonSchema: true, reasoning_effort: "none" })
