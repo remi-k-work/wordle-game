@@ -5,11 +5,11 @@
   "extends": [
     "./node_modules/@effect/tsgo/oxlint-presets/recommended.json"
   ],
-  // Tight scope: react, react-hooks, jsx-a11y, typescript, import, vitest (the
-  // closest clean equivalent of `eslint-config-next/core-web-vitals` is kept by
-  // the plugin set; the nextjs plugin itself is gone with Next.js).
+  // Tight scope: react, jsx-a11y, typescript, import, vitest (+ effecttsgo via
+  // extends). NOTE: setting `plugins` overwrites oxlint's base set, and oxlint
+  // silently drops unknown ids — there is no "eslint" or "react-hooks" plugin id
+  // (react-hooks rules are core and enabled explicitly under `rules` below)
   "plugins": [
-    "eslint",
     "typescript",
     "react",
     "jsx-a11y",
@@ -24,18 +24,11 @@
     "node": true,
     "es2023": true
   },
-  // Mirrors the old eslint.config.mjs globalIgnores plus local scratch/dict files.
-  // node_modules and .git are ignored by default; .gitignore is respected automatically.
-  "ignorePatterns": [
-    "dist/**",
-    ".wrangler/**",
-    "next-env.d.ts",
-    ".repos/**",
-    "_scratchpad/**",
-    "src/seed/dictionary-pl.txt"
-  ],
+  // No ignorePatterns needed: node_modules and .git are ignored by default,
+  // and .gitignore is respected automatically (covers dist, .wrangler, .repos,
+  // _scratchpad, and the seed dictionaries)
   "settings": {
-    // Oxlint has no "detect"; pin to the installed React version.
+    // Oxlint has no "detect"; pin to the installed React version
     "react": {
       "version": "19.3.1"
     }
@@ -43,27 +36,24 @@
   "rules": {
     "effecttsgo/schema-class-missing-brand": "off",
     "effecttsgo/unstable-api-usage": "off",
-    // --- Next.js core-web-vitals parity ---
-    // Oxlint rule names drop the `@next/next` prefix.
-    // core-web-vitals upgrades these two to error (rest of recommended stays warn/error via correctness).
-    "nextjs/no-html-link-for-pages": "error",
-    "nextjs/no-sync-scripts": "error",
-    // --- eslint-config-next downgrades / modern-JSX opts ---
+    // --- modern-JSX opts ---
     "react/no-unknown-property": "off",
     "react/react-in-jsx-scope": "off",
-    // NOTE: eslint-config-next also sets `react/prop-types: off`, but Oxlint
-    // deliberately does not implement `react/prop-types` (React 19 ignores
-    // PropTypes; TypeScript covers props), so there is nothing to disable.
     "react/jsx-no-target-blank": "off",
-    // --- typescript-eslint parity (next/typescript sets these to warn) ---
+    // --- typescript-eslint ---
     "typescript/no-unused-vars": "warn",
     "typescript/no-unused-expressions": "warn",
     "typescript/no-explicit-any": "warn",
+    // --- react-hooks ---
+    // Not covered by categories.correctness in this oxlint build (the plugin id
+    // is rejected too), so both rules are pinned explicitly
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
     // --- import parity ---
     "import/no-anonymous-default-export": "warn",
     // --- @effect/vitest support ---
     // Tests use `it.effect(...)`; teach the rule these are test blocks so the
-    // rule keeps working as intended instead of false-positive errors.
+    // rule keeps working as intended instead of false-positive errors
     "vitest/no-standalone-expect": [
       "error",
       {
@@ -78,22 +68,20 @@
       }
     ],
     // --- Downgraded to warn: valuable type-aware / Effect rules that fire on
-    // pre-existing code and would need invasive, unrelated refactors to fix.
-    // They stay visible without blocking `npm run lint`.
-    // XState `assign(({ context }) => ({ ...context, ... }))` idiom.
+    // pre-existing code and would need invasive, unrelated refactors to fix
+    // They stay visible without blocking `npm run lint`
+    // XState `assign(({ context }) => ({ ...context, ... }))` idiom
     "typescript/no-misused-spread": "warn",
-    // Translation values / chart formatters typed as `unknown`.
+    // Translation values / chart formatters typed as `unknown`
     "typescript/restrict-template-expressions": "warn",
     "typescript/no-base-to-string": "warn",
-    // Architectural Effect guidance; matches Effect's own correctness preset.
+    // Architectural Effect guidance; matches Effect's own correctness preset
     "effecttsgo/any-unknown-in-error-context": "warn",
-    // --- Disabled: not part of the old eslint-config-next coverage ---
-    // Base UI Switch carries its own aria-label; the rule can't see through it.
+    // --- Disabled: false-positive-prone on this codebase ---
+    // Base UI Switch carries its own aria-label; the rule can't see through it
     "jsx-a11y/label-has-associated-control": "off",
-    // Prefers `<output>` over role="status"; motion.p markup is intentional.
+    // Prefers `<output>` over role="status"; motion.p markup is intentional
     "jsx-a11y/prefer-tag-over-role": "off"
-    // react-hooks (rules-of-hooks, exhaustive-deps) and the 5 jsx-a11y rules
-    // enabled by eslint-config-next are covered by the plugins + correctness category.
-    // Existing `eslint-disable` comments keep working (respected by default).
+    // Existing `eslint-disable` comments keep working (respected by default)
   }
 }

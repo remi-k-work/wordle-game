@@ -53,17 +53,3 @@ export function NavItem({ href, match, title, icon, isExternal = false }: NavIte
     </Link>
   );
 }
-
-export function NavItemSkeleton({ href, title, icon, isExternal = false }: NavItemProps) {
-  return (
-    <Link
-      to={href}
-      title={title}
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noopener noreferrer" : undefined}
-      className="border bg-secondary p-1 [&>svg]:size-11"
-    >
-      {icon}
-    </Link>
-  );
-}

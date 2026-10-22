@@ -14,29 +14,23 @@ Unlike traditional clones, Wordle Overdrive treats individual puzzles as steppin
 
 ## 🧠 Key Features
 
-* **AI Riddle Engine:** Supported by a language-aware AI layer (Gemini Flash), every new word initializes with a bespoke, cryptic one-sentence riddle. This removes "blind first guesses" and replaces them with strategic, thematic deduction.
+* **AI Riddle Engine:** Supported by a language-aware AI layer (OpenRouter with an automatic model fallback chain), every new word initializes with a bespoke, cryptic one-sentence riddle. This removes "blind first guesses" and replaces them with strategic, thematic deduction.
 * **Survival Keypad:** The virtual keyboard dynamically deletes incorrect grey letters as you play. This prevents accidental wasted keystrokes and tightens the mechanical flow during high-pressure late turns.
 * **Fully Bilingual:** Native localized prompts and independent 30,000+ word dictionaries for both **English** and **Polish** game modes.
 
 ## 🛠️ Architecture & Tech Stack
 
-* `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `nextjs`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins as the successor to `eslint-config-next`.
-* `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
-* `npm test` — Vitest.
-
-Notes: Next.js documents ESLint/Biome but not Oxlint, so the lint layer here is standalone. Two rules from the old setup have no Oxlint equivalent and were dropped: `react/prop-types` (moot on React 19 + TypeScript) and `import/resolver` TypeScript module-resolution (`tsc` remains the backstop for unresolved imports).
-
 This repository serves as a showcase for production-grade functional programming in TypeScript and modern reactive state architecture.
 
-* **Framework:** Next.js (App Router) for lightning-fast server rendering and robust asset optimization.
+* **Framework:** TanStack Start (React 19) — isomorphic rendering on Cloudflare Workers with type-safe file-based routing, route loaders, and Effect RPC over server route handlers.
 * **State & Logic Control:** Driven by **Effect & Atoms**. The entire game lifecycle avoids messy asynchronous side effects by utilizing explicit, type-safe functional generators (`yield*`) to coordinate game states, long-term session banking, and error boundaries.
-* **AI Orchestration:** Seamless integration with Gemini models to handle high-speed, cost-efficient riddle compilation out of the box.
+* **AI Orchestration:** OpenRouter integration (`@effect/ai-openrouter`) with an Effect `ExecutionPlan` fallback chain, handling high-speed, cost-efficient riddle compilation out of the box.
 * **Styling:** Custom, highly scannable Dark and Light mode UI systems engineered entirely around fluid, modern `oklch` color gamuts.
 
 ## 🧪 Development
 
-* `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `nextjs`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins as the successor to `eslint-config-next`.
+* `npm run dev` — Vite dev server.
+* `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `react-hooks`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins.
 * `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
 * `npm test` — Vitest.
-
-Notes: Next.js documents ESLint/Biome but not Oxlint, so the lint layer here is standalone. Two rules from the old setup have no Oxlint equivalent and were dropped: `react/prop-types` (moot on React 19 + TypeScript) and `import/resolver` TypeScript module-resolution (`tsc` remains the backstop for unresolved imports).
+* `npm run build` / `npm run deploy` — Cloudflare production build, then `wrangler deploy`.

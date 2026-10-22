@@ -1,55 +1,29 @@
-// react
-import { Suspense } from "react";
-
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
 // components
 import { Logo } from "./logo";
-import { NavItem, NavItemSkeleton } from "./nav-item";
-import { ThemeChanger, ThemeChangerSkeleton } from "./theme-changer";
-import { LangChanger, LangChangerSkeleton } from "./lang-changer";
+import { NavItem } from "./nav-item";
+import { ThemeChanger } from "./theme-changer";
+import { LangChanger } from "./lang-changer";
 
 // constants
 import { NAV_ITEMS } from "./constants";
 
-// Component remains the fast, static shell
+// Fully synchronous shell: Logo/NavItem/LangChanger are static imports and render
+// in a single pass on both server and client (isomorphic execution model), so no
+// Suspense wrapper is needed — only ThemeChanger defers, behind its own
+// ClientOnly + Suspense boundary (see ./theme-changer)
 export function Header() {
-  return (
-    <Suspense fallback={<HeaderSkeleton />}>
-      <HeaderContent />
-    </Suspense>
-  );
-}
-
-// This component contains the dynamic logic
-function HeaderContent() {
   return (
     <header className={cn("z-10 flex items-center gap-4 bg-linear-to-b from-surface-1 via-surface-3 to-transparent p-2", "lg:sticky lg:top-0")}>
       <Logo />
       <nav className="flex flex-1 flex-wrap items-center justify-end gap-1 sm:gap-4">
         {NAV_ITEMS.map((navItem, index) => (
-          <Suspense key={index} fallback={<NavItemSkeleton {...navItem} />}>
-            <NavItem {...navItem} />
-          </Suspense>
+          <NavItem key={index} {...navItem} />
         ))}
         <LangChanger />
         <ThemeChanger />
-      </nav>
-    </header>
-  );
-}
-
-export function HeaderSkeleton() {
-  return (
-    <header className={cn("z-10 flex items-center gap-4 bg-linear-to-b from-surface-1 via-surface-3 to-transparent p-2", "lg:sticky lg:top-0")}>
-      <Logo />
-      <nav className="flex flex-1 flex-wrap items-center justify-end gap-1 sm:gap-4">
-        {NAV_ITEMS.map((navItem, index) => (
-          <NavItemSkeleton key={index} {...navItem} />
-        ))}
-        <LangChangerSkeleton />
-        <ThemeChangerSkeleton />
       </nav>
     </header>
   );

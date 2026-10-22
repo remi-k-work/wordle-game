@@ -22,9 +22,6 @@ src/seed/dictionary-pl.txt
 /.dev.vars
 /worker-configuration.d.ts
 
-# production
-/build
-
 # misc
 .DS_Store
 *.pem

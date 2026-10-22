@@ -35,7 +35,10 @@ export function GuessRow({ wordleGrid, rowIndex }: GuessRowProps) {
       {wordleGrid[rowIndex].map((tile, tileIndex) => {
         const wasEmpty = baseWordleGrid[rowIndex][tileIndex].tileKey === "";
         const isSonarReveal = wasEmpty && tile.tileKey !== "" && sonarTiles.has(tileIndex);
-        return <GuessTile key={tileIndex + String(isSonarReveal)} tile={tile} isSonarReveal={isSonarReveal} />;
+        // Stable per-position keys: useSonarPing already starts/stops the glow
+        // from the `isSonarReveal` prop (effect + cleanup), so keying on it too
+        // only remounted the tile DOM on every reveal flip
+        return <GuessTile key={tileIndex} tile={tile} isSonarReveal={isSonarReveal} />;
       })}
     </div>
   );

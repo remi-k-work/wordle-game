@@ -19,7 +19,7 @@ export function NewHighScore() {
 
   return (
     <AnimatePresence>
-      {isVisible && (
+      {isVisible ? (
         <motion.section
           className="grid place-items-center gap-4 rounded-md border-2 border-accent p-4"
           layout
@@ -43,7 +43,7 @@ export function NewHighScore() {
           </T>
           <Initials />
         </motion.section>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 }

@@ -69,13 +69,3 @@ export function LangChanger() {
     </Button>
   );
 }
-
-export function LangChangerSkeleton() {
-  const gt = useGT();
-
-  return (
-    <Button className="button p-1" title={gt("Select Website Language")} disabled>
-      <div className="size-11 animate-pulse bg-accent" />
-    </Button>
-  );
-}

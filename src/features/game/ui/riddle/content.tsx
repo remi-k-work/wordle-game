@@ -40,7 +40,8 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
       <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} theRiddle={theRiddle} />
 
       <section className={DIALOG_FOOTER_CLASSES}>
-        {isAwaiting && <GameFlowButton keepText onClicked={onGameFlowClicked} />}
+        {/* Explicit ternary, never `&&`: a numeric condition would render "0" (rendering-conditional-render) */}
+        {isAwaiting ? <GameFlowButton keepText onClicked={onGameFlowClicked} /> : null}
         <SpeakButtonRegular sanitizedText={theRiddle} disabled={!canSpeakRegular}>
           {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
         </SpeakButtonRegular>
@@ -60,7 +61,6 @@ export function ContentSkeleton({ mode }: ContentProps) {
 
       <section className={DIALOG_FOOTER_CLASSES}>
         <SpeakButtonRegularSkeleton>{mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}</SpeakButtonRegularSkeleton>
-
         <SpeakButtonNaturalSkeleton>{mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}</SpeakButtonNaturalSkeleton>
       </section>
     </>

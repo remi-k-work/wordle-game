@@ -52,8 +52,13 @@ export function CurrentGuess() {
       {finalGuessTiles.map((tile, tileIndex) => {
         const isSonarReveal = tileIndex >= currentLength && sonarVowelByPosition.has(tileIndex);
         return (
+          // Keys stay stable per position: the sonar ping is driven by the
+          // `isSonarReveal` prop through useSonarPing's effect + cleanup, so the
+          // previous `key={tileIndex + String(isSonarReveal)}` remount — which
+          // destroyed and recreated the tile DOM on every reveal flip — was
+          // redundant churn (rerender-no-inline-components / stable identity)
           <GuessTile
-            key={tileIndex + String(isSonarReveal)}
+            key={tileIndex}
             tile={tile}
             bounceAnim={tile.tileKey !== "" && tileIndex === currentLength - 1 && !isSonarReveal}
             isSonarReveal={isSonarReveal}
