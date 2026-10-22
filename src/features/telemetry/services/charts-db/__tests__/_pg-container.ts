@@ -2,7 +2,7 @@ import { PostgreSqlContainer } from "@testcontainers/postgresql";
 import { PgClient } from "@effect/sql-pg";
 import { Context, Effect, Layer, Redacted, Schema } from "effect";
 import { SqlClient } from "effect/sql";
-import { pgConfig } from "@/lib/pg.server";
+import { pgConfig } from "@/lib/pg-config";
 
 class ContainerError extends Schema.TaggedError<ContainerError>()("ContainerError", {
   cause: Schema.Defect(),
