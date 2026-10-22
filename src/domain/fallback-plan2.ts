@@ -12,7 +12,7 @@ const step = (model: string, config: typeof OpenRouterLanguageModel.Config.Servi
 
 // Builds the shared fallback ladder for any LanguageModel service
 export const makeFallbackPlan2 = ExecutionPlan.make(
-  step("openrouter/auto", { strictJsonSchema: true, reasoning_effort: "none" }),
+  step("openrouter/auto", { strictJsonSchema: true, reasoning_effort: "low" }),
   step("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   step("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   step("openrouter/free", { strictJsonSchema: true, reasoning_effort: "none" })
@@ -24,6 +24,6 @@ export const OpenRouterClientLayer = Layer.unwrap(
 );
 
 // The client layer above requires an HTTP transport; composing it here keeps
-// every consumer (AI-backed RPC handlers, proof scripts) on the same wiring.
+// every consumer (AI-backed RPC handlers, proof scripts) on the same wiring
 // The transport is the fetch-backed HttpClient (workers runtime has no undici)
 export const OpenRouterClientWithHttp = OpenRouterClientLayer.pipe(Layer.provide(FetchHttpClient.layer));
