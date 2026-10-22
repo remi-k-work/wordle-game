@@ -1,6 +1,7 @@
 // services, features, and other libraries
-import { Config, Effect, Layer, Redacted, String } from "effect";
+import { Layer, Redacted, String } from "effect";
 import { PgClient } from "@effect/sql-pg";
+import { env } from "cloudflare:workers";
 
 export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.camelToSnake, transformResultNames: String.snakeToCamel, transformJson: true };
 
@@ -16,29 +17,12 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.cam
 // scheduler (see domain/helpers.server.ts) — both fixes are required
 const isWorkerd = typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
 
-export const makePgClientLayer = (databaseUrl: Redacted.Redacted<string>, ssl: PgClient.PgPoolConfig["ssl"]) =>
-  PgClient.layer({
-    ...pgConfig,
-    url: databaseUrl,
-    // ssl,
-    idleTimeout: "10 seconds",
-    connectTimeout: "10 seconds",
-    ...(isWorkerd ? { connectionTTL: "0 seconds" as const } : {}),
-  });
-
-// Resolves the connection options shared by the live client layer and the migration runner:
-// `ENV` drives SSL, `DATABASE_URL` is always read from the redacted config
-export const connectConfig = Effect.gen(function* () {
-  const env = yield* Config.Literals(["local", "prod"], "ENV").pipe(Config.withDefault("prod"));
-  const ssl = env !== "local" ? { rejectUnauthorized: false } : false;
-  const databaseUrl = yield* Config.Redacted("DATABASE_URL");
-
-  return { databaseUrl, ssl };
+export const makePgClientLayer = PgClient.layer({
+  ...pgConfig,
+  url: Redacted.make(env.HYPERDRIVE.connectionString),
+  idleTimeout: "10 seconds",
+  connectTimeout: "10 seconds",
+  ...(isWorkerd ? { connectionTTL: "0 seconds" as const } : {}),
 });
 
-export const PgLive = Layer.unwrap(
-  Effect.gen(function* () {
-    const { databaseUrl, ssl } = yield* connectConfig;
-    return makePgClientLayer(databaseUrl, ssl);
-  })
-).pipe(Layer.orDie);
+export const PgLive = makePgClientLayer.pipe(Layer.orDie);

@@ -5,14 +5,12 @@ import { Effect, Layer, Logger } from "effect";
 import { NodeServices, NodeRuntime } from "@effect/platform-node";
 import { Migrator } from "effect/sql";
 import { PgMigrator } from "@effect/sql-pg";
-import { connectConfig, makePgClientLayer } from "@/lib/pg.server";
+import { makePgClientLayer } from "@/lib/pg.server";
 
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer);
 
 const main = Effect.gen(function* () {
-  const { databaseUrl, ssl } = yield* connectConfig;
-
-  const pgClientLayer = makePgClientLayer(databaseUrl, ssl);
+  const pgClientLayer = makePgClientLayer;
 
   yield* Effect.log("Running database migrations...");
 

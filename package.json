@@ -22,7 +22,9 @@
     "seed-dic-en": "tsx ./src/seed/dictionary-en.ts",
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts",
     "db:migrate": "tsx ./src/seed/run-migrations.ts",
+    "upload": "npm run build && wrangler versions upload --preview-alias staging",
     "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types",
     "prepare": "effect-tsgo patch --typescript --oxlint"
   },
   "dependencies": {
@@ -40,9 +42,9 @@
     "clsx": "^2.1.1",
     "effect": "^4.0.5",
     "embla-carousel-react": "^8.6.0",
-    "gt-react": "^11.4.13",
-    "gt-tanstack-start": "^11.4.13",
-    "motion": "^14.5.0",
+    "gt-react": "^11.4.14",
+    "gt-tanstack-start": "^11.4.14",
+    "motion": "^14.6.0",
     "next-themes": "^0.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
