@@ -13,9 +13,14 @@ import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, AiClientsWithHttp);
 
-// The two Cloudflare models used by the production fallback ladder; GPT-OSS
-// needs a low reasoning budget; Llama 3.3 supports JSON mode directly
+// The three Cloudflare models used by the production fallback ladder; Gemma
+// thinking is disabled explicitly to keep responses fast; GPT-OSS uses a low
+// reasoning budget; Llama 3.3 supports JSON mode directly
 const CLOUDFLARE_MODELS = [
+  {
+    id: "@cf/google/gemma-4-26b-a4b-it",
+    config: { strictJsonSchema: true, chat_template_kwargs: { enable_thinking: false } },
+  },
   {
     id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
     config: { strictJsonSchema: true },

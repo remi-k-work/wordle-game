@@ -18,10 +18,11 @@ const cloudflareStep = (model: string, config: typeof OpenAiLanguageModel.Config
   schedule: Schedule.exponential("1 second", 2),
 });
 
-// Builds the shared fallback ladder for any LanguageModel service
-// Cloudflare runs closest to the Worker and is tried first
-// OpenRouter remains the final safety net for quality and availability
+// Builds the shared fallback ladder for any LanguageModel service; Cloudflare is always tried first because it runs closest to the Worker
+// Gemma is the quality-first primary with thinking disabled to avoid multi-minute reasoning turns
+// Llama and GPT-OSS are the remaining Cloudflare fallbacks; OpenRouter is strictly secondary
 export const makeFallbackPlan2 = ExecutionPlan.make(
+  cloudflareStep("@cf/google/gemma-4-26b-a4b-it", { strictJsonSchema: true, chat_template_kwargs: { enable_thinking: false } }),
   cloudflareStep("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { strictJsonSchema: true }),
   cloudflareStep("@cf/openai/gpt-oss-120b", { strictJsonSchema: true, reasoning_effort: "low" }),
   openRouterStep("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),

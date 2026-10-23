@@ -5,7 +5,6 @@ import { Cause, Duration, Effect, ExecutionPlan, Layer, Logger, Option, Schedule
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { LanguageModel, Model, Prompt } from "effect/ai";
 import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
-import { OpenRouterLanguageModel } from "@effect/ai-openrouter";
 import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
 
@@ -19,7 +18,7 @@ const Definitions = Schema.Record(Schema.String, Schema.String);
 const DEFINITIONS_PL = Schema.decodeSync(Definitions)(definitionsPlJson);
 
 // Exotic Polish solutions are the cases where the model is most likely to
-// guess the wrong sense or hallucinate a meaning without the dictionary context.
+// guess the wrong sense or hallucinate a meaning without the dictionary context
 const TEST_WORDS = ["ABAJA", "ABCUG", "ABSTA", "ADAKS"] as const;
 
 const LLAMA_LABEL = "Llama 3.3 70B (Cloudflare)";
@@ -29,9 +28,12 @@ const LLAMA_PLAN = ExecutionPlan.make({
   schedule: Schedule.exponential("1 second", 2),
 });
 
-const GEMMA_LABEL = "Gemma 4 26B (OpenRouter)";
+const GEMMA_LABEL = "Gemma 4 26B (Cloudflare)";
 const GEMMA_PLAN = ExecutionPlan.make({
-  provide: OpenRouterLanguageModel.model("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
+  provide: OpenAiLanguageModel.model("@cf/google/gemma-4-26b-a4b-it", {
+    strictJsonSchema: true,
+    chat_template_kwargs: { enable_thinking: false },
+  }),
   attempts: 1,
   schedule: Schedule.exponential("1 second", 2),
 });
@@ -47,7 +49,7 @@ const getDefinition = (theSecretWord: string) => {
 };
 
 // Mirrors the single-field generation flow so the A/B uses the exact production
-// prompt and schema construction, while exposing the model that actually ran.
+// prompt and schema construction, while exposing the model that actually ran
 const generateRiddle = Effect.fn("generateRiddle")(function* (theSecretWord: string, wordDefinition: Option.Option<string>) {
   const languageModel = yield* LanguageModel.LanguageModel;
   const modelName = yield* Model.ModelName;
