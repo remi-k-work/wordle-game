@@ -19,9 +19,6 @@
 			"persist": true
 		}
 	},
-	"vars": {
-		"CLOUDFLARE_ACCOUNT_ID": "e9fa87dff87be000b5679af21f361e04"
-	},
 	"hyperdrive": [
 		{
 			"binding": "HYPERDRIVE",
