@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Option } from "effect";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { matchLanguage } from "./helpers";
 
@@ -16,7 +17,9 @@ CRITICAL RULES:
 3. NEVER reveal the secret word directly. Do not use its root, derivatives, or rhyming giveaways.
 4. Keep it plain text, suitable for Text-To-Speech (no Markdown, emojis, or formatting).
 5. Do not include any preamble or meta-talk. Output ONLY the riddle.
-6. SELF-VERIFY: Ensure the word "${theSecretWord}" is completely absent.
+6. SELF-VERIFY: Ensure the word "${theSecretWord}" is completely absent. The definition may contain it; never copy parts of the definition that reveal it.
+7. If a dictionary definition is provided, use it only to identify the intended meaning. Do not quote or closely paraphrase it, and do not mention that you were given a definition.
+8. The riddle must be an imaginative clue, not a dictionary definition. Use concrete imagery instead of listing properties.
 
 EXAMPLE TONE AND FORMAT:
 Context: Secret word is "MIRROR"
@@ -32,26 +35,50 @@ ZASADY KRYTYCZNE:
 3. NIGDY nie ujawniaj wprost ukrytego słowa. Nie używaj jego form pokrewnych, rdzeni ani rymów. Zwróć szczególną uwagę na polską odmianę (przypadki, liczba mnoga).
 4. Tekst musi być zwykły i przyjazny dla Text-To-Speech (bez Markdowna, emotikonów i formatowania).
 5. Nie używaj wstępów ani metakomentarzy. Wypisz TYLKO zagadkę.
-6. SAMOWERYFIKACJA: Upewnij się, że słowo "${theSecretWord}" (w żadnej formie) nie pojawia się w tekście.
+6. SAMOWERYFIKACJA: Upewnij się, że słowo "${theSecretWord}" (w żadnej formie) nie pojawia się w tekście. Definicja może zawierać to słowo — nie kopiuj jej fragmentów, które je ujawniają.
+7. Jeśli podano definicję słownikową, użyj jej wyłącznie do ustalenia właściwego znaczenia. Nie cytuj jej ani nie parafrazuj zbyt blisko i nie wspominaj, że ją otrzymałeś.
+8. Zagadka musi być pomysłową wskazówką, a nie definicją słownikową. Używaj konkretnych obrazów zamiast wyliczać cechy.
+9. Pisz naturalną, poprawną gramatycznie polszczyzną. Ustal rodzaj gramatyczny i liczbę ukrytego słowa, a następnie konsekwentnie dopasuj rodzaj i liczbę przymiotników, zaimków oraz czasowników. Unikaj kalk z angielskiego.
 
 PRZYKŁAD TONU I FORMATU:
 Kontekst: Ukryte słowo to "LUSTRO"
 Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój ruch, lecz nie mam własnego umysłu. Czym jestem?
 `;
-const RIDDLE_PROMPT_EN = "Craft the riddle now.";
-const RIDDLE_PROMPT_PL = "Stwórz zagadkę teraz.";
+
+// A definition is optional because the riddle flow must still work when the
+// definition asset is unavailable. When present, it disambiguates exotic words
+// and homonyms without adding another RPC round-trip
+const definitionContextEn = (wordDefinition: Option.Option<string>) =>
+  Option.match(wordDefinition, {
+    onSome: (value) =>
+      `Official dictionary meaning for reference: "${value}"\n-> Use this only to identify the intended sense of the secret word. Do not quote or closely paraphrase it, and never repeat the secret word or its inflected forms.\n\n`,
+    onNone: () => "",
+  });
+const definitionContextPl = (wordDefinition: Option.Option<string>) =>
+  Option.match(wordDefinition, {
+    onSome: (value) =>
+      `Oficjalna definicja słownikowa do wglądu: "${value}"\n-> Użyj jej wyłącznie do ustalenia właściwego znaczenia ukrytego słowa. Nie cytuj jej ani nie parafrazuj zbyt blisko; nigdy nie powtarzaj ukrytego słowa ani jego form odmienionych.\n\n`,
+    onNone: () => "",
+  });
+
+const RIDDLE_PROMPT_EN = (wordDefinition: Option.Option<string>) => `${definitionContextEn(wordDefinition)}Craft the riddle now.`;
+const RIDDLE_PROMPT_PL = (wordDefinition: Option.Option<string>) => `${definitionContextPl(wordDefinition)}Stwórz zagadkę teraz.`;
 const DESCRIPTION_EN = "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.";
-const DESCRIPTION_PL = "Zwykły tekst, krótka zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.";
+const DESCRIPTION_PL = "Zwykły tekst, krótka, poprawna gramatycznie zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.";
 
 // Builds the language-specific generation options for a riddle. Exported so the
-// OpenRouter proof script (src/seed/openrouter-plan-proof.ts) exercises the
-// exact same prompts as production (single source of truth)
-export const riddleGenerationOptions = (theSecretWord: string, solutionsLanguage: SolutionsLanguage) => ({
+// OpenRouter/Cloudflare proof scripts exercise the exact same prompts as
+// production (single source of truth)
+export const riddleGenerationOptions = (
+  theSecretWord: string,
+  solutionsLanguage: SolutionsLanguage,
+  wordDefinition: Option.Option<string> = Option.none()
+) => ({
   instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
-  prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN, RIDDLE_PROMPT_PL),
+  prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN(wordDefinition), RIDDLE_PROMPT_PL(wordDefinition)),
   fieldName: "riddle",
   description: matchLanguage(solutionsLanguage, DESCRIPTION_EN, DESCRIPTION_PL),
 });
 
-export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
-  generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage));
+export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage, wordDefinition: Option.Option<string> = Option.none()) =>
+  generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));

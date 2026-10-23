@@ -19,6 +19,9 @@ import definitionsPlJson from "@/assets/data/definitions-pl.json";
 import dictionaryEnJson from "@/assets/data/dictionary-en.json";
 import dictionaryPlJson from "@/assets/data/dictionary-pl.json";
 
+// types
+import type { SolutionsLanguage } from "@/features/game/domain/models";
+
 // Definitions are build-time assets produced by the seed scripts; validate them
 // once at module scope (fail fast on a malformed asset) instead of casting. The
 // schema matches the seed's own `DefinitionsSchema` (src/seed/sync.ts), and a
@@ -40,6 +43,12 @@ const KEYPAD_PL = Schema.decodeSync(Keypad)(keypadPlJson);
 const DICTIONARY_EN = HashSet.fromIterable(dictionaryEnJson);
 const DICTIONARY_PL = HashSet.fromIterable(dictionaryPlJson);
 
+// Definitions are already local build-time assets, so riddle generation can
+// use the raw dictionary meaning without waiting for the client's parallel
+// fetchDefinition request to finish
+const getWordDefinition = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
+  Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord]));
+
 const RpcGameLayer = RpcGame.toLayer({
   fetchSolutions: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, SOLUTIONS_EN, SOLUTIONS_PL)),
 
@@ -48,15 +57,16 @@ const RpcGameLayer = RpcGame.toLayer({
   fetchKeypad: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, KEYPAD_EN, KEYPAD_PL)),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
-    withAiEnabled(generateRiddle(theSecretWord, solutionsLanguage), Effect.succeedSome("No riddle available in the AI off mode.")).pipe(
+    withAiEnabled(
+      generateRiddle(theSecretWord, solutionsLanguage, getWordDefinition(theSecretWord, solutionsLanguage)),
+      Effect.succeedSome("No riddle available in the AI off mode.")
+    ).pipe(
       Effect.tapError(Effect.logError),
       Effect.orElseSucceed(() => Option.none())
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
-    Effect.succeed(
-      Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord])).pipe(Option.map(formatTextForTTS))
-    ),
+    Effect.succeed(getWordDefinition(theSecretWord, solutionsLanguage).pipe(Option.map(formatTextForTTS))),
 
   fetchRiddleAudio: fetchSpeechAudio,
   fetchWordDefinitionAudio: fetchSpeechAudio,

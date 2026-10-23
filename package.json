@@ -23,6 +23,7 @@
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts",
     "db:migrate": "tsx ./src/seed/run-migrations.ts",
     "cloudflare-plan-proof": "tsx ./src/seed/cloudflare-plan-proof.ts",
+    "riddle-prompt-ab": "tsx ./src/seed/riddle-prompt-ab.ts",
     "upload": "npm run build && wrangler versions upload --preview-alias staging",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
