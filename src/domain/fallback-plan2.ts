@@ -22,8 +22,8 @@ const cloudflareStep = (model: string, config: typeof OpenAiLanguageModel.Config
 // Cloudflare runs closest to the Worker and is tried first
 // OpenRouter remains the final safety net for quality and availability
 export const makeFallbackPlan2 = ExecutionPlan.make(
-  cloudflareStep("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { strictJsonSchema: true }),
   cloudflareStep("@cf/openai/gpt-oss-120b", { strictJsonSchema: true, reasoning_effort: "low" }),
+  cloudflareStep("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { strictJsonSchema: true }),
   openRouterStep("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   openRouterStep("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
   openRouterStep("openrouter/free", { strictJsonSchema: true, reasoning_effort: "low" })
