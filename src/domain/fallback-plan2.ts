@@ -37,7 +37,7 @@ const OpenRouterClientLayer = Layer.unwrap(
 // Cloudflare Workers AI client, backed by its OpenAI-compatible endpoint; the compat client appends /chat/completions to this base URL
 export const CloudflareClientLayer = Layer.unwrap(
   Effect.gen(function* () {
-    const apiKey = yield* Config.Redacted("CLOUDFLARE_API_TOKEN");
+    const apiKey = yield* Config.Redacted("CLOUDFLARE_WORKERS_AI_API_TOKEN");
     const accountId = yield* Config.String("CLOUDFLARE_ACCOUNT_ID");
 
     return OpenAiClient.layer({ apiKey, apiUrl: `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1` });
