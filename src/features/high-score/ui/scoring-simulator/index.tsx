@@ -2,8 +2,8 @@
 import { useState } from "react";
 
 // services, features, and other libraries
-import { useGT, useLocale, useMessages } from "gt-tanstack-start";
-import { T, Var } from "gt-react";
+import { T, Var, useGT, useMessages } from "gt-react";
+import { useLocale } from "gt-tanstack-start";
 import { calculatePotentialScore } from "@/features/game/domain/game-logic";
 import { getBasePointsPerTurn, getSpeedMultiplier, potentialScoreAsPercentage } from "@/features/game/domain/helpers";
 import { speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";

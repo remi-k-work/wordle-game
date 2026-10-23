@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
-import { useMessages } from "gt-tanstack-start";
+import { useMessages } from "gt-react";
 
 // components
 import { RevealTitle } from "@/ui/reveal-title";

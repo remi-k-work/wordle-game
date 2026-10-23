@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Array, HashMap, Option } from "effect";
-import { msg } from "gt-tanstack-start";
+import { msg } from "gt-react";
 
 // types
 import type { TheSecretWord, Tile, WordChallenge } from "./models";

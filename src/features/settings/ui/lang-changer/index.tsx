@@ -3,11 +3,10 @@ import { cn } from "@/lib/utils";
 import { Match } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
+import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT } from "gt-tanstack-start";
-import { T } from "gt-react";
 
 // assets
 import { PlFlagIcon } from "@/assets/icons/pl-flag";

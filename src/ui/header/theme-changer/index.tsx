@@ -5,7 +5,7 @@ import { Suspense, lazy } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { useGT } from "gt-tanstack-start";
+import { useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";

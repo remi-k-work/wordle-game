@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 // services, features, and other libraries
 import { DateTime, Option } from "effect";
+import { T } from "gt-react";
 import { useLocale } from "gt-tanstack-start";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -19,7 +20,6 @@ import {
 import { formatDuration } from "@/domain/formatters";
 
 // components
-import { T } from "gt-react";
 import { RunStat } from "./run-stat";
 
 // assets

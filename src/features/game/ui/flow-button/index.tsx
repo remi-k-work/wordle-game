@@ -5,11 +5,10 @@ import { useAtomSet } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state/alert";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { useGameFlowVariant } from "@/features/game/hooks/use-game-flow-variant";
+import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT } from "gt-tanstack-start";
-import { T } from "gt-react";
 import { FlowShell } from "./flow-shell";
 
 // assets

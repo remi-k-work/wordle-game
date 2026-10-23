@@ -2,11 +2,10 @@
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { wordChallengeHasWonAtom } from "@/features/game/state/word-challenge";
 import { modalIsOpenAtom, modalMachineAtom } from "@/state/modal";
+import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT } from "gt-tanstack-start";
-import { T } from "gt-react";
 import { Modal } from "@/ui/modal";
 import { YouWin } from "./you-win";
 import { Nevermind } from "./nevermind";

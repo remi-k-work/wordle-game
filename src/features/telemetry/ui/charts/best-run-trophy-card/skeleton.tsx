@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { msg, useMessages } from "gt-tanstack-start";
+import { msg, useMessages } from "gt-react";
 
 // components
 import { SectionHeaderSkeleton } from "@/ui/section-header";

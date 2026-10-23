@@ -2,7 +2,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { T, msg, useGT } from "gt-tanstack-start";
+import { T, msg, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";

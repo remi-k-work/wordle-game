@@ -4,11 +4,10 @@ import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state/game-settings";
 import { useSpeechVoices } from "@/hooks/use-speech-voices";
 import { matchLanguage } from "@/features/game/domain/helpers";
+import { T, useGT } from "gt-react";
 
 // components
 import { Select } from "@base-ui/react/select";
-import { useGT } from "gt-tanstack-start";
-import { T } from "gt-react";
 
 // assets
 import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";

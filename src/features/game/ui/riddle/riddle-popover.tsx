@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaIsLoadingAtom } from "@/features/game/state/word-meta";
-import { useGT } from "gt-tanstack-start";
+import { useGT } from "gt-react";
 
 // components
 import { GamePopover } from "@/ui/game-popover";

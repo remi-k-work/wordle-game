@@ -4,11 +4,10 @@ import { useCallback, useState } from "react";
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state/modal";
+import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT } from "gt-tanstack-start";
-import { T } from "gt-react";
 import { GamePopover } from "@/ui/game-popover";
 import { LangChanger } from "@/features/settings/ui/lang-changer";
 import { GameFlowButton } from "@/features/game/ui/flow-button";

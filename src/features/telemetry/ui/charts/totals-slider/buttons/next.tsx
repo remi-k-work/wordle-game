@@ -1,6 +1,8 @@
+// services, features, and other libraries
+import { useGT } from "gt-react";
+
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT } from "gt-tanstack-start";
 
 // assets
 import { NextIcon } from "@/assets/icons/next";

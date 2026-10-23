@@ -6,11 +6,11 @@ import { useAtomValue } from "@effect/atom-react";
 import { alertIsForfeitRunAtom } from "@/state/alert";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
+import { useGT } from "gt-react";
 
 // components
 import { Alert } from "@/ui/alert";
 import { Content } from "./content";
-import { useGT } from "gt-tanstack-start";
 
 export function ForfeitRunAlert() {
   // Derived boolean atom: re-renders only when visibility actually flips

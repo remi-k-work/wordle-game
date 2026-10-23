@@ -34,3 +34,13 @@ This repository serves as a showcase for production-grade functional programming
 * `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
 * `npm test` — Vitest.
 * `npm run build` / `npm run deploy` — Cloudflare production build, then `wrangler deploy`.
+
+### 🌐 Translations
+
+English is the source language and Polish is maintained manually, so no General Translation API key or project is required.
+
+* `npm run gt:generate` — scan the code for `T`/`msg` messages and refresh `src/_gt/en.json` and `src/_gt/pl.json`.
+* Translate new or changed entries in `src/_gt/pl.json` by hand, then commit the file.
+* `npm run gt:validate` — validate the generated source against the `gt-tanstack-start` integration.
+
+Locale configuration lives only in `gt.config.json`: `defaultLocale` is the source language and `locales` lists the target languages that receive a generated dictionary.

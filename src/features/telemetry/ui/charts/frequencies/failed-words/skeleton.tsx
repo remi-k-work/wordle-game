@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useGT } from "gt-tanstack-start";
+import { useGT } from "gt-react";
 
 // components
 import { HorizontalBarSkeleton } from "@/features/telemetry/ui/charts/horizontal-bar-skeleton";

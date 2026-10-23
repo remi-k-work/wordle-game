@@ -11,11 +11,11 @@ import {
   overdriveHacksTheOverrideAtom,
 } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { modalMachineAtom } from "@/state/modal";
+import { T, Var, useGT } from "gt-react";
+import { useLocale } from "gt-tanstack-start";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT, useLocale } from "gt-tanstack-start";
-import { T, Var } from "gt-react";
 import { GamePopover } from "@/ui/game-popover";
 
 // assets

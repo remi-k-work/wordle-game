@@ -1,9 +1,9 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { useGT } from "gt-tanstack-start";
 
 // assets
 import { ViewfinderCircleIcon as ViewfinderCircleIconS } from "@heroicons/react/24/solid";

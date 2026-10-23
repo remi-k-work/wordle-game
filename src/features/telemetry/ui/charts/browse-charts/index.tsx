@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useBrowseCharts } from "@/features/telemetry/hooks/use-browse-charts";
-import { useGT } from "gt-tanstack-start";
+import { useGT } from "gt-react";
 
 // components
 import { BrowseChartsShell } from "./browse-charts-shell";

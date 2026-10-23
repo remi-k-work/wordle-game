@@ -4,7 +4,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { Option, Schema } from "effect";
-import { msg } from "gt-tanstack-start";
+import { msg } from "gt-react";
 import { HighScorePage } from "@/features/high-score/domain/models";
 
 // types

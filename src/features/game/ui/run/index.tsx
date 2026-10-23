@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { motion } from "motion/react";
-import { useLocale } from "gt-tanstack-start";
 import { T } from "gt-react";
+import { useLocale } from "gt-tanstack-start";
 import { runSessionRunScoreAtom, runSessionStreakAtom } from "@/features/game/state/run-session";
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 

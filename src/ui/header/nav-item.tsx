@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useMessages } from "gt-tanstack-start";
+import { useMessages } from "gt-react";
 
 // types
 import type { ReactNode } from "react";

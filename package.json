@@ -12,7 +12,7 @@
     "test": "vitest --reporter=verbose",
     "type-check": "tsc --noEmit",
     "gt:generate": "gt generate",
-    "gt:translate": "gt translate",
+    "gt:validate": "gt validate",
     "seed-sol-en": "tsx ./src/seed/solutions-en.ts",
     "seed-sol-pl": "tsx ./src/seed/solutions-pl.ts",
     "seed-def-en": "tsx ./src/seed/definitions-en.ts",

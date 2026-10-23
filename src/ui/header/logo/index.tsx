@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { motion } from "motion/react";
-import { useGT } from "gt-tanstack-start";
+import { useGT } from "gt-react";
 
 // assets
 import { LogoIcon } from "@/assets/icons/logo";

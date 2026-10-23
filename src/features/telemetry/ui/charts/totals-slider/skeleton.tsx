@@ -1,8 +1,7 @@
 // services, features, and other libraries
-import { msg } from "gt-tanstack-start";
+import { msg } from "gt-react";
 
 // components
-import { SLIDE_CLASS } from "./slide";
 import { DotSkeleton } from "./buttons/dot";
 import { NextSkeleton } from "./buttons/next";
 import { PrevSkeleton } from "./buttons/prev";
@@ -12,7 +11,7 @@ import { AnyCounterChartSkeleton } from "@/features/telemetry/ui/charts/any-coun
 // types
 import type { AnyAvgStatArgs, AnyCounterArgs } from "@/features/telemetry/services/charts-db/models";
 
-type TotalsSlideSpec =
+export type TotalsSlideSpec =
   | { kind: "counter"; counterName: AnyCounterArgs["counterName"]; title: string; personalHeader: string }
   | {
       kind: "avg";
@@ -22,12 +21,15 @@ type TotalsSlideSpec =
       personalHeader: string;
     };
 
+// constants
+import { SLIDE_CLASS } from "./slide";
+
 // Single source of truth for the 10 slides — drives both the live slider
 // (index.tsx) and its skeleton so titles/ordering cannot drift apart. The spec set
 // deliberately lives in this recharts-free skeleton module: importing it from
 // index.tsx instead would drag the embla carousel into the statically-bundled
 // page shell
-const TOTALS_SLIDES = [
+export const TOTALS_SLIDES = [
   { kind: "counter", counterName: "gamesPlayed", title: msg("Games played"), personalHeader: msg("Your Games") },
   { kind: "counter", counterName: "runsStarted", title: msg("Arcade runs started"), personalHeader: msg("Your Runs") },
   { kind: "counter", counterName: "perfectGames", title: msg("Games solved on the first guess"), personalHeader: msg("Your Perfect Games") },
@@ -57,9 +59,6 @@ const TOTALS_SLIDES = [
     personalHeader: msg("Your Average Duration"),
   },
 ] as const satisfies ReadonlyArray<TotalsSlideSpec>;
-
-export { TOTALS_SLIDES };
-export type { TotalsSlideSpec };
 
 export function TotalsSlideSkeleton({ spec }: { spec: TotalsSlideSpec }) {
   if (spec.kind === "counter") return <AnyCounterChartSkeleton title={spec.title} personalHeader={spec.personalHeader} />;

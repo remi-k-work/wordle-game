@@ -1,6 +1,7 @@
+// services, features, and other libraries
+import { T, useMessages } from "gt-react";
+
 // components
-import { useMessages } from "gt-tanstack-start";
-import { T } from "gt-react";
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
 import { StatCard, StatCardSkeleton } from "@/ui/stat-card";
 
@@ -16,7 +17,7 @@ interface StatPairProps {
 }
 
 // Shared two-card layout for the scalar telemetry charts (counters and
-// averages). Formatting stays with callers; only the grid chrome is shared.
+// averages). Formatting stays with callers; only the grid chrome is shared
 export function StatPair({ title, personalHeader, personal, globalTitle, global }: StatPairProps) {
   const messages = useMessages();
 

@@ -4,10 +4,10 @@ import "@/assets/styles/globals.css";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { GTProvider, getLocale, getTranslationsSnapshot, useGT } from "gt-tanstack-start";
+import { T, useGT } from "gt-react";
+import { GTProvider, getLocale, getTranslationsSnapshot } from "gt-tanstack-start";
 
 // components
-import { T } from "gt-react";
 import { ThemeProvider } from "next-themes";
 import { AtomRegistryProvider } from "@/ui/atom-registry-provider";
 import { Toastify } from "@/ui/toastify";
