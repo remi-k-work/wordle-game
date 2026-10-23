@@ -22,6 +22,7 @@
     "seed-dic-en": "tsx ./src/seed/dictionary-en.ts",
     "seed-dic-pl": "tsx ./src/seed/dictionary-pl.ts",
     "db:migrate": "tsx ./src/seed/run-migrations.ts",
+    "cloudflare-plan-proof": "tsx ./src/seed/cloudflare-plan-proof.ts",
     "upload": "npm run build && wrangler versions upload --preview-alias staging",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",

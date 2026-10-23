@@ -5,7 +5,7 @@ import { Keypad, TheSecretWord } from "@/features/game/domain/models";
 import { matchLanguage } from "@/features/game/domain/helpers";
 import { generateRiddle } from "@/features/game/domain/riddle2";
 import { formatTextForTTS } from "@/domain/formatters";
-import { OpenRouterClientWithHttp } from "@/domain/fallback-plan2";
+import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { makeRpcHandler, withAiEnabled } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
@@ -62,6 +62,6 @@ const RpcGameLayer = RpcGame.toLayer({
   fetchWordDefinitionAudio: fetchSpeechAudio,
 });
 
-const RpcGameLayerWithOpenRouter = RpcGameLayer.pipe(Layer.provide(OpenRouterClientWithHttp), Layer.provide(OpenRouter.layer));
+const RpcGameLayerWithAi = RpcGameLayer.pipe(Layer.provide(AiClientsWithHttp), Layer.provide(OpenRouter.layer));
 
-export const handler = makeRpcHandler(RpcGame, "/api/rpc/game", RpcGameLayerWithOpenRouter);
+export const handler = makeRpcHandler(RpcGame, "/api/rpc/game", RpcGameLayerWithAi);

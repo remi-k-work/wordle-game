@@ -2,7 +2,7 @@
 import { Effect, Layer, Option } from "effect";
 import { RpcOverdriveHacks } from "./requests";
 import { generateOverride } from "@/features/overdrive-hacks/domain/override2";
-import { OpenRouterClientWithHttp } from "@/domain/fallback-plan2";
+import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { makeRpcHandler, withAiEnabled } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
@@ -19,6 +19,6 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverrideAudio: fetchSpeechAudio,
 });
 
-const RpcOverdriveHacksLayerWithOpenRouter = RpcOverdriveHacksLayer.pipe(Layer.provide(OpenRouterClientWithHttp), Layer.provide(OpenRouter.layer));
+const RpcOverdriveHacksLayerWithAi = RpcOverdriveHacksLayer.pipe(Layer.provide(AiClientsWithHttp), Layer.provide(OpenRouter.layer));
 
-export const handler = makeRpcHandler(RpcOverdriveHacks, "/api/rpc/overdrive-hacks", RpcOverdriveHacksLayerWithOpenRouter);
+export const handler = makeRpcHandler(RpcOverdriveHacks, "/api/rpc/overdrive-hacks", RpcOverdriveHacksLayerWithAi);

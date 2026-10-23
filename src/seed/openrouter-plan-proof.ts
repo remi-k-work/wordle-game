@@ -4,10 +4,10 @@ import "dotenv/config";
 import { Effect, Layer, Logger, Option } from "effect";
 import { NodeRuntime, NodeServices } from "@effect/platform-node";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
-import { OpenRouterClientWithHttp } from "@/domain/fallback-plan2";
+import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, OpenRouterClientWithHttp);
+const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, AiClientsWithHttp);
 
 const main = Effect.gen(function* () {
   yield* Effect.log("Proving Effect-v4 AI + OpenRouter `ExecutionPlan` fallback end-to-end...\n");
