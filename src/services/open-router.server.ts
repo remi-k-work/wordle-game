@@ -25,7 +25,7 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
         flow(HttpClientRequest.prependUrl("https://openrouter.ai/api/v1"), HttpClientRequest.bearerToken(apiKey), HttpClientRequest.acceptJson)
       ),
       HttpClient.filterStatusOk,
-      HttpClient.retryTransient({ schedule: Schedule.exponential(100), times: 3 })
+      HttpClient.retryTransient({ schedule: Schedule.exponential("100 millis"), times: 3 })
     );
 
     // Text-to-speech effect execution
@@ -36,7 +36,7 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
         const speechRequest = yield* decodeSpeechRequest(voice === undefined ? { input } : { input, voice });
 
         // Execute request
-        const request = yield* HttpClientRequest.bodyJson(speechRequest)(HttpClientRequest.post("/audio/speech"));
+        const request = yield* HttpClientRequest.post("/audio/speech").pipe(HttpClientRequest.bodyJson(speechRequest));
         const response = yield* client.execute(request).pipe(
           // Surface upstream status + body (e.g. rate-limit details) instead of burying them in `cause`
           Effect.catchTag("HttpClientError", (clientError) => {

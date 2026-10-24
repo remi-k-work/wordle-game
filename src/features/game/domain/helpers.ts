@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, DateTime, Duration, Number, Option, pipe } from "effect";
+import { Array, DateTime, Duration, Number, Option } from "effect";
 
 // types
 import type { Color, SolutionsLanguage, WordChallenge, WordScore } from "./models";
@@ -8,17 +8,11 @@ import type { Color, SolutionsLanguage, WordChallenge, WordScore } from "./model
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from "./constants";
 
 // Pick the color with the higher priority
-export const pickStrongerColor = (a: Color | undefined, b: Color) =>
-  Option.match(Option.fromNullishOr(a), {
-    onNone: () => b,
-    onSome: (a) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a),
-  });
+export const pickStrongerColor = (a: Color | undefined, b: Color): Color => (a === undefined || COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a);
 
 // Establish the speed multiplier based on the time it took
 export const getSpeedMultiplier = (elapsedSeconds: number) =>
-  pipe(
-    SPEED_MULTIPLIER_RULES,
-    Array.findFirst(({ maxSeconds }) => elapsedSeconds < maxSeconds),
+  Array.findFirst(SPEED_MULTIPLIER_RULES, ({ maxSeconds }) => elapsedSeconds < maxSeconds).pipe(
     Option.map(({ multiplier }) => multiplier),
     Option.getOrElse(() => 0.8)
   );

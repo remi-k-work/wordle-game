@@ -14,7 +14,8 @@ interface GenerateSingleFieldOptions {
 }
 
 // Surfaces a message from an unknown failure without assuming an Error shape
-const describeFailure = (cause: unknown): string => (Predicate.isObject(cause) && Predicate.isString(cause.message) ? cause.message : String.String(cause));
+const describeFailure = (cause: unknown) =>
+  Predicate.hasProperty(cause, "message") && Predicate.isString(cause.message) ? cause.message : String.String(cause);
 
 // Raw single-field generation against whichever `LanguageModel` is in scope
 export const generateSingleField2 = Effect.fn("generateSingleField2")(
@@ -31,9 +32,7 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
     return yield* languageModel.generateObject({ prompt, schema }).pipe(
       // Normalize for TTS and keep only non-empty output (an empty riddle is no riddle)
       Effect.map(({ value }) => Option.liftPredicate(formatTextForTTS(value[fieldName]), String.isNonEmpty)),
-      Effect.tapError((error) =>
-        Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(Cause.fail(error))}`)
-      )
+      Effect.tapCause((cause) => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(cause)}`))
     );
   },
   Effect.withExecutionPlan(makeFallbackPlan2),

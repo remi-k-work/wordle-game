@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Array, HashMap, HashSet, Option, Random, pipe } from "effect";
+import { Effect, Array, HashMap, HashSet, Option, Random, Result } from "effect";
 import { computeKeypadState } from "@/features/game/domain/game-logic";
 
 // types
@@ -19,20 +19,13 @@ export const computeSonarCandidates = (
   // full board (formatGuess x guesses + reduce) per item is ~30x redundant work
   const keypadState = computeKeypadState(theSecretWord, wordleGuesses);
 
-  return pipe(
-    vowels,
-    // Keep only vowels that actually appear somewhere in the secret word
-    Array.filter((vowel) => theSecretWord.includes(vowel)),
-    // Exclude vowels already revealed by previous sonar activations
-    Array.filter((vowel) => !HashSet.has(alreadyRevealedSet, vowel)),
-    // Keep vowels the player hasn't positively identified yet (untouched or only greyed-out guesses)
-    Array.filter((vowel) =>
-      Option.match(HashMap.get(keypadState, vowel), {
-        onNone: () => true,
-        onSome: (color) => color === "" || color === "grey",
-      })
-    )
-  );
+  return Array.filter(vowels, (vowel) => {
+    if (!theSecretWord.includes(vowel) || HashSet.has(alreadyRevealedSet, vowel)) {
+      return false;
+    }
+    const color = Option.getOrElse(HashMap.get(keypadState, vowel), () => "");
+    return color === "" || color === "grey";
+  });
 };
 
 export const calculateSonarTarget = Effect.fnUntraced(function* (
@@ -50,6 +43,6 @@ export const calculateSonarTarget = Effect.fnUntraced(function* (
   return Option.some({
     vowel,
     // A vowel may appear at multiple positions in the secret word (e.g. both E's in "SPEED")
-    positions: Array.flatMap(Array.fromIterable(theSecretWord), (letter, index) => (letter === vowel ? [index] : [])),
+    positions: Array.filterMap(theSecretWord, (letter, index) => (letter === vowel ? Result.succeed(index) : Result.failVoid)),
   });
 });

@@ -1,4 +1,4 @@
-// oxlint-disable effecttsgo/global-date effecttsgo/global-timers
+// oxlint-disable effecttsgo/global-timers
 
 // react
 import { useEffect, useState } from "react";
@@ -85,13 +85,13 @@ export function RunScore() {
 function RunDurationSection({ createdAt, finishedAt, isLive }: RunDurationSectionProps) {
   // Freeze the clock when the run already finished (the section then shows the
   // final result, not a live timer)
-  const [now, setNow] = useState(() => DateTime.makeUnsafe(Date.now()));
+  const [now, setNow] = useState(DateTime.nowUnsafe);
 
   useEffect(() => {
     if (!isLive) return;
 
     const interval = setInterval(() => {
-      setNow(DateTime.makeUnsafe(Date.now()));
+      setNow(DateTime.nowUnsafe());
     }, 1000);
 
     return () => clearInterval(interval);

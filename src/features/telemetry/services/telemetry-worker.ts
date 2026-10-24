@@ -20,7 +20,7 @@ const normalizeMetricPayload = (snapshot: Metric.Metric.Snapshot) =>
   );
 
 // fromJsonString combines JSON.parse + schema decoding (and JSON.stringify + encoding on the way back)
-const MetricPayloadFormJson = Schema.fromJsonString(Schema.Unknown);
+const MetricPayloadFromJson = Schema.fromJsonString(Schema.Unknown);
 
 // TelemetryWorkerLayer is a background service that consumes telemetry data from the Hub
 export const TelemetryWorkerLayer = Layer.effectDiscard(
@@ -80,7 +80,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
               solutionsLanguage: attributes?.["solutionsLanguage"],
               metricName,
               // We need to stringify the metric payload in order for equals to work (for stream deduping)
-              metricPayload: yield* Schema.encodeEffect(MetricPayloadFormJson)(normalizeMetricPayload(snapshot)),
+              metricPayload: yield* Schema.encodeEffect(MetricPayloadFromJson)(normalizeMetricPayload(snapshot)),
             }).pipe(Effect.tapError(Effect.logError), Effect.option);
           })
         )

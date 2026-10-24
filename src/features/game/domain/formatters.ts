@@ -12,7 +12,10 @@ const speedMultiplierRule = (speedMultiplier: number) => Array.findFirst(SPEED_M
 
 // Maps a speed multiplier to a stable category identifier for UI presentation
 export const speedMultiplierToCategory = (speedMultiplier: number) =>
-  Option.getOrUndefined(Option.map(speedMultiplierRule(speedMultiplier), (rule) => rule.category));
+  speedMultiplierRule(speedMultiplier).pipe(
+    Option.map((rule) => rule.category),
+    Option.getOrUndefined
+  );
 
 // Format the current guess word into an array of letter objects with color coding
 export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChallenge["wordleGuesses"][number]): Tile[] => {
@@ -48,7 +51,4 @@ export const speedMultiplierToCategoryEmoji = (speedMultiplier: number) =>
   });
 
 export const maxSecondsToSpeedMultiplier = (maxSeconds: number | null) =>
-  Option.map(
-    Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.maxSeconds === maxSeconds),
-    (rule) => rule.multiplier
-  );
+  Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.maxSeconds === maxSeconds).pipe(Option.map((rule) => rule.multiplier));

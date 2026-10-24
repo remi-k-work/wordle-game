@@ -46,7 +46,7 @@ export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, 
         : { clean: acc.clean, removed: acc.removed + 1 };
     })
   );
-  const cleanDefinitions = Object.fromEntries(HashMap.toEntries(cleanMap));
+  const cleanDefinitions = Object.fromEntries(cleanMap);
 
   // Early return if nothing needs pruning
   if (removalCount === 0) {

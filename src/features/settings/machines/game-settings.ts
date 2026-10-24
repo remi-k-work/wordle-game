@@ -1,7 +1,4 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
-import { Match } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -24,12 +21,7 @@ export const gameSettingsMachine = setup({
   actions: {
     // Toggle the solutions language
     toggleSolutionsLanguage: assign({
-      solutionsLanguage: ({ context }) =>
-        Match.value(context.solutionsLanguage).pipe(
-          Match.when("En", () => "Pl" as const),
-          Match.when("Pl", () => "En" as const),
-          Match.exhaustive
-        ),
+      solutionsLanguage: ({ context }) => (context.solutionsLanguage === "En" ? "Pl" : "En"),
     }),
 
     // The voice related settings

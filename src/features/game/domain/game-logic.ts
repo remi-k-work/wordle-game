@@ -1,5 +1,3 @@
-// oxlint-disable effecttsgo/global-date
-
 // services, features, and other libraries
 import { Array, DateTime, HashMap, HashSet, Option, pipe } from "effect";
 import { getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrongerColor } from "./helpers";
@@ -32,8 +30,7 @@ export function calculatePotentialScore(
   startTimeOrSeconds: WordChallenge["startTime"] | number,
   now?: DateTime.Utc
 ) {
-  const elapsedSeconds =
-    typeof startTimeOrSeconds === "number" ? startTimeOrSeconds : getElapsedSeconds(startTimeOrSeconds, now ?? DateTime.makeUnsafe(Date.now()));
+  const elapsedSeconds = typeof startTimeOrSeconds === "number" ? startTimeOrSeconds : getElapsedSeconds(startTimeOrSeconds, now ?? DateTime.nowUnsafe());
   return Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds));
 }
 

@@ -1,4 +1,4 @@
-// oxlint-disable effecttsgo/global-date typescript/no-misused-spread
+// oxlint-disable typescript/no-misused-spread
 
 // services, features, and other libraries
 import { Array, DateTime, HashSet, Option, String, Effect } from "effect";
@@ -84,11 +84,7 @@ export const wordChallengeMachine = setup({
         currentGuessWord: String.length(context.currentGuessWord) < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
 
         // Lazily assign startTime on the very first letter typed
-        // NOTE: `assign` is synchronous — `DateTime.now` (an Effect) is unavailable here.
-        startTime: Option.match(context.startTime, {
-          onNone: () => Option.some(DateTime.makeUnsafe(Date.now())),
-          onSome: () => context.startTime,
-        }),
+        startTime: Option.orElse(context.startTime, () => Option.some(DateTime.nowUnsafe())),
       } as const satisfies WordChallenge;
     }),
 
@@ -109,12 +105,11 @@ export const wordChallengeMachine = setup({
     }),
 
     // Calculates the player's word score based on the turn they won on and how long it took them
-    // NOTE: `assign` is synchronous — `DateTime.now` (an Effect) is unavailable here.
     calculateScore: assign(
       ({ context }) =>
         ({
           ...context,
-          wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.makeUnsafe(Date.now()))),
+          wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.nowUnsafe())),
         }) as const satisfies WordChallenge
     ),
     // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)

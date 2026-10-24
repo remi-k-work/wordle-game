@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Match, Option } from "effect";
+import { Option, Record } from "effect";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { formatGuess } from "@/features/game/domain/formatters";
 import { matchLanguage } from "@/features/game/domain/helpers";
@@ -38,6 +38,15 @@ PRZYKŁAD OCZEKIWANEGO TONU I FORMATU ODPOWIEDZI:
 Kontekst: Ukryte słowo to "ZEGAR". Gracz wpisał "PASEK" (E żółty, A żółty).
 Wskazówka: Znalazłeś właściwe litery E oraz A, ale znajdują się one na złych pozycjach. Twój strzał dotyczy elementu garderoby, jednak musisz szukać w zupełnie innej kategorii. Zastanów się nad powszechnie używanymi urządzeniami, które często wiszą na ścianie i służą do odmierzania upływającego czasu.
 `;
+
+const COLOR_TO_PL = Record.fromEntries([
+  ["green", "zielony"],
+  ["yellow", "żółty"],
+  ["grey", "szary"],
+  ["red", "czerwony"],
+  ["", ""],
+]) as Readonly<Record<Color, string>>;
+const colorToPl = (color: Color): string => Option.getOrElse(Record.get(COLOR_TO_PL, color), () => color);
 
 const buildFeedbackLines = (
   wordleGuesses: WordChallenge["wordleGuesses"],
@@ -80,14 +89,6 @@ const OVERRIDE_PROMPT_PL = (
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"]
 ) => {
-  const colorToPl = (color: Color) =>
-    Match.value(color).pipe(
-      Match.when("green", () => "zielony"),
-      Match.when("yellow", () => "żółty"),
-      Match.when("grey", () => "szary"),
-      Match.orElse((s) => s)
-    );
-
   return [
     `Stwórz wskazówkę ratunkową teraz, w oparciu o poniższy kontekst:\n\n`,
     Option.match(wordDefinition, {

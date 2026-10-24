@@ -1,4 +1,4 @@
-// oxlint-disable effecttsgo/crypto-random-uuid effecttsgo/global-date typescript/no-misused-spread
+// oxlint-disable effecttsgo/crypto-random-uuid typescript/no-misused-spread
 
 // services, features, and other libraries
 import { DateTime, Effect, Option } from "effect";
@@ -39,7 +39,7 @@ export const runSessionMachine = setup({
         ({
           ...INITIAL_RUN_SESSION,
           runId: Option.some(crypto.randomUUID()),
-          createdAt: Option.some(DateTime.makeUnsafe(Date.now())),
+          createdAt: Option.some(DateTime.nowUnsafe()),
           bestRunScore: context.bestRunScore,
           bestStreak: context.bestStreak,
         }) as const satisfies RunSession

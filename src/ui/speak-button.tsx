@@ -30,7 +30,9 @@ export function SpeakButtonRegular({ sanitizedText, children, className, ...rest
   return (
     <Button
       className={cn("button", className)}
-      onClick={() => Option.match(sanitizedText, { onNone: () => {}, onSome: (sanitizedText) => speakText(sanitizedText) })}
+      onClick={() => {
+        if (Option.isSome(sanitizedText)) speakText(sanitizedText.value);
+      }}
       {...rest}
     >
       <SpeakerWaveIcon className="size-11" />
@@ -45,7 +47,9 @@ export function SpeakButtonNatural({ audioBuffer, children, className, ...rest }
   return (
     <Button
       className={cn("button bg-secondary", className)}
-      onClick={() => Option.match(audioBuffer, { onNone: () => {}, onSome: (audioBuffer) => playAudioBuffer(audioBuffer) })}
+      onClick={() => {
+        if (Option.isSome(audioBuffer)) playAudioBuffer(audioBuffer.value);
+      }}
       {...rest}
     >
       <SpeakerWaveIcon className="size-11" />

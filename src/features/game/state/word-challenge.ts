@@ -1,5 +1,3 @@
-// oxlint-disable effecttsgo/global-date
-
 // services, features, and other libraries
 import { Array, DateTime, HashMap, Option } from "effect";
 import { Atom } from "effect/reactivity";
@@ -31,10 +29,8 @@ export const wordChallengeIsRejectedAtom = wordChallengeMachineAtom.pipe(Atom.ma
 export const wordChallengeHasWonAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("wordWon")));
 
 // Reactive selector for the "live" potential word score based on current progress
-// NOTE: `Atom.make` getters are synchronous, so `DateTime.now` (an Effect) is
-// unavailable here — `Date.now()` is the correct tool
 export const wordChallengePotentialScoreAtom = Atom.make((get) =>
-  calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.makeUnsafe(Date.now()))
+  calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.nowUnsafe())
 );
 
 // An empty row of unplayed tiles, e.g. for the rows below the current guess

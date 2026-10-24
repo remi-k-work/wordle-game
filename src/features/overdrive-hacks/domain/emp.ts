@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Array, HashMap, HashSet, Option, Random, pipe } from "effect";
+import { Effect, Array, HashMap, HashSet, Option, Random } from "effect";
 import { computeKeypadState } from "@/features/game/domain/game-logic";
 
 // types
@@ -21,20 +21,10 @@ export const computeEmpCandidates = (
   // re-evaluating the full board per item is ~30x redundant work
   const keypadState = computeKeypadState(theSecretWord, wordleGuesses);
 
-  return pipe(
-    keypad,
-    // Exclude letters that are anywhere in the secret word
-    Array.filter((letter) => !theSecretWord.includes(letter)),
-    // Exclude letters already nuked by previous EMP activations
-    Array.filter((letter) => !HashSet.has(empNukedSet, letter)),
-    // Exclude letters the player has already discovered through guessing (green/yellow from keypad)
-    Array.filter((letter) =>
-      Option.match(HashMap.get(keypadState, letter), {
-        onNone: () => true,
-        onSome: (color) => color === "",
-      })
-    )
-  );
+  return Array.filter(keypad, (letter) => {
+    if (theSecretWord.includes(letter) || HashSet.has(empNukedSet, letter)) return false;
+    return Option.getOrElse(HashMap.get(keypadState, letter), () => "") === "";
+  });
 };
 
 // EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation
@@ -46,5 +36,6 @@ export const calculateEmpTargets = Effect.fnUntraced(function* (
 ) {
   const candidates = computeEmpCandidates(theSecretWord, wordleGuesses, keypad, empNukedLetters);
   if (candidates.length < EMP_LETTER_COUNT) return Option.none();
-  return Option.some(Array.take(EMP_LETTER_COUNT)(yield* Random.shuffle(candidates)));
+  const shuffled = yield* Random.shuffle(candidates);
+  return Option.some(Array.take(shuffled, EMP_LETTER_COUNT));
 });
