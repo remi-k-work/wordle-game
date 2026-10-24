@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useAtomValue, useAtomSet } from "@effect/atom-react";
 import { wordChallengeCurrentGuessWordAtom, wordChallengeIsRejectedAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksMachineAtom, overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
 
 // components
 import { GuessTile } from "./guess-tile";
@@ -23,10 +24,7 @@ export function CurrentGuess() {
   const sonarReveals = useAtomValue(overdriveHacksSonarRevealsAtom);
 
   // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
-  const sonarVowelByPosition = useMemo(
-    () => new Map(sonarReveals.flatMap((reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const))),
-    [sonarReveals]
-  );
+  const vowelByPosition = useMemo(() => sonarVowelByPosition(sonarReveals), [sonarReveals]);
 
   // Single AbortController removes the keyup listener on unmount or re-run
   useEffect(() => {
@@ -42,7 +40,7 @@ export function CurrentGuess() {
     ...currentGuessWord.split("").map<Tile>((tileKey) => ({ tileKey, color: (isInvalidGuess ? "red" : "") as Color })),
     ...Array.from({ length: WORD_LENGTH - currentLength }, (_, i) => {
       const position = currentLength + i;
-      const vowel = sonarVowelByPosition.get(position);
+      const vowel = vowelByPosition.get(position);
       return vowel ? ({ tileKey: vowel, color: "green" } as const satisfies Tile) : ({ tileKey: "", color: "" } as const satisfies Tile);
     }),
   ];
@@ -50,7 +48,8 @@ export function CurrentGuess() {
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isInvalidGuess && "animate-pulse")}>
       {finalGuessTiles.map((tile, tileIndex) => {
-        const isSonarReveal = tileIndex >= currentLength && sonarVowelByPosition.has(tileIndex);
+        const isSonarReveal = tileIndex >= currentLength && vowelByPosition.has(tileIndex);
+
         return (
           // Keys stay stable per position: the sonar ping is driven by the
           // `isSonarReveal` prop through useSonarPing's effect + cleanup, so the

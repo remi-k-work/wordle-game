@@ -2,6 +2,7 @@
 import { Array, HashMap, pipe } from "effect";
 import { Atom } from "effect/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
+import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
 import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
 import { createMachineAtom } from "@/domain/machine-atom";
 
@@ -38,8 +39,7 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
   const reveals = get(overdriveHacksSonarRevealsAtom);
   if (reveals.length === 0) return wordleGrid;
 
-  // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
-  const vowelByPosition = new Map(reveals.flatMap((reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const)));
+  const vowelByPosition = sonarVowelByPosition(reveals);
 
   return wordleGrid.map((row) =>
     row.map((tile, index) => {

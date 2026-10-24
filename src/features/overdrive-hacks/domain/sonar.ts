@@ -46,3 +46,7 @@ export const calculateSonarTarget = Effect.fnUntraced(function* (
     positions: Array.filterMap(theSecretWord, (letter, index) => (letter === vowel ? Result.succeed(index) : Result.failVoid)),
   });
 });
+
+// O(1) tile lookup: flatten reveal positions once instead of scanning per tile
+export const sonarVowelByPosition = (reveals: ReadonlyArray<SonarReveal>): Map<number, SonarReveal["vowel"]> =>
+  new Map(reveals.flatMap((reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const)));

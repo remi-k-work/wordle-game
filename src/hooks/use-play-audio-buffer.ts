@@ -1,5 +1,3 @@
-// oxlint-disable effecttsgo/global-console
-
 // react
 import { useCallback } from "react";
 
@@ -68,9 +66,9 @@ export function usePlayAudioBuffer() {
     audio.pause();
     revokeSharedUrl();
 
-    // Copy defensively: keeps the atom's buffer replayable
-    const copy = audioBuffer.slice(0);
-    const blob = new Blob([copy as BlobPart], { type: "audio/mpeg" });
+    // Copy defensively: keeps the atom's buffer replayable (a fresh copy is
+    // also ArrayBuffer-backed, which is a valid BlobPart without a cast)
+    const blob = new Blob([new Uint8Array(audioBuffer)], { type: "audio/mpeg" });
     const url = URL.createObjectURL(blob);
     sharedUrl = url;
 
