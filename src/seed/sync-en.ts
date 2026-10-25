@@ -1,15 +1,10 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger } from "effect";
-import { NodeServices, NodeRuntime } from "@effect/platform-node";
 import { makeSync } from "./sync";
+import { runSeed } from "./runtime";
 
 // constants
 const SOLUTIONS_PATH = "./src/seed/solutions-en.json";
 const DEFINITIONS_PATH = "./src/seed/definitions-en.json";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer);
-
-const main = makeSync(SOLUTIONS_PATH, DEFINITIONS_PATH).pipe(Effect.provide(MainLayer));
-
-// Graceful execution and teardown via NodeRuntime
-NodeRuntime.runMain(main);
+// runSeed provides the shared Node layer and graceful teardown on CTRL+C
+runSeed(makeSync(SOLUTIONS_PATH, DEFINITIONS_PATH));

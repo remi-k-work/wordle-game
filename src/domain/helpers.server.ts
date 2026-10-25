@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Config, Effect, Layer, Scheduler } from "effect";
+import { Config, Effect, Layer, Option, Scheduler } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
@@ -79,3 +79,11 @@ export const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Con
 // cheap fallback is served instead (avoids rate limits and token usage)
 export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallback: Effect.Effect<A, E, R>) =>
   Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
+
+// Runs an AI-backed generation and degrades to `None` on any failure. The
+// failure is logged first so it is not silently swallowed
+export const withAiFallback = <A, E, R>(generate: Effect.Effect<Option.Option<A>, E, R>, fallback: Effect.Effect<Option.Option<A>, E, R>) =>
+  withAiEnabled(generate, fallback).pipe(
+    Effect.tapError(Effect.logError),
+    Effect.orElseSucceed(() => Option.none())
+  );

@@ -1,13 +1,14 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Effect, Layer, Logger, Option } from "effect";
-import { NodeRuntime, NodeServices } from "@effect/platform-node";
+import { Effect, Layer, Option } from "effect";
+import { NodeRuntime } from "@effect/platform-node";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
+import { SeedLayer } from "./runtime";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, AiClientsWithHttp);
+const MainLayer = Layer.mergeAll(SeedLayer, AiClientsWithHttp);
 
 const main = Effect.gen(function* () {
   yield* Effect.log("Proving Effect-v4 AI + OpenRouter `ExecutionPlan` fallback end-to-end...\n");

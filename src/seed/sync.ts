@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Effect, FileSystem, HashMap, HashSet, pipe, Schema } from "effect";
+import { Effect, FileSystem, HashSet, Record, Schema } from "effect";
 
 class SeedJsonParseError extends Schema.TaggedError<SeedJsonParseError>()("SeedJsonParseError", {
   file: Schema.String,
@@ -25,28 +25,21 @@ export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, 
 
   // Parse + validate in one step via fromJsonString (no `as` cast, no global Error in failure channel)
   const solutions = yield* Schema.decodeEffect(SolutionsFromJson)(solutionsRaw).pipe(
-    Effect.mapError((cause) => new SeedJsonParseError({ file: solutionsPath, cause })),
-    Effect.orDie
+    Effect.mapError((cause) => new SeedJsonParseError({ file: solutionsPath, cause }))
   );
   const definitions = yield* Schema.decodeEffect(DefinitionsFromJson)(definitionsRaw).pipe(
-    Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })),
-    Effect.orDie
+    Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause }))
   );
 
   // Convert solutions into an uppercase HashSet for O(1) lookups
   const solutionsSet = HashSet.fromIterable(solutions.map((w) => w.toUpperCase()));
 
-  // Perform the intersection cleanup functionally — HashMap for absent-key safety, no mutation
-  const { clean: cleanMap, removed: removalCount } = pipe(
-    Object.entries(definitions),
-    Array.reduce({ clean: HashMap.empty<string, string>(), removed: 0 }, (acc, [word, definition]) => {
-      const upperWord = word.toUpperCase();
-      return HashSet.has(solutionsSet, upperWord)
-        ? { clean: HashMap.set(acc.clean, upperWord, definition), removed: acc.removed }
-        : { clean: acc.clean, removed: acc.removed + 1 };
-    })
+  // Keep only definitions for known solutions and normalize their keys
+  const cleanDefinitions = Record.mapKeys(
+    Record.filter(definitions, (_, word) => HashSet.has(solutionsSet, word.toUpperCase())),
+    (word) => word.toUpperCase()
   );
-  const cleanDefinitions = Object.fromEntries(cleanMap);
+  const removalCount = Object.keys(definitions).length - Object.keys(cleanDefinitions).length;
 
   // Early return if nothing needs pruning
   if (removalCount === 0) {
@@ -57,8 +50,7 @@ export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, 
 
   // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
   const cleanJson = yield* Schema.encodeEffect(DefinitionsFromJson)(cleanDefinitions).pipe(
-    Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })),
-    Effect.orDie
+    Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause }))
   );
   yield* fs.writeFileString(definitionsPath, cleanJson);
 

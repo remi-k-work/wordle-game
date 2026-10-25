@@ -14,7 +14,11 @@ class PgContainer extends Context.Service<PgContainer>()("test/PgContainer", {
       try: () => new PostgreSqlContainer("postgres:alpine").start(),
       catch: (cause) => new ContainerError({ cause }),
     }),
-    (container) => Effect.promise(() => container.stop())
+    (container) =>
+      Effect.tryPromise({
+        try: () => container.stop(),
+        catch: (cause) => new ContainerError({ cause }),
+      }).pipe(Effect.tapError(Effect.logError), Effect.orDie)
   ),
 }) {
   static layer = Layer.effect(this, this.make);

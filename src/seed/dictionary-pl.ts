@@ -1,15 +1,12 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger } from "effect";
-import { NodeServices, NodeRuntime } from "@effect/platform-node";
 import { makeWordlistSync } from "./wordlist";
+import { runSeed } from "./runtime";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer);
-
-// Use NodeRuntime.runMain for graceful teardown on CTRL+C
-NodeRuntime.runMain(
+// runSeed provides the shared Node layer and graceful teardown on CTRL+C
+runSeed(
   makeWordlistSync({
     inputs: ["./src/seed/dictionary-pl.txt"],
     output: "./src/seed/dictionary-pl.json",
     doneMessage: "Polish dictionary successfully generated!",
-  }).pipe(Effect.provide(MainLayer))
+  })
 );

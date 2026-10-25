@@ -1,21 +1,26 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Cause, Duration, Effect, ExecutionPlan, Layer, Logger, Option, Schedule, Schema } from "effect";
-import { NodeRuntime, NodeServices } from "@effect/platform-node";
+import { Cause, Duration, Effect, ExecutionPlan, Layer, Option, Schedule, Schema } from "effect";
+import { NodeRuntime } from "@effect/platform-node";
 import { LanguageModel, Model, Prompt } from "effect/ai";
 import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
+import { SeedLayer } from "./runtime";
 
 // assets
 import definitionsPlJson from "@/assets/data/definitions-pl.json";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, AiClientsWithHttp);
+const MainLayer = Layer.mergeAll(SeedLayer, AiClientsWithHttp);
 
 // Validate the build-time definition asset once, mirroring the RPC handler
 const Definitions = Schema.Record(Schema.String, Schema.String);
 const DEFINITIONS_PL = Schema.decodeSync(Definitions)(definitionsPlJson);
+
+class MissingDefinitionError extends Schema.TaggedError<MissingDefinitionError>()("MissingDefinitionError", {
+  theSecretWord: Schema.String,
+}) {}
 
 // Exotic Polish solutions are the cases where the model is most likely to
 // guess the wrong sense or hallucinate a meaning without the dictionary context
@@ -38,15 +43,8 @@ const GEMMA_PLAN = ExecutionPlan.make({
   schedule: Schedule.exponential("1 second", 2),
 });
 
-const getDefinition = (theSecretWord: string) => {
-  const wordDefinition = DEFINITIONS_PL[theSecretWord];
-
-  if (wordDefinition === undefined) {
-    throw new Error(`Missing Polish definition for '${theSecretWord}'`);
-  }
-
-  return wordDefinition;
-};
+const getDefinition = (theSecretWord: string) =>
+  Option.fromNullishOr(DEFINITIONS_PL[theSecretWord]).pipe(Effect.fromOption(() => new MissingDefinitionError({ theSecretWord })));
 
 // Mirrors the single-field generation flow so the A/B uses the exact production
 // prompt and schema construction, while exposing the model that actually ran
@@ -85,7 +83,7 @@ const main = Effect.gen(function* () {
   yield* Effect.log("A/B: Polish riddles — baseline prompt vs definition-aware prompt\n");
 
   for (const theSecretWord of TEST_WORDS) {
-    const wordDefinition = getDefinition(theSecretWord);
+    const wordDefinition = yield* getDefinition(theSecretWord);
 
     yield* Effect.log(`=== ${theSecretWord} ===\nDefinition: ${wordDefinition}\n`);
 

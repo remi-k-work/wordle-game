@@ -143,8 +143,9 @@ describe("best-run-trophy-card e2e", () => {
         const sql = yield* SqlClient.SqlClient;
         yield* seedFixture;
 
-        // Request for En language but we only seeded Pl runs in this test (the EN fixture row exists,
-        // but to keep the test self-contained we query for a language with no rows at all)
+        // Empty the table so the global lookup genuinely has no candidates
+        yield* sql`DELETE FROM arcade_run_summary`;
+
         const request = yield* Schema.decodeEffect(BestRunTrophyCardArgs)({
           sessionId: "00000000-0000-0000-0000-000000000000",
           solutionsLanguage: "En",
@@ -152,17 +153,7 @@ describe("best-run-trophy-card e2e", () => {
         });
         const result = yield* bestRunTrophyCardQuery(sql)(request);
 
-        // The EN fixture row in FIXTURE_ROWS has score 1000 — wait, it DOES exist.
-        // Let's use a completely unseeded language? Schema only allows "En" | "Pl".
-        // For En, the seeded EN_SESSION row exists (score 1000).
-        // So None only happens if we query for a session that has no runs? But global mode ignores session_id.
-        // Actually findOneOption returns None only if the table is empty for that language.
-        // Let's test with a completely empty table by not seeding — but seedFixture runs in every it.
-        // Alternative: query a language that has no runs in the fixture. Both En and Pl have runs.
-        // The "None" case is genuinely hard to hit with this fixture setup.
-        // Skip this specific assertion; the first two tests cover the main contract.
-        // We can just assert that Option is some (validating the query executes).
-        expect(Option.isSome(result)).toBe(true);
+        expect(Option.isNone(result)).toBe(true);
       })
     );
   });

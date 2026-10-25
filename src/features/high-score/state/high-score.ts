@@ -32,10 +32,5 @@ export const highScoreIsFormVisibleAtom = highScoreMachineAtom.pipe(
 // Atom to fetch the top 10 high scores (5-minute idle TTL like the chart atoms,
 // so remounts within a session reuse the result instead of refetching)
 export const top10HighScoresAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
-  RuntimeAtom.atom(
-    Effect.gen(function* () {
-      const { top10HighScores } = yield* RpcHighScoreClient;
-      return yield* top10HighScores(solutionsLanguage);
-    })
-  ).pipe(Atom.setIdleTTL("5 minutes"))
+  RuntimeAtom.atom(Effect.flatMap(RpcHighScoreClient, ({ top10HighScores }) => top10HighScores(solutionsLanguage))).pipe(Atom.setIdleTTL("5 minutes"))
 );

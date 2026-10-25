@@ -3,6 +3,7 @@ import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/sql";
 import { AnyChartArgs, ArcadeStreakDistributionData, GuessDistributionData, TimeToSolveDistributionData } from "./models";
 import { cumulativeToDistribution } from "./helpers";
+import { dieOnDbFailure } from "@/domain/db-policy";
 import { anyAvgStatQuery } from "./queries/any-avg-stat";
 import { anyCounterQuery } from "./queries/any-counter";
 import { arcadeStreakDistributionQuery } from "./queries/arcade-streak-distribution";
@@ -16,13 +17,12 @@ import { timeToSolveDistributionQuery } from "./queries/time-to-solve-distributi
 
 export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   // Error-escalation policy (E5): every chart query escalates both SchemaError
-  // and SqlError to defects (Effect.die) — the query factories do this via
-  // Effect.tapError(Effect.logError) + Effect.catchTags({...}), and the
-  // histogram methods below do it via Effect.orDie after the strict schema
-  // decode. There is no per-chart graceful degradation; all failures become
-  // RPC 500s. This is intentional and uniform across every method here —
-  // telemetry charts are best-effort. Do NOT introduce per-chart catch
-  // branches that disagree with this policy
+  // and SqlError to defects (Effect.die) — the query factories and the
+  // histogram methods below do this via the shared dieOnDbFailure policy.
+  // There is no per-chart graceful degradation; all failures become RPC 500s.
+  // This is intentional and uniform across every method here — telemetry
+  // charts are best-effort. Do NOT introduce per-chart catch branches that
+  // disagree with this policy
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
 
@@ -38,7 +38,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       })).filter((row) => row.turn !== null);
 
       // Decode against the strict schema, as recommended for final domain mapping
-      return yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
+      return yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(dieOnDbFailure);
     });
 
     const getTimeToSolveDistribution = Effect.fn("getTimeToSolveDistribution")(function* (request: AnyChartArgs) {
@@ -53,7 +53,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       }));
 
       // Decode against the strict schema, as recommended for final domain mapping
-      return yield* Schema.decodeEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(Effect.orDie);
+      return yield* Schema.decodeEffect(Schema.Array(TimeToSolveDistributionData))(chartData).pipe(dieOnDbFailure);
     });
 
     const getArcadeStreakDistribution = Effect.fn("getArcadeStreakDistribution")(function* (request: AnyChartArgs) {
@@ -68,7 +68,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       }));
 
       // Decode against the strict schema, as recommended for final domain mapping
-      return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(Effect.orDie);
+      return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(dieOnDbFailure);
     });
 
     const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);

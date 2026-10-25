@@ -15,11 +15,19 @@ import { HorizontalBarEmpty, HorizontalBarFrame } from "@/features/telemetry/ui/
 import { HardestWordsLeaderboardChartSkeleton } from "./skeleton";
 
 // types
+import type { TooltipPayloadEntry } from "recharts";
+import type { HardestWordsLeaderboardData } from "@/features/telemetry/services/charts-db/models";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface HardestWordsLeaderboardChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
+
+// Recharts types the row behind a tooltip entry as `any`; narrow it to the
+// schema-decoded leaderboard row this chart actually passes in
+type HardestWordsTooltipEntry = Omit<TooltipPayloadEntry, "payload"> & {
+  readonly payload?: HardestWordsLeaderboardData;
+};
 
 export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWordsLeaderboardChartProps) {
   const hardestWordsLeaderboard = useAtomValue(hardestWordsLeaderboardAtom(solutionsLanguage));
@@ -32,16 +40,15 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
     [gt]
   );
   const tooltipLabelFormatter = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (label: unknown, payload: any) => {
-      const row = payload?.[0]?.payload;
+    (label: unknown, payload: ReadonlyArray<HardestWordsTooltipEntry>) => {
+      const row = payload[0]?.payload;
       return (
         <>
           {label}
           <br />
-          <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses?.toFixed(1) ?? "—" })}</span>
+          <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses.toFixed(1) ?? "—" })}</span>
           <br />
-          <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses?.toFixed(1) ?? "—" })}</span>
+          <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses.toFixed(1) ?? "—" })}</span>
         </>
       );
     },

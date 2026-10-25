@@ -6,7 +6,7 @@ import { matchLanguage } from "@/features/game/domain/helpers";
 import { generateRiddle } from "@/features/game/domain/riddle2";
 import { formatTextForTTS } from "@/domain/formatters";
 import { AiClientsWithHttp } from "@/domain/fallback-plan2";
-import { makeRpcHandler, withAiEnabled } from "@/domain/helpers.server";
+import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
 // assets
@@ -57,12 +57,9 @@ const RpcGameLayer = RpcGame.toLayer({
   fetchKeypad: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, KEYPAD_EN, KEYPAD_PL)),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
-    withAiEnabled(
+    withAiFallback(
       generateRiddle(theSecretWord, solutionsLanguage, getWordDefinition(theSecretWord, solutionsLanguage)),
       Effect.succeedSome("No riddle available in the AI off mode.")
-    ).pipe(
-      Effect.tapError(Effect.logError),
-      Effect.orElseSucceed(() => Option.none())
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>

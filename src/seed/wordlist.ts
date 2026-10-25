@@ -46,8 +46,7 @@ export const makeWordlistSync = Effect.fn("makeWordlistSync")(function* ({ input
 
   // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
   const wordlistJson = yield* Schema.encodeEffect(WordlistFromJson)(uniqueWords).pipe(
-    Effect.mapError((cause) => new WordlistJsonEncodeError({ file: output, cause })),
-    Effect.orDie
+    Effect.mapError((cause) => new WordlistJsonEncodeError({ file: output, cause }))
   );
 
   // Write to the new JSON file

@@ -1,17 +1,18 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Cause, Duration, Effect, ExecutionPlan, Layer, Logger, Schedule, Schema } from "effect";
-import { NodeRuntime, NodeServices } from "@effect/platform-node";
+import { Cause, Duration, Effect, ExecutionPlan, Layer, Schedule, Schema } from "effect";
+import { NodeRuntime } from "@effect/platform-node";
 import { LanguageModel, Model, Prompt } from "effect/ai";
 import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { AiClientsWithHttp, makeFallbackPlan2 } from "@/domain/fallback-plan2";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
+import { SeedLayer } from "./runtime";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, AiClientsWithHttp);
+const MainLayer = Layer.mergeAll(SeedLayer, AiClientsWithHttp);
 
 // The three Cloudflare models used by the production fallback ladder; Gemma
 // thinking is disabled explicitly to keep responses fast; GPT-OSS uses a low

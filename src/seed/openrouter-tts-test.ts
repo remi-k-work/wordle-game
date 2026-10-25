@@ -1,15 +1,16 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Array, Cause, Effect, FileSystem, Layer, Logger } from "effect";
-import { NodeRuntime, NodeServices } from "@effect/platform-node";
+import { Array, Cause, Effect, FileSystem, Layer } from "effect";
+import { NodeRuntime } from "@effect/platform-node";
 import { OpenRouter } from "@/services/open-router.server";
 import { OpenRouterError } from "@/domain/errors";
+import { SeedLayer } from "./runtime";
 
 // constants
 import { VOICES_PL } from "@/domain/constants";
 
-const MainLayer = Layer.mergeAll(Logger.layer([Logger.consolePretty()]), NodeServices.layer, OpenRouter.layer);
+const MainLayer = Layer.mergeAll(SeedLayer, OpenRouter.layer);
 
 const EN_TEXT = "Hello! This is a text-to-speech test. The secret word hides among the letters.";
 const PL_TEXT = "Zagadka: pachnący kwiat o żółtych płatkach, który kwitnie wiosną. Słowo kryje się wśród liter.";

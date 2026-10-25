@@ -1,10 +1,8 @@
-// oxlint-disable effecttsgo/global-console
-
 // react
 import { useCallback } from "react";
 
 // services, features, and other libraries
-import { Option } from "effect";
+import { Array, Option } from "effect";
 import { AtomRegistry } from "effect/reactivity";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 import {
@@ -51,26 +49,21 @@ export function useSpeakText() {
 
     // Find the specific voice object using Kimi's safer fallback chain
     const targetLangPrefix = matchLanguage(solutionsLanguage, "en", "pl");
-    const matchingLangs = voices.filter((voice) => voice.lang.toLowerCase().startsWith(targetLangPrefix));
+    const matchingLangs = Array.filter(voices, (voice) => voice.lang.toLowerCase().startsWith(targetLangPrefix));
 
     // A previously stored voice name still wins
-    const exactByName = voices.find((voice) => voice.name === voiceVoice);
+    const exactByName = Array.findFirst(voices, (voice) => voice.name === voiceVoice);
 
     // A "default: true" voice within the active language
-    const defaultInLang = matchingLangs.find((voice) => voice.default);
+    const defaultInLang = Array.findFirst(matchingLangs, (voice) => voice.default);
 
     // First voice whose lang starts with the active language prefix
-    const anyInLang = matchingLangs[0];
+    const anyInLang = Array.head(matchingLangs);
 
     // Last-resort, any voice we can find
-    const fallback = voices[0];
+    const fallback = Array.head(voices);
 
-    const selectedVoice = Option.firstSomeOf([
-      Option.fromNullishOr(exactByName),
-      Option.fromNullishOr(defaultInLang),
-      Option.fromNullishOr(anyInLang),
-      Option.fromNullishOr(fallback),
-    ]);
+    const selectedVoice = Option.firstSomeOf([exactByName, defaultInLang, anyInLang, fallback]);
 
     // Set the voice and language appropriately
     Option.match(selectedVoice, {
