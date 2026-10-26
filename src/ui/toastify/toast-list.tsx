@@ -1,12 +1,17 @@
+// services, features, and other libraries
+import { useMessages } from "gt-react";
+
 // components
 import { Toast } from "@base-ui/react/toast";
+
+// types
+import type { ReactNode } from "react";
 
 // assets
 import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 // constants
-// Fully static class strings, hoisted so the per-toast render doesn't re-run
-// them through twMerge on every toast add/update/remove
+// Fully static class strings, hoisted so the per-toast render doesn't re-run them through twMerge on every toast add/update/remove
 const TOAST_ROOT_CLASS = [
   "[--gap:0.75rem] [--height:var(--toast-frontmost-height,var(--toast-height))] [--offset-y:calc(var(--toast-offset-y)*-1+calc(var(--toast-index)*var(--gap)*-1)+var(--toast-swipe-movement-y))] [--peek:0.75rem] [--scale:calc(max(0,1-(var(--toast-index)*0.1)))] [--shrink:calc(1-var(--scale))]",
   "absolute right-0 bottom-0 left-auto z-[calc(1000-var(--toast-index))] mr-0 h-(--height) w-full border bg-surface-2 shadow-sm select-none",
@@ -35,6 +40,10 @@ const TOAST_CONTENT_CLASS =
 
 export function ToastList() {
   const { toasts } = Toast.useToastManager();
+  const messages = useMessages();
+
+  // Toast copy is authored outside React (e.g. XState actions) with `msg()`; resolve it here, under GTProvider, so it follows the active locale
+  const resolveMessage = (content: ReactNode) => (typeof content === "string" ? messages(content) : content);
 
   return toasts.map((toast) => (
     <Toast.Root key={toast.id} toast={toast} className={TOAST_ROOT_CLASS}>
@@ -42,9 +51,11 @@ export function ToastList() {
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex items-center gap-2">
             {toast.type === "error" ? <ExclamationTriangleIcon className="size-11" /> : <CheckCircleIcon className="size-11" />}
-            <Toast.Title className="font-sans text-lg font-semibold tracking-widest text-text-2 uppercase data-[type=error]:text-destructive sm:text-xl" />
+            <Toast.Title className="font-sans text-lg font-semibold tracking-widest text-text-2 uppercase data-[type=error]:text-destructive sm:text-xl">
+              {resolveMessage(toast.title)}
+            </Toast.Title>
           </header>
-          <Toast.Description className="text-text-1" />
+          <Toast.Description className="text-text-1">{resolveMessage(toast.description)}</Toast.Description>
         </div>
         <Toast.Close className="button bg-secondary p-1 text-text-1">
           <XCircleIcon className="size-11" aria-hidden="true" />

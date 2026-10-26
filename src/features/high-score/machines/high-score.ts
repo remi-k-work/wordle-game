@@ -7,6 +7,7 @@ import { runClientCommand } from "@/lib/runtime-client";
 import { effectActor } from "@/lib/effect-actor";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { assign, setup, assertEvent } from "xstate";
+import { msg } from "gt-react";
 import { toastManager } from "@/ui/toastify";
 import { modalMachineAtom } from "@/state/modal";
 import { beatsTop10Tail } from "@/features/high-score/domain/helpers";
@@ -79,9 +80,25 @@ export const highScoreMachine = setup({
         ({ ...context, newHighScoreId: params.newHighScoreId }) as const satisfies HighScoreMachineContext
     ),
 
-    onSuccess: () => toastManager.add({ title: "Score Recorded", description: "Good luck on your next run!" }),
-    onNoLongerQualified: () => toastManager.add({ type: "error", title: "Leaderboard Updated", description: "This score no longer qualifies for the Top 10." }),
-    onFailure: () => toastManager.add({ type: "error", title: "Submission Failed", description: "Failed to save your score. Please try again later." }),
+    onSuccess: () =>
+      toastManager.add({
+        title: msg("Score Recorded"),
+        description: msg("Good luck on your next run!"),
+      }),
+
+    onNoLongerQualified: () =>
+      toastManager.add({
+        type: "error",
+        title: msg("Leaderboard Updated"),
+        description: msg("This score no longer qualifies for the Top 10."),
+      }),
+
+    onFailure: () =>
+      toastManager.add({
+        type: "error",
+        title: msg("Submission Failed"),
+        description: msg("Failed to save your score. Please try again later."),
+      }),
 
     showHighScoreModal: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "high-score" })),
   },

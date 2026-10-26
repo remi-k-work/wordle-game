@@ -2,6 +2,7 @@
 import { useCallback, useMemo } from "react";
 
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { HashMap, Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameDataKeypadAtom } from "@/features/game/state/game-data";
@@ -45,12 +46,20 @@ function KeypadArea({ keys }: { keys: Keypad }) {
     <footer className="grid gap-1">
       <Toolbar />
 
-      <section className="grid grid-cols-2 gap-2 rounded-md bg-surface-3 p-1 [grid-template-areas:'pool_pool''back_enter'] md:grid-cols-[auto_1fr_auto] md:[grid-template-areas:'back_pool_enter']">
+      <section className={cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']")}>
         <KeypadPool availableKeys={availableKeys} keypadColors={keypadColors} onPressed={handleKeyPressed} />
-        <Button tabIndex={-1} className="button bg-destructive [grid-area:back] max-md:p-1" onClick={() => handleKeyPressed("BACKSPACE")}>
+        <Button
+          tabIndex={-1}
+          className={cn("button bg-destructive", "max-md:hidden max-md:p-1", "md:[grid-area:back]")}
+          onClick={() => handleKeyPressed("BACKSPACE")}
+        >
           <BackspaceIcon className="size-9 md:size-11" />
         </Button>
-        <Button tabIndex={-1} className="button bg-secondary [grid-area:enter] max-md:p-1" onClick={() => handleKeyPressed("ENTER")}>
+        <Button
+          tabIndex={-1}
+          className={cn("button bg-secondary", "max-md:hidden max-md:p-1", "md:[grid-area:enter]")}
+          onClick={() => handleKeyPressed("ENTER")}
+        >
           <PaperAirplaneIcon className="size-9 md:size-11" />
         </Button>
       </section>
@@ -63,12 +72,12 @@ export function FooterSkeleton() {
     <footer className="grid gap-1">
       <ToolbarSkeleton />
 
-      <section className="grid grid-cols-2 gap-2 rounded-md bg-surface-3 p-1 [grid-template-areas:'pool_pool''back_enter'] md:grid-cols-[auto_1fr_auto] md:[grid-template-areas:'back_pool_enter']">
+      <section className={cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']")}>
         <KeypadPoolSkeleton />
-        <Button tabIndex={-1} className="button bg-destructive [grid-area:back] max-md:p-1" disabled>
+        <Button tabIndex={-1} className={cn("button bg-destructive", "max-md:hidden max-md:p-1", "md:[grid-area:back]")} disabled>
           <BackspaceIcon className="size-9 md:size-11" />
         </Button>
-        <Button tabIndex={-1} className="button bg-secondary [grid-area:enter] max-md:p-1" disabled>
+        <Button tabIndex={-1} className={cn("button bg-secondary", "max-md:hidden max-md:p-1", "md:[grid-area:enter]")} disabled>
           <PaperAirplaneIcon className="size-9 md:size-11" />
         </Button>
       </section>
