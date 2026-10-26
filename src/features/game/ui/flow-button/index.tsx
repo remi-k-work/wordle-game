@@ -15,11 +15,19 @@ import { FlowShell } from "./flow-shell";
 import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 interface GameFlowButtonProps extends ComponentPropsWithoutRef<typeof Button> {
   keepText?: boolean;
   onClicked?: () => void;
+}
+
+interface GameFlowAction {
+  title: string;
+  icon: ReactNode;
+  label: ReactNode;
+  className?: string;
+  onClick: () => void;
 }
 
 export function GameFlowButton({ className, keepText = false, onClicked, ...rest }: GameFlowButtonProps) {
@@ -28,50 +36,44 @@ export function GameFlowButton({ className, keepText = false, onClicked, ...rest
   const alertMachineEvent = useAtomSet(alertMachineAtom);
   const gt = useGT();
 
-  return Match.value(variant).pipe(
-    Match.when("skeleton", () => <GameFlowButtonSkeleton className={className} keepText={keepText} {...rest} />),
-    Match.when("next", () => (
-      <FlowShell
-        className={className}
-        keepText={keepText}
-        {...rest}
-        title={gt("Next Word")}
-        icon={<ForwardIcon className="size-11" />}
-        label={<T>Next Word</T>}
-        onClick={() => {
-          gameFlowMachineEvent({ type: "word.nextRequested" });
-          onClicked?.();
-        }}
-      />
-    )),
-    Match.when("start", () => (
-      <FlowShell
-        className={className}
-        keepText={keepText}
-        {...rest}
-        title={gt("Start New Run")}
-        icon={<PuzzlePieceIcon className="size-11" />}
-        label={<T>Start New Run</T>}
-        onClick={() => {
-          gameFlowMachineEvent({ type: "run.startRequested" });
-          onClicked?.();
-        }}
-      />
-    )),
-    Match.orElse(() => (
-      <FlowShell
-        className={cn("bg-destructive", className)}
-        keepText={keepText}
-        {...rest}
-        title={gt("Forfeit Run")}
-        icon={<PowerIcon className="size-11" />}
-        label={<T>Forfeit Run</T>}
-        onClick={() => {
-          alertMachineEvent({ type: "opened", alertType: "forfeit-run" });
-          onClicked?.();
-        }}
-      />
-    ))
+  if (variant === "skeleton") return <GameFlowButtonSkeleton className={className} keepText={keepText} {...rest} />;
+
+  const action = Match.value(variant).pipe(
+    Match.when("next", (): GameFlowAction => ({
+      title: gt("Next Word"),
+      icon: <ForwardIcon className="size-11" />,
+      label: <T>Next Word</T>,
+      onClick: () => gameFlowMachineEvent({ type: "word.nextRequested" }),
+    })),
+    Match.when("start", (): GameFlowAction => ({
+      title: gt("Start New Run"),
+      icon: <PuzzlePieceIcon className="size-11" />,
+      label: <T>Start New Run</T>,
+      onClick: () => gameFlowMachineEvent({ type: "run.startRequested" }),
+    })),
+    Match.when("forfeit", (): GameFlowAction => ({
+      title: gt("Forfeit Run"),
+      icon: <PowerIcon className="size-11" />,
+      label: <T>Forfeit Run</T>,
+      className: "bg-destructive",
+      onClick: () => alertMachineEvent({ type: "opened", alertType: "forfeit-run" }),
+    })),
+    Match.exhaustive
+  );
+
+  return (
+    <FlowShell
+      className={cn(action.className, className)}
+      keepText={keepText}
+      {...rest}
+      title={action.title}
+      icon={action.icon}
+      label={action.label}
+      onClick={() => {
+        action.onClick();
+        onClicked?.();
+      }}
+    />
   );
 }
 

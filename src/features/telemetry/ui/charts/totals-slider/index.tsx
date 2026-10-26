@@ -12,14 +12,18 @@ import { Next } from "./buttons/next";
 import { Prev } from "./buttons/prev";
 import { AnyAvgStatChart } from "@/features/telemetry/ui/charts/any-avg-stat";
 import { AnyCounterChart } from "@/features/telemetry/ui/charts/any-counter";
-import { TOTALS_SLIDES, TotalsSlideSkeleton, type TotalsSlideSpec } from "./skeleton";
+import { TotalsSlideSkeleton } from "./skeleton";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
+import type { TotalsSlideSpec } from "./skeleton";
 
 interface TotalsSliderProps {
   solutionsLanguage: SolutionsLanguage;
 }
+
+// constants
+import { TOTALS_SLIDES } from "./skeleton";
 
 function TotalsSlideChart({ spec, solutionsLanguage }: { spec: TotalsSlideSpec; solutionsLanguage: SolutionsLanguage }) {
   if (spec.kind === "counter")
@@ -43,7 +47,6 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
   const scrollTo = useCallback((index: number) => () => emblaApi?.scrollTo(index), [emblaApi]);
-  const snapCount = emblaApi?.scrollSnapList().length ?? 0;
 
   return (
     <article className="grid grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-4 bg-surface-3 [grid-template-areas:'viewport_viewport''prevnext_dots']">
@@ -61,7 +64,7 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
         <Next onNext={scrollNext} disabled={!canScrollNext} />
       </header>
       <footer className="flex flex-wrap items-center justify-end gap-1 p-2 [grid-area:dots]">
-        {Array.from({ length: snapCount }, (_, index) => (
+        {TOTALS_SLIDES.map((_, index) => (
           <Dot key={index} index={index} selected={index === selectedIndex} onSelect={scrollTo(index)} />
         ))}
       </footer>
