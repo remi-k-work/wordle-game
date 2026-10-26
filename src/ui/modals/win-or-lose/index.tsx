@@ -31,8 +31,8 @@ export function WinOrLoseModal() {
       {hasWon ? <YouWin /> : <Nevermind />}
 
       <section className={DIALOG_FOOTER_CLASSES}>
-        <GameFlowButton keepText tabIndex={-1} />
-        <Button tabIndex={-1} className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
+        <GameFlowButton keepText />
+        <Button className="button bg-secondary" onClick={() => modalMachineEvent({ type: "closed" })}>
           <XCircleIcon className="size-11" />
           <T>Maybe Later</T>
         </Button>

@@ -4,7 +4,7 @@ import { Content } from "./content";
 
 export function HelpModal() {
   return (
-    <StateModal state="help" titleKey="Help">
+    <StateModal state="help">
       <Content />
     </StateModal>
   );

@@ -1,6 +1,3 @@
-// react
-import { useCallback, useState } from "react";
-
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state/modal";
@@ -9,7 +6,7 @@ import { T, useGT } from "gt-react";
 // components
 import { Button } from "@base-ui/react/button";
 import { GamePopover } from "@/ui/game-popover";
-import { LangChanger } from "@/features/settings/ui/lang-changer";
+import { GameLangChanger } from "@/features/settings/ui/lang-changer";
 import { GameFlowButton } from "@/features/game/ui/flow-button";
 
 // assets
@@ -26,27 +23,27 @@ export function GameMenu() {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
   const gt = useGT();
 
-  // Controls whether the popover is open or not
-  const [isOpen, setIsOpen] = useState(false);
-  const close = useCallback(() => setIsOpen(false), []);
-
   return (
-    <GamePopover open={isOpen} onOpenChange={setIsOpen} title={gt("Menu")} trigger={<Bars3Icon className="size-11" />}>
-      <LangChanger keepText onClicked={close} />
-      <GameFlowButton keepText onClicked={close} />
-      {MENU_MODALS.map(({ modalType, label, Icon }) => (
-        <Button
-          key={modalType}
-          className="button"
-          onClick={() => {
-            modalMachineEvent({ type: "opened", modalType });
-            close();
-          }}
-        >
-          <Icon className="size-11" />
-          {label}
-        </Button>
-      ))}
+    <GamePopover title={gt("Menu")} trigger={<Bars3Icon className="size-11" />}>
+      {(close) => (
+        <>
+          <GameLangChanger keepText onClicked={close} />
+          <GameFlowButton keepText onClicked={close} />
+          {MENU_MODALS.map(({ modalType, label, Icon }) => (
+            <Button
+              key={modalType}
+              className="button"
+              onClick={() => {
+                modalMachineEvent({ type: "opened", modalType });
+                close();
+              }}
+            >
+              <Icon className="size-11" />
+              {label}
+            </Button>
+          ))}
+        </>
+      )}
     </GamePopover>
   );
 }

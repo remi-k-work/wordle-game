@@ -2,7 +2,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { T, msg, useGT } from "gt-react";
+import { T, msg, useGT, useMessages } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
   const gt = useGT();
+  const messages = useMessages();
 
   return (
     <article className="mx-auto w-full max-w-384">
@@ -48,7 +49,7 @@ function Home() {
       </RevealOnScroll>
 
       <RevealOnScroll staggerChildren>
-        <SectionHeader title={msg("The Continuous Arcade Run (Accumulation vs. Wipeout)")} />
+        <SectionHeader title={messages(msg("The Continuous Arcade Run (Accumulation vs. Wipeout)"))} />
         <img src={pillar1} loading="lazy" alt={gt("The Continuous Arcade Run (Accumulation vs. Wipeout)")} className="mx-auto h-auto w-full max-w-379" />
         <br />
         <T>
@@ -68,7 +69,7 @@ function Home() {
       </RevealOnScroll>
 
       <RevealOnScroll staggerChildren>
-        <SectionHeader title={msg("Bleeding Potential (Hunt Efficiently)")} />
+        <SectionHeader title={messages(msg("Bleeding Potential (Hunt Efficiently)"))} />
         <img src={pillar2} loading="lazy" alt={gt("Bleeding Potential (Hunt Efficiently)")} className="mx-auto h-auto w-full max-w-379" />
         <br />
         <T>
@@ -94,7 +95,7 @@ function Home() {
       </RevealOnScroll>
 
       <RevealOnScroll staggerChildren>
-        <SectionHeader title={msg("Survival Tools (AI Riddles & Smart Keypad)")} />
+        <SectionHeader title={messages(msg("Survival Tools (AI Riddles & Smart Keypad)"))} />
         <img src={pillar3} loading="lazy" alt={gt("Survival Tools (AI Riddles & Smart Keypad)")} className="mx-auto h-auto w-full max-w-379" />
         <br />
         <T>

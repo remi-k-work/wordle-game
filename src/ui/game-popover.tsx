@@ -1,3 +1,6 @@
+// react
+import { useState } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
@@ -10,9 +13,7 @@ import type { ReactNode } from "react";
 interface GamePopoverProps {
   title: string;
   trigger: ReactNode;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  children: ReactNode;
+  children: (close: () => void) => ReactNode;
   wide?: boolean;
 }
 
@@ -27,15 +28,20 @@ const POPOVER_POPUP_CLASSES = cn(
 // Shared popover chrome for the in-game toolbar (hacks menu, riddle, game
 // menu). Keeps trigger hover behavior, positioning, and enter/exit styling
 // identical without copy-pasting Portal/Positioner/Popup scaffolding
-export function GamePopover({ title, trigger, open, onOpenChange, children, wide = false }: GamePopoverProps) {
+// The popover owns its own visibility: consumers only describe content, and
+// receive `close` so an action picked inside the popup can dismiss it — no
+// consumer has to hold `isOpen` state it never otherwise needs
+export function GamePopover({ title, trigger, children, wide = false }: GamePopoverProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <Popover.Root open={open} onOpenChange={onOpenChange}>
+    <Popover.Root open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       <Popover.Trigger openOnHover title={title} className="button flex-none p-1 data-popup-open:bg-accent">
         {trigger}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8}>
-          <Popover.Popup className={cn(POPOVER_POPUP_CLASSES, wide && "max-w-[90dvw]")}>{children}</Popover.Popup>
+          <Popover.Popup className={cn(POPOVER_POPUP_CLASSES, wide && "max-w-[90dvw]")}>{children(() => setIsOpen(false))}</Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>

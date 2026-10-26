@@ -47,7 +47,7 @@ export function ToastList() {
           <Toast.Description className="text-text-1" />
         </div>
         <Toast.Close className="button bg-secondary p-1 text-text-1">
-          <XCircleIcon className="size-11" />
+          <XCircleIcon className="size-11" aria-hidden="true" />
         </Toast.Close>
       </Toast.Content>
     </Toast.Root>

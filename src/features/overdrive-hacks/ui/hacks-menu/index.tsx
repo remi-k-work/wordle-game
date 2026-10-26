@@ -1,6 +1,3 @@
-// react
-import { useCallback, useState } from "react";
-
 // services, features, and other libraries
 import { Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
@@ -23,18 +20,39 @@ import { SpinnerIcon } from "@/assets/icons/spinner";
 import { LifebuoyIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
+
+interface HackActionProps {
+  Icon: ComponentType<{ className?: string }>;
+  label: ReactNode;
+  badge: ReactNode;
+  disabled?: boolean;
+  onClicked: () => void;
+}
 
 // constants
 import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
+// EMP is a proper noun (kept verbatim); Sonar is translated
 const HACKS = [
-  { id: "emp", label: "EMP", translatable: false, Icon: LifebuoyIcon },
-  { id: "sonar", label: "Sonar", translatable: true, Icon: LifebuoyIcon },
+  { id: "emp", label: "EMP", Icon: LifebuoyIcon },
+  { id: "sonar", label: <T>Sonar</T>, Icon: LifebuoyIcon },
 ] as const;
 
 function HackCostBadge({ children }: { children: ReactNode }) {
   return <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">{children}</span>;
+}
+
+// One row of the hacks menu: icon | label | badge. The emp/sonar entries and
+// both AI Override states all render this same shape
+function HackAction({ Icon, label, badge, disabled = false, onClicked }: HackActionProps) {
+  return (
+    <Button className="button grid grid-cols-[auto_1fr_1fr]" disabled={disabled} onClick={onClicked}>
+      <Icon className="size-11" />
+      <span className="justify-self-start">{label}</span>
+      {badge}
+    </Button>
+  );
 }
 
 export function HacksMenu() {
@@ -50,65 +68,59 @@ export function HacksMenu() {
   const isOverrideHackLoading = useAtomValue(overdriveHacksIsApplyingOverrideAtom);
   const isOverrideHackReady = Option.isSome(theOverride);
 
-  // Controls whether the popover is open or not
-  const [isOpen, setIsOpen] = useState(false);
   const gt = useGT();
   const locale = useLocale();
-
-  const close = useCallback(() => setIsOpen(false), []);
   const canApplyById = { emp: canApplyHackEmp, sonar: canApplyHackSonar } as const;
 
   return (
-    <GamePopover open={isOpen} onOpenChange={setIsOpen} title={gt("Overdrive Hacks")} trigger={<LifebuoyIcon className="size-11" />}>
-      {HACKS.map(({ id, label, translatable, Icon }) => (
-        <Button
-          key={id}
-          className="button grid grid-cols-[auto_1fr_1fr]"
-          disabled={!canApplyById[id]}
-          onClick={() => {
-            overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: id });
-            close();
-          }}
-        >
-          <Icon className="size-11" />
-          <span className="justify-self-start">{translatable ? <T>Sonar</T> : label}</span>
-          <HackCostBadge>
-            <Var>-{OVERDRIVE_HACK_COST(id).toLocaleString(locale)}</Var> <T>pts</T>
-          </HackCostBadge>
-        </Button>
-      ))}
-      {isOverrideHackReady ? (
-        <Button
-          className="button grid grid-cols-[auto_1fr_1fr]"
-          onClick={() => {
-            modalMachineEvent({ type: "opened", modalType: "override-hack" });
-            close();
-          }}
-        >
-          <SparklesIcon className="size-11" />
-          <span className="justify-self-start">
-            <T>AI Override</T>
-          </span>
-          <span className="rounded-md bg-tile-green px-3 py-2 font-sans text-text-2">
-            <T>Ready ↗</T>
-          </span>
-        </Button>
-      ) : (
-        <Button
-          className="button grid grid-cols-[auto_1fr_1fr]"
-          disabled={!canApplyHackOverride || isOverrideHackLoading}
-          onClick={() => {
-            overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "override" });
-          }}
-        >
-          {isOverrideHackLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />}
-          <span className="justify-self-start">
-            <T>AI Override</T>
-          </span>
-          <HackCostBadge>
-            <Var>-{OVERDRIVE_HACK_COST("override").toLocaleString(locale)}</Var> <T>pts</T>
-          </HackCostBadge>
-        </Button>
+    <GamePopover title={gt("Overdrive Hacks")} trigger={<LifebuoyIcon className="size-11" />}>
+      {(close) => (
+        <>
+          {HACKS.map(({ id, label, Icon }) => (
+            <HackAction
+              key={id}
+              Icon={Icon}
+              label={label}
+              badge={
+                <HackCostBadge>
+                  <Var>-{OVERDRIVE_HACK_COST(id).toLocaleString(locale)}</Var> <T>pts</T>
+                </HackCostBadge>
+              }
+              disabled={!canApplyById[id]}
+              onClicked={() => {
+                overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: id });
+                close();
+              }}
+            />
+          ))}
+          {isOverrideHackReady ? (
+            <HackAction
+              Icon={SparklesIcon}
+              label={<T>AI Override</T>}
+              badge={
+                <span className="rounded-md bg-tile-green px-3 py-2 font-sans text-text-2">
+                  <T>Ready ↗</T>
+                </span>
+              }
+              onClicked={() => {
+                modalMachineEvent({ type: "opened", modalType: "override-hack" });
+                close();
+              }}
+            />
+          ) : (
+            <HackAction
+              Icon={isOverrideHackLoading ? SpinnerIcon : SparklesIcon}
+              label={<T>AI Override</T>}
+              badge={
+                <HackCostBadge>
+                  <Var>-{OVERDRIVE_HACK_COST("override").toLocaleString(locale)}</Var> <T>pts</T>
+                </HackCostBadge>
+              }
+              disabled={!canApplyHackOverride || isOverrideHackLoading}
+              onClicked={() => overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "override" })}
+            />
+          )}
+        </>
       )}
     </GamePopover>
   );

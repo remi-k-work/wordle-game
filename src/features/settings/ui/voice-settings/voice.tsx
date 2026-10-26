@@ -12,6 +12,44 @@ import { Select } from "@base-ui/react/select";
 // assets
 import { CheckIcon, ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
+// constants
+// Fully static class strings, hoisted so re-renders don't re-run them through
+// twMerge and the live select + its skeleton cannot drift apart (same pattern
+// as dialog-chrome / chart-tab)
+const VOICE_LABEL_CLASSES = cn("cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase");
+const VOICE_TRIGGER_CLASSES = cn(
+  "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
+  "transition duration-300 ease-in-out",
+  "active:scale-95",
+  "focus-visible:outline-2 focus-visible:outline-offset-1",
+  "data-disabled:pointer-events-none data-disabled:opacity-50",
+  "hover:not-data-disabled:bg-accent data-popup-open:bg-accent"
+);
+
+// Shared select chrome: identical between the live select and its skeleton —
+// the Select.Root's disabled state (live: settings machine, skeleton: always)
+// is what differs, so it stays at the call site
+function VoiceLabel() {
+  return (
+    <Select.Label className={VOICE_LABEL_CLASSES}>
+      <T>Voice</T>
+    </Select.Label>
+  );
+}
+
+function VoiceTrigger() {
+  const gt = useGT();
+
+  return (
+    <Select.Trigger className={VOICE_TRIGGER_CLASSES}>
+      <Select.Value className="data-placeholder:text-text-2/50" placeholder={gt("Select Voice")} />
+      <Select.Icon>
+        <ChevronUpDownIcon className="size-11" />
+      </Select.Icon>
+    </Select.Trigger>
+  );
+}
+
 export function Voice() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const voiceVoice = useAtomValue(gameSettingsVoiceAtom);
@@ -36,24 +74,8 @@ export function Voice() {
         value={voiceVoice}
         onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}
       >
-        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
-          <T>Voice</T>
-        </Select.Label>
-        <Select.Trigger
-          className={cn(
-            "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
-            "transition duration-300 ease-in-out",
-            "active:scale-95",
-            "focus-visible:outline-2 focus-visible:outline-offset-1",
-            "data-disabled:pointer-events-none data-disabled:opacity-50",
-            "hover:not-data-disabled:bg-accent data-popup-open:bg-accent"
-          )}
-        >
-          <Select.Value className="data-placeholder:text-text-2/50" placeholder={gt("Select Voice")} />
-          <Select.Icon>
-            <ChevronUpDownIcon className="size-11" />
-          </Select.Icon>
-        </Select.Trigger>
+        <VoiceLabel />
+        <VoiceTrigger />
         <Select.Portal>
           <Select.Positioner className="z-10 outline-hidden select-none" sideOffset={4}>
             <Select.Popup
@@ -77,7 +99,7 @@ export function Voice() {
               <Select.List className="relative max-h-(--available-height) scroll-py-6 overflow-y-auto py-1">
                 {voices.map(({ label, value }) => (
                   <Select.Item
-                    key={label}
+                    key={value}
                     value={value}
                     className={cn(
                       "grid cursor-default grid-cols-[2rem_1fr] items-center gap-2 py-1.5 pr-4 pl-2.5 outline-hidden select-none",
@@ -109,29 +131,11 @@ export function Voice() {
 }
 
 export function VoiceSkeleton() {
-  const gt = useGT();
-
   return (
     <section>
       <Select.Root name="voiceVoice" items={[]} value={null} onValueChange={() => {}} disabled>
-        <Select.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
-          <T>Voice</T>
-        </Select.Label>
-        <Select.Trigger
-          className={cn(
-            "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
-            "transition duration-300 ease-in-out",
-            "active:scale-95",
-            "focus-visible:outline-2 focus-visible:outline-offset-1",
-            "data-disabled:pointer-events-none data-disabled:opacity-50",
-            "hover:not-data-disabled:bg-accent data-popup-open:bg-accent"
-          )}
-        >
-          <Select.Value className="data-placeholder:text-text-2/50" placeholder={gt("Select Voice")} />
-          <Select.Icon>
-            <ChevronUpDownIcon className="size-11" />
-          </Select.Icon>
-        </Select.Trigger>
+        <VoiceLabel />
+        <VoiceTrigger />
       </Select.Root>
     </section>
   );

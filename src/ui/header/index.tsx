@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 import { NavItem } from "./nav-item";
 import { ThemeChanger } from "./theme-changer";
-import { LangChanger } from "./lang-changer";
+import { SiteLangChanger } from "./lang-changer";
 
 // constants
 import { NAV_ITEMS } from "./constants";
 
-// Fully synchronous shell: Logo/NavItem/LangChanger are static imports and render
+// Fully synchronous shell: Logo/NavItem/SiteLangChanger are static imports and render
 // in a single pass on both server and client (isomorphic execution model), so no
 // Suspense wrapper is needed — only ThemeChanger defers, behind its own
 // ClientOnly + Suspense boundary (see ./theme-changer)
@@ -22,7 +22,7 @@ export function Header() {
         {NAV_ITEMS.map((navItem, index) => (
           <NavItem key={index} {...navItem} />
         ))}
-        <LangChanger />
+        <SiteLangChanger />
         <ThemeChanger />
       </nav>
     </header>

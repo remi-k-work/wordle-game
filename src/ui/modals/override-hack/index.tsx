@@ -4,7 +4,7 @@ import { Content } from "./content";
 
 export function OverrideHackModal() {
   return (
-    <StateModal state="override-hack" titleKey="AI Override">
+    <StateModal state="override-hack">
       <Content />
     </StateModal>
   );

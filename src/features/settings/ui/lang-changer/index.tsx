@@ -13,12 +13,15 @@ import { PlFlagIcon } from "@/assets/icons/pl-flag";
 import { UsFlagIcon } from "@/assets/icons/us-flag";
 
 // types
-interface LangChangerProps {
+interface GameLangChangerProps {
   keepText?: boolean;
   onClicked?: () => void;
 }
 
-export function LangChanger({ keepText = false, onClicked }: LangChangerProps) {
+// Switches the *game vocabulary* (which word list the puzzles are drawn from)
+// Deliberately not called `LangChanger`: the header ships a different control
+// of the same name that switches the website locale (see @/ui/header/lang-changer)
+export function GameLangChanger({ keepText = false, onClicked }: GameLangChangerProps) {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
   const gt = useGT();
@@ -48,7 +51,7 @@ export function LangChanger({ keepText = false, onClicked }: LangChangerProps) {
   );
 }
 
-export function LangChangerSkeleton({ keepText = false }: LangChangerProps) {
+export function GameLangChangerSkeleton({ keepText = false }: Pick<GameLangChangerProps, "keepText">) {
   const gt = useGT();
 
   return (

@@ -4,7 +4,7 @@ import { Content } from "./content";
 
 export function HighScoreModal() {
   return (
-    <StateModal state="high-score" titleKey="High Score">
+    <StateModal state="high-score">
       <Content />
     </StateModal>
   );

@@ -29,11 +29,12 @@ export function GameFlowButton({ className, keepText = false, onClicked, ...rest
   const gt = useGT();
 
   return Match.value(variant).pipe(
-    Match.when("skeleton", () => <GameFlowButtonSkeleton {...rest} />),
+    Match.when("skeleton", () => <GameFlowButtonSkeleton className={className} keepText={keepText} {...rest} />),
     Match.when("next", () => (
       <FlowShell
         className={className}
         keepText={keepText}
+        {...rest}
         title={gt("Next Word")}
         icon={<ForwardIcon className="size-11" />}
         label={<T>Next Word</T>}
@@ -41,13 +42,13 @@ export function GameFlowButton({ className, keepText = false, onClicked, ...rest
           gameFlowMachineEvent({ type: "word.nextRequested" });
           onClicked?.();
         }}
-        {...rest}
       />
     )),
     Match.when("start", () => (
       <FlowShell
         className={className}
         keepText={keepText}
+        {...rest}
         title={gt("Start New Run")}
         icon={<PuzzlePieceIcon className="size-11" />}
         label={<T>Start New Run</T>}
@@ -55,13 +56,13 @@ export function GameFlowButton({ className, keepText = false, onClicked, ...rest
           gameFlowMachineEvent({ type: "run.startRequested" });
           onClicked?.();
         }}
-        {...rest}
       />
     )),
     Match.orElse(() => (
       <FlowShell
         className={cn("bg-destructive", className)}
         keepText={keepText}
+        {...rest}
         title={gt("Forfeit Run")}
         icon={<PowerIcon className="size-11" />}
         label={<T>Forfeit Run</T>}
@@ -69,7 +70,6 @@ export function GameFlowButton({ className, keepText = false, onClicked, ...rest
           alertMachineEvent({ type: "opened", alertType: "forfeit-run" });
           onClicked?.();
         }}
-        {...rest}
       />
     ))
   );

@@ -4,7 +4,7 @@ import { Content } from "./content";
 
 export function VoiceSettingsModal() {
   return (
-    <StateModal state="voice-settings" titleKey="Voice Settings">
+    <StateModal state="voice-settings">
       <Content />
     </StateModal>
   );

@@ -17,7 +17,7 @@ export function CloseModalButton({ className }: ComponentPropsWithoutRef<typeof 
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (
-    <Button tabIndex={-1} className={cn("button mx-auto mt-8 bg-secondary", className)} onClick={() => modalMachineEvent({ type: "closed" })}>
+    <Button className={cn("button mx-auto mt-8 bg-secondary", className)} onClick={() => modalMachineEvent({ type: "closed" })}>
       <XCircleIcon className="size-11" />
       <T>Close</T>
     </Button>

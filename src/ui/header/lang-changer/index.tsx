@@ -28,7 +28,10 @@ const LOCALE_FLAGS: Record<string, typeof MotionUsFlagIcon> = {
   pl: MotionPlFlagIcon,
 };
 
-export function LangChanger() {
+// Switches the *website* locale (UI copy, route data). The game's vocabulary
+// language has its own switch in the game menu/toolbar — see
+// @/features/settings/ui/lang-changer
+export function SiteLangChanger() {
   const gt = useGT();
   const locale = useLocale();
   // GT normalizes the configured locales to include the default locale
