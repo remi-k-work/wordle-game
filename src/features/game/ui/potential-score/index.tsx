@@ -16,7 +16,7 @@ import { motionTokens, springs } from "@/lib/motion-tokens";
 export function PotentialScore() {
   const potentialScore = useAtomValue(wordChallengePotentialScoreAtom);
   const locale = useLocale();
-  const potentialScoreRef = useAnimatedCounter(potentialScore, (value) => Math.round(value).toLocaleString(locale));
+  const potentialScoreRef = useAnimatedCounter(potentialScore, locale);
 
   return (
     <motion.section

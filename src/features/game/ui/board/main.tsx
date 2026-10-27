@@ -28,15 +28,7 @@ export function Main() {
       {wordleGrid.map((tiles, rowIndex) => {
         if (rowIndex === currentGuessRowIndex) return <CurrentGuess key={rowIndex} />;
 
-        // The enhanced grid only fills tiles that are empty in the base grid, so
-        // every filled base-empty tile in a row is a sonar reveal
-        const baseRow = baseWordleGrid[rowIndex];
-        const sonarRevealPositions = new Set<number>();
-        tiles.forEach((tile, tileIndex) => {
-          if (baseRow[tileIndex].tileKey === "" && tile.tileKey !== "") sonarRevealPositions.add(tileIndex);
-        });
-
-        return <GuessRow key={rowIndex} tiles={tiles} sonarRevealPositions={sonarRevealPositions} isFlipping={rowIndex === flippingRowIndex} />;
+        return <GuessRow key={rowIndex} tiles={tiles} baseTiles={baseWordleGrid[rowIndex]} isFlipping={rowIndex === flippingRowIndex} />;
       })}
     </article>
   );

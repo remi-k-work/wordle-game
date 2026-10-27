@@ -16,8 +16,8 @@ export function Run() {
   const runScore = useAtomValue(runSessionRunScoreAtom);
   const streak = useAtomValue(runSessionStreakAtom);
   const locale = useLocale();
-  const runScoreRef = useAnimatedCounter(runScore, (value) => Math.round(value).toLocaleString(locale));
-  const streakRef = useAnimatedCounter(streak, (value) => Math.round(value).toLocaleString(locale));
+  const runScoreRef = useAnimatedCounter(runScore, locale);
+  const streakRef = useAnimatedCounter(streak, locale);
 
   return (
     <motion.section

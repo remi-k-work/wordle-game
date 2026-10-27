@@ -1,6 +1,3 @@
-// react
-import { useMemo } from "react";
-
 // components
 import { ChartTabsSkeleton } from "@/features/telemetry/ui/charts/chart-tabs";
 import { ArcadeStreakDistributionChartSkeleton } from "./arcade-streak/skeleton";
@@ -11,14 +8,14 @@ import { TimeToSolveDistributionChartSkeleton } from "./time-to-solve/skeleton";
 // recharts-free, so the statically-bundled page shell stays lean while the real
 // charts load in their own chunk
 export function DistributionChartsSkeleton() {
-  const tabs = useMemo(
-    () => [
-      { value: "guesses", skeleton: <GuessDistributionChartSkeleton /> },
-      { value: "time", skeleton: <TimeToSolveDistributionChartSkeleton /> },
-      { value: "streak", skeleton: <ArcadeStreakDistributionChartSkeleton /> },
-    ],
-    []
+  return (
+    <ChartTabsSkeleton
+      defaultValue="guesses"
+      tabs={[
+        { value: "guesses", skeleton: <GuessDistributionChartSkeleton /> },
+        { value: "time", skeleton: <TimeToSolveDistributionChartSkeleton /> },
+        { value: "streak", skeleton: <ArcadeStreakDistributionChartSkeleton /> },
+      ]}
+    />
   );
-
-  return <ChartTabsSkeleton defaultValue="guesses" tabs={tabs} />;
 }

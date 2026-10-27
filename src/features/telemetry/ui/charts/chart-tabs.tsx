@@ -15,9 +15,8 @@ import type { ReactNode } from "react";
 interface ChartTabSpec {
   value: string;
   label: ReactNode;
-  // Lazy content: invoked only for the active tab, so switching tabs mounts a
-  // single chart (one RPC family) instead of every tab at once
-  render: () => ReactNode;
+  // Only the active tab's element is mounted, so chart data hooks remain lazy
+  content: ReactNode;
 }
 
 // constants
@@ -45,7 +44,7 @@ export function ChartTabs({ defaultValue, tabs }: { defaultValue: string; tabs: 
       </Tabs.List>
       {activeTab === undefined ? null : (
         <ChartPanel key={activeTab.value} value={activeTab.value}>
-          {activeTab.render()}
+          {activeTab.content}
         </ChartPanel>
       )}
     </Tabs.Root>

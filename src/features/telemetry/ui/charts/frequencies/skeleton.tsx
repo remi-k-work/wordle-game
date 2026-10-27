@@ -1,6 +1,3 @@
-// react
-import { useMemo } from "react";
-
 // components
 import { ChartTabsSkeleton } from "@/features/telemetry/ui/charts/chart-tabs";
 import { FailedWordsFrequencyChartSkeleton } from "./failed-words/skeleton";
@@ -12,15 +9,15 @@ import { HardestWordsLeaderboardChartSkeleton } from "@/features/telemetry/ui/ch
 // recharts-free, so the statically-bundled page shell stays lean while the real
 // charts load in their own chunk
 export function FrequencyChartsSkeleton() {
-  const tabs = useMemo(
-    () => [
-      { value: "firstWords", skeleton: <OpeningGuessesFrequencyChartSkeleton /> },
-      { value: "missedWords", skeleton: <FailedWordsFrequencyChartSkeleton /> },
-      { value: "runDeaths", skeleton: <RunDeathReasonFrequencyChartSkeleton /> },
-      { value: "hardestWords", skeleton: <HardestWordsLeaderboardChartSkeleton /> },
-    ],
-    []
+  return (
+    <ChartTabsSkeleton
+      defaultValue="firstWords"
+      tabs={[
+        { value: "firstWords", skeleton: <OpeningGuessesFrequencyChartSkeleton /> },
+        { value: "missedWords", skeleton: <FailedWordsFrequencyChartSkeleton /> },
+        { value: "runDeaths", skeleton: <RunDeathReasonFrequencyChartSkeleton /> },
+        { value: "hardestWords", skeleton: <HardestWordsLeaderboardChartSkeleton /> },
+      ]}
+    />
   );
-
-  return <ChartTabsSkeleton defaultValue="firstWords" tabs={tabs} />;
 }
