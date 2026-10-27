@@ -4,7 +4,8 @@ import { setup } from "xstate";
 export const modalMachine = setup({
   types: {} as {
     events:
-      { readonly type: "opened"; readonly modalType: "help" | "status" | "voice-settings" | "high-score" | "override-hack" } | { readonly type: "closed" };
+      | { readonly type: "opened"; readonly modalType: "help" | "status" | "voice-settings" | "high-score" | "override-hack" }
+      | { readonly type: "closed" };
   },
 }).createMachine({
   id: "modal",

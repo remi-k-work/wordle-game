@@ -8,39 +8,39 @@ Play the live version here: [wordle-game.remiforge.dev](https://wordle-game.remi
 
 Unlike traditional clones, Wordle Overdrive treats individual puzzles as stepping stones in a long-term endurance run.
 
-* **The Continuous Run:** Points from solved words continuously accumulate into your active **Session Total** and build your **Winning Streak**.
-* **Bleeding Potential (Dynamic Scoring):** Scoring is tied to a real-time matrix matching your turn count and elapsed time. Solving a word in under 30 seconds on Turn 1 crowns you a **Speed Demon** ($1.5\times$ multiplier), while stalling too long drops you to a **Slow Learner** ($0.8\times$ multiplier). Your potential reward bleeds away with every ticking second.
-* **The Wipeout Risk:** There are no safety nets. Failing to solve a word in 6 turns triggers an immediate **Game Over** for the entire session. Your current score and streak are wiped back to zero, leaving only your historical **Best Run** personal record untouched.
+- **The Continuous Run:** Points from solved words continuously accumulate into your active **Session Total** and build your **Winning Streak**.
+- **Bleeding Potential (Dynamic Scoring):** Scoring is tied to a real-time matrix matching your turn count and elapsed time. Solving a word in under 30 seconds on Turn 1 crowns you a **Speed Demon** ($1.5\times$ multiplier), while stalling too long drops you to a **Slow Learner** ($0.8\times$ multiplier). Your potential reward bleeds away with every ticking second.
+- **The Wipeout Risk:** There are no safety nets. Failing to solve a word in 6 turns triggers an immediate **Game Over** for the entire session. Your current score and streak are wiped back to zero, leaving only your historical **Best Run** personal record untouched.
 
 ## 🧠 Key Features
 
-* **AI Riddle Engine:** Supported by a language-aware AI layer (OpenRouter with an automatic model fallback chain), every new word initializes with a bespoke, cryptic one-sentence riddle. This removes "blind first guesses" and replaces them with strategic, thematic deduction.
-* **Survival Keypad:** The virtual keyboard dynamically deletes incorrect grey letters as you play. This prevents accidental wasted keystrokes and tightens the mechanical flow during high-pressure late turns.
-* **Fully Bilingual:** Native localized prompts and independent 30,000+ word dictionaries for both **English** and **Polish** game modes.
+- **AI Riddle Engine:** Supported by a language-aware AI layer (OpenRouter with an automatic model fallback chain), every new word initializes with a bespoke, cryptic one-sentence riddle. This removes "blind first guesses" and replaces them with strategic, thematic deduction.
+- **Survival Keypad:** The virtual keyboard dynamically deletes incorrect grey letters as you play. This prevents accidental wasted keystrokes and tightens the mechanical flow during high-pressure late turns.
+- **Fully Bilingual:** Native localized prompts and independent 30,000+ word dictionaries for both **English** and **Polish** game modes.
 
 ## 🛠️ Architecture & Tech Stack
 
 This repository serves as a showcase for production-grade functional programming in TypeScript and modern reactive state architecture.
 
-* **Framework:** TanStack Start (React 19) — isomorphic rendering on Cloudflare Workers with type-safe file-based routing, route loaders, and Effect RPC over server route handlers.
-* **State & Logic Control:** Driven by **Effect & Atoms**. The entire game lifecycle avoids messy asynchronous side effects by utilizing explicit, type-safe functional generators (`yield*`) to coordinate game states, long-term session banking, and error boundaries.
-* **AI Orchestration:** OpenRouter integration (`@effect/ai-openrouter`) with an Effect `ExecutionPlan` fallback chain, handling high-speed, cost-efficient riddle compilation out of the box.
-* **Styling:** Custom, highly scannable Dark and Light mode UI systems engineered entirely around fluid, modern `oklch` color gamuts.
+- **Framework:** TanStack Start (React 19) — isomorphic rendering on Cloudflare Workers with type-safe file-based routing, route loaders, and Effect RPC over server route handlers.
+- **State & Logic Control:** Driven by **Effect & Atoms**. The entire game lifecycle avoids messy asynchronous side effects by utilizing explicit, type-safe functional generators (`yield*`) to coordinate game states, long-term session banking, and error boundaries.
+- **AI Orchestration:** OpenRouter integration (`@effect/ai-openrouter`) with an Effect `ExecutionPlan` fallback chain, handling high-speed, cost-efficient riddle compilation out of the box.
+- **Styling:** Custom, highly scannable Dark and Light mode UI systems engineered entirely around fluid, modern `oklch` color gamuts.
 
 ## 🧪 Development
 
-* `npm run dev` — Vite dev server.
-* `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `react-hooks`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins.
-* `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
-* `npm test` — Vitest.
-* `npm run build` / `npm run deploy` — Cloudflare production build, then `wrangler deploy`.
+- `npm run dev` — Vite dev server.
+- `npm run lint` — lint with [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (config: `.oxlintrc.json`). Includes the [Effect recommended preset](https://effect.website/docs/v4/getting-started/devtools#oxlint) via `oxlint-tsgolint`, plus `react`, `react-hooks`, `jsx-a11y`, `import`, `typescript`, and `vitest` plugins.
+- `npm run type-check` — `tsc --noEmit` (TypeScript 7 via `@effect/tsgo`).
+- `npm test` — Vitest.
+- `npm run build` / `npm run deploy` — Cloudflare production build, then `wrangler deploy`.
 
 ### 🌐 Translations
 
 English is the source language and Polish is maintained manually, so no General Translation API key or project is required.
 
-* `npm run gt:generate` — scan the code for `T`/`msg` messages and refresh `src/_gt/en.json` and `src/_gt/pl.json`.
-* Translate new or changed entries in `src/_gt/pl.json` by hand, then commit the file.
-* `npm run gt:validate` — validate the generated source against the `gt-tanstack-start` integration.
+- `npm run gt:generate` — scan the code for `T`/`msg` messages and refresh `src/_gt/en.json` and `src/_gt/pl.json`.
+- Translate new or changed entries in `src/_gt/pl.json` by hand, then commit the file.
+- `npm run gt:validate` — validate the generated source against the `gt-tanstack-start` integration.
 
 Locale configuration lives only in `gt.config.json`: `defaultLocale` is the source language and `locales` lists the target languages that receive a generated dictionary.
