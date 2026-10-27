@@ -1,10 +1,10 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { Match } from "effect";
-import { useAtomSet } from "@effect/atom-react";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state/alert";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
-import { useGameFlowVariant } from "@/features/game/hooks/use-game-flow-variant";
+import { gameFlowVariantAtom } from "@/features/game/state/game-flow-variant";
 import { T, useGT } from "gt-react";
 
 // components
@@ -31,7 +31,7 @@ interface GameFlowAction {
 }
 
 export function GameFlowButton({ className, keepText = false, onClicked, ...rest }: GameFlowButtonProps) {
-  const variant = useGameFlowVariant();
+  const variant = useAtomValue(gameFlowVariantAtom);
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
   const gt = useGT();

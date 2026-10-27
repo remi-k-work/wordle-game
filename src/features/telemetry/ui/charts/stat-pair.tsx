@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { T, useMessages } from "gt-react";
+import { useMessages } from "gt-react";
 
 // components
 import { SectionHeader, SectionHeaderSkeleton } from "@/ui/section-header";
@@ -46,7 +46,7 @@ export function StatPairSkeleton({ title, personalHeader, globalTitle }: Pick<St
         <StatCard Tag="header" variant="primary" title={messages(personalHeader)}>
           <StatCardSkeleton />
         </StatCard>
-        <StatCard Tag="footer" variant="secondary" title={globalTitle ?? <T>Global Total</T>}>
+        <StatCard Tag="footer" variant="secondary" title={globalTitle}>
           <StatCardSkeleton />
         </StatCard>
       </article>

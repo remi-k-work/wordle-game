@@ -11,8 +11,8 @@ import { Button } from "@base-ui/react/button";
 import type { Color } from "@/features/game/domain/models";
 
 interface KeypadKeyProps {
-  pressKey: string;
-  keyColor: Color | null;
+  letter: string;
+  color: Color;
   onPressed: (pressedKey: string) => void;
 }
 
@@ -22,24 +22,23 @@ import { EMP_FRY_EXIT, KEYPAD_COLOR_MAP } from "@/features/game/ui/board/constan
 const MotionButton = motion.create(Button);
 
 // Memoized leaf: Each key only re-renders when its own color/handler identity actually changes
-export const KeypadKey = memo(function KeypadKey({ pressKey, keyColor, onPressed }: KeypadKeyProps) {
+export const KeypadKey = memo(function KeypadKey({ letter, color, onPressed }: KeypadKeyProps) {
   return (
     <MotionButton
-      key={pressKey}
       exit={EMP_FRY_EXIT}
       className="button flex-initial basis-12 border-secondary p-0 font-sans text-xl leading-9"
-      style={{ backgroundColor: keyColor ? KEYPAD_COLOR_MAP[keyColor] : KEYPAD_COLOR_MAP[""] }}
-      onClick={() => onPressed(pressKey)}
+      style={{ backgroundColor: KEYPAD_COLOR_MAP[color] }}
+      onClick={() => onPressed(letter)}
     >
-      {pressKey}
+      {letter}
     </MotionButton>
   );
 });
 
-export function KeypadKeySkeleton({ pressKey }: Pick<KeypadKeyProps, "pressKey">) {
+export function KeypadKeySkeleton({ letter }: Pick<KeypadKeyProps, "letter">) {
   return (
     <Button className="button flex-initial basis-12 border-secondary bg-transparent p-0 font-sans text-xl leading-9" disabled>
-      {pressKey}
+      {letter}
     </Button>
   );
 }

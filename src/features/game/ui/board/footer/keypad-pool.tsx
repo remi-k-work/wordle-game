@@ -1,11 +1,5 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { HashMap, Option } from "effect";
-import { useAtomSet } from "@effect/atom-react";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { AnimatePresence } from "motion/react";
 
 // components
@@ -18,38 +12,31 @@ import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 // types
 import type { Color } from "@/features/game/domain/models";
 
+export interface KeypadPoolEntry {
+  letter: string;
+  color: Color;
+}
+
 interface KeypadPoolProps {
-  availableKeys: ReadonlyArray<string>;
-  keypadColors: HashMap.HashMap<string, Color>;
+  keys: ReadonlyArray<KeypadPoolEntry>;
   onPressed: (pressedKey: string) => void;
 }
 
 // constants
 import { ALPHABET } from "@/features/game/ui/board/constants";
 
-export function KeypadPool({ availableKeys, keypadColors, onPressed }: KeypadPoolProps) {
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
-
-  const handleKeyPressed = useCallback(
-    (pressedKey: string) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey }),
-    [overdriveHacksMachineEvent]
-  );
-
+export function KeypadPool({ keys, onPressed }: KeypadPoolProps) {
   return (
     <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
       <AnimatePresence mode="sync">
-        {availableKeys.map((key) => (
-          <KeypadKey key={key} pressKey={key} keyColor={Option.getOrNull(HashMap.get(keypadColors, key))} onPressed={onPressed} />
+        {keys.map(({ letter, color }) => (
+          <KeypadKey key={letter} letter={letter} color={color} onPressed={onPressed} />
         ))}
       </AnimatePresence>
-      <Button
-        tabIndex={-1}
-        className={cn("button min-h-9.5 flex-initial basis-12 bg-destructive p-0", "md:hidden")}
-        onClick={() => handleKeyPressed("BACKSPACE")}
-      >
+      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-destructive p-0", "md:hidden")} onClick={() => onPressed("BACKSPACE")}>
         <BackspaceIcon className="size-8" />
       </Button>
-      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-secondary p-0", "md:hidden")} onClick={() => handleKeyPressed("ENTER")}>
+      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-secondary p-0", "md:hidden")} onClick={() => onPressed("ENTER")}>
         <PaperAirplaneIcon className="size-8" />
       </Button>
     </div>
@@ -59,8 +46,8 @@ export function KeypadPool({ availableKeys, keypadColors, onPressed }: KeypadPoo
 export function KeypadPoolSkeleton() {
   return (
     <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
-      {ALPHABET.map((key) => (
-        <KeypadKeySkeleton key={key} pressKey={key} />
+      {ALPHABET.map((letter) => (
+        <KeypadKeySkeleton key={letter} letter={letter} />
       ))}
       <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-destructive p-0", "md:hidden")} disabled>
         <BackspaceIcon className="size-8" />

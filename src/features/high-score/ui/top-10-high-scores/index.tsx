@@ -47,14 +47,15 @@ const MotionTableRow = motion.create(TableRow);
 export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
   const top10HighScores = useAtomValue(top10HighScoresAtom(solutionsLanguage));
   const newHighScoreId = useAtomValue(highScoreNewHighScoreIdAtom);
+  const highlightedHighScoreId = newHighScoreId.valueOrUndefined;
   const locale = useLocale();
 
   useEffect(() => {
-    if (top10HighScores.waiting || !newHighScoreId.valueOrUndefined) return;
+    if (top10HighScores.waiting || highlightedHighScoreId === undefined) return;
     const animationId = requestAnimationFrame(() => document.getElementById("newHighScoreRow")?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
     return () => cancelAnimationFrame(animationId);
-  }, [top10HighScores.waiting, newHighScoreId.valueOrUndefined]);
+  }, [top10HighScores.waiting, highlightedHighScoreId]);
 
   return AsyncResult.builder(top10HighScores)
     .onInitialOrWaiting(() => <Top10HighScoresSkeleton />)
@@ -66,26 +67,30 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
         <Table>
           <Top10TableHeader />
           <MotionTableBody variants={CONTAINER_VARIANTS} initial="hidden" animate="visible">
-            {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
-              <MotionTableRow
-                key={id}
-                id={id === newHighScoreId.valueOrUndefined ? "newHighScoreRow" : undefined}
-                className={cn("odd:bg-surface-2", id === newHighScoreId.valueOrUndefined && "animate-wiggle bg-accent odd:bg-accent")}
-                variants={ROW_VARIANTS}
-              >
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{playerName}</TableCell>
-                <TableCell className="bg-accent/30">{score.toLocaleString(locale)}</TableCell>
-                <TableCell className="bg-destructive/30">{streak.toLocaleString(locale)}</TableCell>
-                <TableCell>
-                  {Match.value(solutionsLang).pipe(
-                    Match.when("En", () => <UsFlagIcon className="mx-auto size-11" />),
-                    Match.when("Pl", () => <PlFlagIcon className="mx-auto size-11" />),
-                    Match.exhaustive
-                  )}
-                </TableCell>
-              </MotionTableRow>
-            ))}
+            {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => {
+              const isNewHighScore = id === highlightedHighScoreId;
+
+              return (
+                <MotionTableRow
+                  key={id}
+                  id={isNewHighScore ? "newHighScoreRow" : undefined}
+                  className={cn("odd:bg-surface-2", isNewHighScore && "animate-wiggle bg-accent odd:bg-accent")}
+                  variants={ROW_VARIANTS}
+                >
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{playerName}</TableCell>
+                  <TableCell className="bg-accent/30">{score.toLocaleString(locale)}</TableCell>
+                  <TableCell className="bg-destructive/30">{streak.toLocaleString(locale)}</TableCell>
+                  <TableCell>
+                    {Match.value(solutionsLang).pipe(
+                      Match.when("En", () => <UsFlagIcon className="mx-auto size-11" />),
+                      Match.when("Pl", () => <PlFlagIcon className="mx-auto size-11" />),
+                      Match.exhaustive
+                    )}
+                  </TableCell>
+                </MotionTableRow>
+              );
+            })}
           </MotionTableBody>
         </Table>
       )

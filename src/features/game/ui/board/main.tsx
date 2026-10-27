@@ -2,6 +2,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentTurnAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksWordleGridAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { useGameKeyboardInput } from "@/features/game/hooks/use-game-keyboard-input";
 
 // components
 import { CurrentGuess } from "./current-guess";
@@ -11,14 +12,21 @@ import { GuessRow, GuessRowSkeleton } from "./guess-row";
 const MAIN_SKELETON_ROWS = Array.from({ length: 6 }, (_, index) => <GuessRowSkeleton key={index} />);
 
 export function Main() {
+  useGameKeyboardInput();
+
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const baseWordleGrid = useAtomValue(wordChallengeWordleGridAtom);
   const wordleGrid = useAtomValue(overdriveHacksWordleGridAtom);
 
+  // The board is a fixed six-row grid: the active row is where the player types,
+  // and the row immediately before it is still playing its reveal/flip animation
+  const currentGuessRowIndex = currentTurn - 1;
+  const flippingRowIndex = currentGuessRowIndex - 1;
+
   return (
     <article className="grid min-h-full grid-cols-1 grid-rows-6 gap-1">
       {wordleGrid.map((tiles, rowIndex) => {
-        if (rowIndex === currentTurn - 1) return <CurrentGuess key={rowIndex} />;
+        if (rowIndex === currentGuessRowIndex) return <CurrentGuess key={rowIndex} />;
 
         // The enhanced grid only fills tiles that are empty in the base grid, so
         // every filled base-empty tile in a row is a sonar reveal
@@ -28,7 +36,7 @@ export function Main() {
           if (baseRow[tileIndex].tileKey === "" && tile.tileKey !== "") sonarRevealPositions.add(tileIndex);
         });
 
-        return <GuessRow key={rowIndex} tiles={tiles} sonarRevealPositions={sonarRevealPositions} isFlipping={rowIndex === currentTurn - 2} />;
+        return <GuessRow key={rowIndex} tiles={tiles} sonarRevealPositions={sonarRevealPositions} isFlipping={rowIndex === flippingRowIndex} />;
       })}
     </article>
   );

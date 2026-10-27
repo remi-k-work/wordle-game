@@ -18,6 +18,7 @@ import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
 import type { Color, Keypad } from "@/features/game/domain/models";
+import type { KeypadPoolEntry } from "./keypad-pool";
 
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
@@ -31,9 +32,12 @@ function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
-  // Dynamically filter out the grey keys
-  const availableKeys = useMemo(
-    () => keys.filter((key) => Option.getOrElse(HashMap.get(keypadColors, key), () => "" as Color) !== "grey"),
+  // Attach each key's color once here and drop greyed-out keys. The pool then
+  // only needs the keys it renders, not the full color map (and not a second
+  // copy of the key-dispatch handler)
+  const availableKeys = useMemo<KeypadPoolEntry[]>(
+    () =>
+      keys.map((letter) => ({ letter, color: Option.getOrElse(HashMap.get(keypadColors, letter), () => "" as Color) })).filter(({ color }) => color !== "grey"),
     [keys, keypadColors]
   );
 
@@ -47,7 +51,7 @@ function KeypadArea({ keys }: { keys: Keypad }) {
       <Toolbar />
 
       <section className={cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']")}>
-        <KeypadPool availableKeys={availableKeys} keypadColors={keypadColors} onPressed={handleKeyPressed} />
+        <KeypadPool keys={availableKeys} onPressed={handleKeyPressed} />
         <Button
           tabIndex={-1}
           className={cn("button bg-destructive", "max-md:hidden max-md:p-1", "md:[grid-area:back]")}

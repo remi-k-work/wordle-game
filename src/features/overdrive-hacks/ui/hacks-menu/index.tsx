@@ -43,8 +43,7 @@ function HackCostBadge({ children }: { children: ReactNode }) {
   return <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">{children}</span>;
 }
 
-// One row of the hacks menu: icon | label | badge. The emp/sonar entries and
-// both AI Override states all render this same shape
+// One row of the hacks menu: icon | label | badge; the emp/sonar entries and both AI Override states all render this same shape
 function HackAction({ Icon, label, badge, disabled = false, onClicked }: HackActionProps) {
   return (
     <Button className="button grid grid-cols-[auto_1fr_1fr]" disabled={disabled} onClick={onClicked}>
@@ -74,54 +73,62 @@ export function HacksMenu() {
 
   return (
     <GamePopover title={gt("Overdrive Hacks")} trigger={<LifebuoyIcon className="size-11" />}>
-      {(close) => (
-        <>
-          {HACKS.map(({ id, label, Icon }) => (
-            <HackAction
-              key={id}
-              Icon={Icon}
-              label={label}
-              badge={
-                <HackCostBadge>
-                  <Var>-{OVERDRIVE_HACK_COST(id).toLocaleString(locale)}</Var> <T>pts</T>
-                </HackCostBadge>
-              }
-              disabled={!canApplyById[id]}
-              onClicked={() => {
-                overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: id });
-                close();
-              }}
-            />
-          ))}
-          {isOverrideHackReady ? (
-            <HackAction
-              Icon={SparklesIcon}
-              label={<T>AI Override</T>}
-              badge={
+      {(close) => {
+        // The AI Override has two modes of operation: claim the generated override, or buy one from the hacks menu; both render the same row
+        const overrideAction = isOverrideHackReady
+          ? {
+              Icon: SparklesIcon,
+              badge: (
                 <span className="rounded-md bg-tile-green px-3 py-2 font-sans text-text-2">
                   <T>Ready ↗</T>
                 </span>
-              }
-              onClicked={() => {
+              ),
+              disabled: false,
+              onClicked: () => {
                 modalMachineEvent({ type: "opened", modalType: "override-hack" });
                 close();
-              }}
-            />
-          ) : (
-            <HackAction
-              Icon={isOverrideHackLoading ? SpinnerIcon : SparklesIcon}
-              label={<T>AI Override</T>}
-              badge={
+              },
+            }
+          : {
+              Icon: isOverrideHackLoading ? SpinnerIcon : SparklesIcon,
+              badge: (
                 <HackCostBadge>
                   <Var>-{OVERDRIVE_HACK_COST("override").toLocaleString(locale)}</Var> <T>pts</T>
                 </HackCostBadge>
-              }
-              disabled={!canApplyHackOverride || isOverrideHackLoading}
-              onClicked={() => overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "override" })}
+              ),
+              disabled: !canApplyHackOverride || isOverrideHackLoading,
+              onClicked: () => overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "override" }),
+            };
+
+        return (
+          <>
+            {HACKS.map(({ id, label, Icon }) => (
+              <HackAction
+                key={id}
+                Icon={Icon}
+                label={label}
+                badge={
+                  <HackCostBadge>
+                    <Var>-{OVERDRIVE_HACK_COST(id).toLocaleString(locale)}</Var> <T>pts</T>
+                  </HackCostBadge>
+                }
+                disabled={!canApplyById[id]}
+                onClicked={() => {
+                  overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: id });
+                  close();
+                }}
+              />
+            ))}
+            <HackAction
+              Icon={overrideAction.Icon}
+              label={<T>AI Override</T>}
+              badge={overrideAction.badge}
+              disabled={overrideAction.disabled}
+              onClicked={overrideAction.onClicked}
             />
-          )}
-        </>
-      )}
+          </>
+        );
+      }}
     </GamePopover>
   );
 }
