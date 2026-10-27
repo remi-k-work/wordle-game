@@ -37,3 +37,4 @@ yarn-error.log*
 
 # tanstack cli generated artifacts
 /.tanstack/
+.vitest/
