@@ -7,8 +7,10 @@ import type { Color, SolutionsLanguage, WordChallenge, WordScore } from "./model
 // constants
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from "./constants";
 
-// Pick the color with the higher priority
-export const pickStrongerColor = (a: Color | undefined, b: Color): Color => (a === undefined || COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a);
+// Pick the color with the higher priority; `a` comes from HashMap.get (already
+// an Option) so accepting Option directly avoids an intermediate getOrUndefined
+export const pickStrongerColor = (a: Option.Option<Color>, b: Color): Color =>
+  Option.match(a, { onNone: () => b, onSome: (a) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a) });
 
 // Establish the speed multiplier based on the time it took
 export const getSpeedMultiplier = (elapsedSeconds: number) =>

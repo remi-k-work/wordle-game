@@ -3,11 +3,10 @@ import { Config, Effect, Layer, Option, Scheduler } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
+import { isWorkerd } from "@/lib/is-workerd";
 
 // types
 import type { Rpc } from "effect/rpc";
-
-const isWorkerd = typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
 
 // Belt-and-braces for workerd: the default async scheduler dispatches fibers
 // through setImmediate timers owned by the request that first scheduled them,

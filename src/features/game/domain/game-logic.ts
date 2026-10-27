@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, DateTime, HashMap, HashSet, Option, pipe } from "effect";
+import { Array, DateTime, HashMap, HashSet, pipe } from "effect";
 import { getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrongerColor } from "./helpers";
 import { formatGuess } from "./formatters";
 
@@ -35,13 +35,13 @@ export function calculatePotentialScore(
 }
 
 // Compute the final keypad state by reducing all guesses and picking the strongest colors
-// "undefined" variant matters so downstream code can distinguish "never guessed" — modeled as absent key in HashMap
+// Absent keys in the HashMap denote "never guessed" — downstream code can distinguish them
 export const computeKeypadState = (theSecretWord: TheSecretWord, wordleGuesses: WordChallenge["wordleGuesses"]) =>
   pipe(
     wordleGuesses,
     Array.flatMap((guess) => formatGuess(theSecretWord, guess)),
     Array.reduce(HashMap.empty<string, Color>(), (acc: HashMap.HashMap<string, Color>, { tileKey, color }: { tileKey: string; color: Color }) =>
-      HashMap.set(acc, tileKey, pickStrongerColor(Option.getOrUndefined(HashMap.get(acc, tileKey)), color))
+      HashMap.set(acc, tileKey, pickStrongerColor(HashMap.get(acc, tileKey), color))
     )
   );
 

@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { Redacted, String } from "effect";
 import { PgClient } from "@effect/sql-pg";
+import { isWorkerd } from "./is-workerd";
 
 // This module is deliberately free of `cloudflare:workers`: pgConfig and makePgClientLayer are
 // shared by the worker (see pg.server.ts), the migration runner (seed/run-migrations.ts) and the
@@ -18,7 +19,6 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.cam
 // probes) have healthy long-lived sockets, so pool reuse stays on there.
 // NOTE: cross-request fiber scheduling is fixed separately via the sync
 // scheduler (see domain/helpers.server.ts) — both fixes are required
-const isWorkerd = typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
 
 export const makePgClientLayer = (url: Redacted.Redacted<string>) =>
   PgClient.layer({ ...pgConfig, url, idleTimeout: "10 seconds", connectTimeout: "10 seconds", ...(isWorkerd ? { connectionTTL: "0 seconds" as const } : {}) });
