@@ -1,3 +1,6 @@
+// react
+import { Children, isValidElement } from "react";
+
 // services, features, and other libraries
 import { motion } from "motion/react";
 
@@ -24,12 +27,12 @@ const ITEM_VARIANTS = {
 
 export function RevealOnScroll({ children, staggerChildren = false }: RevealOnScrollProps) {
   if (staggerChildren) {
-    const arr = Array.isArray(children) ? children : [children];
+    const childList = Children.toArray(children);
 
     return (
       <motion.div variants={CONTAINER_VARIANTS} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}>
-        {arr.map((child, index) => (
-          <motion.div key={index} variants={ITEM_VARIANTS}>
+        {childList.map((child, index) => (
+          <motion.div key={isValidElement(child) && child.key !== null ? child.key : index} variants={ITEM_VARIANTS}>
             {child}
           </motion.div>
         ))}

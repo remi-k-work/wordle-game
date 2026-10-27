@@ -9,7 +9,6 @@ import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { FlowShell } from "./flow-shell";
 
 // assets
 import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
@@ -62,18 +61,18 @@ export function GameFlowButton({ className, keepText = false, onClicked, ...rest
   );
 
   return (
-    <FlowShell
-      className={cn(action.className, className)}
-      keepText={keepText}
-      {...rest}
+    <Button
+      className={cn("button", !keepText && "max-sm:p-1", action.className, className)}
       title={action.title}
-      icon={action.icon}
-      label={action.label}
+      {...rest}
       onClick={() => {
         action.onClick();
         onClicked?.();
       }}
-    />
+    >
+      {action.icon}
+      {keepText ? action.label : <span className="hidden sm:block">{action.label}</span>}
+    </Button>
   );
 }
 

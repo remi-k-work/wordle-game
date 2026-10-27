@@ -2,6 +2,7 @@
 import { Table, TableBody, TableCell, TableRow } from "@/ui/table";
 import { Top10TableHeader } from "./top-10-table-header";
 
+// constants
 const TOP10_SKELETON_ROWS = [...Array(10)].map((_, index: number) => (
   <TableRow key={index} className="odd:bg-surface-2">
     <TableCell>{index + 1}</TableCell>

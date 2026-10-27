@@ -13,7 +13,7 @@ import { ViewfinderCircleIcon as ViewfinderCircleIconO } from "@heroicons/react/
 interface DotProps {
   index: number;
   selected: boolean;
-  onSelect: () => void;
+  onSelect: (index: number) => void;
 }
 
 export function Dot({ index, selected, onSelect }: DotProps) {
@@ -24,7 +24,7 @@ export function Dot({ index, selected, onSelect }: DotProps) {
       className={cn("button bg-secondary p-0", selected && "bg-accent")}
       title={gt("Go to Chart {index}", { index: index + 1 })}
       aria-label={gt("Go to Chart {index}", { index: index + 1 })}
-      onClick={onSelect}
+      onClick={() => onSelect(index)}
     >
       {selected ? <ViewfinderCircleIconS className="size-11" /> : <ViewfinderCircleIconO className="size-11" />}
     </Button>

@@ -6,6 +6,11 @@ import { Toast } from "@base-ui/react/toast";
 
 // types
 import type { ReactNode } from "react";
+type ToastItemData = ReturnType<typeof Toast.useToastManager>["toasts"][number];
+
+interface ToastItemProps {
+  toast: ToastItemData;
+}
 
 // assets
 import { CheckCircleIcon, ExclamationTriangleIcon, XCircleIcon } from "@heroicons/react/24/outline";
@@ -38,15 +43,14 @@ const TOAST_ROOT_CLASS = [
 const TOAST_CONTENT_CLASS =
   "flex h-full items-center gap-4 overflow-hidden p-3 transition-opacity duration-300 ease-in-out data-behind:opacity-0 data-expanded:opacity-100";
 
-export function ToastList() {
-  const { toasts } = Toast.useToastManager();
+function ToastItem({ toast }: ToastItemProps) {
   const messages = useMessages();
 
   // Toast copy is authored outside React (e.g. XState actions) with `msg()`; resolve it here, under GTProvider, so it follows the active locale
   const resolveMessage = (content: ReactNode) => (typeof content === "string" ? messages(content) : content);
 
-  return toasts.map((toast) => (
-    <Toast.Root key={toast.id} toast={toast} className={TOAST_ROOT_CLASS}>
+  return (
+    <Toast.Root toast={toast} className={TOAST_ROOT_CLASS}>
       <Toast.Content className={TOAST_CONTENT_CLASS}>
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex items-center gap-2">
@@ -62,5 +66,11 @@ export function ToastList() {
         </Toast.Close>
       </Toast.Content>
     </Toast.Root>
-  ));
+  );
+}
+
+export function ToastList() {
+  const { toasts } = Toast.useToastManager();
+
+  return toasts.map((toast) => <ToastItem key={toast.id} toast={toast} />);
 }

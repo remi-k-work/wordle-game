@@ -19,7 +19,7 @@ interface BrowseChartsShellProps {
 export function BrowseChartsShell({ label, checked, disabled, onCheckedChange }: BrowseChartsShellProps) {
   return (
     <header className="my-8 flex justify-end bg-linear-to-b from-surface-1 via-surface-3 to-transparent">
-      <label className="flex items-center gap-3">
+      <div className="flex items-center gap-3" role="group" aria-label={label}>
         <UsFlagIcon className="mx-auto size-11" />
         <Switch.Root
           className={cn(
@@ -38,7 +38,7 @@ export function BrowseChartsShell({ label, checked, disabled, onCheckedChange }:
           <Switch.Thumb className={cn("size-9 bg-primary", "transition-[translate] duration-300 ease-in-out", "data-checked:translate-x-full")} />
         </Switch.Root>
         <PlFlagIcon className="mx-auto size-11" />
-      </label>
+      </div>
     </header>
   );
 }
