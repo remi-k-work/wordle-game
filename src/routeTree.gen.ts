@@ -8,210 +8,210 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as GameRouteImport } from './routes/game'
-import { Route as HighScoreRouteImport } from './routes/high-score'
-import { Route as ManifestDotwebmanifestRouteImport } from './routes/manifest[.]webmanifest'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as ApiRpcGameRouteImport } from './routes/api.rpc.game'
-import { Route as ApiRpcHighScoreRouteImport } from './routes/api.rpc.high-score'
-import { Route as ApiRpcOverdriveHacksRouteImport } from './routes/api.rpc.overdrive-hacks'
-import { Route as ApiRpcTelemetryRouteImport } from './routes/api.rpc.telemetry'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as GameRouteImport } from "./routes/game";
+import { Route as HighScoreRouteImport } from "./routes/high-score";
+import { Route as ManifestDotwebmanifestRouteImport } from "./routes/manifest[.]webmanifest";
+import { Route as RobotsDottxtRouteImport } from "./routes/robots[.]txt";
+import { Route as ApiRpcGameRouteImport } from "./routes/api.rpc.game";
+import { Route as ApiRpcHighScoreRouteImport } from "./routes/api.rpc.high-score";
+import { Route as ApiRpcOverdriveHacksRouteImport } from "./routes/api.rpc.overdrive-hacks";
+import { Route as ApiRpcTelemetryRouteImport } from "./routes/api.rpc.telemetry";
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+  id: "/",
+  path: "/",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const GameRoute = GameRouteImport.update({
-  id: '/game',
-  path: '/game',
+  id: "/game",
+  path: "/game",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const HighScoreRoute = HighScoreRouteImport.update({
-  id: '/high-score',
-  path: '/high-score',
+  id: "/high-score",
+  path: "/high-score",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ManifestDotwebmanifestRoute = ManifestDotwebmanifestRouteImport.update({
-  id: '/manifest.webmanifest',
-  path: '/manifest.webmanifest',
+  id: "/manifest.webmanifest",
+  path: "/manifest.webmanifest",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
+  id: "/robots.txt",
+  path: "/robots.txt",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ApiRpcGameRoute = ApiRpcGameRouteImport.update({
-  id: '/api/rpc/game',
-  path: '/api/rpc/game',
+  id: "/api/rpc/game",
+  path: "/api/rpc/game",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ApiRpcHighScoreRoute = ApiRpcHighScoreRouteImport.update({
-  id: '/api/rpc/high-score',
-  path: '/api/rpc/high-score',
+  id: "/api/rpc/high-score",
+  path: "/api/rpc/high-score",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ApiRpcOverdriveHacksRoute = ApiRpcOverdriveHacksRouteImport.update({
-  id: '/api/rpc/overdrive-hacks',
-  path: '/api/rpc/overdrive-hacks',
+  id: "/api/rpc/overdrive-hacks",
+  path: "/api/rpc/overdrive-hacks",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 const ApiRpcTelemetryRoute = ApiRpcTelemetryRouteImport.update({
-  id: '/api/rpc/telemetry',
-  path: '/api/rpc/telemetry',
+  id: "/api/rpc/telemetry",
+  path: "/api/rpc/telemetry",
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/game': typeof GameRoute
-  '/high-score': typeof HighScoreRoute
-  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
-  '/robots.txt': typeof RobotsDottxtRoute
-  '/api/rpc/game': typeof ApiRpcGameRoute
-  '/api/rpc/high-score': typeof ApiRpcHighScoreRoute
-  '/api/rpc/overdrive-hacks': typeof ApiRpcOverdriveHacksRoute
-  '/api/rpc/telemetry': typeof ApiRpcTelemetryRoute
+  "/": typeof IndexRoute;
+  "/game": typeof GameRoute;
+  "/high-score": typeof HighScoreRoute;
+  "/manifest.webmanifest": typeof ManifestDotwebmanifestRoute;
+  "/robots.txt": typeof RobotsDottxtRoute;
+  "/api/rpc/game": typeof ApiRpcGameRoute;
+  "/api/rpc/high-score": typeof ApiRpcHighScoreRoute;
+  "/api/rpc/overdrive-hacks": typeof ApiRpcOverdriveHacksRoute;
+  "/api/rpc/telemetry": typeof ApiRpcTelemetryRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/game': typeof GameRoute
-  '/high-score': typeof HighScoreRoute
-  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
-  '/robots.txt': typeof RobotsDottxtRoute
-  '/api/rpc/game': typeof ApiRpcGameRoute
-  '/api/rpc/high-score': typeof ApiRpcHighScoreRoute
-  '/api/rpc/overdrive-hacks': typeof ApiRpcOverdriveHacksRoute
-  '/api/rpc/telemetry': typeof ApiRpcTelemetryRoute
+  "/": typeof IndexRoute;
+  "/game": typeof GameRoute;
+  "/high-score": typeof HighScoreRoute;
+  "/manifest.webmanifest": typeof ManifestDotwebmanifestRoute;
+  "/robots.txt": typeof RobotsDottxtRoute;
+  "/api/rpc/game": typeof ApiRpcGameRoute;
+  "/api/rpc/high-score": typeof ApiRpcHighScoreRoute;
+  "/api/rpc/overdrive-hacks": typeof ApiRpcOverdriveHacksRoute;
+  "/api/rpc/telemetry": typeof ApiRpcTelemetryRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/game': typeof GameRoute
-  '/high-score': typeof HighScoreRoute
-  '/manifest.webmanifest': typeof ManifestDotwebmanifestRoute
-  '/robots.txt': typeof RobotsDottxtRoute
-  '/api/rpc/game': typeof ApiRpcGameRoute
-  '/api/rpc/high-score': typeof ApiRpcHighScoreRoute
-  '/api/rpc/overdrive-hacks': typeof ApiRpcOverdriveHacksRoute
-  '/api/rpc/telemetry': typeof ApiRpcTelemetryRoute
+  __root__: typeof rootRouteImport;
+  "/": typeof IndexRoute;
+  "/game": typeof GameRoute;
+  "/high-score": typeof HighScoreRoute;
+  "/manifest.webmanifest": typeof ManifestDotwebmanifestRoute;
+  "/robots.txt": typeof RobotsDottxtRoute;
+  "/api/rpc/game": typeof ApiRpcGameRoute;
+  "/api/rpc/high-score": typeof ApiRpcHighScoreRoute;
+  "/api/rpc/overdrive-hacks": typeof ApiRpcOverdriveHacksRoute;
+  "/api/rpc/telemetry": typeof ApiRpcTelemetryRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
+  fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
-    | '/'
-    | '/game'
-    | '/high-score'
-    | '/manifest.webmanifest'
-    | '/robots.txt'
-    | '/api/rpc/game'
-    | '/api/rpc/high-score'
-    | '/api/rpc/overdrive-hacks'
-    | '/api/rpc/telemetry'
-  fileRoutesByTo: FileRoutesByTo
+    | "/"
+    | "/game"
+    | "/high-score"
+    | "/manifest.webmanifest"
+    | "/robots.txt"
+    | "/api/rpc/game"
+    | "/api/rpc/high-score"
+    | "/api/rpc/overdrive-hacks"
+    | "/api/rpc/telemetry";
+  fileRoutesByTo: FileRoutesByTo;
   to:
-    | '/'
-    | '/game'
-    | '/high-score'
-    | '/manifest.webmanifest'
-    | '/robots.txt'
-    | '/api/rpc/game'
-    | '/api/rpc/high-score'
-    | '/api/rpc/overdrive-hacks'
-    | '/api/rpc/telemetry'
+    | "/"
+    | "/game"
+    | "/high-score"
+    | "/manifest.webmanifest"
+    | "/robots.txt"
+    | "/api/rpc/game"
+    | "/api/rpc/high-score"
+    | "/api/rpc/overdrive-hacks"
+    | "/api/rpc/telemetry";
   id:
-    | '__root__'
-    | '/'
-    | '/game'
-    | '/high-score'
-    | '/manifest.webmanifest'
-    | '/robots.txt'
-    | '/api/rpc/game'
-    | '/api/rpc/high-score'
-    | '/api/rpc/overdrive-hacks'
-    | '/api/rpc/telemetry'
-  fileRoutesById: FileRoutesById
+    | "__root__"
+    | "/"
+    | "/game"
+    | "/high-score"
+    | "/manifest.webmanifest"
+    | "/robots.txt"
+    | "/api/rpc/game"
+    | "/api/rpc/high-score"
+    | "/api/rpc/overdrive-hacks"
+    | "/api/rpc/telemetry";
+  fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  GameRoute: typeof GameRoute
-  HighScoreRoute: typeof HighScoreRoute
-  ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute
-  RobotsDottxtRoute: typeof RobotsDottxtRoute
-  ApiRpcGameRoute: typeof ApiRpcGameRoute
-  ApiRpcHighScoreRoute: typeof ApiRpcHighScoreRoute
-  ApiRpcOverdriveHacksRoute: typeof ApiRpcOverdriveHacksRoute
-  ApiRpcTelemetryRoute: typeof ApiRpcTelemetryRoute
+  IndexRoute: typeof IndexRoute;
+  GameRoute: typeof GameRoute;
+  HighScoreRoute: typeof HighScoreRoute;
+  ManifestDotwebmanifestRoute: typeof ManifestDotwebmanifestRoute;
+  RobotsDottxtRoute: typeof RobotsDottxtRoute;
+  ApiRpcGameRoute: typeof ApiRpcGameRoute;
+  ApiRpcHighScoreRoute: typeof ApiRpcHighScoreRoute;
+  ApiRpcOverdriveHacksRoute: typeof ApiRpcOverdriveHacksRoute;
+  ApiRpcTelemetryRoute: typeof ApiRpcTelemetryRoute;
 }
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/game': {
-      id: '/game'
-      path: '/game'
-      fullPath: '/game'
-      preLoaderRoute: typeof GameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/high-score': {
-      id: '/high-score'
-      path: '/high-score'
-      fullPath: '/high-score'
-      preLoaderRoute: typeof HighScoreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manifest.webmanifest': {
-      id: '/manifest.webmanifest'
-      path: '/manifest.webmanifest'
-      fullPath: '/manifest.webmanifest'
-      preLoaderRoute: typeof ManifestDotwebmanifestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/game': {
-      id: '/api/rpc/game'
-      path: '/api/rpc/game'
-      fullPath: '/api/rpc/game'
-      preLoaderRoute: typeof ApiRpcGameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/high-score': {
-      id: '/api/rpc/high-score'
-      path: '/api/rpc/high-score'
-      fullPath: '/api/rpc/high-score'
-      preLoaderRoute: typeof ApiRpcHighScoreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/overdrive-hacks': {
-      id: '/api/rpc/overdrive-hacks'
-      path: '/api/rpc/overdrive-hacks'
-      fullPath: '/api/rpc/overdrive-hacks'
-      preLoaderRoute: typeof ApiRpcOverdriveHacksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/telemetry': {
-      id: '/api/rpc/telemetry'
-      path: '/api/rpc/telemetry'
-      fullPath: '/api/rpc/telemetry'
-      preLoaderRoute: typeof ApiRpcTelemetryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    "/": {
+      id: "/";
+      path: "/";
+      fullPath: "/";
+      preLoaderRoute: typeof IndexRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/game": {
+      id: "/game";
+      path: "/game";
+      fullPath: "/game";
+      preLoaderRoute: typeof GameRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/high-score": {
+      id: "/high-score";
+      path: "/high-score";
+      fullPath: "/high-score";
+      preLoaderRoute: typeof HighScoreRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/manifest.webmanifest": {
+      id: "/manifest.webmanifest";
+      path: "/manifest.webmanifest";
+      fullPath: "/manifest.webmanifest";
+      preLoaderRoute: typeof ManifestDotwebmanifestRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/robots.txt": {
+      id: "/robots.txt";
+      path: "/robots.txt";
+      fullPath: "/robots.txt";
+      preLoaderRoute: typeof RobotsDottxtRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/rpc/game": {
+      id: "/api/rpc/game";
+      path: "/api/rpc/game";
+      fullPath: "/api/rpc/game";
+      preLoaderRoute: typeof ApiRpcGameRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/rpc/high-score": {
+      id: "/api/rpc/high-score";
+      path: "/api/rpc/high-score";
+      fullPath: "/api/rpc/high-score";
+      preLoaderRoute: typeof ApiRpcHighScoreRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/rpc/overdrive-hacks": {
+      id: "/api/rpc/overdrive-hacks";
+      path: "/api/rpc/overdrive-hacks";
+      fullPath: "/api/rpc/overdrive-hacks";
+      preLoaderRoute: typeof ApiRpcOverdriveHacksRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/api/rpc/telemetry": {
+      id: "/api/rpc/telemetry";
+      path: "/api/rpc/telemetry";
+      fullPath: "/api/rpc/telemetry";
+      preLoaderRoute: typeof ApiRpcTelemetryRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
   }
 }
 
@@ -225,17 +225,15 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRpcHighScoreRoute: ApiRpcHighScoreRoute,
   ApiRpcOverdriveHacksRoute: ApiRpcOverdriveHacksRoute,
   ApiRpcTelemetryRoute: ApiRpcTelemetryRoute,
-}
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+};
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
 
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
+import type { getRouter } from "./router.tsx";
+import type { startInstance } from "./start.ts";
+declare module "@tanstack/react-start" {
   interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+    ssr: true;
+    router: Awaited<ReturnType<typeof getRouter>>;
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
   }
 }
