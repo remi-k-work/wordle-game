@@ -15,6 +15,15 @@ export default defineConfig({
       "react/rules-of-hooks": "error",
       "vite-plus/prefer-vite-plus-imports": "error",
       "effecttsgo/unstable-api-usage": "off",
+
+      // --- @effect/vitest support ---
+      // Tests use `it.effect(...)`; teach the rule these are test blocks so the rule keeps working as intended instead of false-positive errors
+      "vitest/no-standalone-expect": [
+        "error",
+        { additionalTestBlockFunctions: ["it.effect", "it.live", "it.scoped", "test.effect", "test.live", "test.scoped"] },
+      ],
+
+      "jsx-a11y/prefer-tag-over-role": "off",
     },
     options: { typeAware: true, typeCheck: true },
   },
