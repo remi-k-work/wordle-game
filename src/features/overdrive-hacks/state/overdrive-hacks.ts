@@ -7,7 +7,7 @@ import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/fe
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { Color, Tile } from "@/features/game/domain/models";
+import type { Tile } from "@/features/game/domain/models";
 
 export { overdriveHacksCanApplyHackAtom } from "./can-apply";
 
@@ -28,7 +28,7 @@ export const overdriveHacksIsIdleAtom = overdriveHacksMachineAtom.pipe(Atom.map(
 export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
   pipe(
     get(overdriveHacksEmpNukedLettersAtom),
-    Array.reduce(get(wordChallengeKeypadColorsAtom), (acc, letter) => HashMap.set(acc, letter, "grey" as Color))
+    Array.reduce(get(wordChallengeKeypadColorsAtom), (acc, letter) => HashMap.set(acc, letter, "grey"))
   )
 );
 

@@ -17,8 +17,11 @@ import { KeypadPool, KeypadPoolSkeleton } from "./keypad-pool";
 import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { Color, Keypad } from "@/features/game/domain/models";
+import type { Keypad } from "@/features/game/domain/models";
 import type { KeypadPoolEntry } from "./keypad-pool";
+
+// constants
+const EMPTY_KEY_COLOR: KeypadPoolEntry["color"] = "";
 
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
@@ -37,7 +40,9 @@ function KeypadArea({ keys }: { keys: Keypad }) {
   // copy of the key-dispatch handler)
   const availableKeys = useMemo<KeypadPoolEntry[]>(
     () =>
-      keys.map((letter) => ({ letter, color: Option.getOrElse(HashMap.get(keypadColors, letter), () => "" as Color) })).filter(({ color }) => color !== "grey"),
+      keys
+        .map((letter) => ({ letter, color: Option.getOrElse(HashMap.get(keypadColors, letter), () => EMPTY_KEY_COLOR) }))
+        .filter(({ color }) => color !== "grey"),
     [keys, keypadColors]
   );
 

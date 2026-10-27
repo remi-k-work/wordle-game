@@ -34,7 +34,7 @@ export const wordChallengePotentialScoreAtom = Atom.make((get) =>
 );
 
 // An empty row of unplayed tiles, e.g. for the rows below the current guess
-const emptyRow = (): Tile[] => Array.makeBy(WORD_LENGTH, () => ({ tileKey: "", color: "" as Color }));
+const emptyRow = (): Tile[] => Array.makeBy(WORD_LENGTH, (): Tile => ({ tileKey: "", color: "" }));
 
 // Derive the full 6x5 grid state for rendering based on completed guesses
 export const wordChallengeWordleGridAtom = Atom.make((get) =>
