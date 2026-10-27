@@ -35,6 +35,8 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const canSpeakRegular = Option.isSome(theRiddle) && !isAwaiting && !isLoading;
   const canSpeakNatural = canSpeakRegular && Option.isSome(theRiddleAudio) && !isFetching;
 
+  const speakLabel = mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>;
+
   return (
     <>
       <RiddleText isAwaiting={isAwaiting} isLoading={isLoading} theRiddle={theRiddle} />
@@ -43,11 +45,11 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
         {/* Explicit ternary, never `&&`: a numeric condition would render "0" (rendering-conditional-render) */}
         {isAwaiting ? <GameFlowButton keepText onClicked={onGameFlowClicked} /> : null}
         <SpeakButtonRegular sanitizedText={theRiddle} disabled={!canSpeakRegular}>
-          {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
+          {speakLabel}
         </SpeakButtonRegular>
 
         <SpeakButtonNatural audioBuffer={theRiddleAudio} disabled={!canSpeakNatural}>
-          {mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}
+          {speakLabel}
         </SpeakButtonNatural>
       </section>
     </>
@@ -55,13 +57,17 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
 }
 
 export function ContentSkeleton({ mode }: ContentProps) {
+  // Mirrors the label computed in `Content` so the skeleton stays in sync
+  // if the live label ever changes — one definition, two consumers
+  const speakLabel = mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>;
+
   return (
     <>
       <RiddleTextSkeleton />
 
       <section className={DIALOG_FOOTER_CLASSES}>
-        <SpeakButtonRegularSkeleton>{mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}</SpeakButtonRegularSkeleton>
-        <SpeakButtonNaturalSkeleton>{mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>}</SpeakButtonNaturalSkeleton>
+        <SpeakButtonRegularSkeleton>{speakLabel}</SpeakButtonRegularSkeleton>
+        <SpeakButtonNaturalSkeleton>{speakLabel}</SpeakButtonNaturalSkeleton>
       </section>
     </>
   );

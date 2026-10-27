@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
@@ -9,8 +6,8 @@ import { guessDistributionAtom } from "@/features/telemetry/state/charts";
 import { XAxis } from "recharts";
 
 // components
-import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { DistributionEmpty, DistributionFrame } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionEmpty } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionChart } from "@/features/telemetry/ui/charts/distribution-chart";
 import { GuessDistributionChartSkeleton } from "./skeleton";
 
 // types
@@ -24,13 +21,16 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
   const guessDistribution = useAtomValue(guessDistributionAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tickFormatter = useCallback((tick: number) => gt("Turn {turn}", { turn: tick }), [gt]);
-  const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const,
-    [gt]
-  );
-  const tooltipLabelFormatter = useCallback((label: unknown) => gt("Turn: {turn}", { turn: label }), [gt]);
-  const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Guesses") : gt("Global Average")), [gt]);
+  // Formatters are invoked by recharts during render; the recharts wrapper
+  // components (ChartTooltip, ChartLegend, XAxis) are not memoized, so a
+  // stable callback reference buys nothing; plain render-time functions keep
+  // the dependency surface simple and always read the latest `gt` via closure
+  // — same reasoning as run-death-reason's tooltipFormatter
+  const tickFormatter = (tick: number) => gt("Turn {turn}", { turn: tick });
+  const tooltipFormatter = (value: unknown, name: unknown) =>
+    [`${String(value)}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const;
+  const tooltipLabelFormatter = (label: unknown) => gt("Turn: {turn}", { turn: label });
+  const legendFormatter = (value: unknown) => (value === "personalPct" ? gt("Your Guesses") : gt("Global Average"));
 
   return AsyncResult.builder(guessDistribution)
     .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)
@@ -39,17 +39,14 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
       guessDistribution.length === 0 ? (
         <DistributionEmpty title={gt("Guesses needed to win a game")} message={gt("No Guesses yet!")} />
       ) : (
-        <DistributionFrame title={gt("Guesses needed to win a game")} data={guessDistribution}>
-          <ChartGrid />
-
-          <XAxis dataKey="turn" tickFormatter={tickFormatter} stroke="var(--color-text-1)" />
-
-          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
-          <ChartLegend formatter={legendFormatter} />
-
-          <PersonalPctBar />
-          <GlobalPctLine />
-        </DistributionFrame>
+        <DistributionChart
+          title={gt("Guesses needed to win a game")}
+          data={guessDistribution}
+          xAxis={<XAxis dataKey="turn" tickFormatter={tickFormatter} stroke="var(--color-text-1)" />}
+          tooltipFormatter={tooltipFormatter}
+          tooltipLabelFormatter={tooltipLabelFormatter}
+          legendFormatter={legendFormatter}
+        />
       )
     )
     .render();

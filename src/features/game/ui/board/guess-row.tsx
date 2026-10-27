@@ -1,3 +1,6 @@
+// react
+import { memo } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
@@ -16,7 +19,11 @@ interface GuessRowProps {
 // constants
 import { FLIP_STAGGER_CLASSES } from "./constants";
 
-export function GuessRow({ tiles, baseTiles, isFlipping }: GuessRowProps) {
+// Memoized row: completed rows rarely change, so bail out of re-rendering the
+// whole 5-tile subtree when `Main` re-renders due to turn/sonar/typing events
+// elsewhere on the board; `GuessTile` is also memoized, so this gives each row
+// two independent bail-out points
+export const GuessRow = memo(function GuessRow({ tiles, baseTiles, isFlipping }: GuessRowProps) {
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isFlipping && FLIP_STAGGER_CLASSES)}>
       {tiles.map((tile, tileIndex) => (
@@ -27,7 +34,7 @@ export function GuessRow({ tiles, baseTiles, isFlipping }: GuessRowProps) {
       ))}
     </div>
   );
-}
+});
 
 export function GuessRowSkeleton() {
   return (

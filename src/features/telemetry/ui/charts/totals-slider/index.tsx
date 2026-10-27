@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import useEmblaCarousel from "embla-carousel-react";
 import { useEmblaSelect } from "./hooks/use-embla-select";
@@ -44,15 +41,6 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel();
   const { selectedIndex, canScrollPrev, canScrollNext } = useEmblaSelect(emblaApi);
 
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-  const scrollTo = useCallback(
-    (index: number) => {
-      emblaApi?.scrollTo(index);
-    },
-    [emblaApi]
-  );
-
   return (
     <article className="grid grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-4 bg-surface-3 [grid-template-areas:'viewport_viewport''prevnext_dots']">
       <section ref={emblaRef} className="overflow-hidden select-none [grid-area:viewport]">
@@ -68,13 +56,13 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
         </div>
       </section>
       <header className="flex items-center gap-4 p-2 [grid-area:prevnext]">
-        <Prev onPrev={scrollPrev} disabled={!canScrollPrev} />
-        <Next onNext={scrollNext} disabled={!canScrollNext} />
+        <Prev onPrev={() => emblaApi?.scrollPrev()} disabled={!canScrollPrev} />
+        <Next onNext={() => emblaApi?.scrollNext()} disabled={!canScrollNext} />
       </header>
       <footer className="flex flex-wrap items-center justify-end gap-1 p-2 [grid-area:dots]">
         {TOTALS_SLIDES.map((spec, index) => {
           const key = spec.kind === "counter" ? spec.counterName : spec.statColumn;
-          return <Dot key={key} index={index} selected={index === selectedIndex} onSelect={scrollTo} />;
+          return <Dot key={key} index={index} selected={index === selectedIndex} onSelect={(dotIndex) => emblaApi?.scrollTo(dotIndex)} />;
         })}
       </footer>
     </article>

@@ -3,7 +3,6 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { Match } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state/high-score";
@@ -13,16 +12,23 @@ import { useLocale } from "gt-tanstack-start";
 
 // components
 import { InfoLine } from "@/ui/info-line";
+import { LanguageFlag } from "@/ui/language-flag";
 import { Table, TableBody, TableCell, TableRow } from "@/ui/table";
 import { Top10TableHeader } from "./top-10-table-header";
 import { Top10HighScoresSkeleton } from "./skeleton";
 
-// assets
-import { PlFlagIcon } from "@/assets/icons/pl-flag";
-import { UsFlagIcon } from "@/assets/icons/us-flag";
-
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
+
+interface Top10RowProps {
+  rank: number;
+  playerName: string;
+  score: number;
+  streak: number;
+  solutionsLang: "En" | "Pl";
+  isNewHighScore: boolean;
+  locale: string;
+}
 
 interface Top10HighScoresProps {
   solutionsLanguage: SolutionsLanguage;
@@ -44,17 +50,7 @@ const ROW_VARIANTS = {
 const MotionTableBody = motion.create(TableBody);
 const MotionTableRow = motion.create(TableRow);
 
-interface Top10RowProps {
-  rank: number;
-  playerName: string;
-  score: number;
-  streak: number;
-  solutionsLang: "En" | "Pl";
-  isNewHighScore: boolean;
-  locale: string;
-}
-
-export function Top10Row({ rank, playerName, score, streak, solutionsLang, isNewHighScore, locale }: Top10RowProps) {
+function Top10Row({ rank, playerName, score, streak, solutionsLang, isNewHighScore, locale }: Top10RowProps) {
   return (
     <MotionTableRow
       id={isNewHighScore ? "newHighScoreRow" : undefined}
@@ -66,11 +62,7 @@ export function Top10Row({ rank, playerName, score, streak, solutionsLang, isNew
       <TableCell className="bg-accent/30">{score.toLocaleString(locale)}</TableCell>
       <TableCell className="bg-destructive/30">{streak.toLocaleString(locale)}</TableCell>
       <TableCell>
-        {Match.value(solutionsLang).pipe(
-          Match.when("En", () => <UsFlagIcon className="mx-auto size-11" />),
-          Match.when("Pl", () => <PlFlagIcon className="mx-auto size-11" />),
-          Match.exhaustive
-        )}
+        <LanguageFlag solutionsLanguage={solutionsLang} className="mx-auto size-11" />
       </TableCell>
     </MotionTableRow>
   );

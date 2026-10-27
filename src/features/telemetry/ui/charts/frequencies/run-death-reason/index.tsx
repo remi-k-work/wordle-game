@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
@@ -22,10 +19,11 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
   const runDeathReasonFrequency = useAtomValue(runDeathReasonFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown): readonly [string, string] => [gt("{count} times", { count: value }), String(name)] as const,
-    [gt]
-  );
+  // No memoization needed: `ChartBody` is not wrapped in `React.memo`, so a
+  // stable `tooltipFormatter` reference buys nothing; a plain render-time
+  // function always sees the latest `gt` via closure and keeps the dependency
+  // surface simple
+  const tooltipFormatter = (value: unknown, name: unknown): readonly [string, string] => [gt("{count} times", { count: value }), String(name)] as const;
 
   return AsyncResult.builder(runDeathReasonFrequency)
     .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)

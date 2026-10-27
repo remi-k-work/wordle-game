@@ -18,7 +18,37 @@ import pillar1 from "@/assets/pillar1.webp";
 import pillar2 from "@/assets/pillar2.webp";
 import pillar3 from "@/assets/pillar3.webp";
 
+// types
+import type { ReactNode } from "react";
+
 export const Route = createFileRoute("/")({ component: Home });
+
+// A revealed feature block: a scroll-revealed heading, illustration, and body
+// content; shared by the three feature sections on the home page so the
+// RevealOnScroll > SectionHeader > image scaffolding is defined once and the
+// main structure reads as "three feature blocks" instead of repeating markup
+function FeatureSection({
+  title,
+  src,
+  alt,
+  staggerChildren = false,
+  children,
+}: {
+  title: string;
+  src: string;
+  alt: string;
+  staggerChildren?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <RevealOnScroll staggerChildren={staggerChildren}>
+      <SectionHeader title={title} />
+      <img src={src} loading="lazy" alt={alt} className="mx-auto h-auto w-full max-w-379" />
+      <br />
+      {children}
+    </RevealOnScroll>
+  );
+}
 
 function Home() {
   const gt = useGT();
@@ -48,10 +78,12 @@ function Home() {
         />
       </RevealOnScroll>
 
-      <RevealOnScroll staggerChildren>
-        <SectionHeader title={messages(msg("The Continuous Arcade Run (Accumulation vs. Wipeout)"))} />
-        <img src={pillar1} loading="lazy" alt={gt("The Continuous Arcade Run (Accumulation vs. Wipeout)")} className="mx-auto h-auto w-full max-w-379" />
-        <br />
+      <FeatureSection
+        title={messages(msg("The Continuous Arcade Run (Accumulation vs. Wipeout)"))}
+        src={pillar1}
+        alt={gt("The Continuous Arcade Run (Accumulation vs. Wipeout)")}
+        staggerChildren
+      >
         <T>
           <p className="mx-auto px-1 text-center sm:text-xl lg:text-2xl">
             Forget guessing a single word and walking away. In <b>Wordle Overdrive</b>, your points accumulate over a continuous stream of puzzles. Every
@@ -66,12 +98,14 @@ function Home() {
             Score and Streak immediately reset to zero, leaving only your persistent <b>Best Run</b> high water mark as a ghost to chase.
           </p>
         </T>
-      </RevealOnScroll>
+      </FeatureSection>
 
-      <RevealOnScroll staggerChildren>
-        <SectionHeader title={messages(msg("Bleeding Potential (Hunt Efficiently)"))} />
-        <img src={pillar2} loading="lazy" alt={gt("Bleeding Potential (Hunt Efficiently)")} className="mx-auto h-auto w-full max-w-379" />
-        <br />
+      <FeatureSection
+        title={messages(msg("Bleeding Potential (Hunt Efficiently)"))}
+        src={pillar2}
+        alt={gt("Bleeding Potential (Hunt Efficiently)")}
+        staggerChildren
+      >
         <T>
           <p className="mx-auto px-1 text-center sm:text-xl lg:text-2xl">
             In <b>Wordle Overdrive</b>, finding the word is only half the battle. To survive the leaderboard, you must <b>Hunt Efficiently</b>.
@@ -92,12 +126,14 @@ function Home() {
         </T>
         <br />
         <ScoringSimulator />
-      </RevealOnScroll>
+      </FeatureSection>
 
-      <RevealOnScroll staggerChildren>
-        <SectionHeader title={messages(msg("Survival Tools (AI Riddles & Smart Keypad)"))} />
-        <img src={pillar3} loading="lazy" alt={gt("Survival Tools (AI Riddles & Smart Keypad)")} className="mx-auto h-auto w-full max-w-379" />
-        <br />
+      <FeatureSection
+        title={messages(msg("Survival Tools (AI Riddles & Smart Keypad)"))}
+        src={pillar3}
+        alt={gt("Survival Tools (AI Riddles & Smart Keypad)")}
+        staggerChildren
+      >
         <T>
           <p className="mx-auto px-1 text-center sm:text-xl lg:text-2xl">
             With an massive, uncapped vocabulary dictionary of over <b>30,000</b> words, you are not left shooting entirely in the dark. At the start of every
@@ -112,7 +148,7 @@ function Home() {
             legendary, high-scoring run. You can never waste a keystroke by accident again.
           </p>
         </T>
-      </RevealOnScroll>
+      </FeatureSection>
     </article>
   );
 }

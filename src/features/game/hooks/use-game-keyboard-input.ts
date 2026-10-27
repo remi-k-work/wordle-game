@@ -5,11 +5,11 @@ import { useEffect } from "react";
 import { useAtomSet } from "@effect/atom-react";
 import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
-// The game board owns physical keyboard input for as long as it is on screen.
+// The game board owns physical keyboard input for as long as it is on screen
 // The overdrive-hacks machine is the single input gate: it ignores key presses
-// outside an active puzzle, so the board does not have to mirror game state.
+// outside an active puzzle, so the board does not have to mirror game state
 // Keeping this out of `CurrentGuess` also means the listener survives turn
-// changes, while the guess row itself stays presentational.
+// changes, while the guess row itself stays presentational
 export function useGameKeyboardInput() {
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 

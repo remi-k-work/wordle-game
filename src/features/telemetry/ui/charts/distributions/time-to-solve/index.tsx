@@ -11,8 +11,8 @@ import { XAxis } from "recharts";
 import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";
 
 // components
-import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { DistributionEmpty, DistributionFrame } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionEmpty } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionChart } from "@/features/telemetry/ui/charts/distribution-chart";
 import { TimeToSolveDistributionChartSkeleton } from "./skeleton";
 
 // types
@@ -37,12 +37,9 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
     [messages]
   );
   const tickFormatter = useCallback((tick: number | null) => formatSpeedCategory(tick, true), [formatSpeedCategory]);
-  const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const,
-    [gt]
-  );
-  const tooltipLabelFormatter = useCallback((label: unknown) => formatSpeedCategory(label as number | null), [formatSpeedCategory]);
-  const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average")), [gt]);
+  const tooltipFormatter = (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const;
+  const tooltipLabelFormatter = (label: unknown) => formatSpeedCategory(label as number | null);
+  const legendFormatter = (value: unknown) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average"));
 
   return AsyncResult.builder(timeToSolveDistribution)
     .onInitialOrWaiting(() => <TimeToSolveDistributionChartSkeleton />)
@@ -51,17 +48,14 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
       timeToSolveDistribution.length === 0 ? (
         <DistributionEmpty title={gt("Time taken to solve a word")} message={gt("No speed data tracked yet!")} />
       ) : (
-        <DistributionFrame title={gt("Time taken to solve a word")} data={timeToSolveDistribution}>
-          <ChartGrid />
-
-          <XAxis dataKey="maxSeconds" tickFormatter={tickFormatter} stroke="var(--color-text-1)" fontSize={32} />
-
-          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
-          <ChartLegend formatter={legendFormatter} />
-
-          <PersonalPctBar />
-          <GlobalPctLine />
-        </DistributionFrame>
+        <DistributionChart
+          title={gt("Time taken to solve a word")}
+          data={timeToSolveDistribution}
+          xAxis={<XAxis dataKey="maxSeconds" tickFormatter={tickFormatter} stroke="var(--color-text-1)" fontSize={32} />}
+          tooltipFormatter={tooltipFormatter}
+          tooltipLabelFormatter={tooltipLabelFormatter}
+          legendFormatter={legendFormatter}
+        />
       )
     )
     .render();

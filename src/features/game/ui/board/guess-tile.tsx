@@ -1,3 +1,6 @@
+// react
+import { memo } from "react";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useSonarPing } from "@/features/game/hooks/use-sonar-ping";
@@ -14,7 +17,7 @@ interface GuessTileProps {
 // constants
 import { TILE_COLOR_MAP } from "./constants";
 
-export function GuessTile({ tile: { tileKey, color }, bounceAnim = false, isSonarReveal = false }: GuessTileProps) {
+export const GuessTile = memo(function GuessTile({ tile: { tileKey, color }, bounceAnim = false, isSonarReveal = false }: GuessTileProps) {
   const scope = useSonarPing(isSonarReveal);
 
   return (
@@ -22,7 +25,7 @@ export function GuessTile({ tile: { tileKey, color }, bounceAnim = false, isSona
       <span className="text-[50cqi] leading-0 font-semibold sm:text-[40cqi]">{tileKey}</span>
     </div>
   );
-}
+});
 
 export function GuessTileSkeleton() {
   return (

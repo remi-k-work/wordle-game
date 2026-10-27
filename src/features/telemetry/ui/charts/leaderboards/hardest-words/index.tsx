@@ -10,8 +10,8 @@ import { XAxis, YAxis } from "recharts";
 import { formatSeconds } from "@/domain/formatters";
 
 // components
-import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { HorizontalBarEmpty, HorizontalBarFrame } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HorizontalBarEmpty } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HorizontalFrequencyChart } from "@/features/telemetry/ui/charts/horizontal-frequency-chart";
 import { HardestWordsLeaderboardChartSkeleton } from "./skeleton";
 
 // types
@@ -34,27 +34,21 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
   const gt = useGT();
 
   const tickFormatter = useCallback((value: number) => formatSeconds(value), []);
-  const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) =>
-      [formatSeconds(Number(value)), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")] as const,
-    [gt]
-  );
-  const tooltipLabelFormatter = useCallback(
-    (label: unknown, payload: ReadonlyArray<HardestWordsTooltipEntry>) => {
-      const row = payload[0]?.payload;
-      return (
-        <>
-          {label}
-          <br />
-          <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses.toFixed(1) ?? "—" })}</span>
-          <br />
-          <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses.toFixed(1) ?? "—" })}</span>
-        </>
-      );
-    },
-    [gt]
-  );
-  const legendFormatter = useCallback((value: unknown) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")), [gt]);
+  const tooltipFormatter = (value: unknown, name: unknown) =>
+    [formatSeconds(Number(value)), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")] as const;
+  const tooltipLabelFormatter = (label: unknown, payload?: unknown) => {
+    const row = (payload as ReadonlyArray<HardestWordsTooltipEntry> | undefined)?.[0]?.payload;
+    return (
+      <>
+        {label}
+        <br />
+        <span className="font-mono font-normal">{gt("Global Average Guesses: {count}", { count: row?.globalAvgGuesses.toFixed(1) ?? "—" })}</span>
+        <br />
+        <span className="font-mono font-normal">{gt("Your Average Guesses: {count}", { count: row?.personalAvgGuesses.toFixed(1) ?? "—" })}</span>
+      </>
+    );
+  };
+  const legendFormatter = (value: unknown) => (value === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time"));
 
   return AsyncResult.builder(hardestWordsLeaderboard)
     .onInitialOrWaiting(() => <HardestWordsLeaderboardChartSkeleton />)
@@ -63,18 +57,17 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
       hardestWordsLeaderboard.length === 0 ? (
         <HorizontalBarEmpty title={gt("Hardest words by average solve time")} message={gt("No leaderboard data tracked yet!")} />
       ) : (
-        <HorizontalBarFrame title={gt("Hardest words by average solve time")} data={hardestWordsLeaderboard}>
-          <ChartGrid />
-
-          <XAxis type="number" stroke="var(--color-text-1)" tickFormatter={tickFormatter} />
-          <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
-
-          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
-          <ChartLegend formatter={legendFormatter} />
-
-          <PersonalBar dataKey="personalAvgTimeSeconds" />
-          <GlobalBar dataKey="globalAvgTimeSeconds" />
-        </HorizontalBarFrame>
+        <HorizontalFrequencyChart
+          title={gt("Hardest words by average solve time")}
+          data={hardestWordsLeaderboard}
+          xAxis={<XAxis type="number" stroke="var(--color-text-1)" tickFormatter={tickFormatter} />}
+          yAxis={<YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />}
+          tooltipFormatter={tooltipFormatter}
+          tooltipLabelFormatter={tooltipLabelFormatter}
+          legendFormatter={legendFormatter}
+          personalDataKey="personalAvgTimeSeconds"
+          globalDataKey="globalAvgTimeSeconds"
+        />
       )
     )
     .render();

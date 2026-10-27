@@ -17,22 +17,17 @@ function Game() {
   useAtomMount(playerSessionAtom);
   const isLoadingOrFailed = useAtomValue(gameDataIsLoadingOrFailedAtom);
 
-  // If the game data machine is loading or failed, render the skeleton
-  if (isLoadingOrFailed) {
-    return (
-      <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
-        <HeaderSkeleton />
-        <MainSkeleton />
-        <FooterSkeleton />
-      </article>
-    );
-  }
+  // The shell is identical for loading and loaded states; only the board
+  // sections swap between their real and skeleton variants
+  const HeaderEl = isLoadingOrFailed ? HeaderSkeleton : Header;
+  const MainEl = isLoadingOrFailed ? MainSkeleton : Main;
+  const FooterEl = isLoadingOrFailed ? FooterSkeleton : Footer;
 
   return (
     <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
-      <Header />
-      <Main />
-      <Footer />
+      <HeaderEl />
+      <MainEl />
+      <FooterEl />
     </article>
   );
 }

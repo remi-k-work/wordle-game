@@ -39,23 +39,28 @@ export function CurrentGuess() {
   // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
   const vowelByPosition = useMemo(() => sonarVowelByPosition(sonarReveals), [sonarReveals]);
   const currentLength = currentGuessWord.length;
-  const currentGuessTiles = buildCurrentGuessTiles(currentGuessWord, isInvalidGuess, vowelByPosition);
+
+  // Memoize so the tile array reference stays stable across re-renders triggered
+  // by the parent (e.g. Main re-rendering on a turn change); combined with
+  // memo(GuessTile), unchanged tiles bail out of reconciliation instead of
+  // recreating 5 new tile objects and re-running useSonarPing every time
+  const currentGuessTiles = useMemo(
+    () => buildCurrentGuessTiles(currentGuessWord, isInvalidGuess, vowelByPosition),
+    [currentGuessWord, isInvalidGuess, vowelByPosition]
+  );
 
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isInvalidGuess && "animate-pulse")}>
       {currentGuessTiles.map((tile, tileIndex) => {
         const isSonarReveal = tileIndex >= currentLength && vowelByPosition.has(tileIndex);
+        // Only the most recently typed tile bounces, and never a sonar-revealed tile
+        const isLastTypedTile = tile.tileKey !== "" && tileIndex === currentLength - 1;
 
         return (
           // Keys stay stable per position: the sonar ping is driven by the
           // `isSonarReveal` prop through useSonarPing's effect + cleanup, so
           // keying on it would remount the tile DOM on every reveal flip
-          <GuessTile
-            key={tileIndex}
-            tile={tile}
-            bounceAnim={tile.tileKey !== "" && tileIndex === currentLength - 1 && !isSonarReveal}
-            isSonarReveal={isSonarReveal}
-          />
+          <GuessTile key={tileIndex} tile={tile} bounceAnim={isLastTypedTile && !isSonarReveal} isSonarReveal={isSonarReveal} />
         );
       })}
     </div>

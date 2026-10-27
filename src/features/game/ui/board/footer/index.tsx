@@ -31,6 +31,11 @@ export function Footer() {
   return <KeypadArea keys={gameDataKeypad.value} />;
 }
 
+// `KeypadArea` is hoisted to module scope. Defining it inside `Footer`'s body
+// would recreate its component identity on every `Footer` render, remounting
+// the entire keypad subtree (Toolbar, AnimatePresence, motion keys,
+// Backspace/Enter buttons) each time; as a module-level component its identity
+// is stable, so only the atoms it actually subscribes to can re-render it
 function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);

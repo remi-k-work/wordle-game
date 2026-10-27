@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
@@ -9,8 +6,8 @@ import { failedWordsFrequencyAtom } from "@/features/telemetry/state/charts";
 import { XAxis, YAxis } from "recharts";
 
 // components
-import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { HorizontalBarEmpty, HorizontalBarFrame } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HorizontalBarEmpty } from "@/features/telemetry/ui/charts/horizontal-bar-shell";
+import { HorizontalFrequencyChart } from "@/features/telemetry/ui/charts/horizontal-frequency-chart";
 import { FailedWordsFrequencyChartSkeleton } from "./skeleton";
 
 // types
@@ -24,12 +21,9 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
   const failedWordsFrequency = useAtomValue(failedWordsFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${String(value)}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")] as const,
-    [gt]
-  );
-  const tooltipLabelFormatter = useCallback((label: unknown) => String(label), []);
-  const legendFormatter = useCallback((value: unknown) => (value === "personal" ? gt("Your Misses") : gt("Global Misses")), [gt]);
+  const tooltipFormatter = (value: unknown, name: unknown) => [`${String(value)}`, name === "personal" ? gt("Your Misses") : gt("Global Misses")] as const;
+  const tooltipLabelFormatter = (label: unknown) => String(label);
+  const legendFormatter = (value: unknown) => (value === "personal" ? gt("Your Misses") : gt("Global Misses"));
 
   return AsyncResult.builder(failedWordsFrequency)
     .onInitialOrWaiting(() => <FailedWordsFrequencyChartSkeleton />)
@@ -38,18 +32,15 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
       failedWordsFrequency.length === 0 ? (
         <HorizontalBarEmpty title={gt("Words that players failed to guess")} message={gt("No frequency data tracked yet!")} />
       ) : (
-        <HorizontalBarFrame title={gt("Words that players failed to guess")} data={failedWordsFrequency}>
-          <ChartGrid />
-
-          <XAxis type="number" stroke="var(--color-text-1)" />
-          <YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />
-
-          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
-          <ChartLegend formatter={legendFormatter} />
-
-          <PersonalBar />
-          <GlobalBar />
-        </HorizontalBarFrame>
+        <HorizontalFrequencyChart
+          title={gt("Words that players failed to guess")}
+          data={failedWordsFrequency}
+          xAxis={<XAxis type="number" stroke="var(--color-text-1)" />}
+          yAxis={<YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />}
+          tooltipFormatter={tooltipFormatter}
+          tooltipLabelFormatter={tooltipLabelFormatter}
+          legendFormatter={legendFormatter}
+        />
       )
     )
     .render();

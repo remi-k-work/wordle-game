@@ -2,12 +2,12 @@
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentTurnAtom, wordChallengeTheSecretWordAtom, wordChallengeWordScoreAtom } from "@/features/game/state/word-challenge";
+import { T, Var } from "gt-react";
 
 // components
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
+import { RunOutcome } from "./run-outcome";
 import { RunScore } from "./run-score";
-import { SecretWordReveal } from "./secret-word";
-import { T, Var } from "gt-react";
 
 export function YouWin() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
@@ -18,21 +18,22 @@ export function YouWin() {
   const { timeSeconds } = wordScore.value;
 
   return (
-    <article className="mx-auto max-w-prose space-y-4">
-      <T>
-        <p>
-          You found the solution in{" "}
-          <b>
-            <Var>{currentTurn - 1}</Var>
-          </b>{" "}
-          guesses 😄
-        </p>
-      </T>
-
-      <SecretWordReveal secretWord={theSecretWord.value} />
-
+    <RunOutcome
+      secretWord={theSecretWord.value}
+      message={
+        <T>
+          <p>
+            You found the solution in{" "}
+            <b>
+              <Var>{currentTurn - 1}</Var>
+            </b>{" "}
+            guesses 😄
+          </p>
+        </T>
+      }
+    >
       <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={timeSeconds} />
       <RunScore />
-    </article>
+    </RunOutcome>
   );
 }

@@ -32,7 +32,8 @@ interface TurnMetricSectionProps {
   isReportingScore: boolean;
   locale: string;
   ariaLabel: string;
-  onTurnChange: (turn: number) => void;
+  // Only interactive mode needs a change handler; read-only reports omit it
+  onTurnChange?: (turn: number) => void;
 }
 
 interface TimeMetricSectionProps {
@@ -40,7 +41,8 @@ interface TimeMetricSectionProps {
   speedMultiplier: number;
   isReportingScore: boolean;
   ariaLabel: string;
-  onElapsedChange: (seconds: number) => void;
+  // Only interactive mode needs a change handler; read-only reports omit it
+  onElapsedChange?: (seconds: number) => void;
 }
 
 interface ScoreFormulaFooterProps {
@@ -68,7 +70,7 @@ function ScoreHeader({ isReportingScore, potentialScore, speedMultiplier, locale
   );
 }
 
-function TurnMetricSection({ currentTurn, basePointsPerTurn, isReportingScore, locale, ariaLabel, onTurnChange }: TurnMetricSectionProps) {
+function TurnMetricSection({ currentTurn, basePointsPerTurn, isReportingScore, locale, ariaLabel, onTurnChange = () => {} }: TurnMetricSectionProps) {
   return (
     <section className="grid place-items-center bg-surface-1 p-3">
       <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
@@ -84,7 +86,7 @@ function TurnMetricSection({ currentTurn, basePointsPerTurn, isReportingScore, l
   );
 }
 
-function TimeMetricSection({ elapsedSeconds, speedMultiplier, isReportingScore, ariaLabel, onElapsedChange }: TimeMetricSectionProps) {
+function TimeMetricSection({ elapsedSeconds, speedMultiplier, isReportingScore, ariaLabel, onElapsedChange = () => {} }: TimeMetricSectionProps) {
   return (
     <section className="grid place-items-center bg-surface-1 p-3">
       <h4 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
@@ -120,14 +122,13 @@ function ScoreFormulaFooter({ basePointsPerTurn, speedMultiplier, locale }: Scor
   );
 }
 
-export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorProps) {
-  const isReportingScore = guessedTurn !== undefined && timeElapsed !== undefined;
+// Interactive mode: owns its own turn/elapsed state, renders sliders + formula footer
+function InteractiveScoringSimulator() {
   const [interactiveTurn, setInteractiveTurn] = useState(1);
   const [interactiveElapsed, setInteractiveElapsed] = useState(0);
 
-  // Directly derive values from props when reporting, avoiding stale state synchronization
-  const currentTurn = isReportingScore ? guessedTurn : interactiveTurn;
-  const elapsedSeconds = isReportingScore ? timeElapsed : interactiveElapsed;
+  const currentTurn = interactiveTurn;
+  const elapsedSeconds = interactiveElapsed;
 
   const potentialScore = calculatePotentialScore(currentTurn, elapsedSeconds);
   const basePointsPerTurn = getBasePointsPerTurn(currentTurn);
@@ -138,13 +139,13 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
 
   return (
     <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
-      <ScoreHeader isReportingScore={isReportingScore} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
+      <ScoreHeader isReportingScore={false} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <TurnMetricSection
           currentTurn={currentTurn}
           basePointsPerTurn={basePointsPerTurn}
-          isReportingScore={isReportingScore}
+          isReportingScore={false}
           locale={locale}
           ariaLabel={gt("Turn Guessed")}
           onTurnChange={setInteractiveTurn}
@@ -152,13 +153,49 @@ export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorP
         <TimeMetricSection
           elapsedSeconds={elapsedSeconds}
           speedMultiplier={speedMultiplier}
-          isReportingScore={isReportingScore}
+          isReportingScore={false}
           ariaLabel={gt("Time Elapsed")}
           onElapsedChange={setInteractiveElapsed}
         />
       </div>
 
-      {!isReportingScore && <ScoreFormulaFooter basePointsPerTurn={basePointsPerTurn} speedMultiplier={speedMultiplier} locale={locale} />}
+      <ScoreFormulaFooter basePointsPerTurn={basePointsPerTurn} speedMultiplier={speedMultiplier} locale={locale} />
     </article>
   );
+}
+
+// Report mode: purely presentational, derives everything from props, no state, no interactive sliders
+// The metric sections render (sliders disabled) so the turn, time, and speed multiplier stay visible
+// in read-only score reports such as the win modal
+function FinalScoreReport({ guessedTurn, timeElapsed }: { guessedTurn: number; timeElapsed: number }) {
+  const potentialScore = calculatePotentialScore(guessedTurn, timeElapsed);
+  const basePointsPerTurn = getBasePointsPerTurn(guessedTurn);
+  const speedMultiplier = getSpeedMultiplier(timeElapsed);
+
+  const gt = useGT();
+  const locale = useLocale();
+
+  return (
+    <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
+      <ScoreHeader isReportingScore={true} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <TurnMetricSection
+          currentTurn={guessedTurn}
+          basePointsPerTurn={basePointsPerTurn}
+          isReportingScore={true}
+          locale={locale}
+          ariaLabel={gt("Turn Guessed")}
+        />
+
+        <TimeMetricSection elapsedSeconds={timeElapsed} speedMultiplier={speedMultiplier} isReportingScore={true} ariaLabel={gt("Time Elapsed")} />
+      </div>
+    </article>
+  );
+}
+
+// Branches between the two modes: live simulation owns state; score report is a pure read of props
+export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorProps) {
+  if (guessedTurn === undefined || timeElapsed === undefined) return <InteractiveScoringSimulator />;
+  return <FinalScoreReport guessedTurn={guessedTurn} timeElapsed={timeElapsed} />;
 }

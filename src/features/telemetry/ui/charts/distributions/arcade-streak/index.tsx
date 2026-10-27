@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
@@ -9,8 +6,8 @@ import { arcadeStreakDistributionAtom } from "@/features/telemetry/state/charts"
 import { XAxis } from "recharts";
 
 // components
-import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } from "@/features/telemetry/ui/charts/chartCommon";
-import { DistributionEmpty, DistributionFrame } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionEmpty } from "@/features/telemetry/ui/charts/distribution-shell";
+import { DistributionChart } from "@/features/telemetry/ui/charts/distribution-chart";
 import { ArcadeStreakDistributionChartSkeleton } from "./skeleton";
 
 // types
@@ -24,13 +21,10 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
   const arcadeStreakDistribution = useAtomValue(arcadeStreakDistributionAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tickFormatter = useCallback((tick: number) => (tick === Infinity ? "14+" : `${tick}`), []);
-  const tooltipFormatter = useCallback(
-    (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const,
-    [gt]
-  );
-  const tooltipLabelFormatter = useCallback((label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${String(label)}`), []);
-  const legendFormatter = useCallback((value: unknown) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average")), [gt]);
+  const tickFormatter = (tick: number) => (tick === Infinity ? "14+" : `${tick}`);
+  const tooltipFormatter = (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const;
+  const tooltipLabelFormatter = (label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${String(label)}`);
+  const legendFormatter = (value: unknown) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average"));
 
   return AsyncResult.builder(arcadeStreakDistribution)
     .onInitialOrWaiting(() => <ArcadeStreakDistributionChartSkeleton />)
@@ -39,17 +33,14 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
       arcadeStreakDistribution.length === 0 ? (
         <DistributionEmpty title={gt("Streak before a loss")} message={gt("No streak data tracked yet!")} />
       ) : (
-        <DistributionFrame title={gt("Streak before a loss")} data={arcadeStreakDistribution}>
-          <ChartGrid />
-
-          <XAxis dataKey="streak" tickFormatter={tickFormatter} stroke="var(--color-text-1)" />
-
-          <ChartTooltip formatter={tooltipFormatter} labelFormatter={tooltipLabelFormatter} />
-          <ChartLegend formatter={legendFormatter} />
-
-          <PersonalPctBar />
-          <GlobalPctLine />
-        </DistributionFrame>
+        <DistributionChart
+          title={gt("Streak before a loss")}
+          data={arcadeStreakDistribution}
+          xAxis={<XAxis dataKey="streak" tickFormatter={tickFormatter} stroke="var(--color-text-1)" />}
+          tooltipFormatter={tooltipFormatter}
+          tooltipLabelFormatter={tooltipLabelFormatter}
+          legendFormatter={legendFormatter}
+        />
       )
     )
     .render();

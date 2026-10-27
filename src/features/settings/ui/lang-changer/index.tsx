@@ -1,16 +1,12 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { Match } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-
-// assets
-import { PlFlagIcon } from "@/assets/icons/pl-flag";
-import { UsFlagIcon } from "@/assets/icons/us-flag";
+import { LanguageFlag } from "@/ui/language-flag";
 
 // types
 interface GameLangChangerProps {
@@ -35,11 +31,7 @@ export function GameLangChanger({ keepText = false, onClicked }: GameLangChanger
         onClicked?.();
       }}
     >
-      {Match.value(solutionsLanguage).pipe(
-        Match.when("En", () => <UsFlagIcon className="size-11" />),
-        Match.when("Pl", () => <PlFlagIcon className="size-11" />),
-        Match.exhaustive
-      )}
+      <LanguageFlag solutionsLanguage={solutionsLanguage} className="size-11" />
       {keepText ? (
         <T>Game Language</T>
       ) : (
