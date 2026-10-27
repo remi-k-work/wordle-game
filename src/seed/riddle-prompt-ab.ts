@@ -18,7 +18,7 @@ const MainLayer = Layer.mergeAll(SeedLayer, AiClientsWithHttp);
 const Definitions = Schema.Record(Schema.String, Schema.String);
 const DEFINITIONS_PL = Schema.decodeSync(Definitions)(definitionsPlJson);
 
-class MissingDefinitionError extends Schema.TaggedError<MissingDefinitionError>()("MissingDefinitionError", {
+class MissingDefinitionError extends Schema.TaggedError<MissingDefinitionError, { readonly brand: unique symbol }>()("MissingDefinitionError", {
   theSecretWord: Schema.String,
 }) {}
 

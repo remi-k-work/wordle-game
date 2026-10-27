@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Array, Effect, FileSystem, Schema } from "effect";
 
-class WordlistJsonEncodeError extends Schema.TaggedError<WordlistJsonEncodeError>()("WordlistJsonEncodeError", {
+class WordlistJsonEncodeError extends Schema.TaggedError<WordlistJsonEncodeError, { readonly brand: unique symbol }>()("WordlistJsonEncodeError", {
   file: Schema.String,
   cause: Schema.Defect(),
 }) {}

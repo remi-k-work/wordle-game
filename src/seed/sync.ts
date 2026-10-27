@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, FileSystem, HashSet, Record, Schema } from "effect";
 
-class SeedJsonParseError extends Schema.TaggedError<SeedJsonParseError>()("SeedJsonParseError", {
+class SeedJsonParseError extends Schema.TaggedError<SeedJsonParseError, { readonly brand: unique symbol }>()("SeedJsonParseError", {
   file: Schema.String,
   cause: Schema.Defect(),
 }) {}

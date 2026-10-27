@@ -3,7 +3,7 @@ import { Schema } from "effect";
 import { AiError } from "effect/ai";
 
 // Define a domain error for the Effect-based AI providers
-export class AiProviderError extends Schema.TaggedError<AiProviderError>()("AiProviderError", {
+export class AiProviderError extends Schema.TaggedError<AiProviderError, { readonly brand: unique symbol }>()("AiProviderError", {
   reason: AiError.AiErrorReason,
 }) {
   static fromAiError(error: AiError.AiError) {
@@ -11,7 +11,7 @@ export class AiProviderError extends Schema.TaggedError<AiProviderError>()("AiPr
   }
 }
 
-export class OpenRouterError extends Schema.TaggedError<OpenRouterError>()("OpenRouterError", {
+export class OpenRouterError extends Schema.TaggedError<OpenRouterError, { readonly brand: unique symbol }>()("OpenRouterError", {
   cause: Schema.Defect(),
   status: Schema.optionalKey(Schema.Int),
   responseBody: Schema.optionalKey(Schema.String),

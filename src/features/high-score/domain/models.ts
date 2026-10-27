@@ -7,7 +7,7 @@ import { BasePage } from "@/domain/models";
 export type HighScoreMachineContext = typeof HighScoreMachineContext.Type;
 
 // Represents the high score entry for a player
-export class HighScore extends Schema.Class<HighScore>("HighScore")({
+export class HighScore extends Schema.Class<HighScore, { readonly brand: unique symbol }>("HighScore")({
   id: Schema.Int.check(Schema.isGreaterThan(0)),
   playerName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(3))),
   score: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
@@ -20,7 +20,7 @@ export class HighScore extends Schema.Class<HighScore>("HighScore")({
 }) {}
 
 // The schema for adding a new high score entry (the required fields only)
-export class AddHighScore extends Schema.Class<AddHighScore>("AddHighScore")({
+export class AddHighScore extends Schema.Class<AddHighScore, { readonly brand: unique symbol }>("AddHighScore")({
   playerName: HighScore.fields.playerName,
   score: HighScore.fields.score,
   streak: HighScore.fields.streak,

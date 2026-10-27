@@ -4,7 +4,7 @@ import { Context, Effect, Layer, Redacted, Schema } from "effect";
 import { SqlClient } from "effect/sql";
 import { pgConfig } from "@/lib/pg-config";
 
-class ContainerError extends Schema.TaggedError<ContainerError>()("ContainerError", {
+class ContainerError extends Schema.TaggedError<ContainerError, { readonly brand: unique symbol }>()("ContainerError", {
   cause: Schema.Defect(),
 }) {}
 

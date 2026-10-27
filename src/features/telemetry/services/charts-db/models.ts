@@ -5,7 +5,7 @@ import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "
 // constants
 import { MAX_TURNS } from "@/features/game/domain/constants";
 
-export class AnyChartArgs extends Schema.Class<AnyChartArgs>("AnyChartArgs")({
+export class AnyChartArgs extends Schema.Class<AnyChartArgs, { readonly brand: unique symbol }>("AnyChartArgs")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
 }) {}
@@ -19,7 +19,7 @@ export class AnyAvgStatArgs extends AnyChartArgs.extend<AnyAvgStatArgs>("AnyAvgS
   statTable: Schema.Literals(["runWordEvent", "arcadeRunSummary"]),
 }) {}
 
-export class AnyCounterData extends Schema.Class<AnyCounterData>("AnyCounterData")({
+export class AnyCounterData extends Schema.Class<AnyCounterData, { readonly brand: unique symbol }>("AnyCounterData")({
   personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
@@ -59,7 +59,7 @@ export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathR
   reason: RunDeathReason,
 }) {}
 
-export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData>("HardestWordsLeaderboardData")({
+export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData, { readonly brand: unique symbol }>("HardestWordsLeaderboardData")({
   word: TheSecretWord,
   personalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
   personalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS }))),
@@ -71,7 +71,7 @@ export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCard
   whichBestRun: Schema.Literals(["personal", "global"]),
 }) {}
 
-export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData>("BestRunTrophyCardData")({
+export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData, { readonly brand: unique symbol }>("BestRunTrophyCardData")({
   deathReason: RunDeathReason,
   failedOnWord: FailedOnWord,
   finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),

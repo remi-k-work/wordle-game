@@ -8,7 +8,7 @@ import { MAX_TURNS } from "@/features/game/domain/constants";
 // types
 export type BrowseCharts = typeof BrowseCharts.Type;
 
-export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse")({
+export class AddGlobalPulse extends Schema.Class<AddGlobalPulse, { readonly brand: unique symbol }>("AddGlobalPulse")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
   instanceId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
@@ -16,7 +16,7 @@ export class AddGlobalPulse extends Schema.Class<AddGlobalPulse>("AddGlobalPulse
   metricPayload: Schema.Unknown,
 }) {}
 
-export class AddArcadeRunSummary extends Schema.Class<AddArcadeRunSummary>("AddArcadeRunSummary")({
+export class AddArcadeRunSummary extends Schema.Class<AddArcadeRunSummary, { readonly brand: unique symbol }>("AddArcadeRunSummary")({
   runId: Schema.Trim.check(Schema.isUUID()),
   sessionId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
@@ -27,7 +27,7 @@ export class AddArcadeRunSummary extends Schema.Class<AddArcadeRunSummary>("AddA
   durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-export class AddRunWordEvent extends Schema.Class<AddRunWordEvent>("AddRunWordEvent")({
+export class AddRunWordEvent extends Schema.Class<AddRunWordEvent, { readonly brand: unique symbol }>("AddRunWordEvent")({
   runId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
   theSecretWord: TheSecretWord,

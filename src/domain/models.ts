@@ -7,12 +7,12 @@ const PageParams = Schema.Record(Schema.Trim, Schema.Trim);
 const PageSearchParams = Schema.Record(Schema.Trim, Schema.Union([Schema.Trim, Schema.Array(Schema.Trim), Schema.Undefined]));
 
 // Represents the base route/page inputs
-export class BasePage extends Schema.Class<BasePage>("BasePage")({
+export class BasePage extends Schema.Class<BasePage, { readonly brand: unique symbol }>("BasePage")({
   params: PageParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
   searchParams: PageSearchParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
 }) {}
 
-export class SpeechRequest extends Schema.Class<SpeechRequest>("SpeechRequest")({
+export class SpeechRequest extends Schema.Class<SpeechRequest, { readonly brand: unique symbol }>("SpeechRequest")({
   model: Schema.optionalKey(
     Schema.Trim.pipe(
       Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")),
