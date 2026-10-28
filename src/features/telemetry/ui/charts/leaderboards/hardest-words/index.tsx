@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
@@ -33,7 +30,9 @@ export function HardestWordsLeaderboardChart({ solutionsLanguage }: HardestWords
   const hardestWordsLeaderboard = useAtomValue(hardestWordsLeaderboardAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tickFormatter = useCallback((value: number) => formatSeconds(value), []);
+  // `formatSeconds` is a module-level function with no changing dependencies,
+  // so `useCallback` would add nothing — a plain render-time function is simpler
+  const tickFormatter = (value: number) => formatSeconds(value);
   const tooltipFormatter = (value: unknown, name: unknown) =>
     [formatSeconds(Number(value)), name === "personalAvgTimeSeconds" ? gt("Your Average Time") : gt("Global Average Time")] as const;
   const tooltipLabelFormatter = (label: unknown, payload?: unknown) => {

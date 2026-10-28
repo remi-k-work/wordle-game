@@ -19,7 +19,12 @@ const nullToInfinity = (value: number | null) => value ?? Infinity;
 // request with the player's session id, and caches the result for 5 minutes
 // of idle time (remounts within that window reuse it instead of refetching)
 const chartAtom = <A, E>(fetch: (client: Context.Service.Shape<typeof RpcTelemetryClient>, sessionId: string) => Effect.Effect<A, E>) =>
-  RuntimeAtom.atom((get) => Effect.flatMap(RpcTelemetryClient, (client) => fetch(client, get(sessionIdAtom)))).pipe(Atom.setIdleTTL("5 minutes"));
+  RuntimeAtom.atom((get) =>
+    Effect.gen(function* () {
+      const client = yield* RpcTelemetryClient;
+      return yield* fetch(client, get(sessionIdAtom));
+    })
+  ).pipe(Atom.setIdleTTL("5 minutes"));
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) => client.getGuessDistribution({ sessionId, solutionsLanguage }))
@@ -27,17 +32,19 @@ export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLa
 
 export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
-    client
-      .getTimeToSolveDistribution({ sessionId, solutionsLanguage })
-      .pipe(Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) }))))
+    Effect.gen(function* () {
+      const data = yield* client.getTimeToSolveDistribution({ sessionId, solutionsLanguage });
+      return data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) }));
+    })
   )
 );
 
 export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
-    client
-      .getArcadeStreakDistribution({ sessionId, solutionsLanguage })
-      .pipe(Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) }))))
+    Effect.gen(function* () {
+      const data = yield* client.getArcadeStreakDistribution({ sessionId, solutionsLanguage });
+      return data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) }));
+    })
   )
 );
 

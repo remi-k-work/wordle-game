@@ -11,19 +11,21 @@ import { NewHighScore } from "@/features/high-score/ui/new-high-score";
 
 export function Nevermind() {
   const theSecretWord = useAtomValue(wordChallengeTheSecretWordAtom);
-  if (Option.isNone(theSecretWord)) return null;
 
-  return (
-    <RunOutcome
-      secretWord={theSecretWord.value}
-      message={
-        <p>
-          <T>Better luck next time 😄</T>
-        </p>
-      }
-    >
-      <RunScore />
-      <NewHighScore />
-    </RunOutcome>
-  );
+  return Option.match(theSecretWord, {
+    onNone: () => null,
+    onSome: (theSecretWord) => (
+      <RunOutcome
+        secretWord={theSecretWord}
+        message={
+          <p>
+            <T>Better luck next time 😄</T>
+          </p>
+        }
+      >
+        <RunScore />
+        <NewHighScore />
+      </RunOutcome>
+    ),
+  });
 }

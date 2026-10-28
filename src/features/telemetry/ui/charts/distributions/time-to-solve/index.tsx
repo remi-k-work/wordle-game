@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
@@ -27,16 +24,15 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
   const gt = useGT();
   const messages = useMessages();
 
-  const formatSpeedCategory = useCallback(
-    (maxSeconds: number | null, emojiOnly: boolean = false) =>
-      Option.match(maxSecondsToSpeedMultiplier(maxSeconds), {
-        onNone: () => (emojiOnly ? "?" : messages(msg("Unknown"))),
-        onSome: (speedMultiplier) =>
-          emojiOnly ? speedMultiplierToCategoryEmoji(speedMultiplier) : messages(speedMultiplierToCategoryMessage(speedMultiplier)),
-      }),
-    [messages]
-  );
-  const tickFormatter = useCallback((tick: number | null) => formatSpeedCategory(tick, true), [formatSpeedCategory]);
+  // `messages` from `useMessages()` is a stable reference, so plain render-time
+  // functions are sufficient — `useCallback` would add a dependency array without
+  // buying any memoization benefit (same reasoning as the other distribution charts)
+  const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) =>
+    Option.match(maxSecondsToSpeedMultiplier(maxSeconds), {
+      onNone: () => (emojiOnly ? "?" : messages(msg("Unknown"))),
+      onSome: (speedMultiplier) => (emojiOnly ? speedMultiplierToCategoryEmoji(speedMultiplier) : messages(speedMultiplierToCategoryMessage(speedMultiplier))),
+    });
+  const tickFormatter = (tick: number | null) => formatSpeedCategory(tick, true);
   const tooltipFormatter = (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Speed") : gt("Global Average")] as const;
   const tooltipLabelFormatter = (label: unknown) => formatSpeedCategory(label as number | null);
   const legendFormatter = (value: unknown) => (value === "personalPct" ? gt("Your Speed") : gt("Global Average"));

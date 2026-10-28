@@ -1,5 +1,3 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
 import { Effect, Option, Result } from "effect";
 import { Atom } from "effect/reactivity";
@@ -53,10 +51,14 @@ const fetchAudioActor = effectActor(({ theRiddle, wordDefinition }: FetchAudioIn
     const { fetchRiddleAudio, fetchWordDefinitionAudio } = yield* RpcGameClient;
     const { theRiddleAudioResult, wordDefinitionAudioResult } = yield* Effect.all(
       {
-        theRiddleAudioResult: Option.isNone(theRiddle) ? Effect.succeedNone : fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage }),
-        wordDefinitionAudioResult: Option.isNone(wordDefinition)
-          ? Effect.succeedNone
-          : fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage }),
+        theRiddleAudioResult: Option.match(theRiddle, {
+          onNone: () => Effect.succeedNone,
+          onSome: (riddle) => fetchRiddleAudio({ input: riddle, solutionsLanguage }),
+        }),
+        wordDefinitionAudioResult: Option.match(wordDefinition, {
+          onNone: () => Effect.succeedNone,
+          onSome: (definition) => fetchWordDefinitionAudio({ input: definition, solutionsLanguage }),
+        }),
       },
       { mode: "result", concurrency: 2 }
     );

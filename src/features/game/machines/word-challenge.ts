@@ -1,7 +1,5 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
-import { Array, DateTime, HashSet, Option, String, Effect } from "effect";
+import { Array, DateTime, HashSet, Option, Effect } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -17,6 +15,10 @@ import type { TheSecretWord, WordChallenge } from "@/features/game/domain/models
 // constants
 import { INITIAL_WORD_CHALLENGE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
 
+// Shared empty dictionary reused for the no-guesses-yet case, so the per-keypress
+// `isValidWord` guard doesn't allocate a fresh HashSet on every keystroke
+const EMPTY_DICTIONARY = HashSet.empty<string>();
+
 export const wordChallengeMachine = setup({
   types: {} as {
     events:
@@ -28,10 +30,21 @@ export const wordChallengeMachine = setup({
     context: WordChallenge;
   },
   guards: {
-    isValidWord: ({ context }) => canSubmitGuess(context.currentGuessWord, context.currentTurn, context.wordleGuesses, Option.getOrThrow(context.dictionary)),
+    isValidWord: ({ context }) =>
+      canSubmitGuess(
+        context.currentGuessWord,
+        context.currentTurn,
+        context.wordleGuesses,
+        Option.getOrElse(context.dictionary, () => EMPTY_DICTIONARY)
+      ),
 
     // Do we have a winner? When the player correctly guesses the secret word, we have a winner
-    isGameWon: ({ context }) => Option.getOrThrow(context.theSecretWord) === Option.getOrElse(Array.last(context.wordleGuesses), () => "" as const),
+    // Only true when both the secret word and the last guess are present and equal
+    isGameWon: ({ context }) =>
+      Option.match(Option.all([context.theSecretWord, Array.last(context.wordleGuesses)]), {
+        onNone: () => false,
+        onSome: ([secret, last]) => secret === last,
+      }),
 
     // Do we have a loser? When the player runs out of turns, we have a loser
     isGameLost: ({ context }) => context.currentTurn > MAX_TURNS,
@@ -81,7 +94,7 @@ export const wordChallengeMachine = setup({
       return {
         ...context,
         // Letters can no longer be appended once the word has reached full length
-        currentGuessWord: String.length(context.currentGuessWord) < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
+        currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
 
         // Lazily assign startTime on the very first letter typed
         startTime: Option.orElse(context.startTime, () => Option.some(DateTime.nowUnsafe())),
@@ -100,7 +113,10 @@ export const wordChallengeMachine = setup({
         currentGuessWord: "",
         wordleGuesses,
         currentTurn: context.currentTurn + 1,
-        greyLetters: computeGreyLetters(Option.getOrThrow(context.theSecretWord), wordleGuesses),
+        greyLetters: Option.match(context.theSecretWord, {
+          onNone: () => context.greyLetters,
+          onSome: (theSecretWord) => computeGreyLetters(theSecretWord, wordleGuesses),
+        }),
       } as const satisfies WordChallenge;
     }),
 
@@ -112,8 +128,9 @@ export const wordChallengeMachine = setup({
           wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.nowUnsafe())),
         }) as const satisfies WordChallenge
     ),
+
     // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
-    trackInvalidGuessSubmitted: () => runClientCommand(trackInvalidGuessSubmitted),
+    trackInvalidGuessSubmitted: () => runClientCommand(trackInvalidGuessSubmitted()),
 
     // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
     trackValidGuessSubmitted: ({ context }) => runClientCommand(trackValidGuessSubmitted(context)),
@@ -122,7 +139,7 @@ export const wordChallengeMachine = setup({
     trackWordWon: ({ context }) =>
       runClientCommand(
         Effect.gen(function* () {
-          const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+          const { context: runSessionMachineContext } = yield* Atom.get(runSessionMachineAtom);
           yield* trackWordWon(runSessionMachineContext, context);
         })
       ),
@@ -139,7 +156,7 @@ export const wordChallengeMachine = setup({
     trackWordLost: ({ context }) =>
       runClientCommand(
         Effect.gen(function* () {
-          const runSessionMachineContext = (yield* Atom.get(runSessionMachineAtom)).context;
+          const { context: runSessionMachineContext } = yield* Atom.get(runSessionMachineAtom);
           yield* trackWordLost(runSessionMachineContext, context);
         })
       ),

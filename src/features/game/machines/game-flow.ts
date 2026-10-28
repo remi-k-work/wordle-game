@@ -28,55 +28,56 @@ export const gameFlowMachine = setup({
   actions: {
     startRun: () =>
       runClientCommand(
-        Effect.gen(function* () {
-          yield* Atom.set(modalMachineAtom, { type: "closed" });
-          yield* Atom.set(runSessionMachineAtom, { type: "startedNewRun" });
-          yield* Atom.set(gameDataMachineAtom, { type: "nextWordRequested" });
-        })
+        Effect.all([
+          Atom.set(modalMachineAtom, { type: "closed" }),
+          Atom.set(runSessionMachineAtom, { type: "startedNewRun" }),
+          Atom.set(gameDataMachineAtom, { type: "nextWordRequested" }),
+        ])
       ),
     requestNextWord: () =>
-      runClientCommand(
-        Effect.gen(function* () {
-          yield* Atom.set(modalMachineAtom, { type: "closed" });
-          yield* Atom.set(gameDataMachineAtom, { type: "nextWordRequested" });
-        })
-      ),
+      runClientCommand(Effect.all([Atom.set(modalMachineAtom, { type: "closed" }), Atom.set(gameDataMachineAtom, { type: "nextWordRequested" })])),
     forfeitRun: ({ event }) =>
       runClientCommand(
         Effect.gen(function* () {
           assertEvent(event, "run.forfeitConfirmed");
-          yield* Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge });
-          yield* Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
-          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
+          yield* Effect.all([
+            Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge }),
+            Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" }),
+            Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
+            Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
+          ]);
         })
       ),
     bankWonWord: ({ event }) =>
       runClientCommand(
         Effect.gen(function* () {
           assertEvent(event, "word.won");
-          yield* Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
-          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
+          yield* Effect.all([
+            Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore }),
+            Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
+            Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
+          ]);
         })
       ),
     finishLostRun: () =>
       runClientCommand(
-        Effect.gen(function* () {
-          yield* Atom.set(runSessionMachineAtom, { type: "wordLost" });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" });
-          yield* Atom.set(modalMachineAtom, { type: "opened", modalType: "status" });
-        })
+        Effect.all([
+          Atom.set(runSessionMachineAtom, { type: "wordLost" }),
+          Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
+          Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
+        ])
       ),
     changeLanguage: ({ event }) =>
       runClientCommand(
         Effect.gen(function* () {
           assertEvent(event, "language.changed");
-          yield* Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" });
-          yield* Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" });
-          yield* Atom.set(wordMetaMachineAtom, { type: "resetRequested" });
-          yield* Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: event.solutionsLanguage });
+          yield* Effect.all([
+            Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" }),
+            Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" }),
+            Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" }),
+            Atom.set(wordMetaMachineAtom, { type: "resetRequested" }),
+            Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: event.solutionsLanguage }),
+          ]);
         })
       ),
   },

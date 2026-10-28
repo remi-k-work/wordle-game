@@ -60,7 +60,7 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
 
         return { audioData, generationId } as const;
       },
-      Effect.mapError((cause) => (isOpenRouterError(cause) ? cause : new OpenRouterError({ cause })))
+      Effect.mapError((error) => (isOpenRouterError(error) ? error : new OpenRouterError({ cause: error })))
     );
 
     return { generateSpeech } as const;

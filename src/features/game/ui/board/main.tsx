@@ -2,7 +2,6 @@
 import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentTurnAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksWordleGridAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
-import { useGameKeyboardInput } from "@/features/game/hooks/use-game-keyboard-input";
 
 // components
 import { CurrentGuess } from "./current-guess";
@@ -12,8 +11,6 @@ import { GuessRow, GuessRowSkeleton } from "./guess-row";
 const MAIN_SKELETON_ROWS = Array.from({ length: 6 }, (_, index) => <GuessRowSkeleton key={index} />);
 
 export function Main() {
-  useGameKeyboardInput();
-
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const baseWordleGrid = useAtomValue(wordChallengeWordleGridAtom);
   const wordleGrid = useAtomValue(overdriveHacksWordleGridAtom);

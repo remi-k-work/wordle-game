@@ -1,5 +1,3 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
@@ -105,8 +103,10 @@ const fetchOverrideAudioActor = effectActor(({ theOverride }: FetchOverrideAudio
     const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
     const { fetchOverrideAudio } = yield* RpcOverdriveHacksClient;
-    if (Option.isNone(theOverride)) return Option.none();
-    return yield* fetchOverrideAudio({ input: theOverride.value, solutionsLanguage });
+    return yield* Option.match(theOverride, {
+      onNone: () => Effect.succeedNone,
+      onSome: (override) => fetchOverrideAudio({ input: override, solutionsLanguage }),
+    });
   })
 );
 
@@ -135,29 +135,29 @@ export const overdriveHacksMachine = setup({
     },
   },
   actions: {
-    // @ts-expect-error XState inference breaks due to circular module dependency
+    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
     applyEmpHack: assign(
-      ({ context }, params: { empNukedLetters: OverdriveHacks["empNukedLetters"] }) =>
+      ({ context }, params: { readonly empNukedLetters: OverdriveHacks["empNukedLetters"] }) =>
         ({ ...context, empNukedLetters: [...context.empNukedLetters, ...params.empNukedLetters] }) as const satisfies OverdriveHacks
     ),
 
-    // @ts-expect-error XState inference breaks due to circular module dependency
+    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
     applySonarHack: assign(
-      ({ context }, params: { sonarReveals: OverdriveHacks["sonarReveals"] }) =>
+      ({ context }, params: { readonly sonarReveals: OverdriveHacks["sonarReveals"] }) =>
         ({ ...context, sonarReveals: [...context.sonarReveals, ...params.sonarReveals] }) as const satisfies OverdriveHacks
     ),
 
-    // @ts-expect-error XState inference breaks due to circular module dependency
+    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
     applyOverrideHack: assign(
-      ({ context }, params: { theOverride: OverdriveHacks["theOverride"] }) =>
+      ({ context }, params: { readonly theOverride: OverdriveHacks["theOverride"] }) =>
         ({ ...context, theOverride: params.theOverride }) as const satisfies OverdriveHacks
     ),
 
     onOverrideHackApplied: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
 
-    // @ts-expect-error XState inference breaks due to circular module dependency
+    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
     saveOverrideAudio: assign(
-      ({ context }, params: { theOverrideAudio: OverdriveHacks["theOverrideAudio"] }) =>
+      ({ context }, params: { readonly theOverrideAudio: OverdriveHacks["theOverrideAudio"] }) =>
         ({ ...context, theOverrideAudio: params.theOverrideAudio }) as const satisfies OverdriveHacks
     ),
 

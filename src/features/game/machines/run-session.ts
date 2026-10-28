@@ -32,8 +32,8 @@ export const runSessionMachine = setup({
   actions: {
     // Start a new arcade run, wiping previous run stats but preserving historical "best" stats
     // NOTE: `assign` is synchronous, so `Clock`/`DateTime.now` (Effects) and the
-    // `Crypto` service are unavailable here — `crypto.randomUUID()`/`Date.now()`
-    // are the correct tools. Effect's `Random` has no UUID API regardless.
+    // `Crypto` service are unavailable here — `crypto.randomUUID()`/`DateTime.nowUnsafe()`
+    // are the correct tools; Effect's `Random` has no UUID API regardless
     startNewRun: assign(
       ({ context }) =>
         ({
@@ -88,15 +88,12 @@ export const runSessionMachine = setup({
       ),
 
     // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-    trackStartedNewRun: () => runClientCommand(trackStartedNewRun),
+    trackStartedNewRun: () => runClientCommand(trackStartedNewRun()),
 
     // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
+    // The telemetry action guards the no-active-run case itself, so no outer check is needed here
     trackForfeitedRun: ({ context, event }) => {
       assertEvent(event, "forfeitedRun");
-
-      // Only track if there is an active run to forfeit
-      if (Option.isNone(context.runId)) return;
-
       void runClientCommand(trackForfeitedRun(context, event.wordChallenge));
     },
 

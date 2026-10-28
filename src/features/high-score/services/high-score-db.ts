@@ -10,7 +10,7 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
 
-    const top10HighScores = SqlSchema.findAll({
+    const top10HighScoresQuery = SqlSchema.findAll({
       Request: SolutionsLanguage,
       Result: HighScore,
       execute: (solutionsLanguage) =>
@@ -24,14 +24,14 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
     });
 
     return {
-      top10HighScores: (solutionsLanguage: SolutionsLanguage) => dieOnDbFailure(top10HighScores(solutionsLanguage)),
+      top10HighScores: (solutionsLanguage: SolutionsLanguage) => dieOnDbFailure(top10HighScoresQuery(solutionsLanguage)),
       addHighScore: (request: AddHighScore) =>
         sql
           .withTransaction(
             Effect.gen(function* () {
               // Serialize qualification and insertion so two simultaneous submissions cannot both claim the same final slot.
               yield* sql`LOCK TABLE high_score IN SHARE ROW EXCLUSIVE MODE`;
-              const currentTop10 = yield* top10HighScores(request.solutionsLang);
+              const currentTop10 = yield* top10HighScoresQuery(request.solutionsLang);
               const qualifies = currentTop10.length < 10 || beatsTop10Tail(currentTop10, request.score, request.streak);
               if (!qualifies) return Option.none();
 

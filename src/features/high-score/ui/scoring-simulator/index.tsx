@@ -122,45 +122,100 @@ function ScoreFormulaFooter({ basePointsPerTurn, speedMultiplier, locale }: Scor
   );
 }
 
-// Interactive mode: owns its own turn/elapsed state, renders sliders + formula footer
-function InteractiveScoringSimulator() {
-  const [interactiveTurn, setInteractiveTurn] = useState(1);
-  const [interactiveElapsed, setInteractiveElapsed] = useState(0);
-
-  const currentTurn = interactiveTurn;
-  const elapsedSeconds = interactiveElapsed;
-
-  const potentialScore = calculatePotentialScore(currentTurn, elapsedSeconds);
-  const basePointsPerTurn = getBasePointsPerTurn(currentTurn);
-  const speedMultiplier = getSpeedMultiplier(elapsedSeconds);
-
-  const gt = useGT();
-  const locale = useLocale();
-
+// Shared shell for both scoring simulator modes: the article wrapper, score header,
+// and the two metric sections; interactive mode passes change handlers and renders
+// the formula footer as children; report mode is read-only and omits both
+function ScoringSimulatorBody({
+  isReportingScore,
+  potentialScore,
+  speedMultiplier,
+  locale,
+  currentTurn,
+  basePointsPerTurn,
+  elapsedSeconds,
+  ariaLabelTurn,
+  ariaLabelTime,
+  onTurnChange,
+  onElapsedChange,
+  children,
+}: {
+  isReportingScore: boolean;
+  potentialScore: number;
+  speedMultiplier: number;
+  locale: string;
+  currentTurn: number;
+  basePointsPerTurn: number;
+  elapsedSeconds: number;
+  ariaLabelTurn: string;
+  ariaLabelTime: string;
+  onTurnChange?: (turn: number) => void;
+  onElapsedChange?: (seconds: number) => void;
+  children?: React.ReactNode;
+}) {
   return (
     <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
-      <ScoreHeader isReportingScore={false} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
+      <ScoreHeader isReportingScore={isReportingScore} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
 
       <div className="grid gap-3 sm:grid-cols-2">
         <TurnMetricSection
           currentTurn={currentTurn}
           basePointsPerTurn={basePointsPerTurn}
-          isReportingScore={false}
+          isReportingScore={isReportingScore}
           locale={locale}
-          ariaLabel={gt("Turn Guessed")}
-          onTurnChange={setInteractiveTurn}
+          ariaLabel={ariaLabelTurn}
+          onTurnChange={onTurnChange}
         />
         <TimeMetricSection
           elapsedSeconds={elapsedSeconds}
           speedMultiplier={speedMultiplier}
-          isReportingScore={false}
-          ariaLabel={gt("Time Elapsed")}
-          onElapsedChange={setInteractiveElapsed}
+          isReportingScore={isReportingScore}
+          ariaLabel={ariaLabelTime}
+          onElapsedChange={onElapsedChange}
         />
       </div>
 
-      <ScoreFormulaFooter basePointsPerTurn={basePointsPerTurn} speedMultiplier={speedMultiplier} locale={locale} />
+      {children}
     </article>
+  );
+}
+
+// Derives the score readings (plus `gt`/`locale`) shared by both simulator modes
+// Keeping this in one hook means the turn/time → score derivation can't drift
+// between the interactive and read-only report modes
+function useScoreReadings(guessedTurn: number, timeElapsed: number) {
+  const gt = useGT();
+  const locale = useLocale();
+
+  const potentialScore = calculatePotentialScore(guessedTurn, timeElapsed);
+  const basePointsPerTurn = getBasePointsPerTurn(guessedTurn);
+  const speedMultiplier = getSpeedMultiplier(timeElapsed);
+
+  return { potentialScore, basePointsPerTurn, speedMultiplier, gt, locale };
+}
+
+// Interactive mode: owns its own turn/elapsed state, renders sliders + formula footer
+function InteractiveScoringSimulator() {
+  const [interactiveTurn, setInteractiveTurn] = useState(1);
+  const [interactiveElapsed, setInteractiveElapsed] = useState(0);
+
+  const { potentialScore, basePointsPerTurn, speedMultiplier, gt, locale } = useScoreReadings(interactiveTurn, interactiveElapsed);
+
+  return (
+    <ScoringSimulatorBody
+      isReportingScore={false}
+      potentialScore={potentialScore}
+      speedMultiplier={speedMultiplier}
+      locale={locale}
+      currentTurn={interactiveTurn}
+      basePointsPerTurn={basePointsPerTurn}
+      elapsedSeconds={interactiveElapsed}
+      ariaLabelTurn={gt("Turn Guessed")}
+      ariaLabelTime={gt("Time Elapsed")}
+      onTurnChange={setInteractiveTurn}
+      onElapsedChange={setInteractiveElapsed}
+    >
+      <ScoreFormulaFooter basePointsPerTurn={basePointsPerTurn} speedMultiplier={speedMultiplier} locale={locale} />
+    </ScoringSimulatorBody>
   );
 }
 
@@ -168,29 +223,20 @@ function InteractiveScoringSimulator() {
 // The metric sections render (sliders disabled) so the turn, time, and speed multiplier stay visible
 // in read-only score reports such as the win modal
 function FinalScoreReport({ guessedTurn, timeElapsed }: { guessedTurn: number; timeElapsed: number }) {
-  const potentialScore = calculatePotentialScore(guessedTurn, timeElapsed);
-  const basePointsPerTurn = getBasePointsPerTurn(guessedTurn);
-  const speedMultiplier = getSpeedMultiplier(timeElapsed);
-
-  const gt = useGT();
-  const locale = useLocale();
+  const { potentialScore, basePointsPerTurn, speedMultiplier, gt, locale } = useScoreReadings(guessedTurn, timeElapsed);
 
   return (
-    <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
-      <ScoreHeader isReportingScore={true} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <TurnMetricSection
-          currentTurn={guessedTurn}
-          basePointsPerTurn={basePointsPerTurn}
-          isReportingScore={true}
-          locale={locale}
-          ariaLabel={gt("Turn Guessed")}
-        />
-
-        <TimeMetricSection elapsedSeconds={timeElapsed} speedMultiplier={speedMultiplier} isReportingScore={true} ariaLabel={gt("Time Elapsed")} />
-      </div>
-    </article>
+    <ScoringSimulatorBody
+      isReportingScore={true}
+      potentialScore={potentialScore}
+      speedMultiplier={speedMultiplier}
+      locale={locale}
+      currentTurn={guessedTurn}
+      basePointsPerTurn={basePointsPerTurn}
+      elapsedSeconds={timeElapsed}
+      ariaLabelTurn={gt("Turn Guessed")}
+      ariaLabelTime={gt("Time Elapsed")}
+    />
   );
 }
 

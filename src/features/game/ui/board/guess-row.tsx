@@ -26,12 +26,17 @@ import { FLIP_STAGGER_CLASSES } from "./constants";
 export const GuessRow = memo(function GuessRow({ tiles, baseTiles, isFlipping }: GuessRowProps) {
   return (
     <div className={cn("grid grid-cols-5 grid-rows-1 gap-1", isFlipping && FLIP_STAGGER_CLASSES)}>
-      {tiles.map((tile, tileIndex) => (
+      {tiles.map((tile, tileIndex) => {
+        // A tile is a sonar reveal when the base grid has no letter at this
+        // position but the (hacked) grid does — i.e. the reveal came from sonar,
+        // not from the player's own typing
+        const isSonarReveal = baseTiles[tileIndex].tileKey === "" && tile.tileKey !== "";
+
         // Stable per-position keys: useSonarPing already starts/stops the glow
         // from the `isSonarReveal` prop (effect + cleanup), so keying on it too
         // only remounted the tile DOM on every reveal flip
-        <GuessTile key={tileIndex} tile={tile} isSonarReveal={baseTiles[tileIndex].tileKey === "" && tile.tileKey !== ""} />
-      ))}
+        return <GuessTile key={tileIndex} tile={tile} isSonarReveal={isSonarReveal} />;
+      })}
     </div>
   );
 });

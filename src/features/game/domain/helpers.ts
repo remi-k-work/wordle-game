@@ -10,7 +10,7 @@ import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_
 // Pick the color with the higher priority; `a` comes from HashMap.get (already
 // an Option) so accepting Option directly avoids an intermediate getOrUndefined
 export const pickStrongerColor = (a: Option.Option<Color>, b: Color): Color =>
-  Option.match(a, { onNone: () => b, onSome: (a) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a) });
+  Option.map(a, (a) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[a] ? b : a)).pipe(Option.getOrElse(() => b));
 
 // Establish the speed multiplier based on the time it took
 export const getSpeedMultiplier = (elapsedSeconds: number) =>
@@ -24,10 +24,7 @@ export const getBasePointsPerTurn = (currentTurn: WordChallenge["currentTurn"]) 
 
 // Calculate elapsed time in seconds, treating an unstarted timer as zero seconds
 export const getElapsedSeconds = (startTime: WordChallenge["startTime"], endTime: DateTime.Utc) =>
-  Option.match(startTime, {
-    onNone: () => 0,
-    onSome: (startTime) => DateTime.distance(startTime, endTime).pipe(Duration.toSeconds),
-  });
+  Option.map(startTime, (startTime) => DateTime.distance(startTime, endTime).pipe(Duration.toSeconds)).pipe(Option.getOrElse(() => 0));
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
 export const potentialScoreAsPercentage = (potentialScore: WordScore["wordScore"]) =>

@@ -24,6 +24,13 @@ interface ContentProps {
 // constants
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 
+// The speak button label depends only on the mode; defined once here and used by
+// both `Content` and `ContentSkeleton` so the skeleton stays in sync if the
+// label ever changes — one definition, two consumers
+function speakLabel(mode: ContentProps["mode"]) {
+  return mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>;
+}
+
 export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const theRiddle = useAtomValue(wordMetaTheRiddleAtom);
   const theRiddleAudio = useAtomValue(wordMetaTheRiddleAudioAtom);
@@ -35,7 +42,7 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
   const canSpeakRegular = Option.isSome(theRiddle) && !isAwaiting && !isLoading;
   const canSpeakNatural = canSpeakRegular && Option.isSome(theRiddleAudio) && !isFetching;
 
-  const speakLabel = mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>;
+  const speakLabelEl = speakLabel(mode);
 
   return (
     <>
@@ -45,11 +52,11 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
         {/* Explicit ternary, never `&&`: a numeric condition would render "0" (rendering-conditional-render) */}
         {isAwaiting ? <GameFlowButton keepText onClicked={onGameFlowClicked} /> : null}
         <SpeakButtonRegular sanitizedText={theRiddle} disabled={!canSpeakRegular}>
-          {speakLabel}
+          {speakLabelEl}
         </SpeakButtonRegular>
 
         <SpeakButtonNatural audioBuffer={theRiddleAudio} disabled={!canSpeakNatural}>
-          {speakLabel}
+          {speakLabelEl}
         </SpeakButtonNatural>
       </section>
     </>
@@ -57,17 +64,15 @@ export function Content({ mode, onGameFlowClicked }: ContentProps) {
 }
 
 export function ContentSkeleton({ mode }: ContentProps) {
-  // Mirrors the label computed in `Content` so the skeleton stays in sync
-  // if the live label ever changes — one definition, two consumers
-  const speakLabel = mode === "voiceTest" ? <T>Test Voice</T> : <T>Speak Riddle</T>;
+  const speakLabelEl = speakLabel(mode);
 
   return (
     <>
       <RiddleTextSkeleton />
 
       <section className={DIALOG_FOOTER_CLASSES}>
-        <SpeakButtonRegularSkeleton>{speakLabel}</SpeakButtonRegularSkeleton>
-        <SpeakButtonNaturalSkeleton>{speakLabel}</SpeakButtonNaturalSkeleton>
+        <SpeakButtonRegularSkeleton>{speakLabelEl}</SpeakButtonRegularSkeleton>
+        <SpeakButtonNaturalSkeleton>{speakLabelEl}</SpeakButtonNaturalSkeleton>
       </section>
     </>
   );

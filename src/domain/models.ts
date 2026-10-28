@@ -13,12 +13,7 @@ export class BasePage extends Schema.Class<BasePage, { readonly brand: unique sy
 }) {}
 
 export class SpeechRequest extends Schema.Class<SpeechRequest, { readonly brand: unique symbol }>("SpeechRequest")({
-  model: Schema.optionalKey(
-    Schema.Trim.pipe(
-      Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")),
-      Schema.withConstructorDefault(Effect.succeed("fish-audio/s2.1-pro-free:free"))
-    )
-  ),
+  model: Schema.optionalKey(Schema.Trim.pipe(Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")))),
   input: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())),
   voice: Schema.optionalKey(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
   response_format: Schema.optionalKey(Schema.Literal("mp3").pipe(Schema.withDecodingDefaultType(Effect.succeed("mp3")))),

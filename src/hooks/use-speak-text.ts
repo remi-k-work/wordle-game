@@ -3,7 +3,6 @@ import { useCallback } from "react";
 
 // services, features, and other libraries
 import { Array, Option } from "effect";
-import { AtomRegistry } from "effect/reactivity";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 import {
   gameSettingsSolutionsLanguageAtom,
@@ -33,7 +32,7 @@ export function useSpeakText() {
     // from the shared registry here instead of being subscribed to in render —
     // settings changes no longer re-render every mounted speak button
     // (rerender-defer-reads)
-    const registry: AtomRegistry.AtomRegistry = sharedAtomRegistry;
+    const registry = sharedAtomRegistry;
     const solutionsLanguage = registry.get(gameSettingsSolutionsLanguageAtom);
     const voiceVoice = registry.get(gameSettingsVoiceAtom);
     const voiceVolume = registry.get(gameSettingsVoiceVolumeAtom);

@@ -32,7 +32,10 @@ export const makeFallbackPlan2 = ExecutionPlan.make(
 
 // The OpenRouter client layer, backed by the OpenAI-compatible endpoint
 const OpenRouterClientLayer = Layer.unwrap(
-  Config.Redacted("OPENROUTER_API_KEY").pipe(Effect.map((apiKey) => Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }))))
+  Effect.gen(function* () {
+    const apiKey = yield* Config.Redacted("OPENROUTER_API_KEY");
+    return Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }));
+  })
 ).pipe(Layer.provide(FetchHttpClient.layer));
 
 // Cloudflare Workers AI client, backed by its OpenAI-compatible endpoint; the compat client appends /chat/completions to this base URL

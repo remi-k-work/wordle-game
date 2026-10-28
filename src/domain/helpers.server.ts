@@ -1,8 +1,9 @@
 // services, features, and other libraries
-import { Config, Effect, Layer, Option, Scheduler } from "effect";
+import { Config, Effect, Layer, Option } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
+import { SyncScheduler } from "@/lib/sync-scheduler";
 import { isWorkerd } from "@/lib/is-workerd";
 
 // types
@@ -15,7 +16,8 @@ import type { Rpc } from "effect/rpc";
 // created". The sync scheduler dispatches via microtasks, which are not
 // request-owned. (See Scheduler.MixedScheduler and the Workers recipe on
 // HttpRouter.toWebHandler; the per-request runtime below is the primary fix.)
-const SyncScheduler = Layer.succeed(Scheduler.Scheduler, new Scheduler.MixedScheduler("sync"));
+// SyncScheduler is defined once in @/lib/sync-scheduler and shared with
+// lib/runtime.server.ts so both stay in sync
 
 // Builds the web handler for an RPC group's HTTP route. disableFatalDefects serializes defects
 // as an Exit instead of closing the connection; disableTracing is deliberate (no tracer configured)
@@ -72,10 +74,11 @@ export const routeHandler =
 
 // Reads the AI switch from Config, defaulting to "on". AI-backed RPCs call this to skip expensive
 // generation (avoiding rate limits and token usage) when the switch is off
-export const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Config.withDefault("on"));
+const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Config.withDefault("on"));
 
 // Runs the AI-backed generation unless the AI switch is off, in which case the
 // cheap fallback is served instead (avoids rate limits and token usage)
+// Combinator-based (no Effect.gen wrapper) per Effect conventions for reusable functions
 export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallback: Effect.Effect<A, E, R>) =>
   Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
 

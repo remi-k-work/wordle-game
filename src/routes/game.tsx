@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useAtomValue, useAtomMount } from "@effect/atom-react";
 import { playerSessionAtom } from "@/features/player/state/player";
 import { gameDataIsLoadingOrFailedAtom } from "@/features/game/state/game-data";
+import { useGameKeyboardInput } from "@/features/game/hooks/use-game-keyboard-input";
 
 // components
 import { Header, HeaderSkeleton } from "@/features/game/ui/board/header";
@@ -15,6 +16,12 @@ export const Route = createFileRoute("/game")({ component: Game });
 
 function Game() {
   useAtomMount(playerSessionAtom);
+
+  // The game board owns physical keyboard input for as long as it is on screen
+  // The listener lives at the route shell (not inside `Main`) so `Main` stays
+  // purely presentational — it only renders the board grid
+  useGameKeyboardInput();
+
   const isLoadingOrFailed = useAtomValue(gameDataIsLoadingOrFailedAtom);
 
   // The shell is identical for loading and loaded states; only the board

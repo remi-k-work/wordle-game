@@ -40,9 +40,7 @@ export const computeKeypadState = (theSecretWord: TheSecretWord, wordleGuesses: 
   pipe(
     wordleGuesses,
     Array.flatMap((guess) => formatGuess(theSecretWord, guess)),
-    Array.reduce(HashMap.empty<string, Color>(), (acc: HashMap.HashMap<string, Color>, { tileKey, color }: { tileKey: string; color: Color }) =>
-      HashMap.set(acc, tileKey, pickStrongerColor(HashMap.get(acc, tileKey), color))
-    )
+    Array.reduce(HashMap.empty<string, Color>(), (acc, { tileKey, color }) => HashMap.set(acc, tileKey, pickStrongerColor(HashMap.get(acc, tileKey), color)))
   );
 
 // Letters whose strongest color across all guesses is "grey" — the keypad keys

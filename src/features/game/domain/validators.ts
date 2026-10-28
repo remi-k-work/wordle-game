@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { Array, HashSet, Option, String } from "effect";
+import { Array, HashSet } from "effect";
 
 // types
-import type { WordChallenge } from "./models";
+import type { TheSecretWord, WordChallenge } from "./models";
 
 // constants
 import { MAX_TURNS, WORD_LENGTH } from "./constants";
@@ -23,10 +23,10 @@ export const canSubmitGuess = (
   currentGuessWord: WordChallenge["currentGuessWord"],
   currentTurn: WordChallenge["currentTurn"],
   wordleGuesses: WordChallenge["wordleGuesses"],
-  dictionary: Option.Option.Value<WordChallenge["dictionary"]>
+  dictionary: HashSet.HashSet<TheSecretWord>
 ) =>
   // Within the turn limit, the right length, not a duplicate, and in the dictionary
   currentTurn <= MAX_TURNS &&
-  String.length(currentGuessWord) === WORD_LENGTH &&
+  currentGuessWord.length === WORD_LENGTH &&
   !Array.contains(wordleGuesses, currentGuessWord) &&
   HashSet.has(dictionary, currentGuessWord);

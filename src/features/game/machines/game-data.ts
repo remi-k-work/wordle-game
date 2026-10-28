@@ -1,7 +1,5 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
-import { Effect, Option, Random } from "effect";
+import { Array, Effect, Option, Random } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { effectActor } from "@/lib/effect-actor";
@@ -20,7 +18,7 @@ interface OnLoadingInput {
 }
 
 interface SelectSecretWordInput {
-  solutions: Option.Option.Value<GameData["solutions"]>;
+  solutions: Option.Option<ReadonlyArray<TheSecretWord>>;
 }
 
 // constants
@@ -41,7 +39,18 @@ const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: On
   })
 );
 
-const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) => Random.choice(solutions));
+const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) =>
+  Effect.gen(function* () {
+    // `Effect.fromOption` turns a missing or empty solutions list into a
+    // controlled Effect failure (NoSuchElementError) that the machine handles
+    // by transitioning to `failure` instead of crashing; `Random.shuffle` does
+    // not throw on empty arrays; an empty list reaches `Array.head` which
+    // returns `None`, and `Effect.fromOption` converts that to the failure
+    const solutionsList = yield* Effect.fromOption(solutions);
+    const shuffled = yield* Random.shuffle(solutionsList);
+    return yield* Effect.fromOption(Array.head(shuffled));
+  })
+);
 
 export const gameDataMachine = setup({
   types: {} as {
@@ -102,7 +111,7 @@ export const gameDataMachine = setup({
     selectingWord: {
       invoke: {
         src: "selectSecretWordActor",
-        input: ({ context }) => ({ solutions: Option.getOrThrow(context.solutions) }),
+        input: ({ context }) => ({ solutions: context.solutions }),
         onDone: { target: "ready", actions: { type: "onSecretWordSelected", params: ({ event }) => ({ theSecretWord: event.output }) } },
         onError: "failure",
       },

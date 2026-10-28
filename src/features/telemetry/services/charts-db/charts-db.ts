@@ -1,7 +1,15 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/sql";
-import { AnyChartArgs, ArcadeStreakDistributionData, GuessDistributionData, TimeToSolveDistributionData } from "./models";
+import {
+  AnyChartArgs,
+  AnyCounterArgs,
+  AnyAvgStatArgs,
+  ArcadeStreakDistributionData,
+  BestRunTrophyCardArgs,
+  GuessDistributionData,
+  TimeToSolveDistributionData,
+} from "./models";
 import { cumulativeToDistribution } from "./helpers";
 import { dieOnDbFailure } from "@/domain/db-policy";
 import { anyAvgStatQuery } from "./queries/any-avg-stat";
@@ -71,13 +79,35 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(dieOnDbFailure);
     });
 
-    const getOpeningGuessesFrequency = openingGuessesFrequencyQuery(sql);
-    const getFailedWordsFrequency = failedWordsFrequencyQuery(sql);
-    const getRunDeathReasonFrequency = runDeathReasonFrequencyQuery(sql);
-    const getAnyCounter = anyCounterQuery(sql);
-    const getAnyAvgStat = anyAvgStatQuery(sql);
-    const getHardestWordsLeaderboard = hardestWordsLeaderboardQuery(sql);
-    const getBestRunTrophyCard = bestRunTrophyCardQuery(sql);
+    // Simple passthroughs to query functions — no additional logic or tracing value at this layer,
+    // so untraced variants avoid creating redundant spans
+    const getOpeningGuessesFrequency = Effect.fnUntraced(function* (request: AnyChartArgs) {
+      return yield* openingGuessesFrequencyQuery(sql)(request);
+    });
+
+    const getFailedWordsFrequency = Effect.fnUntraced(function* (request: AnyChartArgs) {
+      return yield* failedWordsFrequencyQuery(sql)(request);
+    });
+
+    const getRunDeathReasonFrequency = Effect.fnUntraced(function* (request: AnyChartArgs) {
+      return yield* runDeathReasonFrequencyQuery(sql)(request);
+    });
+
+    const getAnyCounter = Effect.fnUntraced(function* (request: AnyCounterArgs) {
+      return yield* anyCounterQuery(sql)(request);
+    });
+
+    const getAnyAvgStat = Effect.fnUntraced(function* (request: AnyAvgStatArgs) {
+      return yield* anyAvgStatQuery(sql)(request);
+    });
+
+    const getHardestWordsLeaderboard = Effect.fnUntraced(function* (request: AnyChartArgs) {
+      return yield* hardestWordsLeaderboardQuery(sql)(request);
+    });
+
+    const getBestRunTrophyCard = Effect.fnUntraced(function* (request: BestRunTrophyCardArgs) {
+      return yield* bestRunTrophyCardQuery(sql)(request);
+    });
 
     return {
       getGuessDistribution,

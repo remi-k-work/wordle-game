@@ -13,9 +13,9 @@ interface GenerateSingleFieldOptions {
   readonly description: string;
 }
 
-// Surfaces a message from an unknown failure without assuming an Error shape
-const describeFailure = (cause: unknown) =>
-  Predicate.hasProperty(cause, "message") && Predicate.isString(cause.message) ? cause.message : String.String(cause);
+// Surfaces a message from an unknown failure without assuming an Error shape.
+const describeFailure = (error: unknown) =>
+  Predicate.hasProperty(error, "message") && Predicate.isString(error.message) ? error.message : String.String(error);
 
 // Raw single-field generation against whichever `LanguageModel` is in scope
 export const generateSingleField2 = Effect.fn("generateSingleField2")(

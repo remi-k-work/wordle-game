@@ -39,16 +39,16 @@ export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChall
 };
 
 export const speedMultiplierToCategoryMessage = (speedMultiplier: number) =>
-  Option.match(speedMultiplierRule(speedMultiplier), {
-    onNone: () => msg("Unknown"),
-    onSome: (rule) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[rule.category],
-  });
+  speedMultiplierRule(speedMultiplier).pipe(
+    Option.map((rule) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[rule.category]),
+    Option.getOrElse(() => msg("Unknown"))
+  );
 
 export const speedMultiplierToCategoryEmoji = (speedMultiplier: number) =>
-  Option.match(speedMultiplierRule(speedMultiplier), {
-    onNone: () => "?",
-    onSome: (rule) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[rule.category],
-  });
+  speedMultiplierRule(speedMultiplier).pipe(
+    Option.map((rule) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[rule.category]),
+    Option.getOrElse(() => "?")
+  );
 
 export const maxSecondsToSpeedMultiplier = (maxSeconds: number | null) =>
   Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.maxSeconds === maxSeconds).pipe(Option.map((rule) => rule.multiplier));
