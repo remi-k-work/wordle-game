@@ -12,8 +12,7 @@ export const wordMetaWordDefinitionAtom = wordMetaMachineAtom.pipe(Atom.map((sna
 export const wordMetaTheRiddleAudioAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddleAudio));
 export const wordMetaWordDefinitionAudioAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordDefinitionAudio));
 
-// Derived booleans: subscribe to these instead of the full snapshot when only
-// the machine state (not context) is needed
+// Derived booleans: subscribe to these instead of the full snapshot when only the machine state (not context) is needed
 export const wordMetaIsAwaitingAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("awaitingTheSecretWord")));
 export const wordMetaIsLoadingAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("loading")));
 export const wordMetaIsFetchingAudioAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("fetchingAudio")));

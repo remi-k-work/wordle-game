@@ -1,3 +1,6 @@
+// services, features, and other libraries
+import { cn } from "@/lib/utils";
+
 // components
 import { Tabs } from "@base-ui/react/tabs";
 
@@ -12,8 +15,12 @@ interface ChartTabProps {
 // constants
 // Fully static class string, hoisted so tab switches don't re-run it through
 // twMerge; shared by the tab and its skeleton
-const TAB_CLASS =
-  "flex items-center justify-center px-6 py-4 text-lg font-semibold tracking-widest text-text-2 uppercase break-keep whitespace-nowrap outline-none select-none hover:text-text-2 focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid data-active:text-primary";
+const TAB_CLASS = cn(
+  "flex items-center justify-center px-6 py-4 text-lg font-semibold tracking-widest break-keep whitespace-nowrap text-text-2 uppercase outline-none select-none",
+  "hover:text-text-2",
+  "focus-visible:outline-2 focus-visible:-outline-offset-1 focus-visible:outline-accent focus-visible:outline-solid",
+  "data-active:text-primary"
+);
 
 export function ChartTab({ value, children }: ChartTabProps) {
   return (

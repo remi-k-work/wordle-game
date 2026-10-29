@@ -12,7 +12,7 @@ import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 // types
 import type { Color } from "@/features/game/domain/models";
 
-export interface KeypadPoolEntry {
+interface KeypadPoolEntry {
   letter: string;
   color: Color;
 }

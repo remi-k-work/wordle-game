@@ -20,8 +20,7 @@ const runSessionAtom = Atom.kvs({
   defaultValue: () => INITIAL_RUN_SESSION,
 }).pipe(Atom.keepAlive);
 
-// The run session machine is now a living actor inside the effect atom, hydrated from (and
-// persisting back to) durable storage on every snapshot.
+// The run session machine is now a living actor inside the effect atom, hydrated from (and persisting back to) durable storage on every snapshot
 export const runSessionMachineAtom = createMachineAtom(runSessionMachine, {
   input: (get) => get.once(runSessionAtom),
   onSnapshot: (get, snapshot) => {

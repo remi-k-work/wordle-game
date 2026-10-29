@@ -12,14 +12,12 @@ interface StatCardProps {
 }
 
 // constants
-const VARIANT_STYLES = {
-  primary: "border-primary text-primary",
-  secondary: "border-secondary text-secondary",
-} as const;
+const VARIANT_STYLES = { primary: cn("border-primary text-primary"), secondary: cn("border-secondary text-secondary") } as const;
 
-// Fully static portion of the card chrome, hoisted so each card render only
-// merges the two-argument variant override
-const CARD_CLASS = "row-span-2 grid grid-rows-subgrid gap-3 rounded-xl border-2 bg-surface-1 p-3 text-center md:p-6 lg:p-9 w-3/4 max-w-lg justify-self-center";
+// Fully static portion of the card chrome, hoisted so each card render only merges the two-argument variant override
+const CARD_CLASS = cn(
+  "row-span-2 grid w-3/4 max-w-lg grid-rows-subgrid gap-3 justify-self-center rounded-xl border-2 bg-surface-1 p-3 text-center md:p-6 lg:p-9"
+);
 
 export function StatCard({ Tag = "section", variant, title, children }: StatCardProps) {
   return (
