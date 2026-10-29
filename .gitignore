@@ -2,6 +2,8 @@
 /_scratchpad
 .env
 src/seed/dictionary-pl.txt
+loop.ps1
+opencode.json
 
 # dependencies
 /node_modules
