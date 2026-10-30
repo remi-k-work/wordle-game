@@ -23,6 +23,13 @@ const normalizeMetricPayload = (snapshot: Metric.Metric.Snapshot) =>
 // fromJsonString combines JSON.parse + schema decoding (and JSON.stringify + encoding on the way back)
 const MetricPayloadFromJson = Schema.fromJsonString(Schema.Unknown);
 
+// Schema.decodeUnknownEffect / Schema.encodeEffect build a parser on every call,
+// so build them once at module scope instead of per telemetry event
+const decodeRunWordEvent = Schema.decodeUnknownEffect(AddRunWordEvent);
+const decodeArcadeRunSummary = Schema.decodeUnknownEffect(AddArcadeRunSummary);
+const decodeGlobalPulse = Schema.decodeUnknownEffect(AddGlobalPulse);
+const encodeMetricPayload = Schema.encodeEffect(MetricPayloadFromJson);
+
 // TelemetryWorkerLayer is a background service that consumes telemetry data from the Hub
 export const TelemetryWorkerLayer = Layer.effectDiscard(
   Effect.gen(function* () {
@@ -60,8 +67,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const processSpan = (name: string, attributesObject: Record<string, unknown>) =>
       pipe(
         Match.value(name),
-        Match.when("logWordWon", () => Schema.decodeUnknownEffect(AddRunWordEvent)(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
-        Match.when("logRunCompleted", () => Schema.decodeUnknownEffect(AddArcadeRunSummary)(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary))),
+        Match.when("logWordWon", () => decodeRunWordEvent(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
+        Match.when("logRunCompleted", () => decodeArcadeRunSummary(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary))),
         Match.orElse(() => Effect.void)
       );
 
@@ -72,23 +79,27 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
       // A snapshot that fails to decode is logged and skipped (Option.none)
       // so one malformed metric cannot kill the processor stream
       const globalPulseRecords = Array.getSomes(
-        yield* Effect.forEach(snapshots, (snapshot) =>
-          Effect.gen(function* () {
-            const { id: metricName, attributes } = snapshot;
-            return yield* Schema.decodeUnknownEffect(AddGlobalPulse)({
-              sessionId: attributes?.["sessionId"],
-              instanceId,
-              solutionsLanguage: attributes?.["solutionsLanguage"],
-              metricName,
-              // We need to stringify the metric payload in order for equals to work (for stream deduping)
-              metricPayload: yield* Schema.encodeEffect(MetricPayloadFromJson)(normalizeMetricPayload(snapshot)),
-            }).pipe(Effect.tapError(Effect.logError), Effect.option);
-          })
-        )
+        yield* Effect.forEach(snapshots, (snapshot) => {
+          const { id: metricName, attributes } = snapshot;
+          return encodeMetricPayload(normalizeMetricPayload(snapshot)).pipe(
+            // We need to stringify the metric payload in order for equals to work (for stream deduping)
+            Effect.flatMap((metricPayload) =>
+              decodeGlobalPulse({
+                sessionId: attributes?.["sessionId"],
+                instanceId,
+                solutionsLanguage: attributes?.["solutionsLanguage"],
+                metricName,
+                metricPayload,
+              })
+            ),
+            Effect.tapError(Effect.logError),
+            Effect.option
+          );
+        })
       );
 
-      if (globalPulseRecords.length > 0) {
-        yield* addGlobalPulse([...globalPulseRecords]).pipe(
+      if (Array.isReadonlyArrayNonEmpty(globalPulseRecords)) {
+        yield* addGlobalPulse(globalPulseRecords).pipe(
           // Same non-critical policy: log the failure and let the next pulse retry
           Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Failed to insert global pulses:", cause))
         );

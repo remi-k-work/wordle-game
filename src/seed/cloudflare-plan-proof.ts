@@ -43,21 +43,20 @@ const TEST_CASES = [
 // Mirrors the single-field generation flow so the proof exercises the same
 // prompt/schema construction as production, while also exposing the model that
 // actually handled the request
-const generateRiddle = (theSecretWord: string, solutionsLanguage: SolutionsLanguage) =>
-  Effect.gen(function* () {
-    const languageModel = yield* LanguageModel.LanguageModel;
-    const modelName = yield* Model.ModelName;
-    const options = riddleGenerationOptions(theSecretWord, solutionsLanguage);
-    const schema = Schema.Struct({ riddle: Schema.Trim.pipe(Schema.annotate({ description: options.description })) });
-    const prompt = Prompt.fromMessages([
-      Prompt.systemMessage({ content: options.instructions }),
-      Prompt.userMessage({ content: [Prompt.textPart({ text: options.prompt })] }),
-    ]);
+const generateRiddle = Effect.fn("generateRiddle")(function* (theSecretWord: string, solutionsLanguage: SolutionsLanguage) {
+  const languageModel = yield* LanguageModel.LanguageModel;
+  const modelName = yield* Model.ModelName;
+  const options = riddleGenerationOptions(theSecretWord, solutionsLanguage);
+  const schema = Schema.Struct({ riddle: Schema.Trim.pipe(Schema.annotate({ description: options.description })) });
+  const prompt = Prompt.fromMessages([
+    Prompt.systemMessage({ content: options.instructions }),
+    Prompt.userMessage({ content: [Prompt.textPart({ text: options.prompt })] }),
+  ]);
 
-    const { value } = yield* languageModel.generateObject({ prompt, schema });
+  const { value } = yield* languageModel.generateObject({ prompt, schema });
 
-    return { modelName, riddle: value.riddle } as const;
-  });
+  return { modelName, riddle: value.riddle } as const;
+});
 
 const runCase = <A extends { readonly modelName: string; readonly riddle: string }, E, R>(label: string, effect: Effect.Effect<A, E, R>) =>
   effect.pipe(

@@ -21,7 +21,8 @@ import {
 
 export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("addGlobalPulse", {
-    payload: Schema.Array(AddGlobalPulse),
+    // `sql.insert` compiles one or more rows; an empty batch is never valid
+    payload: Schema.NonEmptyArray(AddGlobalPulse),
   }),
 
   Rpc.make("addArcadeRunSummary", {
@@ -62,10 +63,6 @@ export class RpcTelemetry extends RpcGroup.make(
     success: Schema.Array(RunDeathReasonFrequencyData),
   }),
 
-  // B5: scalar shape — COALESCE always materialises exactly one row, so the
-  // wire response is a single `{ personal, global }` object (not a 1-element
-  // array). Matches `getBestRunTrophyCard`'s non-Array precedent for known
-  // cardinality. Backed by SqlSchema.findOne in the charts-db service.
   Rpc.make("getAnyCounter", {
     payload: AnyCounterArgs,
     success: AnyCounterData,
@@ -73,8 +70,6 @@ export class RpcTelemetry extends RpcGroup.make(
 
   Rpc.make("getAnyAvgStat", {
     payload: AnyAvgStatArgs,
-    // E3: dedicated Result schema (AnyAvgStatData), structurally identical to
-    // AnyCounterData — the wire shape `{ personal, global }` is unchanged.
     success: AnyAvgStatData,
   }),
 

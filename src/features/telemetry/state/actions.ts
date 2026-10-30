@@ -31,7 +31,8 @@ export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSess
   yield* Option.match(Option.all({ runId: runSession.runId, theSecretWord: wordChallenge.theSecretWord, wordScore: wordChallenge.wordScore }), {
     onNone: () => Effect.void,
     onSome: ({ runId, theSecretWord, wordScore }) =>
-      Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: Math.floor(wordScore.timeSeconds) }),
+      // `timeSeconds` is already an Int by schema, so it needs no flooring
+      Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: wordScore.timeSeconds }),
   });
 });
 
@@ -115,7 +116,7 @@ export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession,
   // `timeToSolve` needs the volatile word score, which may be absent; skip it gracefully instead of failing
   yield* Option.match(wordChallenge.wordScore, {
     onNone: () => Effect.void,
-    onSome: (score) => trackMetric(attributes, metrics.timeToSolve, Math.floor(score.timeSeconds)),
+    onSome: (score) => trackMetric(attributes, metrics.timeToSolve, score.timeSeconds),
   });
 
   yield* trackMetric(attributes, metrics.gamesPlayed, 1);

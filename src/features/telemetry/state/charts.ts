@@ -19,12 +19,16 @@ const nullToInfinity = (value: number | null) => value ?? Infinity;
 // request with the player's session id, and caches the result for 5 minutes
 // of idle time (remounts within that window reuse it instead of refetching)
 const chartAtom = <A, E>(fetch: (client: Context.Service.Shape<typeof RpcTelemetryClient>, sessionId: string) => Effect.Effect<A, E>) =>
-  RuntimeAtom.atom((get) =>
-    Effect.gen(function* () {
+  RuntimeAtom.atom((get) => {
+    // Read the session id inside the atom read context so this atom re-runs
+    // (and re-subscribes) when the player's session changes
+    const sessionId = get(sessionIdAtom);
+
+    return Effect.gen(function* () {
       const client = yield* RpcTelemetryClient;
-      return yield* fetch(client, get(sessionIdAtom));
-    })
-  ).pipe(Atom.setIdleTTL("5 minutes"));
+      return yield* fetch(client, sessionId);
+    });
+  }).pipe(Atom.setIdleTTL("5 minutes"));
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) => client.getGuessDistribution({ sessionId, solutionsLanguage }))

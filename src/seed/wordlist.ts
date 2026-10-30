@@ -10,6 +10,9 @@ class WordlistJsonEncodeError extends Schema.TaggedError<WordlistJsonEncodeError
 // — single source of truth per https://www.effect.solutions/data-modeling#json-encoding-decoding
 const WordlistFromJson = Schema.fromJsonString(Schema.Array(Schema.String), { space: 2 });
 
+// Schema.encodeEffect builds a parser on every call, so build it once at module scope
+const encodeWordlist = Schema.encodeEffect(WordlistFromJson);
+
 interface WordlistSyncOptions {
   // The raw word-list .txt files to merge (one per line)
   readonly inputs: ReadonlyArray<string>;
@@ -45,9 +48,7 @@ export const makeWordlistSync = Effect.fn("makeWordlistSync")(function* ({ input
   yield* Effect.log(`Found ${uniqueWords.length} valid 5-letter words. Saving...`);
 
   // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
-  const wordlistJson = yield* Schema.encodeEffect(WordlistFromJson)(uniqueWords).pipe(
-    Effect.mapError((cause) => new WordlistJsonEncodeError({ file: output, cause }))
-  );
+  const wordlistJson = yield* encodeWordlist(uniqueWords).pipe(Effect.mapError((cause) => new WordlistJsonEncodeError({ file: output, cause })));
 
   // Write to the new JSON file
   yield* fs.writeFileString(output, wordlistJson);

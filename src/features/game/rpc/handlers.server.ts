@@ -27,16 +27,23 @@ import type { SolutionsLanguage } from "@/features/game/domain/models";
 // schema matches the seed's own `DefinitionsSchema` (src/seed/sync.ts), and a
 // missing word resolves to `undefined` at runtime (handled by `Option.fromNullishOr`)
 const Definitions = Schema.Record(Schema.String, Schema.String);
-const DEFINITIONS_EN = Schema.decodeSync(Definitions)(definitionsEnJson);
-const DEFINITIONS_PL = Schema.decodeSync(Definitions)(definitionsPlJson);
+
+// Compile each decoder once: `Schema.decodeSync` builds a parser, and every
+// schema below is decoded for both language assets
+const decodeDefinitions = Schema.decodeSync(Definitions);
+const decodeSolutions = Schema.decodeSync(Schema.Array(TheSecretWord));
+const decodeKeypad = Schema.decodeSync(Keypad);
+
+const DEFINITIONS_EN = decodeDefinitions(definitionsEnJson);
+const DEFINITIONS_PL = decodeDefinitions(definitionsPlJson);
 
 // Validate the smaller build-time assets once at module scope (fail fast on a malformed asset)
 // The 30,000+ word dictionaries are trusted as-is: re-validating every entry would add
 // significant cold-start work for an asset already produced by our own build scripts
-const SOLUTIONS_EN = Schema.decodeSync(Schema.Array(TheSecretWord))(solutionsEnJson);
-const SOLUTIONS_PL = Schema.decodeSync(Schema.Array(TheSecretWord))(solutionsPlJson);
-const KEYPAD_EN = Schema.decodeSync(Keypad)(keypadEnJson);
-const KEYPAD_PL = Schema.decodeSync(Keypad)(keypadPlJson);
+const SOLUTIONS_EN = decodeSolutions(solutionsEnJson);
+const SOLUTIONS_PL = decodeSolutions(solutionsPlJson);
+const KEYPAD_EN = decodeKeypad(keypadEnJson);
+const KEYPAD_PL = decodeKeypad(keypadPlJson);
 
 // Built once at module scope: hashing 30,000+ words into a HashSet is far too
 // expensive to repeat on every request (server-hoist-static-io)

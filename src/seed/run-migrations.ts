@@ -2,7 +2,6 @@ import "dotenv/config";
 
 // services, features, and other libraries
 import { Config, Effect } from "effect";
-import { Migrator } from "effect/sql";
 import { PgMigrator } from "@effect/sql-pg";
 import { makePgClientLayer } from "@/lib/pg-config";
 import { runSeed } from "./runtime";
@@ -13,16 +12,14 @@ const main = Effect.gen(function* () {
 
   yield* Effect.log("Running database migrations...");
 
-  const result = yield* PgMigrator.run({ loader: Migrator.fromFileSystem("src/seed/migrations"), table: "schema_migrations" }).pipe(
+  const result = yield* PgMigrator.run({ loader: PgMigrator.fromFileSystem("src/seed/migrations"), table: "schema_migrations" }).pipe(
     Effect.provide(pgClientLayer)
   );
 
   if (result.length === 0) {
     yield* Effect.log("No pending migrations — database is up to date.");
   } else {
-    for (const [id, name] of result) {
-      yield* Effect.log(`Applied migration ${id}_${name}`);
-    }
+    yield* Effect.forEach(result, ([id, name]) => Effect.log(`Applied migration ${id}_${name}`), { discard: true });
     yield* Effect.log("All migrations applied successfully!");
   }
 });
