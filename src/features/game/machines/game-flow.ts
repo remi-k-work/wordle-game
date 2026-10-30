@@ -36,29 +36,31 @@ export const gameFlowMachine = setup({
       ),
     requestNextWord: () =>
       runClientCommand(Effect.all([Atom.set(modalMachineAtom, { type: "closed" }), Atom.set(gameDataMachineAtom, { type: "nextWordRequested" })])),
-    forfeitRun: ({ event }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          assertEvent(event, "run.forfeitConfirmed");
-          yield* Effect.all([
-            Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge }),
-            Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" }),
-            Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
-            Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
-          ]);
-        })
-      ),
-    bankWonWord: ({ event }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          assertEvent(event, "word.won");
-          yield* Effect.all([
-            Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore }),
-            Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
-            Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
-          ]);
-        })
-      ),
+    forfeitRun: ({ event }) => {
+      // Narrowed inline, before the command is built, so the fan-out below stays
+      // a plain `Effect.all` rather than a generator that only yields once
+      assertEvent(event, "run.forfeitConfirmed");
+
+      return runClientCommand(
+        Effect.all([
+          Atom.set(runSessionMachineAtom, { type: "forfeitedRun", wordChallenge: event.wordChallenge }),
+          Atom.set(wordChallengeMachineAtom, { type: "forfeitedRun" }),
+          Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
+          Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
+        ])
+      );
+    },
+    bankWonWord: ({ event }) => {
+      assertEvent(event, "word.won");
+
+      return runClientCommand(
+        Effect.all([
+          Atom.set(runSessionMachineAtom, { type: "wordWon", wordScore: event.wordScore }),
+          Atom.set(overdriveHacksMachineAtom, { type: "puzzle.ended" }),
+          Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
+        ])
+      );
+    },
     finishLostRun: () =>
       runClientCommand(
         Effect.all([
@@ -67,19 +69,19 @@ export const gameFlowMachine = setup({
           Atom.set(modalMachineAtom, { type: "opened", modalType: "status" }),
         ])
       ),
-    changeLanguage: ({ event }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          assertEvent(event, "language.changed");
-          yield* Effect.all([
-            Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" }),
-            Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" }),
-            Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" }),
-            Atom.set(wordMetaMachineAtom, { type: "resetRequested" }),
-            Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: event.solutionsLanguage }),
-          ]);
-        })
-      ),
+    changeLanguage: ({ event }) => {
+      assertEvent(event, "language.changed");
+
+      return runClientCommand(
+        Effect.all([
+          Atom.set(runSessionMachineAtom, { type: "solutionsLanguageChanged" }),
+          Atom.set(wordChallengeMachineAtom, { type: "solutionsLanguageChanged" }),
+          Atom.set(overdriveHacksMachineAtom, { type: "solutionsLanguageChanged" }),
+          Atom.set(wordMetaMachineAtom, { type: "resetRequested" }),
+          Atom.set(gameDataMachineAtom, { type: "solutionsLanguageChanged", solutionsLanguage: event.solutionsLanguage }),
+        ])
+      );
+    },
   },
 }).createMachine({
   id: "gameFlow",

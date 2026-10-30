@@ -21,10 +21,16 @@ export const computeEmpCandidates = (
   // re-evaluating the full board per item is ~30x redundant work
   const keypadState = computeKeypadState(theSecretWord, wordleGuesses);
 
-  return Array.filter(keypad, (letter) => {
-    if (theSecretWord.includes(letter) || HashSet.has(empNukedSet, letter)) return false;
-    return Option.getOrElse(HashMap.get(keypadState, letter), () => "") === "";
-  });
+  return Array.filter(
+    keypad,
+    (letter) =>
+      !theSecretWord.includes(letter) &&
+      !HashSet.has(empNukedSet, letter) &&
+      // An absent key means the letter was never guessed, so it is still a
+      // candidate; `computeKeypadState` never stores any other colour for an
+      // unguessed letter, so absence is the only signal worth reading here
+      Option.isNone(HashMap.get(keypadState, letter))
+  );
 };
 
 // EMP_LETTER_COUNT (currently 3) controls how many letters to nuke per activation

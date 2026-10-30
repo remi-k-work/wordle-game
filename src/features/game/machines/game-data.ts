@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Effect, Option, Random } from "effect";
+import { Effect, Option, Random } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { effectActor } from "@/lib/effect-actor";
@@ -41,14 +41,8 @@ const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: On
 
 const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) =>
   Effect.gen(function* () {
-    // `Effect.fromOption` turns a missing or empty solutions list into a
-    // controlled Effect failure (NoSuchElementError) that the machine handles
-    // by transitioning to `failure` instead of crashing; `Random.shuffle` does
-    // not throw on empty arrays; an empty list reaches `Array.head` which
-    // returns `None`, and `Effect.fromOption` converts that to the failure
     const solutionsList = yield* Effect.fromOption(solutions);
-    const shuffled = yield* Random.shuffle(solutionsList);
-    return yield* Effect.fromOption(Array.head(shuffled));
+    return yield* Random.choice(solutionsList);
   })
 );
 
@@ -64,23 +58,21 @@ export const gameDataMachine = setup({
     // Save the loaded game data
     saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
 
-    onSecretWordSelected: (_, params: { theSecretWord: TheSecretWord }) =>
+    onSecretWordSelected: (_, { theSecretWord }: { theSecretWord: TheSecretWord }) =>
       runClientCommand(
-        Effect.gen(function* () {
-          const theSecretWord = params.theSecretWord;
-
+        Effect.all([
           // *** TEST CODE ***
           // *** TEST CODE ***
           // *** TEST CODE ***
-          yield* Effect.log(`The Secret Word: ${theSecretWord}`);
+          Effect.log(`The Secret Word: ${theSecretWord}`),
           // *** TEST CODE ***
           // *** TEST CODE ***
           // *** TEST CODE ***
 
-          yield* Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord });
-          yield* Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord });
-          yield* Atom.set(overdriveHacksMachineAtom, { type: "puzzle.started" });
-        })
+          Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord }),
+          Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord }),
+          Atom.set(overdriveHacksMachineAtom, { type: "puzzle.started" }),
+        ])
       ),
 
     // Notify the word challenge machine that game data is ready (no word yet — idle state)

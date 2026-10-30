@@ -10,20 +10,19 @@ import { dieOnDbFailure } from "@/domain/db-policy";
 // preserves trailing cumulative total row (NULLIF back to NULL).
 // C1: single-pass conditional aggregation replaces two-CTE FULL OUTER JOIN.
 //
-// NOTE: the `any` in `Schema.ConstraintCodec<any>` is load-bearing. TS resolves
-// a generic schema parameter to its constraint (`Schema.Constraint`, whose
-// `Type`/`DecodingServices` are `unknown`) whenever the row type passes through
-// any generic inference hop (dieOnDbFailure, .pipe) — collapsing the decoded
-// rows to `unknown[]` and breaking every consumer. `any` is the only bound that
-// threads through; the runtime decode inside SqlSchema.findAll stays strict.
+// The generic bound is `Schema.Codec<any>`: TS resolves a generic schema
+// parameter to its constraint, and the plain `Constraint` bound types `Type` as
+// `unknown`, which collapses the decoded rows to `unknown[]` at every generic
+// inference hop (dieOnDbFailure, .pipe) and breaks every consumer. Codec's
+// views are `any`, so the row type threads through; the runtime decode inside
+// SqlSchema.findAll stays strict
 export const makeHistogramDistributionQuery =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <R extends Schema.ConstraintCodec<any>>(sql: SqlClient.SqlClient) =>
-    (args: { metricName: string; bucketAlias: string; Result: R }) => {
-      const query = SqlSchema.findAll({
-        Request: AnyChartArgs,
-        Result: args.Result,
-        execute: ({ sessionId, solutionsLanguage }) => sql`
+  <R extends Schema.Codec<any>>(sql: SqlClient.SqlClient) =>
+  (args: { metricName: string; bucketAlias: string; Result: R }) => {
+    const query = SqlSchema.findAll({
+      Request: AnyChartArgs,
+      Result: args.Result,
+      execute: ({ sessionId, solutionsLanguage }) => sql`
       SELECT
         NULLIF(COALESCE((bucket->>0)::int, -1), -1) AS ${sql(args.bucketAlias)},
         COALESCE(SUM((bucket->>1)::int) FILTER (WHERE session_id = ${sessionId}), 0)::int AS personal,
@@ -34,7 +33,7 @@ export const makeHistogramDistributionQuery =
         AND solutions_language = ${solutionsLanguage}
       GROUP BY COALESCE((bucket->>0)::int, -1)
       ORDER BY ${sql(args.bucketAlias)} ASC NULLS LAST`,
-      });
+    });
 
-      return (request: AnyChartArgs) => dieOnDbFailure(query(request));
-    };
+    return (request: AnyChartArgs) => dieOnDbFailure(query(request));
+  };

@@ -1,5 +1,3 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
 import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
@@ -10,7 +8,7 @@ import { assign, setup, assertEvent } from "xstate";
 import { msg } from "gt-react";
 import { toastManager } from "@/ui/toastify";
 import { modalMachineAtom } from "@/state/modal";
-import { beatsTop10Tail } from "@/features/high-score/domain/helpers";
+import { qualifiesForTop10 } from "@/features/high-score/domain/helpers";
 import { AddHighScore } from "@/features/high-score/domain/models";
 
 // types
@@ -61,13 +59,22 @@ export const highScoreMachine = setup({
   guards: {
     // Determine if the current run qualifies for the high score
     qualifiesForHighScore: ({ context }, params: { top10HighScores: ReadonlyArray<HighScore> }) =>
-      // If there are fewer than 10 entries, any score qualifies; otherwise it must beat the 10th-place entry
-      params.top10HighScores.length < 10 || beatsTop10Tail(params.top10HighScores, context.runScore, context.streak),
+      // Fewer than 10 entries means any score qualifies; otherwise it must beat
+      // the 10th-place entry (shared with the DB service's post-lock re-check)
+      qualifiesForTop10(params.top10HighScores, context.runScore, context.streak),
   },
   actions: {
     saveRunData: assign(({ event }) => {
       assertEvent(event, "runFinished");
-      return { ...INITIAL_HIGH_SCORE_CONTEXT, ...event } as const satisfies HighScoreMachineContext;
+      // Explicit field selection rather than spreading `event`: a spread-derived
+      // property is not checked by `satisfies`, so the event's `type` would land
+      // in the context (which has no such field) unchecked
+      return {
+        ...INITIAL_HIGH_SCORE_CONTEXT,
+        runScore: event.runScore,
+        streak: event.streak,
+        solutionsLanguage: event.solutionsLanguage,
+      } as const satisfies HighScoreMachineContext;
     }),
 
     saveInitials: assign(({ context, event }) => {

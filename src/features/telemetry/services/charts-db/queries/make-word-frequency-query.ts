@@ -10,16 +10,15 @@ import { dieOnDbFailure } from "@/domain/db-policy";
 // FILTER computes personal/global in one JSONB scan. Row-equality validated
 // against e2e fixture. Words are stored uppercase in DB, so no UPPER() needed.
 //
-// NOTE: the `any` in `Schema.ConstraintCodec<any>` is load-bearing — see the
-// matching comment in make-histogram-distribution-query.ts.
+// The generic bound is `Schema.Codec<any>` — see the matching comment in
+// make-histogram-distribution-query.ts for why not the plain `Constraint`
 export const makeWordFrequencyQuery =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  <R extends Schema.ConstraintCodec<any>>(sql: SqlClient.SqlClient) =>
-    (args: { metricName: string; Result: R }) => {
-      const query = SqlSchema.findAll({
-        Request: AnyChartArgs,
-        Result: args.Result,
-        execute: ({ sessionId, solutionsLanguage }) => sql`
+  <R extends Schema.Codec<any>>(sql: SqlClient.SqlClient) =>
+  (args: { metricName: string; Result: R }) => {
+    const query = SqlSchema.findAll({
+      Request: AnyChartArgs,
+      Result: args.Result,
+      execute: ({ sessionId, solutionsLanguage }) => sql`
       SELECT
         kv.key AS word,
         COALESCE(SUM(kv.value::int) FILTER (WHERE session_id = ${sessionId}), 0)::int AS personal,
@@ -35,7 +34,7 @@ export const makeWordFrequencyQuery =
         COALESCE(SUM(kv.value::int) FILTER (WHERE session_id = ${sessionId}), 0) DESC,
         kv.key ASC
       LIMIT 15`,
-      });
+    });
 
-      return (request: AnyChartArgs) => dieOnDbFailure(query(request));
-    };
+    return (request: AnyChartArgs) => dieOnDbFailure(query(request));
+  };

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Option, Record } from "effect";
+import { Array, Option } from "effect";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { formatGuess } from "@/features/game/domain/formatters";
 import { matchLanguage } from "@/features/game/domain/helpers";
@@ -39,14 +39,14 @@ Kontekst: Ukryte słowo to "ZEGAR". Gracz wpisał "PASEK" (E żółty, A żółt
 Wskazówka: Znalazłeś właściwe litery E oraz A, ale znajdują się one na złych pozycjach. Twój strzał dotyczy elementu garderoby, jednak musisz szukać w zupełnie innej kategorii. Zastanów się nad powszechnie używanymi urządzeniami, które często wiszą na ścianie i służą do odmierzania upływającego czasu.
 `;
 
-const COLOR_TO_PL = Record.fromEntries([
-  ["green", "zielony"],
-  ["yellow", "żółty"],
-  ["grey", "szary"],
-  ["red", "czerwony"],
-  ["", ""],
-]) as Readonly<Record<Color, string>>;
-const colorToPl = (color: Color): string => Option.getOrElse(Record.get(COLOR_TO_PL, color), () => color);
+const COLOR_TO_PL = {
+  green: "zielony",
+  yellow: "żółty",
+  grey: "szary",
+  red: "czerwony",
+  "": "",
+} as const satisfies Readonly<Record<Color, string>>;
+const colorToPl = (color: Color) => COLOR_TO_PL[color];
 
 const buildFeedbackLines = (
   wordleGuesses: WordChallenge["wordleGuesses"],
@@ -78,7 +78,7 @@ const OVERRIDE_PROMPT_EN = (
         `The player already has this cryptic riddle: "${value}".\n-> Provide a useful delta. Do not repeat the same imagery, phrasing, or tropes.\n\n`,
       onNone: () => "",
     }),
-    wordleGuesses.length === 0
+    Array.isReadonlyArrayEmpty(wordleGuesses)
       ? `The player has not made any guesses yet (Turn 1).\n-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`
       : `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n${buildFeedbackLines(wordleGuesses, theSecretWord).join("")}\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`,
   ].join("");
@@ -101,7 +101,7 @@ const OVERRIDE_PROMPT_PL = (
         `Gracz dysponuje już tą zagadką: "${value}".\n-> Zapewnij nową wartość. Nie powtarzaj tych samych skojarzeń, sformułowań ani motywów.\n\n`,
       onNone: () => "",
     }),
-    wordleGuesses.length === 0
+    Array.isReadonlyArrayEmpty(wordleGuesses)
       ? `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`
       : `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n${buildFeedbackLines(wordleGuesses, theSecretWord, colorToPl).join("")}\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`,
   ].join("");

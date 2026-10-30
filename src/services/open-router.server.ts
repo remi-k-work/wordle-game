@@ -81,7 +81,9 @@ export const fetchSpeechAudio = Effect.fnUntraced(
     // OpenRouter's default voice is used for English; pick a random recommended Polish voice otherwise
     const voice = solutionsLanguage === "En" ? undefined : yield* Random.choice(VOICES_PL);
 
-    const { audioData } = yield* generateSpeech(voice === undefined ? { input } : { input, voice });
+    // generateSpeech already normalizes an absent vs explicitly-undefined voice before
+    // decoding (optionalKey needs the key absent), so the English `undefined` is forwarded as-is
+    const { audioData } = yield* generateSpeech({ input, voice });
 
     return Option.some(audioData);
   },

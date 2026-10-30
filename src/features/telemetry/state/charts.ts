@@ -32,19 +32,18 @@ export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLa
 
 export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
-    Effect.gen(function* () {
-      const data = yield* client.getTimeToSolveDistribution({ sessionId, solutionsLanguage });
-      return data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) }));
-    })
+    client.getTimeToSolveDistribution({ sessionId, solutionsLanguage }).pipe(
+      // A non-empty `maxSeconds` is a rounding artifact of the bucket boundary
+      Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) })))
+    )
   )
 );
 
 export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
-    Effect.gen(function* () {
-      const data = yield* client.getArcadeStreakDistribution({ sessionId, solutionsLanguage });
-      return data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) }));
-    })
+    client
+      .getArcadeStreakDistribution({ sessionId, solutionsLanguage })
+      .pipe(Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) }))))
   )
 );
 

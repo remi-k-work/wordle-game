@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Effect, Layer, Stream, Duration, Equal, Match, Metric, Schedule, Schema, pipe, Crypto } from "effect";
+import { Array, Effect, Layer, Stream, Duration, Match, Metric, Schedule, Schema, pipe, Crypto } from "effect";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain/models";
@@ -99,10 +99,10 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     // --- Stream 2: Metrics (Native Snapshot Loop via Stream) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
-    // Declarative Stream alignment with spanProcessor: poll every 10s, dedup via Equal.equals, no Ref
+    // Declarative Stream alignment with spanProcessor: poll every 10s, dedup via `Stream.changes` (Equal.equals), no Ref
     const metricProcessor = pipe(
       Stream.fromEffectSchedule(Metric.snapshot, Schedule.spaced(Duration.seconds(10))),
-      Stream.changesWith((a, b) => Equal.equals(a, b)),
+      Stream.changes,
       Stream.runForEach((snapshots) => processMetrics(snapshots))
     );
 

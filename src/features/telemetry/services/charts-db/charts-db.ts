@@ -34,8 +34,21 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   make: Effect.gen(function* () {
     const sql = yield* SqlClient.SqlClient;
 
+    // Each query factory builds a `SqlSchema`, so the factories are hoisted and
+    // built once per layer instead of once per request
+    const guessDistributionQueryFn = guessDistributionQuery(sql);
+    const timeToSolveDistributionQueryFn = timeToSolveDistributionQuery(sql);
+    const arcadeStreakDistributionQueryFn = arcadeStreakDistributionQuery(sql);
+    const openingGuessesFrequencyQueryFn = openingGuessesFrequencyQuery(sql);
+    const failedWordsFrequencyQueryFn = failedWordsFrequencyQuery(sql);
+    const runDeathReasonFrequencyQueryFn = runDeathReasonFrequencyQuery(sql);
+    const anyCounterQueryFn = anyCounterQuery(sql);
+    const anyAvgStatQueryFn = anyAvgStatQuery(sql);
+    const hardestWordsLeaderboardQueryFn = hardestWordsLeaderboardQuery(sql);
+    const bestRunTrophyCardQueryFn = bestRunTrophyCardQuery(sql);
+
     const getGuessDistribution = Effect.fn("getGuessDistribution")(function* (request: AnyChartArgs) {
-      const rows = yield* guessDistributionQuery(sql)(request);
+      const rows = yield* guessDistributionQueryFn(request);
 
       const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
         turn: row.turn,
@@ -50,7 +63,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     });
 
     const getTimeToSolveDistribution = Effect.fn("getTimeToSolveDistribution")(function* (request: AnyChartArgs) {
-      const rows = yield* timeToSolveDistributionQuery(sql)(request);
+      const rows = yield* timeToSolveDistributionQueryFn(request);
 
       const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
         maxSeconds: row.maxSeconds,
@@ -65,7 +78,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     });
 
     const getArcadeStreakDistribution = Effect.fn("getArcadeStreakDistribution")(function* (request: AnyChartArgs) {
-      const rows = yield* arcadeStreakDistributionQuery(sql)(request);
+      const rows = yield* arcadeStreakDistributionQueryFn(request);
 
       const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
         streak: row.streak,
@@ -79,47 +92,21 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       return yield* Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData))(chartData).pipe(dieOnDbFailure);
     });
 
-    // Simple passthroughs to query functions — no additional logic or tracing value at this layer,
-    // so untraced variants avoid creating redundant spans
-    const getOpeningGuessesFrequency = Effect.fnUntraced(function* (request: AnyChartArgs) {
-      return yield* openingGuessesFrequencyQuery(sql)(request);
-    });
-
-    const getFailedWordsFrequency = Effect.fnUntraced(function* (request: AnyChartArgs) {
-      return yield* failedWordsFrequencyQuery(sql)(request);
-    });
-
-    const getRunDeathReasonFrequency = Effect.fnUntraced(function* (request: AnyChartArgs) {
-      return yield* runDeathReasonFrequencyQuery(sql)(request);
-    });
-
-    const getAnyCounter = Effect.fnUntraced(function* (request: AnyCounterArgs) {
-      return yield* anyCounterQuery(sql)(request);
-    });
-
-    const getAnyAvgStat = Effect.fnUntraced(function* (request: AnyAvgStatArgs) {
-      return yield* anyAvgStatQuery(sql)(request);
-    });
-
-    const getHardestWordsLeaderboard = Effect.fnUntraced(function* (request: AnyChartArgs) {
-      return yield* hardestWordsLeaderboardQuery(sql)(request);
-    });
-
-    const getBestRunTrophyCard = Effect.fnUntraced(function* (request: BestRunTrophyCardArgs) {
-      return yield* bestRunTrophyCardQuery(sql)(request);
-    });
-
+    // Simple passthroughs to query functions. Referencing the hoisted query
+    // directly keeps this layer a thin boundary: the queries already carry the
+    // shared `dieOnDbFailure` policy, and there is no logic or tracing value to
+    // add here that would justify wrapping each call in its own Effect
     return {
       getGuessDistribution,
       getTimeToSolveDistribution,
       getArcadeStreakDistribution,
-      getOpeningGuessesFrequency,
-      getFailedWordsFrequency,
-      getRunDeathReasonFrequency,
-      getAnyCounter,
-      getAnyAvgStat,
-      getHardestWordsLeaderboard,
-      getBestRunTrophyCard,
+      getOpeningGuessesFrequency: (request: AnyChartArgs) => openingGuessesFrequencyQueryFn(request),
+      getFailedWordsFrequency: (request: AnyChartArgs) => failedWordsFrequencyQueryFn(request),
+      getRunDeathReasonFrequency: (request: AnyChartArgs) => runDeathReasonFrequencyQueryFn(request),
+      getAnyCounter: (request: AnyCounterArgs) => anyCounterQueryFn(request),
+      getAnyAvgStat: (request: AnyAvgStatArgs) => anyAvgStatQueryFn(request),
+      getHardestWordsLeaderboard: (request: AnyChartArgs) => hardestWordsLeaderboardQueryFn(request),
+      getBestRunTrophyCard: (request: BestRunTrophyCardArgs) => bestRunTrophyCardQueryFn(request),
     } as const;
   }),
 }) {

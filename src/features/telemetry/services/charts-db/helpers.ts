@@ -27,9 +27,7 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
   rows: readonly T[],
   mapResult: (row: T, discretePersonal: number, discreteGlobal: number, personalPct: number, globalPct: number) => TResult
 ): TResult[] => {
-  const lastRow = Array.last(rows);
-  const totalPersonal = Option.match(lastRow, { onNone: () => 0, onSome: (row) => row.personal });
-  const totalGlobal = Option.match(lastRow, { onNone: () => 0, onSome: (row) => row.global });
+  const { personal: totalPersonal, global: totalGlobal } = Option.getOrElse(Array.last(rows), () => ({ personal: 0, global: 0 }));
 
   const [, distribution] = Array.mapAccum(rows, { personal: 0, global: 0 }, (prev, row) => {
     const discretePersonal = row.personal - prev.personal;

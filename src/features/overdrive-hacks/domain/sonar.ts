@@ -20,11 +20,14 @@ export const computeSonarCandidates = (
   const keypadState = computeKeypadState(theSecretWord, wordleGuesses);
 
   return Array.filter(vowels, (vowel) => {
-    if (!theSecretWord.includes(vowel) || HashSet.has(alreadyRevealedSet, vowel)) {
-      return false;
-    }
-    const color = Option.getOrElse(HashMap.get(keypadState, vowel), () => "");
-    return color === "" || color === "grey";
+    if (!theSecretWord.includes(vowel) || HashSet.has(alreadyRevealedSet, vowel)) return false;
+
+    // A vowel that has never been guessed (absent from the keypad state) is
+    // still worth revealing; a guessed one only once the player has ruled it out
+    return Option.match(HashMap.get(keypadState, vowel), {
+      onNone: () => true,
+      onSome: (color) => color === "grey",
+    });
   });
 };
 
@@ -35,7 +38,7 @@ export const calculateSonarTarget = Effect.fnUntraced(function* (
   alreadyRevealedVowels: ReadonlyArray<SonarReveal["vowel"]>
 ) {
   const candidates = computeSonarCandidates(theSecretWord, wordleGuesses, vowels, alreadyRevealedVowels);
-  if (!Array.isReadonlyArrayNonEmpty(candidates)) return Option.none();
+  if (Array.isReadonlyArrayEmpty(candidates)) return Option.none();
 
   // Pick exactly one vowel at random from the equally-valid candidates
   const vowel = yield* Random.choice(candidates);

@@ -107,7 +107,7 @@ export const wordChallengeMachine = setup({
     // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
     // `greyLetters` is recomputed here — once per submission — so the keypress guard above never has to
     submitGuess: assign(({ context }) => {
-      const wordleGuesses = [...context.wordleGuesses, context.currentGuessWord];
+      const wordleGuesses = Array.append(context.wordleGuesses, context.currentGuessWord);
       return {
         ...context,
         currentGuessWord: "",
@@ -137,29 +137,16 @@ export const wordChallengeMachine = setup({
 
     // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
     trackWordWon: ({ context }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          const { context: runSessionMachineContext } = yield* Atom.get(runSessionMachineAtom);
-          yield* trackWordWon(runSessionMachineContext, context);
-        })
-      ),
+      runClientCommand(Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordWon(runSession, context)))),
 
     onWordWon: ({ context }) =>
       runClientCommand(
-        Effect.gen(function* () {
-          const wordScore = yield* Effect.fromOption(context.wordScore);
-          yield* Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore });
-        })
+        Effect.fromOption(context.wordScore).pipe(Effect.flatMap((wordScore) => Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore })))
       ),
 
     // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
     trackWordLost: ({ context }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          const { context: runSessionMachineContext } = yield* Atom.get(runSessionMachineAtom);
-          yield* trackWordLost(runSessionMachineContext, context);
-        })
-      ),
+      runClientCommand(Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordLost(runSession, context)))),
 
     onWordLost: () => runClientCommand(Atom.set(gameFlowMachineAtom, { type: "word.lost" })),
   },

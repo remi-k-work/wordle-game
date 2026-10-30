@@ -72,10 +72,11 @@ export function SiteLangChanger() {
 
   return (
     <Button className="button p-1" title={gt("Select Website Language")} disabled={isPending} onClick={handleLangToggled}>
-      {/* The flag flips over to the other language instead of swapping out from under the pointer;
-          `initial={false}` keeps the server markup (and the hydration render) free of any rotation */}
       <AnimatePresence mode="wait" initial={false}>
-        {Record.get(LOCALE_FLAGS, locale).pipe(Option.getOrElse(() => Record.get(LOCALE_FLAGS, "en").valueOrUndefined))}
+        {Record.get(LOCALE_FLAGS, locale).pipe(
+          Option.orElse(() => Record.get(LOCALE_FLAGS, "en")),
+          Option.getOrUndefined
+        )}
       </AnimatePresence>
     </Button>
   );

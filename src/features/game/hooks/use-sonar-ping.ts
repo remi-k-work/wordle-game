@@ -18,25 +18,34 @@ export function useSonarPing(isEnabled: boolean) {
     let stopPulse: (() => void) | undefined;
 
     const playSequence = async () => {
-      // Step 1: Dramatic Ping
-      await animate(
+      // Registered before the first await so cleanup can always interrupt the initial ping; without this, an unmount during step 1 leaves it running
+      const ping = animate(
         node,
         { scale: [1, 1.15, 1], boxShadow: ["none", "0 0 24px var(--color-accent)", "none"], borderColor: ["", "var(--color-accent)", ""] },
         { duration: motionTokens.duration.slow, ease: motionTokens.easing.sharp }
       );
+      stopPulse = () => ping.stop();
+
+      await ping;
 
       if (!isMounted) return;
 
-      // Step 2: Infinite subtle pulse
+      // Infinite subtle pulse
       const controls = animate(
         node,
         { boxShadow: ["none", "0 0 12px var(--color-accent)", "none"] },
         { duration: motionTokens.duration.crawl * 2, repeat: Infinity, ease: "easeInOut" }
       );
-      stopPulse = () => controls.stop();
+      stopPulse = () => {
+        controls.stop();
+        ping.stop();
+      };
     };
 
-    void playSequence();
+    // motion rejects when a playback is interrupted, and an interruption is
+    // expected here (unmount, or the effect re-running for a new reveal), so the
+    // rejection is swallowed rather than escaping as an unhandled rejection
+    void playSequence().catch(() => {});
 
     return () => {
       isMounted = false;
