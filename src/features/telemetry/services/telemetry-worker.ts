@@ -1,5 +1,6 @@
 // services, features, and other libraries
-import { Array, Effect, Layer, Stream, Duration, Match, Metric, Schedule, Schema, pipe, Crypto } from "effect";
+import { Array, Effect, Layer, Stream, Duration, Match, Metric, Schedule, Schema, pipe } from "effect";
+import { SecureRandom } from "effect/crypto/SecureRandom";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain/models";
@@ -30,8 +31,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
 
     // Generate the unique identifier for this specific browser session/tab load
     // This lives in the closure of the worker and remains constant until the page reloads
-    const crypto = yield* Crypto.Crypto;
-    const instanceId = yield* crypto.randomUUIDv4();
+    const { uuidV4 } = yield* SecureRandom;
+    const instanceId = yield* uuidV4();
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
     const processSpanBatch = Effect.fnUntraced(function* (spanBatch: ReadonlyArray<Tracer.Span>) {
