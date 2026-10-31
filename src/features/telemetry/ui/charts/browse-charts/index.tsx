@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { useBrowseCharts } from "@/features/telemetry/hooks/use-browse-charts";
+import { useBrowseCharts } from "@/features/charts/hooks/use-browse-charts";
 import { useGT } from "gt-react";
 
 // components

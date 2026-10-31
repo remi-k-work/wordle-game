@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/sql";
-import { AnyAvgStatArgs, AnyAvgStatData } from "@/features/telemetry/services/charts-db/models";
+import { AnyAvgStatArgs, AnyAvgStatData } from "@/features/charts/domain/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 export const anyAvgStatQuery = (sql: SqlClient.SqlClient) => {

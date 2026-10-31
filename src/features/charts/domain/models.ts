@@ -2,8 +2,15 @@
 import { Schema } from "effect";
 import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
+// types
+export type BrowseCharts = typeof BrowseCharts.Type;
+
 // constants
 import { MAX_TURNS } from "@/features/game/domain/constants";
+
+export const BrowseCharts = Schema.Struct({
+  sl: SolutionsLanguage,
+});
 
 export class AnyChartArgs extends Schema.Class<AnyChartArgs, { readonly brand: unique symbol }>("AnyChartArgs")({
   sessionId: Schema.Trim.check(Schema.isUUID()),

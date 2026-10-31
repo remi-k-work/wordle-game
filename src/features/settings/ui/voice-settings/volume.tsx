@@ -4,14 +4,14 @@ import { gameSettingsMachineAtom, gameSettingsVoiceVolumeAtom } from "@/features
 
 // components
 import { T } from "gt-react";
-import { VoiceSliderField, VoiceSliderSkeleton } from "./voice-slider";
+import { VoiceSlider, VoiceSliderSkeleton } from "./voice-slider";
 
 export function Volume() {
   const voiceVolume = useAtomValue(gameSettingsVoiceVolumeAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
   return (
-    <VoiceSliderField
+    <VoiceSlider
       name="voiceVolume"
       label={<T>Volume</T>}
       min={0}

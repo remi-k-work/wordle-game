@@ -4,14 +4,14 @@ import { gameSettingsMachineAtom, gameSettingsVoiceRateAtom } from "@/features/s
 
 // components
 import { T } from "gt-react";
-import { VoiceSliderField, VoiceSliderSkeleton } from "./voice-slider";
+import { VoiceSlider, VoiceSliderSkeleton } from "./voice-slider";
 
 export function Rate() {
   const voiceRate = useAtomValue(gameSettingsVoiceRateAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
   return (
-    <VoiceSliderField
+    <VoiceSlider
       name="voiceRate"
       label={<T>Rate</T>}
       min={0.5}

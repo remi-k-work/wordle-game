@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
-import { openingGuessesFrequencyAtom } from "@/features/telemetry/state/charts";
+import { openingGuessesFrequencyAtom } from "@/features/charts/state/charts";
 import { XAxis, YAxis } from "recharts";
 
 // components

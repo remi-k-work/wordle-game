@@ -4,14 +4,14 @@ import { gameSettingsMachineAtom, gameSettingsVoicePitchAtom } from "@/features/
 
 // components
 import { T } from "gt-react";
-import { VoiceSliderField, VoiceSliderSkeleton } from "./voice-slider";
+import { VoiceSlider, VoiceSliderSkeleton } from "./voice-slider";
 
 export function Pitch() {
   const voicePitch = useAtomValue(gameSettingsVoicePitchAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
   return (
-    <VoiceSliderField
+    <VoiceSlider
       name="voicePitch"
       label={<T>Pitch</T>}
       min={0.5}

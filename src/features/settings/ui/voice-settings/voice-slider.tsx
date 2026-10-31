@@ -4,7 +4,7 @@ import { Slider } from "@base-ui/react/slider";
 // types
 import type { ReactNode } from "react";
 
-interface VoiceSliderFieldProps {
+interface VoiceSliderProps {
   name: string;
   label: ReactNode;
   min: number;
@@ -24,8 +24,8 @@ interface VoiceSliderSkeletonProps {
   skeletonValue?: number;
 }
 
-// Single chrome for Volume/Rate/Pitch — only range, value, and event differ.
-export function VoiceSliderField({ name, label, min, max, step, value, disabled = false, onValueChange }: VoiceSliderFieldProps) {
+// Single chrome for Volume/Rate/Pitch — only range, value, and event differ
+export function VoiceSlider({ name, label, min, max, step, value, disabled = false, onValueChange }: VoiceSliderProps) {
   return (
     <Slider.Root
       className="my-3 w-full"
@@ -50,5 +50,5 @@ export function VoiceSliderField({ name, label, min, max, step, value, disabled 
 }
 
 export function VoiceSliderSkeleton({ name, label, min, max, step, skeletonValue = 1 }: VoiceSliderSkeletonProps) {
-  return <VoiceSliderField name={name} label={label} min={min} max={max} step={step} value={skeletonValue} disabled onValueChange={() => {}} />;
+  return <VoiceSlider name={name} label={label} min={min} max={max} step={step} value={skeletonValue} disabled onValueChange={() => {}} />;
 }

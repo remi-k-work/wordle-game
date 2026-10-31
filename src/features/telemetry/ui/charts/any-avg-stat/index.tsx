@@ -3,7 +3,7 @@ import { T } from "gt-react";
 import { useLocale } from "gt-tanstack-start";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
-import { anyAvgStatAtom } from "@/features/telemetry/state/charts";
+import { anyAvgStatAtom } from "@/features/charts/state/charts";
 import { formatSeconds } from "@/domain/formatters";
 
 // components
@@ -11,7 +11,7 @@ import { StatPair, StatPairSkeleton } from "@/features/telemetry/ui/charts/stat-
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { AnyAvgStatArgs } from "@/features/telemetry/services/charts-db/models";
+import type { AnyAvgStatArgs } from "@/features/charts/domain/models";
 
 interface AnyAvgStatChartProps {
   statColumn: AnyAvgStatArgs["statColumn"];

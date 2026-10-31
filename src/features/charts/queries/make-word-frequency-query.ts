@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
-import { AnyChartArgs } from "@/features/telemetry/services/charts-db/models";
+import { AnyChartArgs } from "@/features/charts/domain/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
 
 // Factory backing openingGuesses + failedWords. Both queries are identical

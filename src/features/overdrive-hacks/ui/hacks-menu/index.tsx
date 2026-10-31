@@ -14,21 +14,12 @@ import { useLocale } from "gt-tanstack-start";
 // components
 import { Button } from "@base-ui/react/button";
 import { GamePopover } from "@/ui/game-popover";
+import { HackCostBadge } from "./hack-cost-badge";
+import { HackAction } from "./hack-action";
 
 // assets
 import { SpinnerIcon } from "@/assets/icons/spinner";
 import { LifebuoyIcon, SparklesIcon } from "@heroicons/react/24/outline";
-
-// types
-import type { ComponentType, ReactNode } from "react";
-
-interface HackActionProps {
-  Icon: ComponentType<{ className?: string }>;
-  label: ReactNode;
-  badge: ReactNode;
-  disabled?: boolean;
-  onClicked: () => void;
-}
 
 // constants
 import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
@@ -38,21 +29,6 @@ const HACKS = [
   { id: "emp", label: "EMP", Icon: LifebuoyIcon },
   { id: "sonar", label: <T>Sonar</T>, Icon: LifebuoyIcon },
 ] as const;
-
-function HackCostBadge({ children }: { children: ReactNode }) {
-  return <span className="rounded-md bg-destructive px-3 py-2 font-sans text-text-2">{children}</span>;
-}
-
-// One row of the hacks menu: icon | label | badge; the emp/sonar entries and both AI Override states all render this same shape
-function HackAction({ Icon, label, badge, disabled = false, onClicked }: HackActionProps) {
-  return (
-    <Button className="button grid grid-cols-[auto_1fr_1fr]" disabled={disabled} onClick={onClicked}>
-      <Icon className="size-11" />
-      <span className="justify-self-start">{label}</span>
-      {badge}
-    </Button>
-  );
-}
 
 export function HacksMenu() {
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);

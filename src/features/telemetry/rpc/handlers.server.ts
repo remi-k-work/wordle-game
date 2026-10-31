@@ -2,7 +2,7 @@
 import { Effect, Layer } from "effect";
 import { RpcTelemetry } from "./requests";
 import { TelemetryDB } from "@/features/telemetry/services/telemetry-db";
-import { ChartsDB } from "@/features/telemetry/services/charts-db/charts-db";
+import { ChartsDB } from "@/features/charts/services/charts-db";
 import { PgLive } from "@/lib/pg.server";
 import { makeRpcHandler } from "@/domain/helpers.server";
 

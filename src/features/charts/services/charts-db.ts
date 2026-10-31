@@ -9,19 +9,19 @@ import {
   BestRunTrophyCardArgs,
   GuessDistributionData,
   TimeToSolveDistributionData,
-} from "./models";
-import { cumulativeToDistribution } from "./helpers";
+} from "@/features/charts/domain/models";
+import { cumulativeToDistribution } from "@/features/charts/domain/helpers";
 import { dieOnDbFailure } from "@/domain/db-policy";
-import { anyAvgStatQuery } from "./queries/any-avg-stat";
-import { anyCounterQuery } from "./queries/any-counter";
-import { arcadeStreakDistributionQuery } from "./queries/arcade-streak-distribution";
-import { bestRunTrophyCardQuery } from "./queries/best-run-trophy-card";
-import { failedWordsFrequencyQuery } from "./queries/failed-words-frequency";
-import { guessDistributionQuery } from "./queries/guess-distribution";
-import { hardestWordsLeaderboardQuery } from "./queries/hardest-words-leaderboard";
-import { openingGuessesFrequencyQuery } from "./queries/opening-guesses-frequency";
-import { runDeathReasonFrequencyQuery } from "./queries/run-death-reason-frequency";
-import { timeToSolveDistributionQuery } from "./queries/time-to-solve-distribution";
+import { anyAvgStatQuery } from "@/features/charts/queries/any-avg-stat";
+import { anyCounterQuery } from "@/features/charts/queries/any-counter";
+import { arcadeStreakDistributionQuery } from "@/features/charts/queries/arcade-streak-distribution";
+import { bestRunTrophyCardQuery } from "@/features/charts/queries/best-run-trophy-card";
+import { failedWordsFrequencyQuery } from "@/features/charts/queries/failed-words-frequency";
+import { guessDistributionQuery } from "@/features/charts/queries/guess-distribution";
+import { hardestWordsLeaderboardQuery } from "@/features/charts/queries/hardest-words-leaderboard";
+import { openingGuessesFrequencyQuery } from "@/features/charts/queries/opening-guesses-frequency";
+import { runDeathReasonFrequencyQuery } from "@/features/charts/queries/run-death-reason-frequency";
+import { timeToSolveDistributionQuery } from "@/features/charts/queries/time-to-solve-distribution";
 
 // Schema.decodeEffect builds a parser on every call, so build the array
 // decoders once at module scope instead of per request

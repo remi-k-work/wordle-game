@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
-import { runDeathReasonFrequencyAtom } from "@/features/telemetry/state/charts";
+import { runDeathReasonFrequencyAtom } from "@/features/charts/state/charts";
 
 // components
 import { ChartBody } from "./chart-body";

@@ -3,7 +3,7 @@ import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { msg, useGT, useMessages } from "gt-react";
-import { timeToSolveDistributionAtom } from "@/features/telemetry/state/charts";
+import { timeToSolveDistributionAtom } from "@/features/charts/state/charts";
 import { XAxis } from "recharts";
 import { maxSecondsToSpeedMultiplier, speedMultiplierToCategoryEmoji, speedMultiplierToCategoryMessage } from "@/features/game/domain/formatters";
 

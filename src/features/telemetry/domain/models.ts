@@ -5,9 +5,6 @@ import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "
 // constants
 import { MAX_TURNS } from "@/features/game/domain/constants";
 
-// types
-export type BrowseCharts = typeof BrowseCharts.Type;
-
 export class AddGlobalPulse extends Schema.Class<AddGlobalPulse, { readonly brand: unique symbol }>("AddGlobalPulse")({
   sessionId: Schema.Trim.check(Schema.isUUID()),
   instanceId: Schema.Trim.check(Schema.isUUID()),
@@ -34,7 +31,3 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent, { readonly br
   guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS }))),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
-
-export const BrowseCharts = Schema.Struct({
-  sl: SolutionsLanguage,
-});

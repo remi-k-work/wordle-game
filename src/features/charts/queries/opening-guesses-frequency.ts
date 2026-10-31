@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { SqlClient } from "effect/sql";
-import { OpeningGuessesFrequencyData } from "@/features/telemetry/services/charts-db/models";
+import { OpeningGuessesFrequencyData } from "@/features/charts/domain/models";
 import { makeWordFrequencyQuery } from "./make-word-frequency-query";
 
 export const openingGuessesFrequencyQuery = (sql: SqlClient.SqlClient) =>

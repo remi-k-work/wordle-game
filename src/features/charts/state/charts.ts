@@ -10,7 +10,7 @@ import { sessionIdAtom } from "@/features/player/state/player";
 // types
 import type { Context } from "effect";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { AnyAvgStatArgs, AnyCounterArgs, BestRunTrophyCardArgs } from "@/features/telemetry/services/charts-db/models";
+import type { AnyAvgStatArgs, AnyCounterArgs, BestRunTrophyCardArgs } from "@/features/charts/domain/models";
 
 // Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
 const nullToInfinity = (value: number | null) => value ?? Infinity;

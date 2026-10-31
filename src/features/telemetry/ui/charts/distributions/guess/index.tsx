@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
-import { guessDistributionAtom } from "@/features/telemetry/state/charts";
+import { guessDistributionAtom } from "@/features/charts/state/charts";
 import { XAxis } from "recharts";
 
 // components

@@ -2,7 +2,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
-import { hardestWordsLeaderboardAtom } from "@/features/telemetry/state/charts";
+import { hardestWordsLeaderboardAtom } from "@/features/charts/state/charts";
 import { XAxis, YAxis } from "recharts";
 import { formatSeconds } from "@/domain/formatters";
 
@@ -13,7 +13,7 @@ import { HardestWordsLeaderboardChartSkeleton } from "./skeleton";
 
 // types
 import type { TooltipPayloadEntry } from "recharts";
-import type { HardestWordsLeaderboardData } from "@/features/telemetry/services/charts-db/models";
+import type { HardestWordsLeaderboardData } from "@/features/charts/domain/models";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface HardestWordsLeaderboardChartProps {

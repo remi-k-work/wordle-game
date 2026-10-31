@@ -17,7 +17,7 @@ import {
   OpeningGuessesFrequencyData,
   RunDeathReasonFrequencyData,
   TimeToSolveDistributionData,
-} from "@/features/telemetry/services/charts-db/models";
+} from "@/features/charts/domain/models";
 
 export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("addGlobalPulse", {
