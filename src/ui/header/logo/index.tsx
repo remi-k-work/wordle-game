@@ -9,7 +9,7 @@ import { useGT } from "gt-react";
 import { LogoIcon } from "@/assets/icons/logo";
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 const MotionLink = motion.create(Link);
 
@@ -21,8 +21,8 @@ export function Logo() {
       className="flex-none"
       to="/"
       title={gt("Wordle Overdrive")}
-      whileHover={{ rotate: -6, scale: motionTokens.scale.pop }}
-      transition={springs.snappy}
+      whileHover={{ rotate: -6, scale: MOTION_TOKENS.scale.pop }}
+      transition={SPRINGS.snappy}
     >
       <LogoIcon className="size-11 sm:size-13" />
     </MotionLink>

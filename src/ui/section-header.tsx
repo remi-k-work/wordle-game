@@ -12,17 +12,17 @@ interface SectionHeaderProps {
 }
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 const SECTION_HEADER_CLASSES = cn("my-8 bg-linear-to-r from-secondary to-surface-1 p-3 font-sans text-lg", "sm:text-2xl lg:text-3xl");
 
 export function SectionHeader({ title }: SectionHeaderProps) {
   return (
     <motion.h2
-      initial={{ opacity: 0, y: motionTokens.distance.md }}
+      initial={{ opacity: 0, y: MOTION_TOKENS.distance.md }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={springs.gentle}
+      transition={SPRINGS.gentle}
       className={SECTION_HEADER_CLASSES}
     >
       {title}

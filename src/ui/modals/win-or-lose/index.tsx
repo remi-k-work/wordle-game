@@ -9,7 +9,7 @@ import { Button } from "@base-ui/react/button";
 import { Modal } from "@/ui/modal";
 import { YouWin } from "./you-win";
 import { Nevermind } from "./nevermind";
-import { GameFlowButton } from "@/features/game/ui/flow-button";
+import { GameFlowButton } from "@/features/game/ui/game-flow-button";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";

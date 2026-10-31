@@ -11,7 +11,7 @@ import {
 
 // components
 import { T } from "gt-react";
-import { GameFlowButton } from "@/features/game/ui/flow-button";
+import { GameFlowButton } from "@/features/game/ui/game-flow-button";
 import { SpeakButtonNatural, SpeakButtonNaturalSkeleton, SpeakButtonRegular, SpeakButtonRegularSkeleton } from "@/ui/speak-button";
 import { RiddleText, RiddleTextSkeleton } from "./riddle-text";
 

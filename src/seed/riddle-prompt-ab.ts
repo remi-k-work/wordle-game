@@ -12,6 +12,9 @@ import { SeedLayer } from "./runtime";
 // assets
 import definitionsPlJson from "@/assets/data/definitions-pl.json";
 
+// types
+import type { TheSecretWord, WordMeta } from "@/features/game/domain/models";
+
 const MainLayer = Layer.mergeAll(SeedLayer, AiClientsWithHttp);
 
 // Validate the build-time definition asset once, mirroring the RPC handler
@@ -43,12 +46,12 @@ const GEMMA_PLAN = ExecutionPlan.make({
   schedule: Schedule.exponential("1 second", 2),
 });
 
-const getDefinition = (theSecretWord: string) =>
+const getDefinition = (theSecretWord: TheSecretWord) =>
   Option.fromNullishOr(DEFINITIONS_PL[theSecretWord]).pipe(Effect.fromOption(() => new MissingDefinitionError({ theSecretWord })));
 
 // Mirrors the single-field generation flow so the A/B uses the exact production
 // prompt and schema construction, while exposing the model that actually ran
-const generateRiddle = Effect.fn("generateRiddle")(function* (theSecretWord: string, wordDefinition: Option.Option<string>) {
+const generateRiddle = Effect.fn("generateRiddle")(function* (theSecretWord: TheSecretWord, wordDefinition: WordMeta["wordDefinition"]) {
   const languageModel = yield* LanguageModel.LanguageModel;
   const modelName = yield* Model.ModelName;
   const options = riddleGenerationOptions(theSecretWord, "Pl", wordDefinition);
@@ -63,7 +66,7 @@ const generateRiddle = Effect.fn("generateRiddle")(function* (theSecretWord: str
   return { modelName, riddle: value.riddle } as const;
 });
 
-const runCase = <E, R>(label: string, theSecretWord: string, effect: Effect.Effect<{ readonly modelName: string; readonly riddle: string }, E, R>) =>
+const runCase = <E, R>(label: string, theSecretWord: TheSecretWord, effect: Effect.Effect<{ readonly modelName: string; readonly riddle: string }, E, R>) =>
   effect.pipe(
     Effect.timed,
     Effect.matchEffect({

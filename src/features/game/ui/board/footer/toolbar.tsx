@@ -2,7 +2,7 @@
 import { HacksMenu, HacksMenuSkeleton } from "@/features/overdrive-hacks/ui/hacks-menu";
 import { Riddle, RiddleSkeleton } from "@/features/game/ui/riddle";
 import { GameLangChanger, GameLangChangerSkeleton } from "@/features/settings/ui/lang-changer";
-import { GameFlowButton, GameFlowButtonSkeleton } from "@/features/game/ui/flow-button";
+import { GameFlowButton, GameFlowButtonSkeleton } from "@/features/game/ui/game-flow-button";
 
 export function Toolbar() {
   return (

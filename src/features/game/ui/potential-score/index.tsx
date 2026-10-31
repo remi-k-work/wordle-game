@@ -11,7 +11,7 @@ import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 import { Progress } from "@base-ui/react/progress";
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 export function PotentialScore() {
   const potentialScore = useAtomValue(wordChallengePotentialScoreAtom);
@@ -20,9 +20,9 @@ export function PotentialScore() {
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: motionTokens.distance.sm }}
+      initial={{ opacity: 0, y: MOTION_TOKENS.distance.sm }}
       animate={{ opacity: 1, y: 0 }}
-      transition={springs.gentle}
+      transition={SPRINGS.gentle}
       className="grid flex-1 place-items-center rounded-md border border-accent bg-surface-2 px-2 py-1"
     >
       <h2 className="font-sans text-sm font-semibold tracking-widest text-accent uppercase">

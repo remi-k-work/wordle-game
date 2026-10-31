@@ -7,7 +7,7 @@ import { T, useGT } from "gt-react";
 import { Button } from "@base-ui/react/button";
 import { GamePopover } from "@/ui/game-popover";
 import { GameLangChanger } from "@/features/settings/ui/lang-changer";
-import { GameFlowButton } from "@/features/game/ui/flow-button";
+import { GameFlowButton } from "@/features/game/ui/game-flow-button";
 
 // assets
 import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "@heroicons/react/24/outline";

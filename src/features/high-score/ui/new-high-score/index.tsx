@@ -11,7 +11,7 @@ import { Initials } from "./initials";
 import { TrophyIcon } from "@heroicons/react/24/outline";
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 export function NewHighScore() {
   // Derived boolean atom: re-renders only when visibility actually flips
@@ -23,10 +23,10 @@ export function NewHighScore() {
         <motion.section
           className="grid place-items-center gap-4 rounded-md border-2 border-accent p-4"
           layout
-          initial={{ opacity: 0, scale: motionTokens.scale.press, y: motionTokens.distance.sm }}
+          initial={{ opacity: 0, scale: MOTION_TOKENS.scale.press, y: MOTION_TOKENS.distance.sm }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: motionTokens.scale.press, y: motionTokens.distance.sm }}
-          transition={springs.gentle}
+          exit={{ opacity: 0, scale: MOTION_TOKENS.scale.press, y: MOTION_TOKENS.distance.sm }}
+          transition={SPRINGS.gentle}
         >
           <div className="flex items-center gap-2 text-accent">
             <TrophyIcon className="size-11" />

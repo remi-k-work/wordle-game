@@ -14,7 +14,7 @@ interface InfoLineProps {
 }
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 export function InfoLine({ message, className }: InfoLineProps) {
   return (
@@ -25,10 +25,10 @@ export function InfoLine({ message, className }: InfoLineProps) {
           aria-live="polite"
           className={cn("mb-4 flex max-w-none items-center justify-center gap-2 border px-6 py-9 text-xl", className)}
           layout
-          initial={{ opacity: 0, scale: motionTokens.scale.press, y: motionTokens.distance.sm }}
+          initial={{ opacity: 0, scale: MOTION_TOKENS.scale.press, y: MOTION_TOKENS.distance.sm }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: motionTokens.scale.press, y: motionTokens.distance.sm }}
-          transition={springs.gentle}
+          exit={{ opacity: 0, scale: MOTION_TOKENS.scale.press, y: MOTION_TOKENS.distance.sm }}
+          transition={SPRINGS.gentle}
         >
           <InformationCircleIcon className="size-11 flex-none" />
           {message}

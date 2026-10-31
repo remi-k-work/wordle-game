@@ -9,51 +9,31 @@ import { overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state
 import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
 
 // components
-import { GuessTile } from "./guess-tile";
+import { CurrentGuessTile } from "./current-guess-tile";
 
 // types
-import type { Tile } from "@/features/game/domain/models";
-import type { SonarReveal } from "@/features/overdrive-hacks/domain/models";
-
-interface CurrentGuessTileProps {
-  tile: Tile;
-  tileIndex: number;
-  currentLength: number;
-}
+import type { Tile, WordChallenge } from "@/features/game/domain/models";
+import type { OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 
 // constants
 import { WORD_LENGTH } from "@/features/game/domain/constants";
 
 // One row of current-guess tiles: typed letters first, then any sonar-revealed vowels, then the remaining empty positions
-function buildCurrentGuessTiles(currentGuessWord: string, isInvalidGuess: boolean, sonarReveals: ReadonlyArray<SonarReveal>): Tile[] {
+function buildCurrentGuessTiles(
+  currentGuessWord: WordChallenge["currentGuessWord"],
+  isInvalidGuess: boolean,
+  sonarReveals: OverdriveHacks["sonarReveals"]
+): Tile[] {
   // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
   const vowelByPosition = sonarVowelByPosition(sonarReveals);
 
   return Array.from({ length: WORD_LENGTH }, (_, position): Tile => {
     const typedLetter = currentGuessWord[position];
-
     if (typedLetter !== undefined) return { tileKey: typedLetter, color: isInvalidGuess ? "red" : "" };
 
     const sonarVowel = vowelByPosition.get(position);
     return sonarVowel ? { tileKey: sonarVowel, color: "green" } : { tileKey: "", color: "" };
   });
-}
-
-// A single tile in the active guess row:
-// - a typed letter when its index is < currentLength
-// - a sonar-revealed vowel when its index is >= currentLength and it carries a key
-// - empty otherwise
-// Only the most recently typed tile bounces; sonar-revealed tiles never bounce
-function CurrentGuessTile({ tile, tileIndex, currentLength }: CurrentGuessTileProps) {
-  // Typed letters occupy indices < currentLength; sonar-revealed tiles occupy
-  // indices >= currentLength with a non-empty key, so a tile at or past
-  // currentLength with a key must be a sonar reveal
-  const isSonarReveal = tileIndex >= currentLength && tile.tileKey !== "";
-
-  // Only the most recently typed tile bounces, and never a sonar-revealed tile
-  const isLastTypedTile = tile.tileKey !== "" && tileIndex === currentLength - 1;
-
-  return <GuessTile tile={tile} bounceAnim={isLastTypedTile && !isSonarReveal} isSonarReveal={isSonarReveal} />;
 }
 
 export function CurrentGuess() {

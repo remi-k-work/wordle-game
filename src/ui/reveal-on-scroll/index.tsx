@@ -13,16 +13,16 @@ interface RevealOnScrollProps {
 }
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 const CONTAINER_VARIANTS = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.08, delayChildren: motionTokens.duration.normal } },
+  visible: { transition: { staggerChildren: 0.08, delayChildren: MOTION_TOKENS.duration.normal } },
 } as const;
 
 const ITEM_VARIANTS = {
-  hidden: { opacity: 0, y: motionTokens.distance.md },
-  visible: { opacity: 1, y: 0, transition: springs.gentle },
+  hidden: { opacity: 0, y: MOTION_TOKENS.distance.md },
+  visible: { opacity: 1, y: 0, transition: SPRINGS.gentle },
 } as const;
 
 export function RevealOnScroll({ children, staggerChildren = false }: RevealOnScrollProps) {
@@ -42,10 +42,10 @@ export function RevealOnScroll({ children, staggerChildren = false }: RevealOnSc
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: motionTokens.distance.md }}
+      initial={{ opacity: 0, y: MOTION_TOKENS.distance.md }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={springs.gentle}
+      transition={SPRINGS.gentle}
     >
       {children}
     </motion.div>

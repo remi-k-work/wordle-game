@@ -1,5 +1,5 @@
 // Shared motion tokens — single source of truth for every animation in the app
-export const motionTokens = {
+export const MOTION_TOKENS = {
   duration: { instant: 0.08, fast: 0.18, normal: 0.35, slow: 0.6, crawl: 1.0 },
   easing: { smooth: [0.22, 1, 0.36, 1], sharp: [0.4, 0, 0.2, 1], bounce: [0.34, 1.56, 0.64, 1], linear: [0, 0, 1, 1] },
   distance: { xs: 4, sm: 8, md: 16, lg: 24, xl: 48 },
@@ -7,7 +7,7 @@ export const motionTokens = {
 } as const;
 
 // Spring presets — physics-based transitions for natural feel
-export const springs = {
+export const SPRINGS = {
   snappy: { type: "spring", stiffness: 300, damping: 30 },
   gentle: { type: "spring", stiffness: 120, damping: 14 },
   bouncy: { type: "spring", stiffness: 400, damping: 10 },

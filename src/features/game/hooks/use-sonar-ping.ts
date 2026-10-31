@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import { useAnimate } from "motion/react";
 
 // constants
-import { motionTokens } from "@/lib/motion-tokens";
+import { MOTION_TOKENS } from "@/lib/motion-tokens";
 
 export function useSonarPing(isEnabled: boolean) {
   const [scope, animate] = useAnimate();
@@ -22,7 +22,7 @@ export function useSonarPing(isEnabled: boolean) {
       const ping = animate(
         node,
         { scale: [1, 1.15, 1], boxShadow: ["none", "0 0 24px var(--color-accent)", "none"], borderColor: ["", "var(--color-accent)", ""] },
-        { duration: motionTokens.duration.slow, ease: motionTokens.easing.sharp }
+        { duration: MOTION_TOKENS.duration.slow, ease: MOTION_TOKENS.easing.sharp }
       );
       stopPulse = () => ping.stop();
 
@@ -34,7 +34,7 @@ export function useSonarPing(isEnabled: boolean) {
       const controls = animate(
         node,
         { boxShadow: ["none", "0 0 12px var(--color-accent)", "none"] },
-        { duration: motionTokens.duration.crawl * 2, repeat: Infinity, ease: "easeInOut" }
+        { duration: MOTION_TOKENS.duration.crawl * 2, repeat: Infinity, ease: "easeInOut" }
       );
       stopPulse = () => {
         controls.stop();

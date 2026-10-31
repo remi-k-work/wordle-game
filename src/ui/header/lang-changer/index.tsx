@@ -21,7 +21,7 @@ import { PlFlagIcon } from "@/assets/icons/pl-flag";
 import { ReactNode } from "react";
 
 // constants
-import { springs } from "@/lib/motion-tokens";
+import { SPRINGS } from "@/lib/motion-tokens";
 
 const MotionUsFlagIcon = motion.create(UsFlagIcon);
 const MotionPlFlagIcon = motion.create(PlFlagIcon);
@@ -35,7 +35,7 @@ const LOCALE_FLAGS: Record.ReadonlyRecord<string, ReactNode> = Record.fromEntrie
       initial={{ opacity: 0, rotate: -90 }}
       animate={{ opacity: 1, rotate: 0 }}
       exit={{ opacity: 0, rotate: 90 }}
-      transition={springs.snappy}
+      transition={SPRINGS.snappy}
     />,
   ],
   [
@@ -46,7 +46,7 @@ const LOCALE_FLAGS: Record.ReadonlyRecord<string, ReactNode> = Record.fromEntrie
       initial={{ opacity: 0, rotate: -90 }}
       animate={{ opacity: 1, rotate: 0 }}
       exit={{ opacity: 0, rotate: 90 }}
-      transition={springs.snappy}
+      transition={SPRINGS.snappy}
     />,
   ],
 ]);

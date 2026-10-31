@@ -1,10 +1,9 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { Match } from "effect";
-import { useAtomSet, useAtomValue } from "@effect/atom-react";
+import { useAtomSet } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state/alert";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
-import { gameFlowVariantAtom } from "@/features/game/state/game-flow-variant";
 import { T, useGT } from "gt-react";
 
 // components
@@ -17,7 +16,8 @@ import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/out
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { GameFlowVariant } from "@/features/game/state/game-flow-variant";
 
-interface GameFlowButtonProps extends ComponentPropsWithoutRef<typeof Button> {
+interface GameFlowButtonLiveProps extends ComponentPropsWithoutRef<typeof Button> {
+  variant: Exclude<GameFlowVariant, "skeleton">;
   keepText?: boolean;
   onClicked?: () => void;
 }
@@ -30,31 +30,15 @@ interface GameFlowAction {
   onClick: () => void;
 }
 
-// `GameFlowButton` decides which variant to show (skeleton vs live); it only
-// subscribes to the derived variant atom, so it doesn't re-render on every
-// keystroke — only when the flow variant actually changes
-export function GameFlowButton({ className, keepText = false, onClicked, ...rest }: GameFlowButtonProps) {
-  const variant = useAtomValue(gameFlowVariantAtom);
-
-  if (variant === "skeleton") return <GameFlowButtonSkeleton className={className} keepText={keepText} {...rest} />;
-  return <GameFlowButtonLive variant={variant} className={className} keepText={keepText} onClicked={onClicked} {...rest} />;
-}
-
 // `GameFlowButtonLive` resolves the current flow action (Next / Start / Forfeit)
 // and renders the button; all domain logic about what each variant means lives
 // here, keeping `GameFlowButton` focused on variant selection
 // `variant` excludes "skeleton": `GameFlowButton` renders that variant directly,
 // so `GameFlowButtonLive` only ever receives a live variant
-function GameFlowButtonLive({
-  variant,
-  className,
-  keepText = false,
-  onClicked,
-  ...rest
-}: GameFlowButtonProps & { variant: Exclude<GameFlowVariant, "skeleton"> }) {
+export function GameFlowButtonLive({ variant, className, keepText = false, onClicked, ...rest }: GameFlowButtonLiveProps) {
+  const gt = useGT();
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
-  const gt = useGT();
 
   const action = Match.value(variant).pipe(
     Match.when("next", (): GameFlowAction => ({
@@ -91,14 +75,6 @@ function GameFlowButtonLive({
     >
       {action.icon}
       {keepText ? action.label : <span className="hidden sm:block">{action.label}</span>}
-    </Button>
-  );
-}
-
-export function GameFlowButtonSkeleton({ className, keepText = false, ...rest }: GameFlowButtonProps) {
-  return (
-    <Button className={cn("button", !keepText && "max-sm:p-1", className)} disabled {...rest}>
-      &nbsp;
     </Button>
   );
 }

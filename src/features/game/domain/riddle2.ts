@@ -4,7 +4,7 @@ import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { matchLanguage } from "./helpers";
 
 // types
-import type { SolutionsLanguage, TheSecretWord } from "./models";
+import type { SolutionsLanguage, TheSecretWord, WordMeta } from "./models";
 
 // constants
 const SYSTEM_PROMPT_EN = (theSecretWord: TheSecretWord) => `
@@ -48,21 +48,21 @@ Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój r
 // A definition is optional because the riddle flow must still work when the
 // definition asset is unavailable. When present, it disambiguates exotic words
 // and homonyms without adding another RPC round-trip
-const definitionContextEn = (wordDefinition: Option.Option<string>) =>
+const definitionContextEn = (wordDefinition: WordMeta["wordDefinition"]) =>
   Option.match(wordDefinition, {
     onSome: (value) =>
       `Official dictionary meaning for reference: "${value}"\n-> Use this only to identify the intended sense of the secret word. Do not quote or closely paraphrase it, and never repeat the secret word or its inflected forms.\n\n`,
     onNone: () => "",
   });
-const definitionContextPl = (wordDefinition: Option.Option<string>) =>
+const definitionContextPl = (wordDefinition: WordMeta["wordDefinition"]) =>
   Option.match(wordDefinition, {
     onSome: (value) =>
       `Oficjalna definicja słownikowa do wglądu: "${value}"\n-> Użyj jej wyłącznie do ustalenia właściwego znaczenia ukrytego słowa. Nie cytuj jej ani nie parafrazuj zbyt blisko; nigdy nie powtarzaj ukrytego słowa ani jego form odmienionych.\n\n`,
     onNone: () => "",
   });
 
-const RIDDLE_PROMPT_EN = (wordDefinition: Option.Option<string>) => `${definitionContextEn(wordDefinition)}Craft the riddle now.`;
-const RIDDLE_PROMPT_PL = (wordDefinition: Option.Option<string>) => `${definitionContextPl(wordDefinition)}Stwórz zagadkę teraz.`;
+const RIDDLE_PROMPT_EN = (wordDefinition: WordMeta["wordDefinition"]) => `${definitionContextEn(wordDefinition)}Craft the riddle now.`;
+const RIDDLE_PROMPT_PL = (wordDefinition: WordMeta["wordDefinition"]) => `${definitionContextPl(wordDefinition)}Stwórz zagadkę teraz.`;
 const DESCRIPTION_EN = "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.";
 const DESCRIPTION_PL = "Zwykły tekst, krótka, poprawna gramatycznie zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.";
 
@@ -72,7 +72,7 @@ const DESCRIPTION_PL = "Zwykły tekst, krótka, poprawna gramatycznie zagadka (1
 export const riddleGenerationOptions = (
   theSecretWord: string,
   solutionsLanguage: SolutionsLanguage,
-  wordDefinition: Option.Option<string> = Option.none()
+  wordDefinition: WordMeta["wordDefinition"] = Option.none()
 ) => ({
   instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
   prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN(wordDefinition), RIDDLE_PROMPT_PL(wordDefinition)),
@@ -80,5 +80,8 @@ export const riddleGenerationOptions = (
   description: matchLanguage(solutionsLanguage, DESCRIPTION_EN, DESCRIPTION_PL),
 });
 
-export const generateRiddle = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage, wordDefinition: Option.Option<string> = Option.none()) =>
-  generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));
+export const generateRiddle = (
+  theSecretWord: TheSecretWord,
+  solutionsLanguage: SolutionsLanguage,
+  wordDefinition: WordMeta["wordDefinition"] = Option.none()
+) => generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));

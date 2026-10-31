@@ -12,8 +12,8 @@ import { SpinnerIcon } from "@/assets/icons/spinner";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 
 export function RiddlePopover() {
-  const isLoading = useAtomValue(wordMetaIsLoadingAtom);
   const gt = useGT();
+  const isLoading = useAtomValue(wordMetaIsLoadingAtom);
 
   return (
     <GamePopover title={gt("Riddle")} trigger={isLoading ? <SpinnerIcon className="size-11" /> : <SparklesIcon className="size-11" />} wide>

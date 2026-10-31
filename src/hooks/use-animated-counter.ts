@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { animate } from "motion";
 
 // constants
-import { motionTokens } from "@/lib/motion-tokens";
+import { MOTION_TOKENS } from "@/lib/motion-tokens";
 
 // Animated number counter. Always animates from the previous value to the
 // new one. Writes to a ref via the `motion` `animate()` helper — no React
@@ -28,8 +28,8 @@ export function useAnimatedCounter(value: number, locale: string) {
     if (!node) return;
 
     const controls = animate(previousRef.current, value, {
-      duration: motionTokens.duration.crawl,
-      ease: motionTokens.easing.smooth,
+      duration: MOTION_TOKENS.duration.crawl,
+      ease: MOTION_TOKENS.easing.smooth,
       onUpdate: (v) => {
         animatedValueRef.current = v;
         node.textContent = Math.round(v).toLocaleString(localeRef.current);

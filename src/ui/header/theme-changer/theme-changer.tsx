@@ -10,7 +10,7 @@ import { Button } from "@base-ui/react/button";
 import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 
 // constants
-import { springs } from "@/lib/motion-tokens";
+import { SPRINGS } from "@/lib/motion-tokens";
 
 const MotionMoonIcon = motion.create(MoonIcon);
 const MotionSunIcon = motion.create(SunIcon);
@@ -31,7 +31,7 @@ export default function ThemeChanger() {
             initial={{ opacity: 0, rotate: -90 }}
             animate={{ opacity: 1, rotate: 0 }}
             exit={{ opacity: 0, rotate: 90 }}
-            transition={springs.snappy}
+            transition={SPRINGS.snappy}
           />
         ) : (
           <MotionMoonIcon
@@ -40,7 +40,7 @@ export default function ThemeChanger() {
             initial={{ opacity: 0, rotate: -90 }}
             animate={{ opacity: 1, rotate: 0 }}
             exit={{ opacity: 0, rotate: 90 }}
-            transition={springs.snappy}
+            transition={SPRINGS.snappy}
           />
         )}
       </AnimatePresence>

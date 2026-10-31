@@ -13,7 +13,7 @@ interface PageHeaderProps {
 }
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 export function PageHeader({ title, description }: PageHeaderProps) {
   const messages = useMessages();
@@ -25,9 +25,9 @@ export function PageHeader({ title, description }: PageHeaderProps) {
         title={messages(title)}
       />
       <motion.p
-        initial={{ opacity: 0, y: motionTokens.distance.sm }}
+        initial={{ opacity: 0, y: MOTION_TOKENS.distance.sm }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ ...springs.gentle, delay: motionTokens.duration.slow }}
+        transition={{ ...SPRINGS.gentle, delay: MOTION_TOKENS.duration.slow }}
         className={cn("mb-8 bg-linear-to-r from-secondary to-surface-1 p-3 font-sans text-lg", "sm:text-2xl lg:text-3xl")}
       >
         {messages(description)}

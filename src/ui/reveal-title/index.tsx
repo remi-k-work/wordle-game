@@ -10,16 +10,16 @@ interface RevealTitleProps {
 }
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 const CONTAINER_VARIANTS = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.05, delayChildren: motionTokens.duration.fast } },
+  visible: { transition: { staggerChildren: 0.05, delayChildren: MOTION_TOKENS.duration.fast } },
 } as const;
 
 const SEGMENT_VARIANTS = {
   hidden: { opacity: 0, y: "100%" },
-  visible: { opacity: 1, y: 0, transition: springs.gentle },
+  visible: { opacity: 1, y: 0, transition: SPRINGS.gentle },
 } as const;
 
 const MotionH1 = motion.create("h1");

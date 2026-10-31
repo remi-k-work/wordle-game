@@ -1,8 +1,11 @@
+// services, features, and other libraries
+import { Record } from "effect";
+
 // types
 import type { Color } from "@/features/game/domain/models";
 
 // constants
-import { motionTokens } from "@/lib/motion-tokens";
+import { MOTION_TOKENS } from "@/lib/motion-tokens";
 
 export const TILE_COLOR_MAP = {
   grey: "[--_background:var(--color-tile-grey)] bg-(--_background)",
@@ -10,7 +13,7 @@ export const TILE_COLOR_MAP = {
   green: "[--_background:var(--color-tile-green)] bg-(--_background)",
   red: "[--_background:var(--color-destructive)] bg-(--_background)",
   "": "[--_background:transparent] bg-(--_background)",
-} as const satisfies Record<Color, string>;
+} as const satisfies Record.ReadonlyRecord<Color, string>;
 
 export const KEYPAD_COLOR_MAP = {
   grey: "var(--color-tile-grey)",
@@ -18,7 +21,7 @@ export const KEYPAD_COLOR_MAP = {
   green: "var(--color-tile-green)",
   red: "var(--color-destructive)",
   "": "transparent",
-} as const satisfies Record<Color, string>;
+} as const satisfies Record.ReadonlyRecord<Color, string>;
 
 // Single source of truth for the skeleton alphabet — mirrors the keypad pool
 export const ALPHABET = [
@@ -68,8 +71,8 @@ export const EMP_FRY_EXIT = {
     "0 0 0px transparent",
   ],
   transition: {
-    duration: motionTokens.duration.crawl * 6,
-    ease: motionTokens.easing.sharp,
+    duration: MOTION_TOKENS.duration.crawl * 6,
+    ease: MOTION_TOKENS.easing.sharp,
   },
 };
 

@@ -10,7 +10,7 @@ import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 // constants
-import { motionTokens, springs } from "@/lib/motion-tokens";
+import { MOTION_TOKENS, SPRINGS } from "@/lib/motion-tokens";
 
 export function Run() {
   const runScore = useAtomValue(runSessionRunScoreAtom);
@@ -21,9 +21,9 @@ export function Run() {
 
   return (
     <motion.section
-      initial={{ opacity: 0, y: motionTokens.distance.sm }}
+      initial={{ opacity: 0, y: MOTION_TOKENS.distance.sm }}
       animate={{ opacity: 1, y: 0 }}
-      transition={springs.gentle}
+      transition={SPRINGS.gentle}
       className="grid flex-2 place-items-center rounded-md border bg-secondary px-2 py-1"
     >
       <h2 className="font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">
