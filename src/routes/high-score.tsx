@@ -17,20 +17,20 @@ import { Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-sc
 // Skeletons live in dedicated recharts-free modules (see the per-module ./skeleton
 // files) so this statically-bundled route chunk stays lean; the real chart sections
 // import lazily below and stream in under their exact skeleton placeholders
-import { BrowseChartsSkeleton } from "@/features/telemetry/ui/charts/browse-charts/skeleton";
-import { BestRunTrophyCardChartSkeleton } from "@/features/telemetry/ui/charts/best-run-trophy-card/skeleton";
-import { TotalsSliderSkeleton } from "@/features/telemetry/ui/charts/totals-slider/skeleton";
-import { DistributionChartsSkeleton } from "@/features/telemetry/ui/charts/distributions/skeleton";
-import { FrequencyChartsSkeleton } from "@/features/telemetry/ui/charts/frequencies/skeleton";
+import { BrowseChartsSkeleton } from "@/features/charts/ui/browse-charts/skeleton";
+import { BestRunTrophyCardChartSkeleton } from "@/features/charts/ui/best-run-trophy-card/skeleton";
+import { TotalsSliderSkeleton } from "@/features/charts/ui/totals-slider/skeleton";
+import { DistributionChartsSkeleton } from "@/features/charts/ui/distribution-charts/skeleton";
+import { FrequencyChartsSkeleton } from "@/features/charts/ui/frequency-charts/skeleton";
 
 // Lazy chart sections (recharts, embla). Each one loads its own chunk via a concrete
 // module path — a shared barrel import would fuse them all (plus every other section)
 // into one chunk, so e.g. mounting the embla slider would also download recharts
-const BrowseCharts = lazy(() => import("@/features/telemetry/ui/charts/browse-charts").then((m) => ({ default: m.BrowseCharts })));
-const BestRunTrophyCardChart = lazy(() => import("@/features/telemetry/ui/charts/best-run-trophy-card").then((m) => ({ default: m.BestRunTrophyCardChart })));
-const TotalsSlider = lazy(() => import("@/features/telemetry/ui/charts/totals-slider").then((m) => ({ default: m.TotalsSlider })));
-const DistributionCharts = lazy(() => import("@/features/telemetry/ui/charts/distributions").then((m) => ({ default: m.DistributionCharts })));
-const FrequencyCharts = lazy(() => import("@/features/telemetry/ui/charts/frequencies").then((m) => ({ default: m.FrequencyCharts })));
+const BrowseCharts = lazy(() => import("@/features/charts/ui/browse-charts").then((m) => ({ default: m.BrowseCharts })));
+const BestRunTrophyCardChart = lazy(() => import("@/features/charts/ui/best-run-trophy-card").then((m) => ({ default: m.BestRunTrophyCardChart })));
+const TotalsSlider = lazy(() => import("@/features/charts/ui/totals-slider").then((m) => ({ default: m.TotalsSlider })));
+const DistributionCharts = lazy(() => import("@/features/charts/ui/distribution-charts").then((m) => ({ default: m.DistributionCharts })));
+const FrequencyCharts = lazy(() => import("@/features/charts/ui/frequency-charts").then((m) => ({ default: m.FrequencyCharts })));
 
 // The top-10 table lazily loads too: its module pulls in the motion runtime, which
 // would otherwise land in this statically-bundled route chunk (bundle-dynamic-imports)

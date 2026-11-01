@@ -4,11 +4,11 @@
 import { assign, setup, assertEvent } from "xstate";
 
 // types
-import type { BrowseCharts } from "@/features/telemetry/domain/models";
+import type { BrowseCharts } from "@/features/charts/domain/models";
 import type { useUrlScribe } from "@/hooks/use-url-scribe";
 
 // constants
-import { INITIAL_BROWSE_CHARTS } from "@/features/telemetry/domain/constants";
+import { INITIAL_BROWSE_CHARTS } from "@/features/charts/domain/constants";
 
 export const browseChartsMachine = setup({
   types: {} as {
