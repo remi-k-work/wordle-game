@@ -1,3 +1,6 @@
+// tanstack
+import { useRouterState } from "@tanstack/react-router";
+
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
@@ -10,11 +13,10 @@ import { SiteLangChanger } from "./lang-changer";
 // constants
 import { NAV_ITEMS } from "./constants";
 
-// Fully synchronous shell: Logo/NavItem/SiteLangChanger are static imports and render
-// in a single pass on both server and client (isomorphic execution model), so no
-// Suspense wrapper is needed — only ThemeChanger defers, behind its own
-// ClientOnly + Suspense boundary (see ./theme-changer)
 export function Header() {
+  const pathname = useRouterState({ select: ({ location }) => location.pathname });
+  if (pathname === "/game") return <header />;
+
   return (
     <header className={cn("z-10 flex items-center gap-1 bg-linear-to-b from-surface-1 via-surface-3 to-transparent p-1", "lg:sticky lg:top-0")}>
       <Logo />
