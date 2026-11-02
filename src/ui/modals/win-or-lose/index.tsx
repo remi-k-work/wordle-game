@@ -26,9 +26,15 @@ export function WinOrLoseModal() {
   const hasWon = useAtomValue(wordChallengeHasWonAtom);
   const gt = useGT();
 
+  // Resolve the outcome once: the same `hasWon` condition drives both the modal
+  // title and the rendered content, so state it in one place instead of repeating
+  // the condition inside the JSX
+  const title = hasWon ? gt("You Win") : gt("Run Over");
+  const content = hasWon ? <YouWin /> : <Nevermind />;
+
   return (
-    <Modal isOpen={isOpen} title={hasWon ? gt("You Win") : gt("Run Over")}>
-      {hasWon ? <YouWin /> : <Nevermind />}
+    <Modal isOpen={isOpen} title={title}>
+      {content}
 
       <section className={DIALOG_FOOTER_CLASSES}>
         <GameFlowButton keepText />

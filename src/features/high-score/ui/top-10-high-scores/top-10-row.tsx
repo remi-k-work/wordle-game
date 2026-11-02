@@ -30,9 +30,10 @@ const ROW_VARIANTS = {
   visible: { opacity: 1, y: 0, transition: SPRINGS.gentle },
 } as const;
 
-// DOM id of the row that holds the newly-set high score, used to scroll it into
-// view; defined once here so the JSX and the scroll effect stay in sync
-const NEW_HIGH_SCORE_ROW_ID = "newHighScoreRow";
+// Single source of truth for the DOM id of the row that holds the newly-set
+// high score; `Top10HighScores` imports it to scroll that row into view, so the
+// id and the scroll effect can't drift out of sync
+export const NEW_HIGH_SCORE_ROW_ID = "newHighScoreRow";
 
 const MotionTableRow = motion.create(TableRow);
 

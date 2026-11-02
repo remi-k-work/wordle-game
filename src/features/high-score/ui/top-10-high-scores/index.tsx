@@ -25,15 +25,12 @@ interface Top10HighScoresProps {
 
 // constants
 import { MOTION_TOKENS } from "@/lib/motion-tokens";
+import { NEW_HIGH_SCORE_ROW_ID } from "./top-10-row";
 
 const CONTAINER_VARIANTS = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.05, delayChildren: MOTION_TOKENS.duration.fast } },
 } as const;
-
-// DOM id of the row that holds the newly-set high score, used to scroll it into
-// view; defined once here so the JSX and the scroll effect stay in sync
-const NEW_HIGH_SCORE_ROW_ID = "newHighScoreRow";
 
 const MotionTableBody = motion.create(TableBody);
 

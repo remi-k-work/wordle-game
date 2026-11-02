@@ -1,5 +1,5 @@
 // react
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
@@ -38,16 +38,16 @@ export function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
 
-  // Attach each key's color once here and drop greyed-out keys; the pool then
-  // only needs the keys it renders, not the full color map (and not a second
-  // copy of the key-dispatch handler)
-  const availableKeys = useMemo(
-    () =>
-      keys
-        .map((letter) => ({ letter, color: Option.getOrElse(HashMap.get(keypadColors, letter), () => EMPTY_KEY_COLOR) }))
-        .filter(({ color }) => color !== "grey"),
-    [keys, keypadColors]
-  );
+  // Attach each key's color and drop greyed-out keys; the pool only needs the
+  // keys it renders; `KeypadPool` destructures `letter`/`color` to primitives,
+  // and `KeypadKey` is memoized, so unchanged keys bail out by value even
+  // though `availableKeys` is a new array each render; `KeypadArea` re-renders
+  // only when `keypadColors` changes (its sole atom subscription), so a
+  // `useMemo` here would never cache across renders — the derivation runs on
+  // every render either way
+  const availableKeys = keys
+    .map((letter) => ({ letter, color: Option.getOrElse(HashMap.get(keypadColors, letter), () => EMPTY_KEY_COLOR) }))
+    .filter(({ color }) => color !== "grey");
 
   const handleKeyPressed = useCallback(
     (pressedKey: string) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey }),

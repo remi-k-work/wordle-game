@@ -22,7 +22,7 @@ interface GameFlowButtonLiveProps extends ComponentPropsWithoutRef<typeof Button
   onClicked?: () => void;
 }
 
-interface GameFlowAction {
+interface FlowAction {
   title: string;
   icon: ReactNode;
   label: ReactNode;
@@ -30,38 +30,54 @@ interface GameFlowAction {
   onClick: () => void;
 }
 
-// `GameFlowButtonLive` resolves the current flow action (Next / Start / Forfeit)
-// and renders the button; all domain logic about what each variant means lives
-// here, keeping `GameFlowButton` focused on variant selection
+// Resolves the button's action (title/icon/label/handler) from the current
+// flow variant; kept as a pure function so `GameFlowButtonLive` renders the
+// button without mixing in domain resolution logic
 // `variant` excludes "skeleton": `GameFlowButton` renders that variant directly,
-// so `GameFlowButtonLive` only ever receives a live variant
+// so `resolveFlowAction` only ever receives a live variant
+function resolveFlowAction(
+  variant: GameFlowButtonLiveProps["variant"],
+  deps: { gt: ReturnType<typeof useGT>; onNext: () => void; onStart: () => void; onForfeit: () => void }
+): FlowAction {
+  const { gt, onNext, onStart, onForfeit } = deps;
+
+  return Match.value(variant).pipe(
+    Match.when("next", (): FlowAction => ({
+      title: gt("Next Word"),
+      icon: <ForwardIcon className="size-11" />,
+      label: <T>Next Word</T>,
+      onClick: onNext,
+    })),
+    Match.when("start", (): FlowAction => ({
+      title: gt("Start New Run"),
+      icon: <PuzzlePieceIcon className="size-11" />,
+      label: <T>Start New Run</T>,
+      onClick: onStart,
+    })),
+    Match.when("forfeit", (): FlowAction => ({
+      title: gt("Forfeit Run"),
+      icon: <PowerIcon className="size-11" />,
+      label: <T>Forfeit Run</T>,
+      className: "bg-destructive",
+      onClick: onForfeit,
+    })),
+    Match.exhaustive
+  );
+}
+
+// `GameFlowButtonLive` renders the button for a resolved flow action; all domain
+// logic about what each variant means lives in `resolveFlowAction`.
 export function GameFlowButtonLive({ variant, className, keepText = false, onClicked, ...rest }: GameFlowButtonLiveProps) {
   const gt = useGT();
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
   const alertMachineEvent = useAtomSet(alertMachineAtom);
 
-  const action = Match.value(variant).pipe(
-    Match.when("next", (): GameFlowAction => ({
-      title: gt("Next Word"),
-      icon: <ForwardIcon className="size-11" />,
-      label: <T>Next Word</T>,
-      onClick: () => gameFlowMachineEvent({ type: "word.nextRequested" }),
-    })),
-    Match.when("start", (): GameFlowAction => ({
-      title: gt("Start New Run"),
-      icon: <PuzzlePieceIcon className="size-11" />,
-      label: <T>Start New Run</T>,
-      onClick: () => gameFlowMachineEvent({ type: "run.startRequested" }),
-    })),
-    Match.when("forfeit", (): GameFlowAction => ({
-      title: gt("Forfeit Run"),
-      icon: <PowerIcon className="size-11" />,
-      label: <T>Forfeit Run</T>,
-      className: "bg-destructive",
-      onClick: () => alertMachineEvent({ type: "opened", alertType: "forfeit-run" }),
-    })),
-    Match.exhaustive
-  );
+  const action = resolveFlowAction(variant, {
+    gt,
+    onNext: () => gameFlowMachineEvent({ type: "word.nextRequested" }),
+    onStart: () => gameFlowMachineEvent({ type: "run.startRequested" }),
+    onForfeit: () => alertMachineEvent({ type: "opened", alertType: "forfeit-run" }),
+  });
 
   return (
     <Button

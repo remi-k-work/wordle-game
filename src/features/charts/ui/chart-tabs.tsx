@@ -42,11 +42,9 @@ export function ChartTabs({ defaultValue, tabs }: { defaultValue: string; tabs: 
         ))}
         <Tabs.Indicator className={TABS_INDICATOR_CLASSES} />
       </Tabs.List>
-      {activeTab === undefined ? null : (
-        <ChartPanel key={activeTab.value} value={activeTab.value}>
-          {activeTab.content}
-        </ChartPanel>
-      )}
+      <ChartPanel key={activeTab.value} value={activeTab.value}>
+        {activeTab.content}
+      </ChartPanel>
     </Tabs.Root>
   );
 }

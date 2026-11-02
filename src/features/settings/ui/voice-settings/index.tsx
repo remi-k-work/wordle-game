@@ -1,7 +1,4 @@
-// The dialog body only ever mounts inside an open modal (client-side interaction),
-// so there is no code-splitting to preserve: import it directly
-import { VoiceSettings as VoiceSettingsBody } from "./voice-settings";
-
-export function VoiceSettings() {
-  return <VoiceSettingsBody />;
-}
+// Public entry for the voice-settings dialog body: re-export the body component
+// directly rather than wrapping it in a pass-through component with no
+// responsibility of its own
+export { VoiceSettings } from "./voice-settings";

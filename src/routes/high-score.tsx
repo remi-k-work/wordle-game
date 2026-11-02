@@ -8,6 +8,7 @@ import { msg } from "gt-react";
 import { HighScorePage } from "@/features/high-score/domain/models";
 
 // types
+import type { ReactNode } from "react";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 // components
@@ -69,6 +70,13 @@ function HighScore() {
   return <PageContent solutionsLanguage={sl} />;
 }
 
+// A lazy-loaded chart section: each section carries its own Suspense boundary
+// with a dedicated skeleton, so the page reads as a list of sections rather
+// than repeating Suspense scaffolding six times
+function LazySection({ fallback, children }: { fallback: ReactNode; children: ReactNode }) {
+  return <Suspense fallback={fallback}>{children}</Suspense>;
+}
+
 function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLanguage }) {
   return (
     <article className="mx-auto w-full max-w-384">
@@ -76,24 +84,24 @@ function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLangua
         title={msg("High Score & Charts")}
         description={msg("The following section displays the top 10 scores, along with various informative game charts.")}
       />
-      <Suspense fallback={<BrowseChartsSkeleton />}>
+      <LazySection fallback={<BrowseChartsSkeleton />}>
         <BrowseCharts />
-      </Suspense>
-      <Suspense fallback={<Top10HighScoresSkeleton />}>
+      </LazySection>
+      <LazySection fallback={<Top10HighScoresSkeleton />}>
         <Top10HighScores solutionsLanguage={solutionsLanguage} />
-      </Suspense>
-      <Suspense fallback={<BestRunTrophyCardChartSkeleton />}>
+      </LazySection>
+      <LazySection fallback={<BestRunTrophyCardChartSkeleton />}>
         <BestRunTrophyCardChart solutionsLanguage={solutionsLanguage} />
-      </Suspense>
-      <Suspense fallback={<TotalsSliderSkeleton />}>
+      </LazySection>
+      <LazySection fallback={<TotalsSliderSkeleton />}>
         <TotalsSlider solutionsLanguage={solutionsLanguage} />
-      </Suspense>
-      <Suspense fallback={<DistributionChartsSkeleton />}>
+      </LazySection>
+      <LazySection fallback={<DistributionChartsSkeleton />}>
         <DistributionCharts solutionsLanguage={solutionsLanguage} />
-      </Suspense>
-      <Suspense fallback={<FrequencyChartsSkeleton />}>
+      </LazySection>
+      <LazySection fallback={<FrequencyChartsSkeleton />}>
         <FrequencyCharts solutionsLanguage={solutionsLanguage} />
-      </Suspense>
+      </LazySection>
     </article>
   );
 }

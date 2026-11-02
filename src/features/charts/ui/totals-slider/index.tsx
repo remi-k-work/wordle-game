@@ -7,35 +7,24 @@ import { Slide } from "./slide";
 import { Dot } from "./buttons/dot";
 import { Next } from "./buttons/next";
 import { Prev } from "./buttons/prev";
-import { AnyAvgStatChart } from "@/features/charts/ui/any-avg-stat";
-import { AnyCounterChart } from "@/features/charts/ui/any-counter";
+import { TotalsSlideChart } from "./totals-slide-chart";
 import { TotalsSlideSkeleton } from "./skeleton";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { TotalsSlideSpec } from "./skeleton";
+import type { TotalsSlideSpec } from "./constants";
 
 interface TotalsSliderProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
 // constants
-import { TOTALS_SLIDES } from "./skeleton";
+import { TOTALS_SLIDES } from "./constants";
 
-function TotalsSlideChart({ spec, solutionsLanguage }: { spec: TotalsSlideSpec; solutionsLanguage: SolutionsLanguage }) {
-  if (spec.kind === "counter")
-    return <AnyCounterChart counterName={spec.counterName} solutionsLanguage={solutionsLanguage} title={spec.title} personalHeader={spec.personalHeader} />;
-
-  return (
-    <AnyAvgStatChart
-      statColumn={spec.statColumn}
-      statTable={spec.statTable}
-      solutionsLanguage={solutionsLanguage}
-      title={spec.title}
-      personalHeader={spec.personalHeader}
-    />
-  );
-}
+// Each slide spec maps to a stable, unique key (counter name or stat column)
+// shared by the slide and its navigation dot — defined once so the two `.map()`
+// calls below can't drift out of sync
+const slideKey = (spec: TotalsSlideSpec): string => (spec.kind === "counter" ? spec.counterName : spec.statColumn);
 
 export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel();
@@ -45,14 +34,11 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
     <article className="grid grid-cols-[auto_1fr] grid-rows-[1fr_auto] gap-4 bg-surface-3 [grid-template-areas:'viewport_viewport''prevnext_dots']">
       <section ref={emblaRef} className="overflow-hidden select-none [grid-area:viewport]">
         <div className="-ms-4 flex touch-pan-y touch-pinch-zoom">
-          {TOTALS_SLIDES.map((spec, index) => {
-            const key = spec.kind === "counter" ? spec.counterName : spec.statColumn;
-            return (
-              <Slide key={key} index={index} selectedIndex={selectedIndex} skeleton={<TotalsSlideSkeleton spec={spec} />}>
-                <TotalsSlideChart spec={spec} solutionsLanguage={solutionsLanguage} />
-              </Slide>
-            );
-          })}
+          {TOTALS_SLIDES.map((spec, index) => (
+            <Slide key={slideKey(spec)} index={index} selectedIndex={selectedIndex} skeleton={<TotalsSlideSkeleton spec={spec} />}>
+              <TotalsSlideChart spec={spec} solutionsLanguage={solutionsLanguage} />
+            </Slide>
+          ))}
         </div>
       </section>
       <header className="flex items-center gap-4 p-2 [grid-area:prevnext]">
@@ -60,10 +46,9 @@ export function TotalsSlider({ solutionsLanguage }: TotalsSliderProps) {
         <Next onNext={() => emblaApi?.scrollNext()} disabled={!canScrollNext} />
       </header>
       <footer className="flex flex-wrap items-center justify-end gap-1 p-2 [grid-area:dots]">
-        {TOTALS_SLIDES.map((spec, index) => {
-          const key = spec.kind === "counter" ? spec.counterName : spec.statColumn;
-          return <Dot key={key} index={index} selected={index === selectedIndex} onSelect={(dotIndex) => emblaApi?.scrollTo(dotIndex)} />;
-        })}
+        {TOTALS_SLIDES.map((spec, index) => (
+          <Dot key={slideKey(spec)} index={index} selected={index === selectedIndex} onSelect={(dotIndex) => emblaApi?.scrollTo(dotIndex)} />
+        ))}
       </footer>
     </article>
   );

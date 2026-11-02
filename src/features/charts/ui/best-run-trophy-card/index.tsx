@@ -1,35 +1,23 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { Atom, AsyncResult } from "effect/reactivity";
 import { msg, useMessages } from "gt-react";
 import { bestRunTrophyCardAtom } from "@/features/charts/state/charts";
 
 // components
 import { SectionHeader } from "@/ui/section-header";
-import { BestRunCard, BestRunCardSkeleton } from "./best-run-card";
+import { BestRunSlot } from "./best-run-slot";
 
 // types
-import type { ComponentProps } from "react";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 interface BestRunTrophyCardChartProps {
   solutionsLanguage: SolutionsLanguage;
 }
 
-type BestRunResult = Atom.Type<ReturnType<typeof bestRunTrophyCardAtom>>;
-type BestRunSlotProps = Pick<ComponentProps<typeof BestRunCard>, "Tag" | "variant" | "title"> & { result: BestRunResult };
-
-function BestRunSlot({ result, ...cardProps }: BestRunSlotProps) {
-  return AsyncResult.builder(result)
-    .onInitialOrWaiting(() => <BestRunCardSkeleton {...cardProps} />)
-    .onFailure(() => <BestRunCardSkeleton {...cardProps} />)
-    .onSuccess((bestRun) => <BestRunCard {...cardProps} bestRun={bestRun} />)
-    .render();
-}
-
 export function BestRunTrophyCardChart({ solutionsLanguage }: BestRunTrophyCardChartProps) {
   const bestRunPersonal = useAtomValue(bestRunTrophyCardAtom({ whichBestRun: "personal", solutionsLanguage }));
   const bestRunGlobal = useAtomValue(bestRunTrophyCardAtom({ whichBestRun: "global", solutionsLanguage }));
+
   const messages = useMessages();
   const personalTitle = messages(msg("Your Personal Best"));
   const globalTitle = messages(msg("Global Best"));

@@ -27,7 +27,14 @@ export function useAnimatedCounter(value: number, locale: string) {
     const node = nodeRef.current;
     if (!node) return;
 
-    const controls = animate(previousRef.current, value, {
+    // Capture the previous value BEFORE overwriting the ref: the cleanup of the
+    // previous effect run executes first on every update, so writing
+    // `previousRef.current = value` here would clobber the start value before
+    // `animate()` reads it, making every animation a no-op (start === end)
+    const previous = previousRef.current;
+    previousRef.current = value;
+
+    const controls = animate(previous, value, {
       duration: MOTION_TOKENS.duration.crawl,
       ease: MOTION_TOKENS.easing.smooth,
       onUpdate: (v) => {
@@ -37,7 +44,6 @@ export function useAnimatedCounter(value: number, locale: string) {
     });
 
     return () => {
-      previousRef.current = value;
       controls.stop();
     };
     // The animation only restarts when its numeric target changes; locale changes reformat the current frame through localeRef instead

@@ -27,17 +27,22 @@ export function Content() {
   const canSpeakRegular = Option.isSome(theOverride) && !isAwaiting && !isLoading;
   const canSpeakNatural = canSpeakRegular && Option.isSome(theOverrideAudio);
 
+  // Resolve the message to show before rendering, so the JSX only expresses
+  // structure (a pulsing paragraph containing a message) while the conditional
+  // logic stays in one named, easy-to-scan place; mirrors the same pattern used
+  // by `RiddleText` in the game feature
+  const isPulsing = isAwaiting || isLoading;
+  const message = isAwaiting ? (
+    <T>Waiting for the override being requested...</T>
+  ) : isLoading ? (
+    <T>Thinking...</T>
+  ) : (
+    Option.getOrElse(theOverride, () => <T>Override unavailable. You are on your own! Please try again later.</T>)
+  );
+
   return (
     <article className="mx-auto max-w-prose space-y-9">
-      <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", (isAwaiting || isLoading) && "animate-pulse")}>
-        {isAwaiting ? (
-          <T>Waiting for the override being requested...</T>
-        ) : isLoading ? (
-          <T>Thinking...</T>
-        ) : (
-          Option.getOrElse(theOverride, () => <T>Override unavailable. You are on your own! Please try again later.</T>)
-        )}
-      </p>
+      <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", isPulsing && "animate-pulse")}>{message}</p>
 
       <footer className={DIALOG_FOOTER_CLASSES}>
         <SpeakButtonRegular sanitizedText={theOverride} disabled={!canSpeakRegular}>

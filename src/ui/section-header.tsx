@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 interface SectionHeaderProps {
   // Already-translated display text: the header is purely presentational, so
   // callers decide how to resolve it (raw `msg()` ids in routes, `messages()`
-  // in chart modules). Both the live header and its skeleton share that one
+  // in chart modules); both the live header and its skeleton share that one
   // contract instead of one of them translating behind the caller's back
   title: string;
 }
