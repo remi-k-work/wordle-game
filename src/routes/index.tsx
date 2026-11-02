@@ -11,6 +11,7 @@ import { RevealOnScroll } from "@/ui/reveal-on-scroll";
 import { FeatureSection } from "@/ui/feature-section";
 import { FeatureText } from "@/ui/feature-text";
 import { ScoringSimulator } from "@/features/high-score/ui/scoring-simulator";
+import { FooterLink } from "@/ui/footer-link";
 
 // assets
 import { ArrowRightCircleIcon } from "@heroicons/react/24/outline";
@@ -104,6 +105,7 @@ function Home() {
           legendary, high-scoring run. You can never waste a keystroke by accident again.
         </FeatureText>
       </FeatureSection>
+      <FooterLink />
     </article>
   );
 }

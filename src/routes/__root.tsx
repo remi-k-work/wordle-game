@@ -4,7 +4,6 @@ import "@/assets/styles/globals.css";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { T, useGT } from "gt-react";
 import { GTProvider, getLocale, getTranslationsSnapshot } from "gt-tanstack-start";
 
 // components
@@ -42,8 +41,8 @@ const KEYWORDS = [
   "word puzzle",
 ].join(", ");
 
-// Site-wide tags only. Meta dedupes by name/property keeping the leaf value, so
-// routes that declare their own title (e.g. /high-score) override the one here.
+// Site-wide tags only; meta dedupes by name/property keeping the leaf value, so
+// routes that declare their own title (e.g. /high-score) override the one here
 // The root canonical "/" replaces the "every page canonicalizes to /" behavior
 // the Next.js root metadata used to produce
 export const ROOT_HEAD = {
@@ -86,9 +85,6 @@ export const ROOT_HEAD = {
     { rel: "icon", href: "/icon.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", href: "/apple-icon.png" },
     { rel: "manifest", href: "/manifest.webmanifest" },
-    // The footer links out to the portfolio site and loads its thumbnail image
-    // (rendering-resource-hints)
-    { rel: "preconnect", href: "https://www.remiforge.dev" },
   ],
 };
 
@@ -106,7 +102,7 @@ function RootComponent() {
   return <Outlet />;
 }
 
-// The html document shell; the router streams the route components into it.
+// The html document shell; the router streams the route components into it
 // next-themes keeps working: it only needs the suppressHydrationWarning marker
 // and the `class` attribute mode (no React-specific framework hooks)
 function RootDocument({ children }: { children: ReactNode }) {
@@ -133,51 +129,11 @@ function RootDocument({ children }: { children: ReactNode }) {
                 <Alerts />
               </Toastify>
             </AtomRegistryProvider>
-
-            <FooterLink />
           </ThemeProvider>
         </GTProvider>
 
         <Scripts />
       </body>
     </html>
-  );
-}
-
-function FooterLink() {
-  const gt = useGT();
-
-  return (
-    <a
-      href="https://www.remiforge.dev"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={gt("Visit RemiForge Portfolio (opens in a new tab)")}
-      className="mx-auto mt-9 flex max-w-xl flex-wrap items-center gap-5 rounded-xl border border-gray-700 bg-neutral-900 p-4 text-start text-neutral-200 no-underline transition-colors hover:border-gray-500"
-    >
-      <img
-        src="https://www.remiforge.dev/opengraph-image.jpg"
-        width="1200"
-        height="630"
-        alt={gt("RemiForge Portfolio")}
-        loading="lazy"
-        decoding="async"
-        className="aspect-1200/630 h-auto w-32 flex-none rounded-lg object-cover"
-      />
-      <div className="min-w-56 flex-1">
-        <div className="mb-1 text-sm tracking-wider text-neutral-400 uppercase">
-          <span aria-hidden="true">👨‍💻</span> <T>Built By</T>
-        </div>
-        <div className="flex items-center gap-2 text-2xl font-bold text-white">
-          RemiForge
-          <span aria-hidden="true" className="text-xl font-normal text-gray-500">
-            ↗
-          </span>
-        </div>
-        <div className="mt-1 text-sm text-neutral-400">
-          <T>Portfolio of Projects, Experiments & Contact</T>
-        </div>
-      </div>
-    </a>
   );
 }

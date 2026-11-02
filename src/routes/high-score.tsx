@@ -23,6 +23,7 @@ import { BestRunTrophyCardChartSkeleton } from "@/features/charts/ui/best-run-tr
 import { TotalsSliderSkeleton } from "@/features/charts/ui/totals-slider/skeleton";
 import { DistributionChartsSkeleton } from "@/features/charts/ui/distribution-charts/skeleton";
 import { FrequencyChartsSkeleton } from "@/features/charts/ui/frequency-charts/skeleton";
+import { FooterLink } from "@/ui/footer-link";
 
 // Lazy chart sections (recharts, embla). Each one loads its own chunk via a concrete
 // module path — a shared barrel import would fuse them all (plus every other section)
@@ -102,6 +103,7 @@ function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLangua
       <LazySection fallback={<FrequencyChartsSkeleton />}>
         <FrequencyCharts solutionsLanguage={solutionsLanguage} />
       </LazySection>
+      <FooterLink />
     </article>
   );
 }
