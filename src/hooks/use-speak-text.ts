@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { Array, Option } from "effect";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
@@ -13,8 +10,12 @@ import {
 } from "@/features/settings/state/game-settings";
 import { matchLanguage } from "@/features/game/domain/helpers";
 
+// A plain closure, not a `useCallback`: nothing in the body reads React state or
+// props (settings are read imperatively below), and every call site wraps it in
+// its own inline arrow, so a stable identity here would be discarded before it
+// could stabilize anything downstream
 export function useSpeakText() {
-  return useCallback((sanitizedText: string) => {
+  return (sanitizedText: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) {
       console.warn("Speech Synthesis is not supported in this environment.");
       return;
@@ -83,5 +84,5 @@ export function useSpeakText() {
     utterance.pitch = voicePitch;
 
     synth.speak(utterance);
-  }, []);
+  };
 }

@@ -1,11 +1,11 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
 import { runDeathReasonFrequencyAtom } from "@/features/charts/state/charts";
 
 // components
-import { ChartBody } from "./chart-body";
+import { ChartSection } from "@/features/charts/ui/chart-section";
+import { ChartBody } from "@/features/charts/ui/run-death-reason-frequency/chart-body";
 import { RunDeathReasonFrequencyChartSkeleton } from "./skeleton";
 
 // types
@@ -19,24 +19,21 @@ export function RunDeathReasonFrequencyChart({ solutionsLanguage }: RunDeathReas
   const runDeathReasonFrequency = useAtomValue(runDeathReasonFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
-  // No memoization needed: `ChartBody` is not wrapped in `React.memo`, so a
-  // stable `tooltipFormatter` reference buys nothing; a plain render-time
-  // function always sees the latest `gt` via closure and keeps the dependency
-  // surface simple
+  // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
+  const title = gt("Reasons why an arcade run ended");
+
   const tooltipFormatter = (value: unknown, name: unknown): readonly [string, string] => [gt("{count} times", { count: value }), String(name)] as const;
 
-  return AsyncResult.builder(runDeathReasonFrequency)
-    .onInitialOrWaiting(() => <RunDeathReasonFrequencyChartSkeleton />)
-    .onFailure(() => <RunDeathReasonFrequencyChartSkeleton />)
-    .onSuccess((runDeathReasonFrequency) => (
-      <ChartBody
-        runDeathReasonFrequency={runDeathReasonFrequency}
-        title={gt("Reasons why an arcade run ended")}
-        emptyMessage={gt("No frequency data tracked yet!")}
-        tooltipFormatter={tooltipFormatter}
-      />
-    ))
-    .render();
+  return (
+    <ChartSection
+      title={title}
+      result={runDeathReasonFrequency}
+      skeleton={<RunDeathReasonFrequencyChartSkeleton />}
+      emptyMessage={gt("No frequency data tracked yet!")}
+    >
+      {(rows) => <ChartBody runDeathReasonFrequency={rows} title={title} tooltipFormatter={tooltipFormatter} />}
+    </ChartSection>
+  );
 }
 
 // The skeleton lives in ./skeleton so route-level Suspense fallbacks never

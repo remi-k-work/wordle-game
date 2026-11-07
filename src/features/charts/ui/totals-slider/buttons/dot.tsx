@@ -19,13 +19,12 @@ interface DotProps {
 export function Dot({ index, selected, onSelect }: DotProps) {
   const gt = useGT();
 
+  // The dot's tooltip and its accessible name are the same message, so it is
+  // resolved once instead of being translated twice per dot per slider render
+  const label = gt("Go to Chart {index}", { index: index + 1 });
+
   return (
-    <Button
-      className={cn("button bg-secondary p-0", selected && "bg-accent")}
-      title={gt("Go to Chart {index}", { index: index + 1 })}
-      aria-label={gt("Go to Chart {index}", { index: index + 1 })}
-      onClick={() => onSelect(index)}
-    >
+    <Button className={cn("button bg-secondary p-0", selected && "bg-accent")} title={label} aria-label={label} onClick={() => onSelect(index)}>
       {selected ? <ViewfinderCircleIconS className="size-11" /> : <ViewfinderCircleIconO className="size-11" />}
     </Button>
   );

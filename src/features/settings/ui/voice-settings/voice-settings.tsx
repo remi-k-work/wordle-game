@@ -1,10 +1,13 @@
 // components
-import { Voice, VoiceSkeleton } from "./voice";
-import { Volume, VolumeSkeleton } from "./volume";
-import { Rate, RateSkeleton } from "./rate";
-import { Pitch, PitchSkeleton } from "./pitch";
-import { Riddle, RiddleSkeleton } from "@/features/game/ui/riddle";
+import { Voice } from "./voice";
+import { Volume } from "./volume";
+import { Rate } from "./rate";
+import { Pitch } from "./pitch";
+import { RiddleVoiceTest } from "@/features/game/ui/riddle";
 
+// This body never had a "whole modal is loading" state of its own — the dialog
+// opens synchronously and each section is either live or derives its own state
+// from the settings machine — so it deliberately ships only the live variant
 export function VoiceSettings() {
   return (
     <article className="bg-surface-2 p-3 text-start">
@@ -12,19 +15,7 @@ export function VoiceSettings() {
       <Volume />
       <Rate />
       <Pitch />
-      <Riddle mode="voiceTest" />
-    </article>
-  );
-}
-
-export function VoiceSettingsSkeleton() {
-  return (
-    <article className="bg-surface-2 p-3 text-start">
-      <VoiceSkeleton />
-      <VolumeSkeleton />
-      <RateSkeleton />
-      <PitchSkeleton />
-      <RiddleSkeleton mode="voiceTest" />
+      <RiddleVoiceTest />
     </article>
   );
 }

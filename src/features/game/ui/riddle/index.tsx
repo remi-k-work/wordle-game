@@ -1,27 +1,12 @@
 // components
-import { Button } from "@base-ui/react/button";
-import { Content, ContentSkeleton } from "./content";
-import { RiddlePopover } from "./riddle-popover";
+import { Content } from "./content";
 
-// assets
-import { SparklesIcon } from "@heroicons/react/24/outline";
-
-// types
-interface RiddleProps {
-  mode: "popover" | "voiceTest";
-}
-
-export function Riddle({ mode }: RiddleProps) {
-  if (mode === "voiceTest") return <Content mode="voiceTest" />;
-  return <RiddlePopover />;
-}
-
-export function RiddleSkeleton({ mode }: RiddleProps) {
-  if (mode === "voiceTest") return <ContentSkeleton mode="voiceTest" />;
-
-  return (
-    <Button className="button flex-none p-1" disabled>
-      <SparklesIcon className="size-11" />
-    </Button>
-  );
+// The riddle has exactly two entry points, and they are different UI concepts
+// rather than configurations of one component: the in-game toolbar opens the
+// riddle in a popover, while the voice-settings modal reads and speaks it inline
+// Naming each entry point at its call site keeps both consumers self-describing
+// and avoids a `mode` switch that has to be duplicated in the live and skeleton
+// versions
+export function RiddleVoiceTest() {
+  return <Content mode="voiceTest" />;
 }

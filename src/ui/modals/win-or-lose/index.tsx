@@ -8,7 +8,7 @@ import { T, useGT } from "gt-react";
 import { Button } from "@base-ui/react/button";
 import { Modal } from "@/ui/modal";
 import { YouWin } from "./you-win";
-import { Nevermind } from "./nevermind";
+import { RunOver } from "./run-over";
 import { GameFlowButton } from "@/features/game/ui/game-flow-button";
 
 // assets
@@ -30,7 +30,7 @@ export function WinOrLoseModal() {
   // title and the rendered content, so state it in one place instead of repeating
   // the condition inside the JSX
   const title = hasWon ? gt("You Win") : gt("Run Over");
-  const content = hasWon ? <YouWin /> : <Nevermind />;
+  const content = hasWon ? <YouWin /> : <RunOver />;
 
   return (
     <Modal isOpen={isOpen} title={title}>

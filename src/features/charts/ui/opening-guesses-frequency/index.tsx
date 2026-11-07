@@ -1,12 +1,12 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
 import { openingGuessesFrequencyAtom } from "@/features/charts/state/charts";
 import { XAxis, YAxis } from "recharts";
+import { formatCount, makeSeriesLabels } from "@/features/charts/ui/chart-series";
 
 // components
-import { HorizontalBarEmpty } from "@/features/charts/ui/horizontal-bar-shell";
+import { ChartSection } from "@/features/charts/ui/chart-section";
 import { HorizontalFrequencyChart } from "@/features/charts/ui/horizontal-frequency-chart";
 import { OpeningGuessesFrequencyChartSkeleton } from "./skeleton";
 
@@ -21,29 +21,30 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
   const openingGuessesFrequency = useAtomValue(openingGuessesFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tooltipFormatter = (value: unknown, name: unknown) => [`${String(value)}`, name === "personal" ? gt("Your Guesses") : gt("Global Guesses")] as const;
-  const tooltipLabelFormatter = (label: unknown) => String(label);
-  const legendFormatter = (value: unknown) => (value === "personal" ? gt("Your Guesses") : gt("Global Guesses"));
+  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personal", personal: "Your Guesses", global: "Global Guesses", formatValue: formatCount });
 
-  return AsyncResult.builder(openingGuessesFrequency)
-    .onInitialOrWaiting(() => <OpeningGuessesFrequencyChartSkeleton />)
-    .onFailure(() => <OpeningGuessesFrequencyChartSkeleton />)
-    .onSuccess((openingGuessesFrequency) =>
-      openingGuessesFrequency.length === 0 ? (
-        <HorizontalBarEmpty title={gt("First word guessed in a game")} message={gt("No frequency data tracked yet!")} />
-      ) : (
+  // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
+  const title = gt("First word guessed in a game");
+
+  return (
+    <ChartSection
+      title={title}
+      result={openingGuessesFrequency}
+      skeleton={<OpeningGuessesFrequencyChartSkeleton />}
+      emptyMessage={gt("No frequency data tracked yet!")}
+    >
+      {(rows) => (
         <HorizontalFrequencyChart
-          title={gt("First word guessed in a game")}
-          data={openingGuessesFrequency}
+          title={title}
+          data={rows}
           xAxis={<XAxis type="number" stroke="var(--color-text-1)" />}
           yAxis={<YAxis dataKey="word" type="category" stroke="var(--color-text-1)" />}
-          tooltipFormatter={tooltipFormatter}
-          tooltipLabelFormatter={tooltipLabelFormatter}
-          legendFormatter={legendFormatter}
+          tooltipFormatter={seriesLabels.tooltipFormatter}
+          legendFormatter={seriesLabels.legendFormatter}
         />
-      )
-    )
-    .render();
+      )}
+    </ChartSection>
+  );
 }
 
 // The skeleton lives in ./skeleton so route-level Suspense fallbacks never

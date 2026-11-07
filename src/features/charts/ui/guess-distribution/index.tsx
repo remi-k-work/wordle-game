@@ -1,12 +1,12 @@
 // services, features, and other libraries
-import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
+import { useAtomValue } from "@effect/atom-react";
 import { guessDistributionAtom } from "@/features/charts/state/charts";
 import { XAxis } from "recharts";
+import { formatPercent, makeSeriesLabels } from "@/features/charts/ui/chart-series";
 
 // components
-import { DistributionEmpty } from "@/features/charts/ui/distribution-shell";
+import { ChartSection } from "@/features/charts/ui/chart-section";
 import { DistributionChart } from "@/features/charts/ui/distribution-chart";
 import { GuessDistributionChartSkeleton } from "./skeleton";
 
@@ -21,35 +21,29 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
   const guessDistribution = useAtomValue(guessDistributionAtom(solutionsLanguage));
   const gt = useGT();
 
-  // Formatters are invoked by recharts during render; the recharts wrapper
-  // components (ChartTooltip, ChartLegend, XAxis) are not memoized, so a
-  // stable callback reference buys nothing; plain render-time functions keep
-  // the dependency surface simple and always read the latest `gt` via closure
-  // — same reasoning as run-death-reason's tooltipFormatter
-  const tickFormatter = (tick: number) => gt("Turn {turn}", { turn: tick });
-  const tooltipFormatter = (value: unknown, name: unknown) =>
-    [`${String(value)}%`, name === "personalPct" ? gt("Your Guesses") : gt("Global Average")] as const;
-  const tooltipLabelFormatter = (label: unknown) => gt("Turn: {turn}", { turn: label });
-  const legendFormatter = (value: unknown) => (value === "personalPct" ? gt("Your Guesses") : gt("Global Average"));
+  // The personal series is labelled against the global average everywhere both appear (tooltip and legend), so the pair is resolved once here
+  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personalPct", personal: "Your Guesses", global: "Global Average", formatValue: formatPercent });
 
-  return AsyncResult.builder(guessDistribution)
-    .onInitialOrWaiting(() => <GuessDistributionChartSkeleton />)
-    .onFailure(() => <GuessDistributionChartSkeleton />)
-    .onSuccess((guessDistribution) =>
-      guessDistribution.length === 0 ? (
-        <DistributionEmpty title={gt("Guesses needed to win a game")} message={gt("No Guesses yet!")} />
-      ) : (
+  const tickFormatter = (tick: number) => gt("Turn {turn}", { turn: tick });
+  const tooltipLabelFormatter = (label: unknown) => gt("Turn: {turn}", { turn: label });
+
+  // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
+  const title = gt("Guesses needed to win a game");
+
+  return (
+    <ChartSection title={title} result={guessDistribution} skeleton={<GuessDistributionChartSkeleton />} emptyMessage={gt("No Guesses yet!")}>
+      {(rows) => (
         <DistributionChart
-          title={gt("Guesses needed to win a game")}
-          data={guessDistribution}
+          title={title}
+          data={rows}
           xAxis={<XAxis dataKey="turn" tickFormatter={tickFormatter} stroke="var(--color-text-1)" />}
-          tooltipFormatter={tooltipFormatter}
+          tooltipFormatter={seriesLabels.tooltipFormatter}
           tooltipLabelFormatter={tooltipLabelFormatter}
-          legendFormatter={legendFormatter}
+          legendFormatter={seriesLabels.legendFormatter}
         />
-      )
-    )
-    .render();
+      )}
+    </ChartSection>
+  );
 }
 
 // The skeleton lives in ./skeleton so route-level Suspense fallbacks never

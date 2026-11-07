@@ -1,6 +1,8 @@
+// services, features, and other libraries
+import { cn } from "@/lib/utils";
+
 // components
 import { ComposedChart } from "recharts";
-import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
 
 // types
@@ -13,11 +15,9 @@ interface DistributionFrameProps {
 }
 
 // constants
-const DISTRIBUTION_CHART_CLASS = "h-96 w-full **:outline-none **:select-none lg:h-192";
+const DISTRIBUTION_CHART_CLASS = cn("h-96 w-full **:outline-none **:select-none lg:h-192");
 
-// Shared SectionHeader + ComposedChart wrapper for the three distribution
-// charts (guesses, time-to-solve, streak). Axis/Tooltip/Legend/series stay in
-// each chart because labels and formatters differ.
+// Shared SectionHeader + ComposedChart wrapper for the three distribution charts (guesses, time-to-solve, streak)
 export function DistributionFrame({ title, data, children }: DistributionFrameProps) {
   return (
     <>
@@ -28,16 +28,3 @@ export function DistributionFrame({ title, data, children }: DistributionFramePr
     </>
   );
 }
-
-export function DistributionEmpty({ title, message }: { title: string; message: string }) {
-  return (
-    <>
-      <SectionHeader title={title} />
-      <InfoLine message={message} />
-    </>
-  );
-}
-
-// The skeleton moved to ./distribution-skeleton so route-level Suspense fallbacks
-// never statically bundle recharts; re-exported here for existing consumers
-export { DistributionSkeleton } from "./distribution-skeleton";

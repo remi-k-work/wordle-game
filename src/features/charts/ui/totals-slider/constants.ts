@@ -15,11 +15,6 @@ export type TotalsSlideSpec =
     };
 
 // constants
-// Single source of truth for the 10 slides — drives both the live slider
-// (index.tsx) and its skeleton so titles/ordering cannot drift apart. The spec set
-// deliberately lives in this recharts-free skeleton module: importing it from
-// index.tsx instead would drag the embla carousel into the statically-bundled
-// page shell
 export const TOTALS_SLIDES = [
   { kind: "counter", counterName: "gamesPlayed", title: msg("Games played"), personalHeader: msg("Your Games") },
   { kind: "counter", counterName: "runsStarted", title: msg("Arcade runs started"), personalHeader: msg("Your Runs") },
@@ -50,3 +45,6 @@ export const TOTALS_SLIDES = [
     personalHeader: msg("Your Average Duration"),
   },
 ] as const satisfies ReadonlyArray<TotalsSlideSpec>;
+
+// Each slide spec maps to a stable, unique key (counter name or stat column)
+export const slideKey = (spec: TotalsSlideSpec): string => (spec.kind === "counter" ? spec.counterName : spec.statColumn);

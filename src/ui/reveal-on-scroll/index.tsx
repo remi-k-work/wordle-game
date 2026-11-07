@@ -25,6 +25,11 @@ const ITEM_VARIANTS = {
   visible: { opacity: 1, y: 0, transition: SPRINGS.gentle },
 } as const;
 
+// `Children.toArray` already flattens fragments and assigns every element a
+// unique key, so an element always keeps the key it had; only plain text
+// children (which cannot carry one) fall back to their position
+const childKey = (child: ReactNode, index: number) => (isValidElement(child) ? child.key : index);
+
 export function RevealOnScroll({ children, staggerChildren = false }: RevealOnScrollProps) {
   if (staggerChildren) {
     const childList = Children.toArray(children);
@@ -32,7 +37,7 @@ export function RevealOnScroll({ children, staggerChildren = false }: RevealOnSc
     return (
       <motion.div variants={CONTAINER_VARIANTS} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }}>
         {childList.map((child, index) => (
-          <motion.div key={isValidElement(child) && child.key !== null ? child.key : index} variants={ITEM_VARIANTS}>
+          <motion.div key={childKey(child, index)} variants={ITEM_VARIANTS}>
             {child}
           </motion.div>
         ))}

@@ -1,6 +1,5 @@
 // components
 import { BarChart } from "recharts";
-import { InfoLine } from "@/ui/info-line";
 import { SectionHeader } from "@/ui/section-header";
 
 // types
@@ -13,13 +12,12 @@ interface HorizontalBarFrameProps {
 }
 
 // constants
-export const HORIZONTAL_CHART_PADDING_PX = 96;
-export const HORIZONTAL_BAR_HEIGHT_PX = 48;
+const HORIZONTAL_CHART_PADDING_PX = 96;
+const HORIZONTAL_BAR_HEIGHT_PX = 48;
 
 const horizontalChartHeight = (rowCount: number) => `${HORIZONTAL_CHART_PADDING_PX + rowCount * HORIZONTAL_BAR_HEIGHT_PX}px`;
 
-// Shared SectionHeader + vertical BarChart wrapper for the horizontal
-// frequency/leaderboard charts. Series and formatters stay per-chart.
+// Shared SectionHeader + vertical BarChart wrapper for the horizontal frequency/leaderboard charts
 export function HorizontalBarFrame({ title, data, children }: HorizontalBarFrameProps) {
   return (
     <>
@@ -36,16 +34,3 @@ export function HorizontalBarFrame({ title, data, children }: HorizontalBarFrame
     </>
   );
 }
-
-export function HorizontalBarEmpty({ title, message }: { title: string; message: string }) {
-  return (
-    <>
-      <SectionHeader title={title} />
-      <InfoLine message={message} />
-    </>
-  );
-}
-
-// The skeleton moved to ./horizontal-bar-skeleton so route-level Suspense fallbacks
-// never statically bundle recharts; re-exported here for existing consumers
-export { HorizontalBarSkeleton } from "./horizontal-bar-skeleton";

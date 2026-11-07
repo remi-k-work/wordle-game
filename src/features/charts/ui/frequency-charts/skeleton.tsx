@@ -5,7 +5,7 @@ import { OpeningGuessesFrequencyChartSkeleton } from "@/features/charts/ui/openi
 import { RunDeathReasonFrequencyChartSkeleton } from "@/features/charts/ui/run-death-reason-frequency/skeleton";
 import { HardestWordsLeaderboardChartSkeleton } from "@/features/charts/ui/hardest-words-leaderboard/skeleton";
 
-// The tabbed loading placeholder for the frequency section. Every piece is
+// The tabbed loading placeholder for the frequency section; every piece is
 // recharts-free, so the statically-bundled page shell stays lean while the real
 // charts load in their own chunk
 export function FrequencyChartsSkeleton() {

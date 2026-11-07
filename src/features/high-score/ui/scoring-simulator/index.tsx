@@ -2,14 +2,10 @@
 import { InteractiveMode } from "./interactive-mode";
 import { ReportMode } from "./report-mode";
 
-// types
-interface ScoringSimulatorProps {
-  guessedTurn?: number;
-  timeElapsed?: number;
-}
+// The live simulation and the read-only score report are two different UI concepts
+type ScoringSimulatorProps = { mode: "interactive" } | { mode: "report"; guessedTurn: number; timeElapsed: number };
 
-// Branches between the two modes: live simulation owns state; score report is a pure read of props
-export function ScoringSimulator({ guessedTurn, timeElapsed }: ScoringSimulatorProps) {
-  if (guessedTurn === undefined || timeElapsed === undefined) return <InteractiveMode />;
-  return <ReportMode guessedTurn={guessedTurn} timeElapsed={timeElapsed} />;
+export function ScoringSimulator(props: ScoringSimulatorProps) {
+  if (props.mode === "interactive") return <InteractiveMode />;
+  return <ReportMode guessedTurn={props.guessedTurn} timeElapsed={props.timeElapsed} />;
 }

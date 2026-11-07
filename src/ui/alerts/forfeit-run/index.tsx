@@ -1,11 +1,8 @@
 // services, features, and other libraries
-import { Effect } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
 import { useAtomValue } from "@effect/atom-react";
+import { runClientCommand } from "@/lib/runtime-client";
 import { alertIsForfeitRunAtom } from "@/state/alert";
-import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
-import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
+import { confirmForfeitRun } from "@/features/game/state/actions";
 import { useGT } from "gt-react";
 
 // components
@@ -18,18 +15,7 @@ export function ForfeitRunAlert() {
   const gt = useGT();
 
   return (
-    <Alert
-      isOpen={isOpen}
-      title={gt("Forfeit Run")}
-      onOkayed={() =>
-        runClientCommand(
-          Effect.gen(function* () {
-            const wordChallenge = (yield* Atom.get(wordChallengeMachineAtom)).context;
-            yield* Atom.set(gameFlowMachineAtom, { type: "run.forfeitConfirmed", wordChallenge });
-          })
-        )
-      }
-    >
+    <Alert isOpen={isOpen} title={gt("Forfeit Run")} onOkayed={() => runClientCommand(confirmForfeitRun)}>
       <Content />
     </Alert>
   );

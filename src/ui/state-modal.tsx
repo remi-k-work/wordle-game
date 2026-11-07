@@ -10,8 +10,7 @@ import { Modal } from "@/ui/modal";
 import type { ModalType } from "@/state/modal";
 import type { ReactNode } from "react";
 
-// The win-or-lose modal derives its title from game state, so it builds its
-// own `Modal`; every other modal registers its static title here
+// The win-or-lose modal derives its title from game state, so it builds its own `Modal`; every other modal registers its static title here
 type StateModalType = Exclude<ModalType, "status">;
 
 interface StateModalProps {

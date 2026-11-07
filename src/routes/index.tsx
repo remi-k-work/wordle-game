@@ -85,7 +85,7 @@ function Home() {
         <br />
         <FeatureText>Try the simulator below to see exactly how your speed and precision dictate your final payout</FeatureText>
         <br />
-        <ScoringSimulator />
+        <ScoringSimulator mode="interactive" />
       </FeatureSection>
 
       <FeatureSection

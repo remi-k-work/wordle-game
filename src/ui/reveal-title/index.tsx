@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 // types
 interface RevealTitleProps {
   className?: string;
-  Tag?: "h1" | "h2";
   title: string;
   unit?: "word" | "char";
 }
@@ -23,18 +22,17 @@ const SEGMENT_VARIANTS = {
 } as const;
 
 const MotionH1 = motion.create("h1");
-const MotionH2 = motion.create("h2");
 
 // Hoisted so they are compiled once instead of per render (js-hoist-regexp)
 const WORD_SPLIT_RE = /(\s+)/;
 const WHITESPACE_RE = /^\s+$/;
 
-export function RevealTitle({ className, Tag = "h1", title, unit = "word" }: RevealTitleProps) {
+// Every title in the app is the page's own `h1` (the page header and the dialog title)
+export function RevealTitle({ className, title, unit = "word" }: RevealTitleProps) {
   const segments = unit === "char" ? Array.from(title) : title.split(WORD_SPLIT_RE);
-  const MotionTag = Tag === "h1" ? MotionH1 : MotionH2;
 
   return (
-    <MotionTag className={className} variants={CONTAINER_VARIANTS} initial="hidden" animate="visible" aria-label={title}>
+    <MotionH1 className={className} variants={CONTAINER_VARIANTS} initial="hidden" animate="visible" aria-label={title}>
       {segments.map((segment, index) =>
         WHITESPACE_RE.test(segment) ? (
           <span key={index} aria-hidden="true">
@@ -46,6 +44,6 @@ export function RevealTitle({ className, Tag = "h1", title, unit = "word" }: Rev
           </motion.span>
         )
       )}
-    </MotionTag>
+    </MotionH1>
   );
 }

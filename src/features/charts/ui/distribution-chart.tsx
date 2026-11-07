@@ -3,17 +3,10 @@ import { ChartGrid, ChartLegend, ChartTooltip, GlobalPctLine, PersonalPctBar } f
 import { DistributionFrame } from "@/features/charts/ui/distribution-shell";
 
 // types
+import type { LegendFormatter, TooltipFormatter, TooltipLabelFormatter } from "@/features/charts/ui/chart-series";
 import type { ReactNode } from "react";
 
-// Shared scaffolding for the distribution charts (guesses to win, time to solve,
-// arcade streak); each chart owns its data source, title, formatters, axis
-// element, and skeleton — this component only renders the frame + series chrome
-// that is identical across charts: a grid, the x-axis, a personal/global
-// tooltip & legend, and the personal % bar + global % line
-type TooltipFormatter = (value: unknown, name: unknown) => readonly [ReactNode, ReactNode];
-type TooltipLabelFormatter = (label: unknown, payload?: unknown) => ReactNode;
-type LegendFormatter = (value: unknown) => string;
-
+// Shared scaffolding for the distribution charts (guesses to win, time to solve, arcade streak)
 interface DistributionChartProps {
   title: string;
   data: ReadonlyArray<unknown>;

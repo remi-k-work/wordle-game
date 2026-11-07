@@ -2,14 +2,14 @@
 import { T } from "gt-react";
 
 // components
-import { CloseModalButton } from "@/ui/modal-close-button";
+import { ModalBody } from "@/ui/modal-body";
 
 // assets
 import hero from "@/assets/hero.webp";
 
 export function Content() {
   return (
-    <article className="mx-auto max-w-prose space-y-9">
+    <ModalBody>
       <img src={hero} loading="eager" alt="Wordle Overdrive" className="mx-auto h-auto w-full max-w-384" />
 
       <T>
@@ -44,8 +44,6 @@ export function Content() {
       <footer className="mx-auto mt-4 font-sans text-sm font-semibold">
         <T>*Tip: When using a PC, you can type your guesses right on the keyboard.</T>
       </footer>
-
-      <CloseModalButton />
-    </article>
+    </ModalBody>
   );
 }

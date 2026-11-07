@@ -2,18 +2,20 @@
 import { cn } from "@/lib/utils";
 import { useAtomSet } from "@effect/atom-react";
 import { modalMachineAtom } from "@/state/modal";
+import { T } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { T } from "gt-react";
 
 // assets
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
 // types
-import type { ComponentPropsWithoutRef } from "react";
+interface CloseModalButtonProps {
+  className?: string;
+}
 
-export function CloseModalButton({ className }: ComponentPropsWithoutRef<typeof Button>) {
+export function CloseModalButton({ className }: CloseModalButtonProps) {
   const modalMachineEvent = useAtomSet(modalMachineAtom);
 
   return (

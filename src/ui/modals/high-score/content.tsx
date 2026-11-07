@@ -7,7 +7,7 @@ import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/gam
 
 // components
 import { Top10HighScoresSkeleton } from "@/features/high-score/ui/top-10-high-scores/skeleton";
-import { CloseModalButton } from "@/ui/modal-close-button";
+import { ModalBody } from "@/ui/modal-body";
 
 // The table (and the motion runtime its module drags in) is code-split: every modal
 // ships in the root document chunk, so a static import here would load motion on
@@ -18,12 +18,10 @@ export function Content() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
 
   return (
-    <article className="mx-auto max-w-prose space-y-9">
+    <ModalBody>
       <Suspense fallback={<Top10HighScoresSkeleton />}>
         <Top10HighScores solutionsLanguage={solutionsLanguage} />
       </Suspense>
-
-      <CloseModalButton />
-    </article>
+    </ModalBody>
   );
 }

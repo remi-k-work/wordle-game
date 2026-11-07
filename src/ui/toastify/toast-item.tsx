@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { useMessages } from "gt-react";
+import { msg, useMessages } from "gt-react";
 
 // components
 import { Toast } from "@base-ui/react/toast";
@@ -63,7 +63,10 @@ export function ToastItem({ toast }: ToastItemProps) {
           </header>
           <Toast.Description className="text-text-1">{resolveMessage(toast.description)}</Toast.Description>
         </div>
-        <Toast.Close className="button bg-secondary p-1 text-text-1">
+        {/* The icon is `aria-hidden`, so without a name the button would be
+            announced as an unlabelled control — the message handle is resolved
+            here so the label follows the active locale */}
+        <Toast.Close className="button bg-secondary p-1 text-text-1" aria-label={messages(msg("Close"))}>
           <XCircleIcon className="size-11" aria-hidden="true" />
         </Toast.Close>
       </Toast.Content>

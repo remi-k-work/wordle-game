@@ -3,22 +3,22 @@ import { Option } from "effect";
 
 // components
 import { BestRunCardFrame } from "./best-run-card-frame";
-import { BestRunCardEmpty, BestRunCardEmptySkeleton } from "./best-run-card-empty";
+import { BestRunCardEmpty } from "./best-run-card-empty";
 import { BestRunCardFilled } from "./best-run-card-filled";
+import { BestRunCardLoading } from "./best-run-card-loading";
 
 // types
+import type { CardTag, CardVariant } from "@/ui/card-variants";
 import type { BestRunTrophyCardData } from "@/features/charts/domain/models";
 
 interface BestRunCardProps {
-  Tag?: "header" | "footer" | "section" | "div" | "article";
-  variant: "primary" | "secondary";
+  Tag?: CardTag;
+  variant: CardVariant;
   title: string;
   bestRun: Option.Option<BestRunTrophyCardData>;
 }
 
 // Delegates to the empty or filled state based on whether a best run exists
-// Keeps the Option.match small and gives each visual state its own named,
-// single-responsibility component
 export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRunCardProps) {
   return (
     <BestRunCardFrame Tag={Tag} variant={variant} title={title}>
@@ -30,10 +30,11 @@ export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRu
   );
 }
 
+// The loading state is a third state of its own (not the skeleton of the empty state), so it lives in ./best-run-card-loading
 export function BestRunCardSkeleton({ Tag = "section", variant, title }: Omit<BestRunCardProps, "bestRun">) {
   return (
     <BestRunCardFrame Tag={Tag} variant={variant} title={title}>
-      <BestRunCardEmptySkeleton />
+      <BestRunCardLoading />
     </BestRunCardFrame>
   );
 }

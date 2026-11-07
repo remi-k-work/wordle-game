@@ -1,5 +1,4 @@
 // services, features, and other libraries
-import { cn } from "@/lib/utils";
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import {
@@ -8,11 +7,12 @@ import {
   overdriveHacksTheOverrideAtom,
   overdriveHacksTheOverrideAudioAtom,
 } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { T } from "gt-react";
 
 // components
-import { T } from "gt-react";
 import { CloseModalButton } from "@/ui/modal-close-button";
-import { SpeakButtonNatural, SpeakButtonRegular } from "@/ui/speak-button";
+import { SpeakActions } from "@/ui/speak-actions";
+import { PulsingStatusText } from "@/ui/pulsing-status-text";
 
 // constants
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
@@ -24,34 +24,26 @@ export function Content() {
   // Derived boolean atoms: re-render only when the flags actually flip
   const isAwaiting = useAtomValue(overdriveHacksIsIdleAtom);
   const isLoading = useAtomValue(overdriveHacksIsApplyingOverrideAtom);
-  const canSpeakRegular = Option.isSome(theOverride) && !isAwaiting && !isLoading;
-  const canSpeakNatural = canSpeakRegular && Option.isSome(theOverrideAudio);
-
-  // Resolve the message to show before rendering, so the JSX only expresses
-  // structure (a pulsing paragraph containing a message) while the conditional
-  // logic stays in one named, easy-to-scan place; mirrors the same pattern used
-  // by `RiddleText` in the game feature
-  const isPulsing = isAwaiting || isLoading;
-  const message = isAwaiting ? (
-    <T>Waiting for the override being requested...</T>
-  ) : isLoading ? (
-    <T>Thinking...</T>
-  ) : (
-    Option.getOrElse(theOverride, () => <T>Override unavailable. You are on your own! Please try again later.</T>)
-  );
 
   return (
     <article className="mx-auto max-w-prose space-y-9">
-      <p className={cn("mx-auto text-center text-lg leading-relaxed sm:text-xl lg:text-2xl", isPulsing && "animate-pulse")}>{message}</p>
+      {/* The same three-state cascade the riddle shows, on the shared
+          `PulsingStatusText`: the override is generated on demand exactly like
+          the riddle, so "waiting / thinking / unavailable" is stated once for
+          both surfaces and this modal only resolves its own copy */}
+      <PulsingStatusText
+        isAwaiting={isAwaiting}
+        isLoading={isLoading}
+        awaiting={<T>Waiting for the override being requested...</T>}
+        loading={<T>Thinking...</T>}
+      >
+        {Option.getOrElse(theOverride, () => (
+          <T>Override unavailable. You are on your own! Please try again later.</T>
+        ))}
+      </PulsingStatusText>
 
       <footer className={DIALOG_FOOTER_CLASSES}>
-        <SpeakButtonRegular sanitizedText={theOverride} disabled={!canSpeakRegular}>
-          <T>Speak Override</T>
-        </SpeakButtonRegular>
-
-        <SpeakButtonNatural audioBuffer={theOverrideAudio} disabled={!canSpeakNatural}>
-          <T>Speak Override</T>
-        </SpeakButtonNatural>
+        <SpeakActions sanitizedText={theOverride} audioBuffer={theOverrideAudio} label={<T>Speak Override</T>} />
 
         <CloseModalButton className="mt-0" />
       </footer>

@@ -1,62 +1,53 @@
+// services, features, and other libraries
+import { getScoreReadings } from "@/features/high-score/domain/helpers";
+
 // components
 import { ScoreHeader } from "./score-header";
 import { TurnMetricSection } from "./turn-metric-section";
 import { TimeMetricSection } from "./time-metric-section";
 
 // types
+import type { ReactNode } from "react";
+import type { ScoreReadings } from "@/features/high-score/domain/helpers";
+
 interface SimulatorBodyProps {
-  isReportingScore: boolean;
-  potentialScore: number;
-  speedMultiplier: number;
-  locale: string;
-  currentTurn: number;
-  basePointsPerTurn: number;
+  // The two inputs everything else is derived from: the turn the word was guessed
+  // on and the seconds it took; the readings are derived here, so both modes hand
+  // over the numbers they actually own; the sections resolve the locale and
+  // translations they display themselves, so neither is threaded down
+  turn: number;
   elapsedSeconds: number;
-  ariaLabelTurn: string;
-  ariaLabelTime: string;
+  // Read-only score reports (the win modal) disable the sliders and omit the
+  // change handlers; the interactive simulator listens on both
+  isReportingScore: boolean;
   onTurnChange?: (turn: number) => void;
   onElapsedChange?: (seconds: number) => void;
-  children?: React.ReactNode;
+  // Rendered below the two metric sections, and only by the interactive mode,
+  // which is the one that needs the score formula spelled out; given the
+  // readings this shell already derived rather than the raw inputs, so the
+  // footer shows the same numbers as the sections above it without computing
+  // them a second time
+  footer?: (readings: ScoreReadings) => ReactNode;
 }
 
-// Shared shell for both scoring simulator modes: the article wrapper, score header,
-// and the two metric sections; interactive mode passes change handlers and renders
-// the formula footer as children; report mode is read-only and omits both
-export function SimulatorBody({
-  isReportingScore,
-  potentialScore,
-  speedMultiplier,
-  locale,
-  currentTurn,
-  basePointsPerTurn,
-  elapsedSeconds,
-  ariaLabelTurn,
-  ariaLabelTime,
-  onTurnChange,
-  onElapsedChange,
-  children,
-}: SimulatorBodyProps) {
+// Shared shell for both scoring simulator modes
+export function SimulatorBody({ turn, elapsedSeconds, isReportingScore, onTurnChange, onElapsedChange, footer }: SimulatorBodyProps) {
+  const readings = getScoreReadings(turn, elapsedSeconds);
+  const { potentialScore, basePointsPerTurn, speedMultiplier } = readings;
+
   return (
     <article className="mx-auto grid max-w-4xl gap-6 bg-surface-2 p-3">
-      <ScoreHeader isReportingScore={isReportingScore} potentialScore={potentialScore} speedMultiplier={speedMultiplier} locale={locale} />
+      <ScoreHeader isReportingScore={isReportingScore} potentialScore={potentialScore} speedMultiplier={speedMultiplier} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <TurnMetricSection
-          currentTurn={currentTurn}
-          basePointsPerTurn={basePointsPerTurn}
-          isReportingScore={isReportingScore}
-          locale={locale}
-          ariaLabel={ariaLabelTurn}
-          onTurnChange={onTurnChange}
-        />
+        <TurnMetricSection currentTurn={turn} basePointsPerTurn={basePointsPerTurn} isReportingScore={isReportingScore} onTurnChange={onTurnChange} />
         <TimeMetricSection
           elapsedSeconds={elapsedSeconds}
           speedMultiplier={speedMultiplier}
           isReportingScore={isReportingScore}
-          ariaLabel={ariaLabelTime}
           onElapsedChange={onElapsedChange}
         />
       </div>
-      {children}
+      {footer?.(readings)}
     </article>
   );
 }

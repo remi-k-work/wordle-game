@@ -1,13 +1,9 @@
 // services, features, and other libraries
-import { cn } from "@/lib/utils";
 import { AnimatePresence } from "motion/react";
 
 // components
-import { Button } from "@base-ui/react/button";
 import { KeypadKey, KeypadKeySkeleton } from "./keypad-key";
-
-// assets
-import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { KeypadActionKeys } from "./keypad-action-keys";
 
 // types
 import type { Color } from "@/features/game/domain/models";
@@ -25,36 +21,32 @@ interface KeypadPoolProps {
 // constants
 import { ALPHABET } from "@/features/game/ui/board/constants";
 
+// Fully static class string, hoisted so the live pool and its skeleton re-run
+// neither it through twMerge. The `[grid-area:pool]` name has to agree with the
+// area shell's `[grid-template-areas:…]` (see `KeypadArea`), so the pool's slot is
+// stated once for both variants instead of twice
+const POOL_ROOT_CLASSES = "flex flex-wrap justify-center gap-1 [grid-area:pool]";
+
 export function KeypadPool({ keys, onPressed }: KeypadPoolProps) {
   return (
-    <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
+    <div className={POOL_ROOT_CLASSES}>
       <AnimatePresence mode="sync">
         {keys.map(({ letter, color }) => (
           <KeypadKey key={letter} letter={letter} color={color} onPressed={onPressed} />
         ))}
       </AnimatePresence>
-      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-destructive p-0", "md:hidden")} onClick={() => onPressed("BACKSPACE")}>
-        <BackspaceIcon className="size-8" />
-      </Button>
-      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-secondary p-0", "md:hidden")} onClick={() => onPressed("ENTER")}>
-        <PaperAirplaneIcon className="size-8" />
-      </Button>
+      <KeypadActionKeys position="pool" onPressed={onPressed} />
     </div>
   );
 }
 
 export function KeypadPoolSkeleton() {
   return (
-    <div className="flex flex-wrap justify-center gap-1 [grid-area:pool]">
+    <div className={POOL_ROOT_CLASSES}>
       {ALPHABET.map((letter) => (
         <KeypadKeySkeleton key={letter} letter={letter} />
       ))}
-      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-destructive p-0", "md:hidden")} disabled>
-        <BackspaceIcon className="size-8" />
-      </Button>
-      <Button tabIndex={-1} className={cn("button min-h-9.5 flex-initial basis-12 bg-secondary p-0", "md:hidden")} disabled>
-        <PaperAirplaneIcon className="size-8" />
-      </Button>
+      <KeypadActionKeys position="pool" disabled />
     </div>
   );
 }

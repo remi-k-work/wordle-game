@@ -1,10 +1,11 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
 import { alertMachineAtom } from "@/state/alert";
+import { T } from "gt-react";
 
 // components
 import { AlertDialog } from "@base-ui/react/alert-dialog";
-import { T } from "gt-react";
+import { Button } from "@base-ui/react/button";
 
 // assets
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
@@ -34,14 +35,19 @@ export function Alert({ isOpen = false, title, onOkayed, children }: AlertProps)
             <h1 className={DIALOG_TITLE_CLASSES}>{title}</h1>
             {children}
             <section className={DIALOG_FOOTER_CLASSES}>
-              <AlertDialog.Close className="button" onClick={() => alertMachineEvent({ type: "okayed", onOkayed })}>
+              {/* Plain buttons, not `AlertDialog.Close`: the alert is controlled by
+                  the machine, and `Close` would additionally drive the Root's
+                  `onOpenChange` — which maps to `cancelled` — so OK would dispatch
+                  both `okayed` and `cancelled`, and Cancel would dispatch
+                  `cancelled` twice. Each button now has exactly one effect. */}
+              <Button className="button" onClick={() => alertMachineEvent({ type: "okayed", onOkayed })}>
                 <CheckCircleIcon className="size-11" />
                 <T>OK</T>
-              </AlertDialog.Close>
-              <AlertDialog.Close className="button bg-secondary" onClick={() => alertMachineEvent({ type: "cancelled" })}>
+              </Button>
+              <Button className="button bg-secondary" onClick={() => alertMachineEvent({ type: "cancelled" })}>
                 <XCircleIcon className="size-11" />
                 <T>Cancel</T>
-              </AlertDialog.Close>
+              </Button>
             </section>
           </AlertDialog.Popup>
         </AlertDialog.Viewport>

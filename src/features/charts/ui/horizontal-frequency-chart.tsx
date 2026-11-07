@@ -3,24 +3,18 @@ import { ChartGrid, ChartLegend, ChartTooltip, GlobalBar, PersonalBar } from "@/
 import { HorizontalBarFrame } from "@/features/charts/ui/horizontal-bar-shell";
 
 // types
+import type { LegendFormatter, TooltipFormatter, TooltipLabelFormatter } from "@/features/charts/ui/chart-series";
 import type { ReactNode } from "react";
 
-// Shared scaffolding for the horizontal frequency/leaderboard charts
-// (opening guesses, missed words, hardest words); each chart owns its data
-// source, title, formatters, axis elements, and skeleton — this component only
-// renders the frame + series chrome that is identical across charts: a grid,
-// the axes, a personal/global tooltip & legend, and the personal + global bars
-type TooltipFormatter = (value: unknown, name: unknown) => readonly [ReactNode, ReactNode];
-type TooltipLabelFormatter = (label: unknown, payload?: unknown) => ReactNode;
-type LegendFormatter = (value: unknown) => string;
-
+// Shared scaffolding for the horizontal frequency/leaderboard charts (opening guesses, missed words, hardest words)
 interface HorizontalFrequencyChartProps {
   title: string;
   data: ReadonlyArray<unknown>;
   xAxis: ReactNode;
   yAxis: ReactNode;
   tooltipFormatter: TooltipFormatter;
-  tooltipLabelFormatter: TooltipLabelFormatter;
+  // Optional because recharts has its own label rendering, and two of the three charts here read the raw row label unchanged
+  tooltipLabelFormatter?: TooltipLabelFormatter;
   legendFormatter: LegendFormatter;
   personalDataKey?: string;
   globalDataKey?: string;

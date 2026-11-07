@@ -8,17 +8,18 @@ import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 
 // components
-import { Button } from "@base-ui/react/button";
 import { KeypadPool, KeypadPoolSkeleton } from "./keypad-pool";
-
-// assets
-import { BackspaceIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
+import { KeypadActionKeys } from "./keypad-action-keys";
 
 // types
 import type { Keypad } from "@/features/game/domain/models";
 
 // constants
 const EMPTY_KEY_COLOR = "" as const;
+
+// Fully static class string, hoisted so neither the live keypad nor its
+// skeleton re-runs it through twMerge — the two must render the same shell
+const KEYPAD_AREA_CLASSES = cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']");
 
 // `KeypadArea` is hoisted to module scope. Defining it inside `Footer`'s body
 // would recreate its component identity on every `Footer` render, remounting
@@ -28,12 +29,11 @@ const EMPTY_KEY_COLOR = "" as const;
 //
 // `Toolbar` is intentionally rendered by `Footer` as a sibling of `KeypadArea`,
 // not inside it: `KeypadArea` subscribes to keypad colors and re-renders on
-// every keystroke that repaints a key; if `Toolbar` lived inside `KeypadArea`,
-// the toolbar (HacksMenu, Riddle, GameLangChanger, GameFlowButton) would be
-// dragged into those re-renders even though none of it depends on keypad
-// state; as a sibling, `Toolbar` only re-renders when `Footer` itself
-// re-renders — which happens only once, when `gameDataKeypad` flips from
-// `None` to `Some`
+// every keystroke that repaints a key; if `Toolbar` lived inside `KeypadArea`, the
+// toolbar (HacksMenu, Riddle, GameLangChanger, GameFlowButton) would be dragged
+// into those re-renders even though none of it depends on keypad state; as a
+// sibling, `Toolbar` only re-renders when `Footer` itself re-renders — which
+// happens only once, when `gameDataKeypad` flips from `None` to `Some`
 export function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
   const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
@@ -55,32 +55,18 @@ export function KeypadArea({ keys }: { keys: Keypad }) {
   );
 
   return (
-    <section className={cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']")}>
+    <section className={KEYPAD_AREA_CLASSES}>
       <KeypadPool keys={availableKeys} onPressed={handleKeyPressed} />
-      <Button
-        tabIndex={-1}
-        className={cn("button bg-destructive", "max-md:hidden max-md:p-1", "md:[grid-area:back]")}
-        onClick={() => handleKeyPressed("BACKSPACE")}
-      >
-        <BackspaceIcon className="size-9 md:size-11" />
-      </Button>
-      <Button tabIndex={-1} className={cn("button bg-secondary", "max-md:hidden max-md:p-1", "md:[grid-area:enter]")} onClick={() => handleKeyPressed("ENTER")}>
-        <PaperAirplaneIcon className="size-9 md:size-11" />
-      </Button>
+      <KeypadActionKeys position="area" onPressed={handleKeyPressed} />
     </section>
   );
 }
 
 export function KeypadAreaSkeleton() {
   return (
-    <section className={cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']")}>
+    <section className={KEYPAD_AREA_CLASSES}>
       <KeypadPoolSkeleton />
-      <Button tabIndex={-1} className={cn("button bg-destructive", "max-md:hidden max-md:p-1", "md:[grid-area:back]")} disabled>
-        <BackspaceIcon className="size-9 md:size-11" />
-      </Button>
-      <Button tabIndex={-1} className={cn("button bg-secondary", "max-md:hidden max-md:p-1", "md:[grid-area:enter]")} disabled>
-        <PaperAirplaneIcon className="size-9 md:size-11" />
-      </Button>
+      <KeypadActionKeys position="area" disabled />
     </section>
   );
 }

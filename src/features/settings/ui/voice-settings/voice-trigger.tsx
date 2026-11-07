@@ -10,8 +10,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/24/outline";
 
 // constants
 // Fully static class strings, hoisted so re-renders don't re-run them through
-// twMerge and the live select + its skeleton cannot drift apart (same pattern
-// as dialog-chrome / chart-tab)
+// twMerge (same pattern as dialog-chrome / chart-tab)
 const VOICE_TRIGGER_CLASSES = cn(
   "flex w-full items-center justify-between gap-3 border bg-surface-3 px-4 py-2 text-start leading-none font-semibold text-balance",
   "transition duration-300 ease-in-out",

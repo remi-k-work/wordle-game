@@ -1,6 +1,3 @@
-// react
-import { useCallback } from "react";
-
 // services, features, and other libraries
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 import { gameSettingsVoiceVolumeAtom } from "@/features/settings/state/game-settings";
@@ -45,8 +42,11 @@ function ensureVolumeTracking() {
 
 // Plays a generated MP3 buffer (e.g. from OpenRouter `generateSpeech`)
 // Bytes live in `wordMetaTheRiddleAudioAtom`; playback outlives the caller on purpose
+// A plain closure, not a `useCallback` (same reasoning as `useSpeakText`): the
+// body reads no React state or props, and every call site wraps it in its own
+// inline arrow
 export function usePlayAudioBuffer() {
-  return useCallback((audioBuffer: Uint8Array<ArrayBufferLike>) => {
+  return (audioBuffer: Uint8Array<ArrayBufferLike>) => {
     if (typeof window === "undefined" || typeof Audio === "undefined") {
       console.warn("HTMLAudio is not supported in this environment.");
       return;
@@ -91,5 +91,5 @@ export function usePlayAudioBuffer() {
         console.warn("Audio playback failed.", error);
       });
     }
-  }, []);
+  };
 }

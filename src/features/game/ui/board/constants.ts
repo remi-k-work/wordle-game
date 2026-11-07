@@ -7,6 +7,14 @@ import type { Color } from "@/features/game/domain/models";
 // constants
 import { MOTION_TOKENS } from "@/lib/motion-tokens";
 
+// The one row track every part of the board lays its tiles out on: the completed
+// rows, the row the player types into, and both of their skeletons all render
+// five tiles on the same grid, or the letters stop lining up with the rows above
+// and below them. Stated here — beside the board's other presentation tokens —
+// because it is a property of the board's grid, not of any single row component
+// (see `GuessRow` and `CurrentGuess`, which both read it)
+export const ROW_CLASSES = "grid grid-cols-5 grid-rows-1 gap-1";
+
 export const TILE_COLOR_MAP = {
   grey: "[--_background:var(--color-tile-grey)] bg-(--_background)",
   yellow: "[--_background:var(--color-tile-yellow)] bg-(--_background)",

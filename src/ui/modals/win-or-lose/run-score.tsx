@@ -14,11 +14,18 @@ import {
 } from "@/features/game/state/run-session";
 
 // components
-import { RunStat } from "./run-stat";
+import { RunStatCell } from "./run-stat";
 import { RunDurationSection } from "./run-duration";
 
-// assets
-import { FireIcon, TrophyIcon } from "@heroicons/react/24/outline";
+// What the stat grid reports: the run's two figures, plus the timestamps its
+// duration is measured from. A finished run has both ends; a live one only has a
+// start, which is why the timestamps are `Option`s rather than plain values
+interface RunScoreSummary {
+  createdAt: Option.Option<DateTime.DateTime>;
+  finishedAt: Option.Option<DateTime.DateTime>;
+  runScore: number;
+  streak: number;
+}
 
 // Derives the run-score summary from raw atom values; keeps the domain
 // derivation (finished vs. live run, which timestamps to show) out of the
@@ -29,23 +36,16 @@ function buildRunScoreSummary(
   activeCreatedAt: Option.Option<DateTime.DateTime>,
   activeRunScore: number,
   activeStreak: number
-): Option.Option<{
-  createdAt: Option.Option<DateTime.DateTime>;
-  finishedAt: Option.Option<DateTime.DateTime>;
-  runScore: number;
-  streak: number;
-  isLive: boolean;
-}> {
+): Option.Option<RunScoreSummary> {
   return Option.match(runResult, {
     onSome: ({ createdAt, finishedAt, runScore, streak }) =>
-      Option.some({ createdAt: Option.some(createdAt), finishedAt: Option.some(finishedAt), runScore, streak, isLive: false }),
+      Option.some({ createdAt: Option.some(createdAt), finishedAt: Option.some(finishedAt), runScore, streak }),
     onNone: () =>
       Option.map(activeRunId, () => ({
         createdAt: activeCreatedAt,
         finishedAt: Option.none<DateTime.DateTime>(),
         runScore: activeRunScore,
         streak: activeStreak,
-        isLive: true,
       })),
   });
 }
@@ -62,24 +62,28 @@ export function RunScore() {
 
   const summary = buildRunScoreSummary(runResult, activeRunId, activeCreatedAt, activeRunScore, activeStreak);
 
-  return Option.match(summary, {
-    onNone: () => null,
-    onSome: ({ createdAt, finishedAt, runScore, streak, isLive }) => (
-      <section className="grid grid-cols-2 grid-rows-2 border">
-        <RunDurationSection createdAt={createdAt} finishedAt={finishedAt} isLive={isLive} />
-        <RunStat label={<T>Run Score</T>} bg="bg-surface-2 p-3" Icon={TrophyIcon} iconClassName="text-accent">
-          {runScore.toLocaleString(locale)}
-        </RunStat>
-        <RunStat label={<T>Streak</T>} bg="bg-surface-3 p-3" Icon={FireIcon} iconClassName="text-destructive">
-          {streak.toLocaleString(locale)}
-        </RunStat>
-        <RunStat label={<T>Best Run Score</T>} bg="bg-surface-3 p-3" Icon={TrophyIcon} iconClassName="text-accent">
-          {bestRunScore.toLocaleString(locale)}
-        </RunStat>
-        <RunStat label={<T>Best Streak</T>} bg="bg-surface-2 p-3" Icon={FireIcon} iconClassName="text-destructive">
-          {bestStreak.toLocaleString(locale)}
-        </RunStat>
-      </section>
-    ),
-  });
+  // Early return: with neither a finished run nor an active one there is nothing
+  // to report. Returning before the markup keeps the stat grid below at one
+  // indentation level instead of nesting it inside a match callback
+  if (Option.isNone(summary)) return null;
+
+  const { createdAt, finishedAt, runScore, streak } = summary.value;
+
+  return (
+    <section className="grid grid-cols-2 grid-rows-2 border">
+      <RunDurationSection createdAt={createdAt} finishedAt={finishedAt} />
+      <RunStatCell label={<T>Run Score</T>} surface="surface-2" tone="score">
+        {runScore.toLocaleString(locale)}
+      </RunStatCell>
+      <RunStatCell label={<T>Streak</T>} surface="surface-3" tone="streak">
+        {streak.toLocaleString(locale)}
+      </RunStatCell>
+      <RunStatCell label={<T>Best Run Score</T>} surface="surface-3" tone="score">
+        {bestRunScore.toLocaleString(locale)}
+      </RunStatCell>
+      <RunStatCell label={<T>Best Streak</T>} surface="surface-2" tone="streak">
+        {bestStreak.toLocaleString(locale)}
+      </RunStatCell>
+    </section>
+  );
 }

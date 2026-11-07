@@ -1,19 +1,21 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 
+// components
+import { CARD_VARIANT_STYLES } from "@/ui/card-variants";
+
 // types
+import type { CardTag, CardVariant } from "@/ui/card-variants";
 import type { ReactNode } from "react";
 
 interface StatCardProps {
-  Tag?: "header" | "footer" | "section" | "div" | "article";
-  variant: "primary" | "secondary";
+  Tag?: CardTag;
+  variant: CardVariant;
   title: ReactNode;
   children: ReactNode;
 }
 
 // constants
-const VARIANT_STYLES = { primary: cn("border-primary text-primary"), secondary: cn("border-secondary text-secondary") } as const;
-
 // Fully static portion of the card chrome, hoisted so each card render only merges the two-argument variant override
 const CARD_CLASS = cn(
   "row-span-2 grid w-3/4 max-w-lg grid-rows-subgrid gap-3 justify-self-center rounded-xl border-2 bg-surface-1 p-3 text-center md:p-6 lg:p-9"
@@ -21,7 +23,7 @@ const CARD_CLASS = cn(
 
 export function StatCard({ Tag = "section", variant, title, children }: StatCardProps) {
   return (
-    <Tag className={cn(CARD_CLASS, VARIANT_STYLES[variant])}>
+    <Tag className={cn(CARD_CLASS, CARD_VARIANT_STYLES[variant])}>
       {/* self-center perfectly vertically aligns the title in its 1fr track */}
       <div className="@container self-center">
         <h3 className="text-[6cqi] font-semibold tracking-widest uppercase">{title}</h3>
@@ -34,6 +36,7 @@ export function StatCard({ Tag = "section", variant, title, children }: StatCard
   );
 }
 
-export function StatCardSkeleton() {
+// The placeholder for a card's value, not for the card
+export function StatCardValueSkeleton() {
   return <span className="inline-block w-full">&nbsp;</span>;
 }

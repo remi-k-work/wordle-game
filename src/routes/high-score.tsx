@@ -8,7 +8,6 @@ import { msg } from "gt-react";
 import { HighScorePage } from "@/features/high-score/domain/models";
 
 // types
-import type { ReactNode } from "react";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 // components
@@ -71,13 +70,9 @@ function HighScore() {
   return <PageContent solutionsLanguage={sl} />;
 }
 
-// A lazy-loaded chart section: each section carries its own Suspense boundary
-// with a dedicated skeleton, so the page reads as a list of sections rather
-// than repeating Suspense scaffolding six times
-function LazySection({ fallback, children }: { fallback: ReactNode; children: ReactNode }) {
-  return <Suspense fallback={fallback}>{children}</Suspense>;
-}
-
+// Each section owns its own Suspense boundary with the skeleton that matches its
+// shape, so the page reads as a list of sections — each one streaming in under
+// its own placeholder — without any wrapper component in between
 function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLanguage }) {
   return (
     <article className="mx-auto w-full max-w-384">
@@ -85,24 +80,24 @@ function PageContent({ solutionsLanguage }: { solutionsLanguage: SolutionsLangua
         title={msg("High Score & Charts")}
         description={msg("The following section displays the top 10 scores, along with various informative game charts.")}
       />
-      <LazySection fallback={<BrowseChartsSkeleton />}>
+      <Suspense fallback={<BrowseChartsSkeleton />}>
         <BrowseCharts />
-      </LazySection>
-      <LazySection fallback={<Top10HighScoresSkeleton />}>
+      </Suspense>
+      <Suspense fallback={<Top10HighScoresSkeleton />}>
         <Top10HighScores solutionsLanguage={solutionsLanguage} />
-      </LazySection>
-      <LazySection fallback={<BestRunTrophyCardChartSkeleton />}>
+      </Suspense>
+      <Suspense fallback={<BestRunTrophyCardChartSkeleton />}>
         <BestRunTrophyCardChart solutionsLanguage={solutionsLanguage} />
-      </LazySection>
-      <LazySection fallback={<TotalsSliderSkeleton />}>
+      </Suspense>
+      <Suspense fallback={<TotalsSliderSkeleton />}>
         <TotalsSlider solutionsLanguage={solutionsLanguage} />
-      </LazySection>
-      <LazySection fallback={<DistributionChartsSkeleton />}>
+      </Suspense>
+      <Suspense fallback={<DistributionChartsSkeleton />}>
         <DistributionCharts solutionsLanguage={solutionsLanguage} />
-      </LazySection>
-      <LazySection fallback={<FrequencyChartsSkeleton />}>
+      </Suspense>
+      <Suspense fallback={<FrequencyChartsSkeleton />}>
         <FrequencyCharts solutionsLanguage={solutionsLanguage} />
-      </LazySection>
+      </Suspense>
       <FooterLink />
     </article>
   );

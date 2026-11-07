@@ -1,13 +1,16 @@
 // services, features, and other libraries
-import { T } from "gt-react";
 import { useLocale } from "gt-tanstack-start";
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/reactivity";
 import { anyAvgStatAtom } from "@/features/charts/state/charts";
 import { formatSeconds } from "@/domain/formatters";
 
 // components
-import { StatPair, StatPairSkeleton } from "@/features/charts/ui/stat-pair";
+import { AnyAvgStatChartSkeleton } from "./skeleton";
+import { StatPair } from "@/features/charts/ui/stat-pair";
+import { StatSection } from "@/features/charts/ui/stat-section";
+
+// constants
+import { GLOBAL_HEADER } from "./copy";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -27,21 +30,23 @@ export function AnyAvgStatChart({ statColumn, statTable, solutionsLanguage, titl
   const locale = useLocale();
   const formatStatValue = (value: number) => (isDuration ? formatSeconds(value) : value.toLocaleString(locale));
 
-  return AsyncResult.builder(anyAvgStat)
-    .onInitialOrWaiting(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
-    .onFailure(() => <AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />)
-    .onSuccess((anyAvgStat) => (
-      <StatPair
-        title={title}
-        personalHeader={personalHeader}
-        personal={formatStatValue(anyAvgStat.personal)}
-        globalTitle={<T>Global Average</T>}
-        global={formatStatValue(anyAvgStat.global)}
-      />
-    ))
-    .render();
+  return (
+    <StatSection result={anyAvgStat} skeleton={<AnyAvgStatChartSkeleton title={title} personalHeader={personalHeader} />}>
+      {(anyAvgStat) => (
+        <StatPair
+          title={title}
+          personalHeader={personalHeader}
+          personal={formatStatValue(anyAvgStat.personal)}
+          globalHeader={GLOBAL_HEADER}
+          global={formatStatValue(anyAvgStat.global)}
+        />
+      )}
+    </StatSection>
+  );
 }
 
-export function AnyAvgStatChartSkeleton({ title, personalHeader }: Pick<AnyAvgStatChartProps, "title" | "personalHeader">) {
-  return <StatPairSkeleton title={title} personalHeader={personalHeader} globalTitle={<T>Global Average</T>} />;
-}
+// The skeleton lives in ./skeleton so route-level Suspense fallbacks never
+// statically bundle the Effect client runtime this chart atom pulls in; imported
+// here for the waiting/failure states and re-exported so the public API is
+// unchanged
+export { AnyAvgStatChartSkeleton };

@@ -8,6 +8,10 @@ import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
+import { ResponsiveLabel } from "@/ui/responsive-label";
+
+// constants
+import { flowButtonClasses } from "./chrome";
 
 // assets
 import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/outline";
@@ -16,7 +20,9 @@ import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/out
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import type { GameFlowVariant } from "@/features/game/state/game-flow-variant";
 
-interface GameFlowButtonLiveProps extends ComponentPropsWithoutRef<typeof Button> {
+// Every prop of the button except `onClick`: the button's action is resolved from
+// the flow variant, so a caller's handler would be silently discarded here
+interface GameFlowButtonLiveProps extends Omit<ComponentPropsWithoutRef<typeof Button>, "onClick"> {
   variant: Exclude<GameFlowVariant, "skeleton">;
   keepText?: boolean;
   onClicked?: () => void;
@@ -65,8 +71,7 @@ function resolveFlowAction(
   );
 }
 
-// `GameFlowButtonLive` renders the button for a resolved flow action; all domain
-// logic about what each variant means lives in `resolveFlowAction`.
+// `GameFlowButtonLive` renders the button for a resolved flow action; all domain logic about what each variant means lives in `resolveFlowAction`
 export function GameFlowButtonLive({ variant, className, keepText = false, onClicked, ...rest }: GameFlowButtonLiveProps) {
   const gt = useGT();
   const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
@@ -81,7 +86,7 @@ export function GameFlowButtonLive({ variant, className, keepText = false, onCli
 
   return (
     <Button
-      className={cn("button", !keepText && "max-sm:p-1", action.className, className)}
+      className={cn(flowButtonClasses(keepText), action.className, className)}
       title={action.title}
       {...rest}
       onClick={() => {
@@ -90,7 +95,7 @@ export function GameFlowButtonLive({ variant, className, keepText = false, onCli
       }}
     >
       {action.icon}
-      {keepText ? action.label : <span className="hidden sm:block">{action.label}</span>}
+      <ResponsiveLabel keepText={keepText}>{action.label}</ResponsiveLabel>
     </Button>
   );
 }

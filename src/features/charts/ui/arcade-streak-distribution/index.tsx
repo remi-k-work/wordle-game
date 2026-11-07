@@ -1,12 +1,12 @@
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
-import { AsyncResult } from "effect/reactivity";
 import { useGT } from "gt-react";
 import { arcadeStreakDistributionAtom } from "@/features/charts/state/charts";
 import { XAxis } from "recharts";
+import { formatPercent, makeSeriesLabels } from "@/features/charts/ui/chart-series";
 
 // components
-import { DistributionEmpty } from "@/features/charts/ui/distribution-shell";
+import { ChartSection } from "@/features/charts/ui/chart-section";
 import { DistributionChart } from "@/features/charts/ui/distribution-chart";
 import { ArcadeStreakDistributionChartSkeleton } from "./skeleton";
 
@@ -21,29 +21,34 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
   const arcadeStreakDistribution = useAtomValue(arcadeStreakDistributionAtom(solutionsLanguage));
   const gt = useGT();
 
-  const tickFormatter = (tick: number) => (tick === Infinity ? "14+" : `${tick}`);
-  const tooltipFormatter = (value: unknown, name: unknown) => [`${String(value)}%`, name === "personalPct" ? gt("Your Streak") : gt("Global Average")] as const;
-  const tooltipLabelFormatter = (label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${String(label)}`);
-  const legendFormatter = (value: unknown) => (value === "personalPct" ? gt("Your Streak") : gt("Global Average"));
+  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personalPct", personal: "Your Streak", global: "Global Average", formatValue: formatPercent });
 
-  return AsyncResult.builder(arcadeStreakDistribution)
-    .onInitialOrWaiting(() => <ArcadeStreakDistributionChartSkeleton />)
-    .onFailure(() => <ArcadeStreakDistributionChartSkeleton />)
-    .onSuccess((arcadeStreakDistribution) =>
-      arcadeStreakDistribution.length === 0 ? (
-        <DistributionEmpty title={gt("Streak before a loss")} message={gt("No streak data tracked yet!")} />
-      ) : (
+  // An unbounded bucket reads as "14+": the cap the archive keeps after which every longer streak lands in the same row as the unbounded one
+  const tickFormatter = (tick: number) => (tick === Infinity ? "14+" : `${tick}`);
+  const tooltipLabelFormatter = (label: unknown) => (label === Infinity ? "Streak: 14+" : `Streak: ${String(label)}`);
+
+  // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
+  const title = gt("Streak before a loss");
+
+  return (
+    <ChartSection
+      title={title}
+      result={arcadeStreakDistribution}
+      skeleton={<ArcadeStreakDistributionChartSkeleton />}
+      emptyMessage={gt("No streak data tracked yet!")}
+    >
+      {(rows) => (
         <DistributionChart
-          title={gt("Streak before a loss")}
-          data={arcadeStreakDistribution}
+          title={title}
+          data={rows}
           xAxis={<XAxis dataKey="streak" tickFormatter={tickFormatter} stroke="var(--color-text-1)" />}
-          tooltipFormatter={tooltipFormatter}
+          tooltipFormatter={seriesLabels.tooltipFormatter}
           tooltipLabelFormatter={tooltipLabelFormatter}
-          legendFormatter={legendFormatter}
+          legendFormatter={seriesLabels.legendFormatter}
         />
-      )
-    )
-    .render();
+      )}
+    </ChartSection>
+  );
 }
 
 // The skeleton lives in ./skeleton so route-level Suspense fallbacks never

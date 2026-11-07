@@ -27,7 +27,7 @@ export function BestRunCardFilled({ bestRun: { deathReason, failedOnWord, finalS
       </span>
       <span className="flex items-center gap-1 text-3xl wrap-anywhere text-destructive">
         <FireIcon className="size-9" />
-        {finalStreak}
+        {finalStreak.toLocaleString(locale)}
       </span>
       <span className="flex items-center gap-1 text-3xl wrap-anywhere">
         <ClockIcon className="size-9" />

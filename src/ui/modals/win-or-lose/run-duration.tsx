@@ -13,14 +13,22 @@ import { ClockIcon } from "@heroicons/react/24/outline";
 interface RunDurationSectionProps {
   createdAt: Option.Option<DateTime.DateTime>;
   finishedAt: Option.Option<DateTime.DateTime>;
-  isLive: boolean;
 }
 
 // A live run ends "now" (ticking every second); a finished run freezes at its
 // recorded end. The 1 Hz clock is isolated here so a live run re-renders only
 // this section, not the whole stat grid
-export function RunDurationSection({ createdAt, finishedAt, isLive }: RunDurationSectionProps) {
-  const [now, setNow] = useState(DateTime.nowUnsafe);
+export function RunDurationSection({ createdAt, finishedAt }: RunDurationSectionProps) {
+  // Lazy initializer: this section re-renders once a second while the run is
+  // live, and the eager form would re-read the clock on every one of those
+  // renders even though only the first value is ever used
+  const [now, setNow] = useState(() => DateTime.nowUnsafe());
+
+  // The one fact that decides whether this run is still ticking: a run that never
+  // recorded an end has not ended yet. Derived here rather than handed down,
+  // because it is not independent information — the parent cannot know more about
+  // it than `finishedAt` already says
+  const isLive = Option.isNone(finishedAt);
 
   useEffect(() => {
     if (!isLive) return;
@@ -32,7 +40,7 @@ export function RunDurationSection({ createdAt, finishedAt, isLive }: RunDuratio
     return () => clearInterval(interval);
   }, [isLive]);
 
-  const runFinishedAt = isLive ? now : Option.getOrElse(finishedAt, () => now);
+  const runFinishedAt = Option.getOrElse(finishedAt, () => now);
   const runStartedAt = Option.getOrElse(createdAt, () => runFinishedAt);
   const runDuration = DateTime.distance(runStartedAt, runFinishedAt);
 

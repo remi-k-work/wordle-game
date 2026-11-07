@@ -7,9 +7,7 @@ import type { ComponentPropsWithoutRef } from "react";
 type TooltipProps = ComponentPropsWithoutRef<typeof Tooltip>;
 type LegendProps = ComponentPropsWithoutRef<typeof Legend>;
 
-// Shared styling for the telemetry charts. Centralising these ensures the
-// tooltip/legend/grid/bar styling stays consistent across every chart and
-// avoids repeating the same declarative config in each chart component
+// Shared styling for the telemetry charts
 const tooltipStyle = {
   contentStyle: { backgroundColor: "var(--color-surface-1)" },
   labelStyle: { fontFamily: "var(--font-sans)", fontWeight: "bold", color: "var(--color-text-1)" },

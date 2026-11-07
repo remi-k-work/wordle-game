@@ -5,10 +5,8 @@ import { T, useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
-import { GamePopover } from "@/ui/game-popover";
-import { NavItem } from "@/ui/header/nav-item";
-import { ThemeChanger } from "@/ui/header/theme-changer";
-import { SiteLangChanger } from "@/ui/header/lang-changer";
+import { GamePopover, PopoverTriggerSkeleton } from "@/ui/game-popover";
+import { SiteNav } from "@/ui/header/site-nav";
 import { GameLangChanger } from "@/features/settings/ui/lang-changer";
 import { GameFlowButton } from "@/features/game/ui/game-flow-button";
 
@@ -16,8 +14,6 @@ import { GameFlowButton } from "@/features/game/ui/game-flow-button";
 import { Bars3Icon, QuestionMarkCircleIcon, SpeakerWaveIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 // constants
-import { NAV_ITEMS } from "@/ui/header/constants";
-
 const MENU_MODALS = [
   { modalType: "voice-settings", label: <T>Voice Settings</T>, Icon: SpeakerWaveIcon },
   { modalType: "high-score", label: <T>High Score</T>, Icon: TrophyIcon },
@@ -32,13 +28,7 @@ export function GameMenu() {
     <GamePopover title={gt("Menu")} trigger={<Bars3Icon className="size-11" />}>
       {(close) => (
         <>
-          <nav className="flex flex-1 flex-wrap items-center justify-between gap-1">
-            {NAV_ITEMS.map((navItem) => (
-              <NavItem key={navItem.href} {...navItem} />
-            ))}
-            <SiteLangChanger />
-            <ThemeChanger />
-          </nav>
+          <SiteNav className="flex flex-1 flex-wrap items-center justify-between gap-1" />
 
           <GameLangChanger keepText onClicked={close} />
           <GameFlowButton keepText onClicked={close} />
@@ -61,10 +51,8 @@ export function GameMenu() {
   );
 }
 
+// The toolbar popovers each stand in for their live trigger with this shared
+// skeleton; the menu only has to name the icon its own trigger shows
 export function GameMenuSkeleton() {
-  return (
-    <Button className="button flex-none p-1" disabled>
-      <Bars3Icon className="size-11" />
-    </Button>
-  );
+  return <PopoverTriggerSkeleton Icon={Bars3Icon} />;
 }

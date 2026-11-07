@@ -7,6 +7,11 @@ import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { Toolbar, ToolbarSkeleton } from "./toolbar";
 import { KeypadArea, KeypadAreaSkeleton } from "./keypad-area";
 
+// constants
+// Fully static class string, hoisted so the live footer and its skeleton cannot
+// drift into different outer spacing (matching `HEADER_CLASSES` / `TOOLBAR_CLASSES`)
+const FOOTER_CLASSES = "grid gap-1";
+
 export function Footer() {
   const gameDataKeypad = useAtomValue(gameDataKeypadAtom);
 
@@ -14,7 +19,7 @@ export function Footer() {
   if (Option.isNone(gameDataKeypad)) return <FooterSkeleton />;
 
   return (
-    <footer className="grid gap-1">
+    <footer className={FOOTER_CLASSES}>
       <Toolbar />
       <KeypadArea keys={gameDataKeypad.value} />
     </footer>
@@ -23,7 +28,7 @@ export function Footer() {
 
 export function FooterSkeleton() {
   return (
-    <footer className="grid gap-1">
+    <footer className={FOOTER_CLASSES}>
       <ToolbarSkeleton />
       <KeypadAreaSkeleton />
     </footer>

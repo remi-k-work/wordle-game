@@ -4,25 +4,22 @@ import { gameSettingsMachineAtom, gameSettingsVoiceRateAtom } from "@/features/s
 
 // components
 import { T } from "gt-react";
-import { VoiceSlider, VoiceSliderSkeleton } from "./voice-slider";
+import { VoiceSlider } from "./voice-slider";
+
+// types
+import type { VoiceControl } from "./voice-slider";
+
+// constants
+// The control's name, label, and range travel together as one value, so the
+// slider reads them from a single place instead of the component restating
+// name, label, min, max and step as five separate props
+const RATE_CONTROL = { name: "voiceRate", label: <T>Rate</T>, min: 0.5, max: 2, step: 0.05 } as const satisfies VoiceControl;
 
 export function Rate() {
   const voiceRate = useAtomValue(gameSettingsVoiceRateAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
 
   return (
-    <VoiceSlider
-      name="voiceRate"
-      label={<T>Rate</T>}
-      min={0.5}
-      max={2}
-      step={0.05}
-      value={voiceRate}
-      onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceRateChanged", voiceRate: value })}
-    />
+    <VoiceSlider {...RATE_CONTROL} value={voiceRate} onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceRateChanged", voiceRate: value })} />
   );
-}
-
-export function RateSkeleton() {
-  return <VoiceSliderSkeleton name="voiceRate" label={<T>Rate</T>} min={0.5} max={2} step={0.05} skeletonValue={1} />;
 }

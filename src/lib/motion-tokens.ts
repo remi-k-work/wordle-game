@@ -14,3 +14,16 @@ export const SPRINGS = {
   instant: { type: "spring", stiffness: 600, damping: 35 },
   release: { type: "spring", stiffness: 200, damping: 20, restDelta: 0.001 },
 } as const;
+
+// Choreography for a one-icon-for-another swap under `AnimatePresence mode="wait"`
+// (theme toggle, website-locale toggle): the outgoing icon fades and rotates out
+// one way while the incoming one fades and rotates in from the opposite side, so
+// the pair reads as a single rotating control rather than a crossfade
+// Stated once because both toggles restate it, and the four prop groups must stay
+// identical or the two header controls animate with visibly different timing
+export const ICON_SWAP_MOTION = {
+  initial: { opacity: 0, rotate: -90 },
+  animate: { opacity: 1, rotate: 0 },
+  exit: { opacity: 0, rotate: 90 },
+  transition: SPRINGS.snappy,
+} as const;

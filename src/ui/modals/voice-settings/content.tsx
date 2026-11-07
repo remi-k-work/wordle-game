@@ -1,13 +1,11 @@
 // components
 import { VoiceSettings } from "@/features/settings/ui/voice-settings";
-import { CloseModalButton } from "@/ui/modal-close-button";
+import { ModalBody } from "@/ui/modal-body";
 
 export function Content() {
   return (
-    <article className="mx-auto max-w-prose space-y-9">
+    <ModalBody>
       <VoiceSettings />
-
-      <CloseModalButton />
-    </article>
+    </ModalBody>
   );
 }

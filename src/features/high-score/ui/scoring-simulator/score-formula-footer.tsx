@@ -1,14 +1,21 @@
 // services, features, and other libraries
 import { T, Var } from "gt-react";
+import { useLocale } from "gt-tanstack-start";
 
 // types
+import type { ScoreReadings } from "@/features/high-score/domain/helpers";
+
 interface ScoreFormulaFooterProps {
-  basePointsPerTurn: number;
-  speedMultiplier: number;
-  locale: string;
+  // The factors the formula is built from; they are the readings `SimulatorBody`
+  // already derived for the sections above, handed over rather than recomputed
+  // from the raw turn/elapsed inputs here — one owner of the score formula
+  basePointsPerTurn: ScoreReadings["basePointsPerTurn"];
+  speedMultiplier: ScoreReadings["speedMultiplier"];
 }
 
-export function ScoreFormulaFooter({ basePointsPerTurn, speedMultiplier, locale }: ScoreFormulaFooterProps) {
+export function ScoreFormulaFooter({ basePointsPerTurn, speedMultiplier }: ScoreFormulaFooterProps) {
+  const locale = useLocale();
+
   return (
     <footer className="mx-auto bg-surface-1 p-3 text-center text-lg sm:text-xl lg:text-2xl">
       <T>

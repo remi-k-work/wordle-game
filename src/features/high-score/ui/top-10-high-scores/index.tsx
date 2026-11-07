@@ -1,5 +1,5 @@
 // react
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 // services, features, and other libraries
 import { useAtomValue } from "@effect/atom-react";
@@ -7,7 +7,6 @@ import { AsyncResult } from "effect/reactivity";
 import { highScoreNewHighScoreIdAtom, top10HighScoresAtom } from "@/features/high-score/state/high-score";
 import { motion } from "motion/react";
 import { T } from "gt-react";
-import { useLocale } from "gt-tanstack-start";
 
 // components
 import { InfoLine } from "@/ui/info-line";
@@ -25,7 +24,6 @@ interface Top10HighScoresProps {
 
 // constants
 import { MOTION_TOKENS } from "@/lib/motion-tokens";
-import { NEW_HIGH_SCORE_ROW_ID } from "./top-10-row";
 
 const CONTAINER_VARIANTS = {
   hidden: {},
@@ -38,13 +36,17 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
   const top10Result = useAtomValue(top10HighScoresAtom(solutionsLanguage));
   const newHighScoreId = useAtomValue(highScoreNewHighScoreIdAtom);
   const highlightedHighScoreId = newHighScoreId.valueOrUndefined;
-  const locale = useLocale();
+
+  // React-owned handle to the highlighted row, handed to whichever row currently
+  // holds the new high score — the effect scrolls the element the table actually
+  // rendered rather than querying the document by id
+  const highlightedRowRef = useRef<HTMLTableRowElement>(null);
 
   // Scroll the newly-set high score row into view once its data has loaded
   // `top10Result` is the AsyncResult; `.waiting` flips to false when data arrives
   useEffect(() => {
     if (top10Result.waiting || highlightedHighScoreId === undefined) return;
-    const animationId = requestAnimationFrame(() => document.getElementById(NEW_HIGH_SCORE_ROW_ID)?.scrollIntoView({ behavior: "smooth", block: "center" }));
+    const animationId = requestAnimationFrame(() => highlightedRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }));
 
     return () => cancelAnimationFrame(animationId);
   }, [top10Result.waiting, highlightedHighScoreId]);
@@ -59,18 +61,22 @@ export function Top10HighScores({ solutionsLanguage }: Top10HighScoresProps) {
         <Table>
           <Top10TableHeader />
           <MotionTableBody variants={CONTAINER_VARIANTS} initial="hidden" animate="visible">
-            {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => (
-              <Top10Row
-                key={id}
-                rank={index + 1}
-                playerName={playerName}
-                score={score}
-                streak={streak}
-                solutionsLang={solutionsLang}
-                isNewHighScore={id === highlightedHighScoreId}
-                locale={locale}
-              />
-            ))}
+            {top10HighScores.map(({ id, playerName, score, streak, solutionsLang }, index: number) => {
+              const isNewHighScore = id === highlightedHighScoreId;
+
+              return (
+                <Top10Row
+                  key={id}
+                  rank={index + 1}
+                  playerName={playerName}
+                  score={score}
+                  streak={streak}
+                  solutionsLang={solutionsLang}
+                  isNewHighScore={isNewHighScore}
+                  highlightedRowRef={isNewHighScore ? highlightedRowRef : undefined}
+                />
+              );
+            })}
           </MotionTableBody>
         </Table>
       )

@@ -7,9 +7,7 @@ import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/fe
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-import type { Tile } from "@/features/game/domain/models";
-
-export { overdriveHacksCanApplyHackAtom } from "./can-apply";
+import type { BoardTile } from "@/features/game/domain/models";
 
 // The overdrive hacks machine is now a living actor inside the effect atom
 export const overdriveHacksMachineAtom = createMachineAtom(overdriveHacksMachine);
@@ -32,19 +30,29 @@ export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
   )
 );
 
-// Projection for completed rows. Sonar state remains separate from player guesses;
-// the current-guess component can use the same reveal selector when it gains final visuals
+// Projection for the rendered board: one grid, each tile stating whether it is a
+// sonar reveal. Stated here rather than in the row component so the memoized
+// row/tile leaves only ever receive primitives, and so the board never has to
+// subscribe to (and diff) a second grid to find out which tiles glow
+// Sonar state remains separate from player guesses; the current-guess component
+// derives its own reveals from the same `sonarReveals` selector
 export const overdriveHacksWordleGridAtom = Atom.make((get) => {
   const wordleGrid = get(wordChallengeWordleGridAtom);
   const reveals = get(overdriveHacksSonarRevealsAtom);
-  if (reveals.length === 0) return wordleGrid;
+
+  // A tile is a reveal when the base grid leaves its position empty and a reveal
+  // fills it — a letter the player typed is never a reveal. The annotation runs
+  // whether or not there are reveals, so the board always renders one uniform
+  // grid shape instead of a projection that sometimes carries the flag and
+  // sometimes does not
+  if (reveals.length === 0) return wordleGrid.map((row) => row.map((tile): BoardTile => ({ ...tile, isSonarReveal: false })));
 
   const vowelByPosition = sonarVowelByPosition(reveals);
 
   return wordleGrid.map((row) =>
-    row.map((tile, index) => {
+    row.map((tile, index): BoardTile => {
       const vowel = vowelByPosition.get(index);
-      return vowel === undefined || tile.tileKey !== "" ? tile : ({ tileKey: vowel, color: "green" } as const satisfies Tile);
+      return vowel === undefined || tile.tileKey !== "" ? { ...tile, isSonarReveal: false } : { tileKey: vowel, color: "green", isSonarReveal: true };
     })
   );
 });

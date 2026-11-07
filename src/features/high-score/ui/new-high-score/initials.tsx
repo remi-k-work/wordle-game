@@ -17,24 +17,32 @@ import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 // types
 import type { SubmitEvent } from "react";
 
+// constants
+const INITIALS_LENGTH = 3;
+
+// The one rule that turns typed input into the arcade initials the form stores
+// and submits: uppercase A–Z only, capped at `INITIALS_LENGTH` characters.
+// Applied on write rather than on read, so React state holds exactly what the
+// input shows and what the submit dispatches
+const sanitizeInitials = (typed: string) =>
+  typed
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, INITIALS_LENGTH);
+
 export function Initials() {
   const highScoreMachineEvent = useAtomSet(highScoreMachineAtom);
   const [initials, setInitials] = useState("");
 
-  const sanitizedInitials = initials
-    .toUpperCase()
-    .replace(/[^A-Z]/g, "")
-    .slice(0, 3);
-
   const isSubmitting = useAtomValue(highScoreIsSubmittingAtom);
-  const canSubmit = sanitizedInitials.length === 3 && !isSubmitting;
+  const canSubmit = initials.length === INITIALS_LENGTH && !isSubmitting;
 
   // A single submit path: the button's `type="submit"` and the Enter key in the
   // input both reach `onSubmit`, so the dispatch and its guard live in one place
   const submitInitials = (ev: SubmitEvent) => {
     ev.preventDefault();
     if (!canSubmit) return;
-    highScoreMachineEvent({ type: "initialsSubmitted", playerName: sanitizedInitials });
+    highScoreMachineEvent({ type: "initialsSubmitted", playerName: initials });
   };
 
   return (
@@ -42,10 +50,10 @@ export function Initials() {
       <Input
         className="input text-center text-2xl"
         size={5}
-        maxLength={3}
+        maxLength={INITIALS_LENGTH}
         placeholder="AAA"
-        value={sanitizedInitials}
-        onChange={(ev) => setInitials(ev.target.value)}
+        value={initials}
+        onChange={(ev) => setInitials(sanitizeInitials(ev.target.value))}
         disabled={isSubmitting}
       />
 

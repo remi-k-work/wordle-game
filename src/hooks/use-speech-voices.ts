@@ -28,9 +28,12 @@ const updateVoices = () => {
 const subscribe = (onStoreChange: () => void) => {
   listeners.add(onStoreChange);
 
-  // The first subscriber ever (re)attaches the single global listener and
-  // primes the initial snapshot; it stays attached for the app's lifetime
-  if (!isListening) {
+  // The first subscriber attaches the single global listener and primes the
+  // initial snapshot; the last one detaches it again, so the app does not keep
+  // a `voiceschanged` listener alive once nothing renders the voice list anymore.
+  // Re-attaching re-primes, so a voice list that loads after the last unmount
+  // is picked up by the next subscriber instead of being silently dropped
+  if (listeners.size === 1) {
     isListening = true;
     window.speechSynthesis.addEventListener("voiceschanged", updateVoices);
     updateVoices();
@@ -38,6 +41,11 @@ const subscribe = (onStoreChange: () => void) => {
 
   return () => {
     listeners.delete(onStoreChange);
+
+    if (listeners.size === 0 && isListening) {
+      isListening = false;
+      window.speechSynthesis.removeEventListener("voiceschanged", updateVoices);
+    }
   };
 };
 

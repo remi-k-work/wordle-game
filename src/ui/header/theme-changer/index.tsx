@@ -1,5 +1,5 @@
 // react
-import { lazy } from "react";
+import { Suspense, lazy } from "react";
 
 // tanstack
 import { ClientOnly } from "@tanstack/react-router";
@@ -18,7 +18,13 @@ import { SunIcon } from "@heroicons/react/24/outline";
 export function ThemeChanger() {
   return (
     <ClientOnly fallback={<ThemeChangerSkeleton />}>
-      <ThemeChangerChunk />
+      {/* Suspense owns the chunk-loading window. `ClientOnly` only swaps the
+          server/no-JS fallback for the real children — it renders no boundary,
+          and `lazy()` requires one: without it, the first mount after hydration
+          suspends with nothing above it to catch the suspension */}
+      <Suspense fallback={<ThemeChangerSkeleton />}>
+        <ThemeChangerChunk />
+      </Suspense>
     </ClientOnly>
   );
 }

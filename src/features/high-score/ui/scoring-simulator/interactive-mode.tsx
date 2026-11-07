@@ -1,35 +1,27 @@
 // react
 import { useState } from "react";
 
-// services, features, and other libraries
-import { useScoreReadings } from "@/features/high-score/hooks/use-score-readings";
-
 // components
 import { SimulatorBody } from "./simulator-body";
 import { ScoreFormulaFooter } from "./score-formula-footer";
 
-// Interactive mode: owns its own turn/elapsed state, renders sliders + formula footer
+// The time slider cannot produce anything below five seconds (see
+// `TimeMetricSection`), so the live state starts on a value the control can
+// actually reach — seeding 0 would show a duration no drag could ever return to
+const INITIAL_ELAPSED_SECONDS = 5;
+
 export function InteractiveMode() {
   const [interactiveTurn, setInteractiveTurn] = useState(1);
-  const [interactiveElapsed, setInteractiveElapsed] = useState(0);
-
-  const { potentialScore, basePointsPerTurn, speedMultiplier, gt, locale } = useScoreReadings(interactiveTurn, interactiveElapsed);
+  const [interactiveElapsed, setInteractiveElapsed] = useState(INITIAL_ELAPSED_SECONDS);
 
   return (
     <SimulatorBody
-      isReportingScore={false}
-      potentialScore={potentialScore}
-      speedMultiplier={speedMultiplier}
-      locale={locale}
-      currentTurn={interactiveTurn}
-      basePointsPerTurn={basePointsPerTurn}
+      turn={interactiveTurn}
       elapsedSeconds={interactiveElapsed}
-      ariaLabelTurn={gt("Turn Guessed")}
-      ariaLabelTime={gt("Time Elapsed")}
+      isReportingScore={false}
       onTurnChange={setInteractiveTurn}
       onElapsedChange={setInteractiveElapsed}
-    >
-      <ScoreFormulaFooter basePointsPerTurn={basePointsPerTurn} speedMultiplier={speedMultiplier} locale={locale} />
-    </SimulatorBody>
+      footer={(readings) => <ScoreFormulaFooter basePointsPerTurn={readings.basePointsPerTurn} speedMultiplier={readings.speedMultiplier} />}
+    />
   );
 }

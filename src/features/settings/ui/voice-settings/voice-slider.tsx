@@ -1,30 +1,33 @@
 // components
 import { Slider } from "@base-ui/react/slider";
+import { GradientSliderTrack } from "@/ui/gradient-slider-track";
 
 // types
 import type { ReactNode } from "react";
 
-interface VoiceSliderProps {
+// Everything that describes a control other than its current value and its
+// change handler. The three controls share one slider and differ in exactly these
+// fields, so the descriptor is a named type: each caller states its control as
+// one value, and a field added here has to be supplied by all three at once
+export interface VoiceControl {
   name: string;
   label: ReactNode;
   min: number;
   max: number;
   step: number;
+}
+
+interface VoiceSliderProps extends VoiceControl {
   value: number;
   disabled?: boolean;
   onValueChange: (value: number) => void;
 }
 
-interface VoiceSliderSkeletonProps {
-  name: string;
-  label: ReactNode;
-  min: number;
-  max: number;
-  step: number;
-  skeletonValue?: number;
-}
+// constants
+import { VOICE_LABEL_CLASSES } from "./voice-label";
 
-// Single chrome for Volume/Rate/Pitch — only range, value, and event differ
+// Single chrome for Volume/Rate/Pitch — only the control's descriptor, its
+// value, and its event differ
 export function VoiceSlider({ name, label, min, max, step, value, disabled = false, onValueChange }: VoiceSliderProps) {
   return (
     <Slider.Root
@@ -38,17 +41,8 @@ export function VoiceSlider({ name, label, min, max, step, value, disabled = fal
       onValueChange={onValueChange}
       disabled={disabled}
     >
-      <Slider.Label className="cursor-default font-sans text-sm font-semibold tracking-widest text-text-2 uppercase">{label}</Slider.Label>
-      <Slider.Control className="flex w-full touch-none items-center py-3 select-none">
-        <Slider.Track className="h-6 w-full bg-linear-to-l from-destructive via-tile-yellow to-tile-green select-none">
-          <Slider.Indicator className="bg-linear-to-b from-surface-1 via-surface-3 to-surface-1 opacity-75 select-none" />
-          <Slider.Thumb className="size-11 bg-primary select-none has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent" />
-        </Slider.Track>
-      </Slider.Control>
+      <Slider.Label className={VOICE_LABEL_CLASSES}>{label}</Slider.Label>
+      <GradientSliderTrack />
     </Slider.Root>
   );
-}
-
-export function VoiceSliderSkeleton({ name, label, min, max, step, skeletonValue = 1 }: VoiceSliderSkeletonProps) {
-  return <VoiceSlider name={name} label={label} min={min} max={max} step={step} value={skeletonValue} disabled onValueChange={() => {}} />;
 }

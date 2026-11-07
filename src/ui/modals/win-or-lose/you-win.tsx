@@ -14,26 +14,29 @@ export function YouWin() {
   const currentTurn = useAtomValue(wordChallengeCurrentTurnAtom);
   const wordScore = useAtomValue(wordChallengeWordScoreAtom);
 
-  return Option.match(Option.all({ theSecretWord, wordScore }), {
-    onNone: () => null,
-    onSome: ({ theSecretWord, wordScore }) => (
-      <RunOutcome
-        secretWord={theSecretWord}
-        message={
-          <T>
-            <p>
-              You found the solution in{" "}
-              <b>
-                <Var>{currentTurn - 1}</Var>
-              </b>{" "}
-              guesses 😄
-            </p>
-          </T>
-        }
-      >
-        <ScoringSimulator guessedTurn={currentTurn - 1} timeElapsed={wordScore.timeSeconds} />
-        <RunScore />
-      </RunOutcome>
-    ),
-  });
+  // Early return: without both a secret word and a word score there is no outcome to report
+  if (Option.isNone(theSecretWord) || Option.isNone(wordScore)) return null;
+
+  // Named once: the same number is both the guess count the copy prints and the turn the report's score is derived from
+  const guessedTurn = currentTurn - 1;
+
+  return (
+    <RunOutcome
+      secretWord={theSecretWord.value}
+      message={
+        <T>
+          <p>
+            You found the solution in{" "}
+            <b>
+              <Var>{guessedTurn}</Var>
+            </b>{" "}
+            guesses 😄
+          </p>
+        </T>
+      }
+    >
+      <ScoringSimulator mode="report" guessedTurn={guessedTurn} timeElapsed={wordScore.value.timeSeconds} />
+      <RunScore />
+    </RunOutcome>
+  );
 }

@@ -4,7 +4,7 @@ import { wordMetaIsLoadingAtom } from "@/features/game/state/word-meta";
 import { useGT } from "gt-react";
 
 // components
-import { GamePopover } from "@/ui/game-popover";
+import { GamePopover, PopoverTriggerSkeleton } from "@/ui/game-popover";
 import { Content } from "./content";
 
 // assets
@@ -20,4 +20,9 @@ export function RiddlePopover() {
       {(close) => <Content mode="popover" onGameFlowClicked={close} />}
     </GamePopover>
   );
+}
+
+// Kept beside the popover it stands in for: both render the same trigger silhouette, so one component definition covers the live and loading states
+export function RiddlePopoverSkeleton() {
+  return <PopoverTriggerSkeleton Icon={SparklesIcon} />;
 }

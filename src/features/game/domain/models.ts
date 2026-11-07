@@ -48,6 +48,12 @@ export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
 // A single tile in the wordle grid
 export const Tile = Schema.Struct({ tileKey: Letter, color: Color });
 
+// A tile as the board renders it: the decoded tile plus the presentation fact its
+// leaves need. Resolved by the grid projection (see `overdriveHacksWordleGridAtom`)
+// rather than re-derived inside the memoized row/tile components — the same reason
+// `CurrentGuessTile` carries its own `isSonarReveal` (see board/current-guess)
+export type BoardTile = Tile & { readonly isSonarReveal: boolean };
+
 // The wordle grid and the keypad
 export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLength(WORD_LENGTH))).check(Schema.isMaxLength(MAX_TURNS));
 export const Keypad = Schema.Array(Letter);

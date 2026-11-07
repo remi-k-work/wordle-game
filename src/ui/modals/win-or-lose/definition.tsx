@@ -2,10 +2,10 @@
 import { Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { wordMetaWordDefinitionAtom, wordMetaWordDefinitionAudioAtom } from "@/features/game/state/word-meta";
+import { T } from "gt-react";
 
 // components
-import { T } from "gt-react";
-import { SpeakButtonNatural, SpeakButtonRegular } from "@/ui/speak-button";
+import { SpeakActions } from "@/ui/speak-actions";
 
 // constants
 import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
@@ -13,9 +13,6 @@ import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 export function Definition() {
   const wordDefinition = useAtomValue(wordMetaWordDefinitionAtom);
   const wordDefinitionAudio = useAtomValue(wordMetaWordDefinitionAudioAtom);
-
-  const canSpeakRegular = Option.isSome(wordDefinition);
-  const canSpeakNatural = canSpeakRegular && Option.isSome(wordDefinitionAudio);
 
   return (
     <>
@@ -28,13 +25,9 @@ export function Definition() {
       </p>
 
       <section className={DIALOG_FOOTER_CLASSES}>
-        <SpeakButtonRegular sanitizedText={wordDefinition} disabled={!canSpeakRegular}>
-          <T>Speak Definition</T>
-        </SpeakButtonRegular>
-
-        <SpeakButtonNatural audioBuffer={wordDefinitionAudio} disabled={!canSpeakNatural}>
-          <T>Speak Definition</T>
-        </SpeakButtonNatural>
+        {/* Each engine's availability is derived from the payload it needs, so the
+            rule lives once in `SpeakActions` rather than being restated here */}
+        <SpeakActions sanitizedText={wordDefinition} audioBuffer={wordDefinitionAudio} label={<T>Speak Definition</T>} />
       </section>
       <br />
     </>

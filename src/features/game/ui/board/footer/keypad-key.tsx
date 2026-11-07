@@ -2,6 +2,7 @@
 import { memo } from "react";
 
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 
 // components
@@ -21,15 +22,15 @@ import { EMP_FRY_EXIT, KEYPAD_COLOR_MAP } from "@/features/game/ui/board/constan
 
 const MotionButton = motion.create(Button);
 
+// Fully static class string, hoisted so the live key and its skeleton cannot drift
+// into different key sizes or type: a change to the pool's flex-wrap layout has to
+// apply to both at once, or the keyboard visibly reshuffles when data lands
+const KEY_CLASSES = "button flex-initial basis-12 border-secondary p-0 font-sans text-xl leading-9";
+
 // Memoized leaf: Each key only re-renders when its own color/handler identity actually changes
 export const KeypadKey = memo(function KeypadKey({ letter, color, onPressed }: KeypadKeyProps) {
   return (
-    <MotionButton
-      exit={EMP_FRY_EXIT}
-      className="button flex-initial basis-12 border-secondary p-0 font-sans text-xl leading-9"
-      style={{ backgroundColor: KEYPAD_COLOR_MAP[color] }}
-      onClick={() => onPressed(letter)}
-    >
+    <MotionButton exit={EMP_FRY_EXIT} className={KEY_CLASSES} style={{ backgroundColor: KEYPAD_COLOR_MAP[color] }} onClick={() => onPressed(letter)}>
       {letter}
     </MotionButton>
   );
@@ -37,7 +38,7 @@ export const KeypadKey = memo(function KeypadKey({ letter, color, onPressed }: K
 
 export function KeypadKeySkeleton({ letter }: Pick<KeypadKeyProps, "letter">) {
   return (
-    <Button className="button flex-initial basis-12 border-secondary bg-transparent p-0 font-sans text-xl leading-9" disabled>
+    <Button className={cn(KEY_CLASSES, "bg-transparent")} disabled>
       {letter}
     </Button>
   );

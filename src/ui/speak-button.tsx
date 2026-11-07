@@ -13,65 +13,53 @@ import { SpeakerWaveIcon } from "@heroicons/react/24/outline";
 // types
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-interface SpeakButtonRegularProps extends ComponentPropsWithoutRef<typeof Button> {
+interface SpeakButtonChromeProps extends ComponentPropsWithoutRef<typeof Button> {
+  // `secondary` marks the generated-voice button apart from the synthesised one
+  // (see the dialog chrome tokens); the two engines otherwise share this chrome
+  secondary?: boolean;
+}
+
+// Both variants own their click: the payload they were handed decides what is spoken
+type SpeakButtonChromeButtonProps = Omit<ComponentPropsWithoutRef<typeof Button>, "onClick">;
+
+interface SpeakButtonRegularProps extends SpeakButtonChromeButtonProps {
   sanitizedText: Option.Option<string>;
+  disabled: boolean;
   children: ReactNode;
 }
 
-interface SpeakButtonNaturalProps extends ComponentPropsWithoutRef<typeof Button> {
+interface SpeakButtonNaturalProps extends SpeakButtonChromeButtonProps {
   audioBuffer: Option.Option<Uint8Array<ArrayBufferLike>>;
+  disabled: boolean;
   children: ReactNode;
 }
 
-// Shared speak-action chrome (riddle, definition, override) — callers keep their own disabled logic so domain behavior stays local
-export function SpeakButtonRegular({ sanitizedText, children, className, ...rest }: SpeakButtonRegularProps) {
+// Shared speak-action chrome (riddle, definition, override)
+function SpeakButtonChrome({ secondary = false, className, children, ...rest }: SpeakButtonChromeProps) {
+  return (
+    <Button className={cn("button", secondary && "bg-secondary", className)} {...rest}>
+      <SpeakerWaveIcon className="size-11" />
+      {children}
+    </Button>
+  );
+}
+
+export function SpeakButtonRegular({ sanitizedText, children, className, disabled, ...rest }: SpeakButtonRegularProps) {
   const speakText = useSpeakText();
 
   return (
-    <Button
-      className={cn("button", className)}
-      {...rest}
-      onClick={() => {
-        Option.map(sanitizedText, speakText);
-      }}
-    >
-      <SpeakerWaveIcon className="size-11" />
+    <SpeakButtonChrome className={className} disabled={disabled} {...rest} onClick={() => Option.map(sanitizedText, speakText)}>
       {children}
-    </Button>
+    </SpeakButtonChrome>
   );
 }
 
-export function SpeakButtonNatural({ audioBuffer, children, className, ...rest }: SpeakButtonNaturalProps) {
+export function SpeakButtonNatural({ audioBuffer, children, className, disabled, ...rest }: SpeakButtonNaturalProps) {
   const playAudioBuffer = usePlayAudioBuffer();
 
   return (
-    <Button
-      className={cn("button bg-secondary", className)}
-      {...rest}
-      onClick={() => {
-        Option.map(audioBuffer, playAudioBuffer);
-      }}
-    >
-      <SpeakerWaveIcon className="size-11" />
+    <SpeakButtonChrome secondary className={className} disabled={disabled} {...rest} onClick={() => Option.map(audioBuffer, playAudioBuffer)}>
       {children}
-    </Button>
-  );
-}
-
-export function SpeakButtonRegularSkeleton({ children, className, ...rest }: Omit<SpeakButtonRegularProps, "sanitizedText">) {
-  return (
-    <Button className={cn("button", className)} {...rest} disabled>
-      <SpeakerWaveIcon className="size-11" />
-      {children}
-    </Button>
-  );
-}
-
-export function SpeakButtonNaturalSkeleton({ children, className, ...rest }: Omit<SpeakButtonNaturalProps, "audioBuffer">) {
-  return (
-    <Button className={cn("button bg-secondary", className)} {...rest} disabled>
-      <SpeakerWaveIcon className="size-11" />
-      {children}
-    </Button>
+    </SpeakButtonChrome>
   );
 }

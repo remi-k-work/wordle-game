@@ -4,7 +4,7 @@ import { ArcadeStreakDistributionChartSkeleton } from "@/features/charts/ui/arca
 import { GuessDistributionChartSkeleton } from "@/features/charts/ui/guess-distribution/skeleton";
 import { TimeToSolveDistributionChartSkeleton } from "@/features/charts/ui/time-to-solve-distribution/skeleton";
 
-// The tabbed loading placeholder for the distribution section. Every piece is
+// The tabbed loading placeholder for the distribution section; every piece is
 // recharts-free, so the statically-bundled page shell stays lean while the real
 // charts load in their own chunk
 export function DistributionChartsSkeleton() {

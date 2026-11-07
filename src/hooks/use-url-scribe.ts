@@ -33,12 +33,16 @@ const applyParams = (current: Record<string, string | undefined>, values: QueryP
 export function useUrlScribe() {
   const navigateFn = useNavigate();
 
-  // Subscribe to the primitive query string, then parse it into a URLSearchParams
+  // Subscribe to the primitive query string, then parse it once into the entries
   // memoized on that string (rerender-dependencies: selecting the parsed object
   // directly would allocate a fresh identity on every router-store notification
   // and re-render consumers on unrelated navigations)
+  // Parsing here — rather than exposing a `URLSearchParams` for consumers to
+  // re-serialize and re-parse — keeps exactly one representation of the current
+  // search in the app, and leaves this module the only place that knows how a
+  // query string is turned into component-readable data
   const searchStr = useRouterState({ select: ({ location }) => location.searchStr });
-  const searchParams = useMemo(() => new URLSearchParams(searchStr), [searchStr]);
+  const searchEntries = useMemo(() => Object.fromEntries(new URLSearchParams(searchStr)), [searchStr]);
 
   // Programmatically navigates to a new url with updated search params
   const navigate = useCallback(
@@ -59,6 +63,6 @@ export function useUrlScribe() {
     [navigateFn]
   );
 
-  // We cast the functions to the appropriate types, which ensures that components using the hook see the nice, strict overloads
-  return { navigate: navigate as NavigateFn, searchParams } as const;
+  // We cast `navigate` to the appropriate type, which ensures that components using the hook see the nice, strict overloads
+  return { navigate: navigate as NavigateFn, searchEntries } as const;
 }

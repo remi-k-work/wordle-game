@@ -7,6 +7,7 @@ import { T, useGT } from "gt-react";
 // components
 import { Button } from "@base-ui/react/button";
 import { LanguageFlag } from "@/ui/language-flag";
+import { ResponsiveLabel } from "@/ui/responsive-label";
 
 // types
 interface GameLangChangerProps {
@@ -32,13 +33,9 @@ export function GameLangChanger({ keepText = false, onClicked }: GameLangChanger
       }}
     >
       <LanguageFlag solutionsLanguage={solutionsLanguage} className="size-11" />
-      {keepText ? (
+      <ResponsiveLabel keepText={keepText}>
         <T>Game Language</T>
-      ) : (
-        <span className="hidden sm:block">
-          <T>Game Language</T>
-        </span>
-      )}
+      </ResponsiveLabel>
     </Button>
   );
 }
@@ -49,13 +46,9 @@ export function GameLangChangerSkeleton({ keepText = false }: Pick<GameLangChang
   return (
     <Button className={cn("button", !keepText && "max-sm:p-1")} title={gt("Switch Game Vocabulary Language")} disabled>
       <div className="size-11 animate-pulse bg-accent" />
-      {keepText ? (
+      <ResponsiveLabel keepText={keepText}>
         <T>Game Language</T>
-      ) : (
-        <span className="hidden sm:block">
-          <T>Game Language</T>
-        </span>
-      )}
+      </ResponsiveLabel>
     </Button>
   );
 }

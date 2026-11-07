@@ -4,7 +4,7 @@ import { useGT } from "gt-react";
 // components
 import { SectionHeaderSkeleton } from "@/ui/section-header";
 
-// The loading placeholder for the run death reason frequency tab. Lives apart from
+// The loading placeholder for the run death reason frequency tab; lives apart from
 // the chart itself (whose module embeds recharts) so route-level Suspense fallbacks
 // never statically bundle recharts
 export function RunDeathReasonFrequencyChartSkeleton() {
