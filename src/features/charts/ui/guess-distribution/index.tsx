@@ -22,7 +22,7 @@ export function GuessDistributionChart({ solutionsLanguage }: GuessDistributionC
   const gt = useGT();
 
   // The personal series is labelled against the global average everywhere both appear (tooltip and legend), so the pair is resolved once here
-  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personalPct", personal: "Your Guesses", global: "Global Average", formatValue: formatPercent });
+  const seriesLabels = makeSeriesLabels({ personalKey: "personalPct", personal: gt("Your Guesses"), global: gt("Global Average"), formatValue: formatPercent });
 
   const tickFormatter = (tick: number) => gt("Turn {turn}", { turn: tick });
   const tooltipLabelFormatter = (label: unknown) => gt("Turn: {turn}", { turn: label });

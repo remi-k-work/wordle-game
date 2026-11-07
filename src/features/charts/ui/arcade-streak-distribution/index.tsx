@@ -21,7 +21,7 @@ export function ArcadeStreakDistributionChart({ solutionsLanguage }: ArcadeStrea
   const arcadeStreakDistribution = useAtomValue(arcadeStreakDistributionAtom(solutionsLanguage));
   const gt = useGT();
 
-  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personalPct", personal: "Your Streak", global: "Global Average", formatValue: formatPercent });
+  const seriesLabels = makeSeriesLabels({ personalKey: "personalPct", personal: gt("Your Streak"), global: gt("Global Average"), formatValue: formatPercent });
 
   // An unbounded bucket reads as "14+": the cap the archive keeps after which every longer streak lands in the same row as the unbounded one
   const tickFormatter = (tick: number) => (tick === Infinity ? "14+" : `${tick}`);

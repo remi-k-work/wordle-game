@@ -13,10 +13,10 @@ type HardestWordsTooltipEntry = Omit<TooltipPayloadEntry, "payload"> & { readonl
 
 // Resolves every formatter the hardest-words chart hands to recharts: the value axis ticks, the tooltip's value and heading labels, and the legend
 export function makeHardestWordsSeriesLabels(gt: ReturnType<typeof useGT>) {
-  const { tooltipFormatter, legendFormatter } = makeSeriesLabels(gt, {
+  const { tooltipFormatter, legendFormatter } = makeSeriesLabels({
     personalKey: "personalAvgTimeSeconds",
-    personal: "Your Average Time",
-    global: "Global Average Time",
+    personal: gt("Your Average Time"),
+    global: gt("Global Average Time"),
     // Every entry on this chart is an average solve time in seconds
     formatValue: (value: unknown) => formatSeconds(Number(value)),
   });

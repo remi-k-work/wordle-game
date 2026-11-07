@@ -21,7 +21,7 @@ export function OpeningGuessesFrequencyChart({ solutionsLanguage }: OpeningGuess
   const openingGuessesFrequency = useAtomValue(openingGuessesFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
-  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personal", personal: "Your Guesses", global: "Global Guesses", formatValue: formatCount });
+  const seriesLabels = makeSeriesLabels({ personalKey: "personal", personal: gt("Your Guesses"), global: gt("Global Guesses"), formatValue: formatCount });
 
   // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
   const title = gt("First word guessed in a game");

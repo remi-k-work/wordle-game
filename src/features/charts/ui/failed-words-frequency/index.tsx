@@ -21,7 +21,7 @@ export function FailedWordsFrequencyChart({ solutionsLanguage }: FailedWordsFreq
   const failedWordsFrequency = useAtomValue(failedWordsFrequencyAtom(solutionsLanguage));
   const gt = useGT();
 
-  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personal", personal: "Your Misses", global: "Global Misses", formatValue: formatCount });
+  const seriesLabels = makeSeriesLabels({ personalKey: "personal", personal: gt("Your Misses"), global: gt("Global Misses"), formatValue: formatCount });
 
   // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
   const title = gt("Words that players failed to guess");

@@ -24,7 +24,7 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
   const gt = useGT();
   const messages = useMessages();
 
-  const seriesLabels = makeSeriesLabels(gt, { personalKey: "personalPct", personal: "Your Speed", global: "Global Average", formatValue: formatPercent });
+  const seriesLabels = makeSeriesLabels({ personalKey: "personalPct", personal: gt("Your Speed"), global: gt("Global Average"), formatValue: formatPercent });
 
   const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) =>
     Option.match(maxSecondsToSpeedMultiplier(maxSeconds), {

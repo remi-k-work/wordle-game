@@ -56,16 +56,20 @@ function Home() {
         alt={gt("The Continuous Arcade Run (Accumulation vs. Wipeout)")}
         staggerChildren
       >
-        <FeatureText>
-          Forget guessing a single word and walking away. In <b>Wordle Overdrive</b>, your points accumulate over a continuous stream of puzzles. Every victory
-          Banks your hard-earned score into your <b>Total Run Score</b> and stacks your winning streak. The game loop maintains its fluidity—winning one word
-          immediately launches you into the next challenge.
-        </FeatureText>
+        <T>
+          <FeatureText>
+            Forget guessing a single word and walking away. In <b>Wordle Overdrive</b>, your points accumulate over a continuous stream of puzzles. Every
+            victory Banks your hard-earned score into your <b>Total Run Score</b> and stacks your winning streak. The game loop maintains its fluidity—winning
+            one word immediately launches you into the next challenge.
+          </FeatureText>
+        </T>
         <br />
-        <FeatureText>
-          But beware: the stakes have never been higher. A single failed word (failing to guess in 6 turns) triggers a total <b>Wipeout</b>. Your active Run
-          Score and Streak immediately reset to zero, leaving only your persistent <b>Best Run</b> high water mark as a ghost to chase.
-        </FeatureText>
+        <T>
+          <FeatureText>
+            But beware: the stakes have never been higher. A single failed word (failing to guess in 6 turns) triggers a total <b>Wipeout</b>. Your active Run
+            Score and Streak immediately reset to zero, leaving only your persistent <b>Best Run</b> high water mark as a ghost to chase.
+          </FeatureText>
+        </T>
       </FeatureSection>
 
       <FeatureSection
@@ -74,16 +78,22 @@ function Home() {
         alt={gt("Bleeding Potential (Hunt Efficiently)")}
         staggerChildren
       >
-        <FeatureText>
-          In <b>Wordle Overdrive</b>, finding the word is only half the battle. To survive the leaderboard, you must <b>Hunt Efficiently</b>.
-        </FeatureText>
+        <T>
+          <FeatureText>
+            In <b>Wordle Overdrive</b>, finding the word is only half the battle. To survive the leaderboard, you must <b>Hunt Efficiently</b>.
+          </FeatureText>
+        </T>
         <br />
-        <FeatureText>
-          The scoring matrix has been completely overhauled to favor speed and precision. Every second you stall, your potential reward decays. Solve the riddle
-          fast with minimal guesses, and your score skyrockets. Hesitate, and your points bleed away.
-        </FeatureText>
+        <T>
+          <FeatureText>
+            The scoring matrix has been completely overhauled to favor speed and precision. Every second you stall, your potential reward decays. Solve the
+            riddle fast with minimal guesses, and your score skyrockets. Hesitate, and your points bleed away.
+          </FeatureText>
+        </T>
         <br />
-        <FeatureText>Try the simulator below to see exactly how your speed and precision dictate your final payout</FeatureText>
+        <T>
+          <FeatureText>Try the simulator below to see exactly how your speed and precision dictate your final payout</FeatureText>
+        </T>
         <br />
         <ScoringSimulator mode="interactive" />
       </FeatureSection>
@@ -94,16 +104,20 @@ function Home() {
         alt={gt("Survival Tools (AI Riddles & Smart Keypad)")}
         staggerChildren
       >
-        <FeatureText>
-          With an massive, uncapped vocabulary dictionary of over <b>30,000</b> words, you are not left shooting entirely in the dark. At the start of every
-          puzzle, an enigmatic AI master crafts a bespoke, one-sentence riddle giving you a thematic compass. This crucial context lets you make strategic,
-          informed choices from your very first guess.
-        </FeatureText>
+        <T>
+          <FeatureText>
+            With an massive, uncapped vocabulary dictionary of over <b>30,000</b> words, you are not left shooting entirely in the dark. At the start of every
+            puzzle, an enigmatic AI master crafts a bespoke, one-sentence riddle giving you a thematic compass. This crucial context lets you make strategic,
+            informed choices from your very first guess.
+          </FeatureText>
+        </T>
         <br />
-        <FeatureText>
-          Combined with our dedicated Survival Keypad that dynamically vanishes incorrect grey letters as you play, you have all the tools you need to forge a
-          legendary, high-scoring run. You can never waste a keystroke by accident again.
-        </FeatureText>
+        <T>
+          <FeatureText>
+            Combined with our dedicated Survival Keypad that dynamically vanishes incorrect grey letters as you play, you have all the tools you need to forge a
+            legendary, high-scoring run. You can never waste a keystroke by accident again.
+          </FeatureText>
+        </T>
       </FeatureSection>
       <FooterLink />
     </article>
