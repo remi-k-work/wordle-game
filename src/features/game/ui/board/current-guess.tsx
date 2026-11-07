@@ -60,11 +60,18 @@ function buildCurrentGuessTiles(
   return Array.from({ length: WORD_LENGTH }, (_, position): CurrentGuessTile => {
     const typedLetter = currentGuessWord[position];
     if (typedLetter !== undefined) {
-      return { tileKey: typedLetter, color: isInvalidGuess ? "red" : "", isLastTyped: typedLetter !== "" && position === currentLength - 1, isSonarReveal: false };
+      return {
+        tileKey: typedLetter,
+        color: isInvalidGuess ? "red" : "",
+        isLastTyped: typedLetter !== "" && position === currentLength - 1,
+        isSonarReveal: false,
+      };
     }
 
     const sonarVowel = vowelByPosition.get(position);
-    return sonarVowel ? { tileKey: sonarVowel, color: "green", isLastTyped: false, isSonarReveal: true } : { tileKey: "", color: "", isLastTyped: false, isSonarReveal: false };
+    return sonarVowel
+      ? { tileKey: sonarVowel, color: "green", isLastTyped: false, isSonarReveal: true }
+      : { tileKey: "", color: "", isLastTyped: false, isSonarReveal: false };
   });
 }
 

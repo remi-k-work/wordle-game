@@ -26,14 +26,17 @@ export type KeypadAction = "BACKSPACE" | "ENTER";
 // means a key render is two lookups instead of a second trip through twMerge
 // over a template-literal class, and keeps this leaf on the same footing as
 // `KeypadKey`, `GuessTile`, and `GuessRow`, which all state their chrome once
-const ACTION_CHROME: Record<KeypadAction, Record<"area" | "pool", { Icon: ComponentType<{ className?: string }>; rootClasses: string; iconClasses: string }>> = {
+const ACTION_CHROME: Record<
+  KeypadAction,
+  Record<"area" | "pool", { Icon: ComponentType<{ className?: string }>; rootClasses: string; iconClasses: string }>
+> = {
   BACKSPACE: {
-    area: { Icon: BackspaceIcon, rootClasses: cn("button max-md:hidden max-md:p-1 bg-destructive md:[grid-area:back]"), iconClasses: "size-9 md:size-11" },
-    pool: { Icon: BackspaceIcon, rootClasses: cn("button min-h-9.5 flex-initial basis-12 p-0 bg-destructive md:hidden"), iconClasses: "size-8" },
+    area: { Icon: BackspaceIcon, rootClasses: cn("button bg-destructive max-md:hidden max-md:p-1 md:[grid-area:back]"), iconClasses: "size-9 md:size-11" },
+    pool: { Icon: BackspaceIcon, rootClasses: cn("button min-h-9.5 flex-initial basis-12 bg-destructive p-0 md:hidden"), iconClasses: "size-8" },
   },
   ENTER: {
-    area: { Icon: PaperAirplaneIcon, rootClasses: cn("button max-md:hidden max-md:p-1 bg-secondary md:[grid-area:enter]"), iconClasses: "size-9 md:size-11" },
-    pool: { Icon: PaperAirplaneIcon, rootClasses: cn("button min-h-9.5 flex-initial basis-12 p-0 bg-secondary md:hidden"), iconClasses: "size-8" },
+    area: { Icon: PaperAirplaneIcon, rootClasses: cn("button bg-secondary max-md:hidden max-md:p-1 md:[grid-area:enter]"), iconClasses: "size-9 md:size-11" },
+    pool: { Icon: PaperAirplaneIcon, rootClasses: cn("button min-h-9.5 flex-initial basis-12 bg-secondary p-0 md:hidden"), iconClasses: "size-8" },
   },
 };
 
