@@ -19,7 +19,7 @@ interface FetchAudioInput {
 }
 
 // constants
-import { INITIAL_WORD_META } from "@/features/game/domain/constants";
+import { initialWordMeta } from "@/features/game/domain/constants";
 
 const onLoadingActor = effectActor(({ theSecretWord }: OnLoadingInput) =>
   Effect.gen(function* () {
@@ -87,12 +87,12 @@ export const wordMetaMachine = setup({
         ({ ...context, ...params.audio }) as const satisfies WordMeta
     ),
 
-    clearWordMeta: assign(() => INITIAL_WORD_META),
+    clearWordMeta: assign(() => initialWordMeta()),
   },
   actors: { onLoadingActor, fetchAudioActor },
 }).createMachine({
   id: "wordMeta",
-  context: INITIAL_WORD_META,
+  context: initialWordMeta(),
   initial: "awaitingTheSecretWord",
 
   on: {

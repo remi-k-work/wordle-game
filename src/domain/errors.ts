@@ -13,6 +13,6 @@ export class AiProviderError extends Schema.TaggedError<AiProviderError, { reado
 
 export class OpenRouterError extends Schema.TaggedError<OpenRouterError, { readonly brand: unique symbol }>()("OpenRouterError", {
   cause: Schema.Defect(),
-  status: Schema.optionalKey(Schema.Int),
-  responseBody: Schema.optionalKey(Schema.String),
+  status: Schema.optional(Schema.Int),
+  responseBody: Schema.optional(Schema.String),
 }) {}

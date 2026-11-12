@@ -4,6 +4,7 @@ import { msg } from "gt-react";
 
 // types
 import type { TheSecretWord, Tile, WordChallenge } from "./models";
+import type { SpeedMultiplierCategory } from "./constants";
 
 // constants
 import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, SPEED_MULTIPLIER_RULES } from "./constants";
@@ -38,17 +39,20 @@ export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChall
   return tiles;
 };
 
-export const speedMultiplierToCategoryMessage = (speedMultiplier: number) =>
-  speedMultiplierRule(speedMultiplier).pipe(
-    Option.map((rule) => SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP[rule.category]),
-    Option.getOrElse(() => msg("Unknown"))
-  );
+// Maps a speed multiplier to a category-keyed presentation value, falling back
+// when the multiplier is unknown. One helper serves both the message and the
+// emoji map: the fallback stays a thunk so `msg("Unknown")` is only resolved
+// on an actual miss, not at module scope
+const categoryLookup =
+  <A>(map: Readonly<Record<SpeedMultiplierCategory, A>>, fallback: () => A) =>
+  (speedMultiplier: number) =>
+    speedMultiplierRule(speedMultiplier).pipe(
+      Option.map((rule) => map[rule.category]),
+      Option.getOrElse(fallback)
+    );
 
-export const speedMultiplierToCategoryEmoji = (speedMultiplier: number) =>
-  speedMultiplierRule(speedMultiplier).pipe(
-    Option.map((rule) => SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP[rule.category]),
-    Option.getOrElse(() => "?")
-  );
+export const speedMultiplierToCategoryMessage = categoryLookup(SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP, () => msg("Unknown"));
+export const speedMultiplierToCategoryEmoji = categoryLookup(SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, () => "?");
 
 export const maxSecondsToSpeedMultiplier = (maxSeconds: number | null) =>
   Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.maxSeconds === maxSeconds).pipe(Option.map((rule) => rule.multiplier));

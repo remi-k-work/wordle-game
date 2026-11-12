@@ -1,5 +1,7 @@
 // services, features, and other libraries
-import { Array, Option } from "effect";
+import { Array, Option, Schema } from "effect";
+import { BrowseCharts } from "./models";
+import { INITIAL_BROWSE_CHARTS } from "./constants";
 
 // Telemetry stores histograms in cumulative form because they are easy to
 // aggregate in SQL. This helper converts cumulative buckets back into a
@@ -41,3 +43,14 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
 
   return distribution;
 };
+
+/**
+ * Decodes the raw URL query (as parsed by use-url-scribe) into BrowseCharts.
+ *
+ * A hand-edited, unknown, or missing `sl` is rejected by the schema and falls
+ * back to INITIAL_BROWSE_CHARTS instead of flowing a bogus value into the
+ * browse-charts machine, the chart RPC payloads, and matchLanguage (which maps
+ * anything that is not "En" to Polish)
+ */
+export const decodeBrowseCharts = (searchEntries: Readonly<Record<string, string>>): BrowseCharts =>
+  Option.getOrElse(Schema.decodeUnknownOption(BrowseCharts)(searchEntries), () => INITIAL_BROWSE_CHARTS);

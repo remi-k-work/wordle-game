@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Effect, Layer, Stream, Duration, Match, Metric, Schedule, Schema, pipe } from "effect";
+import { Array, Effect, Layer, Predicate, Stream, Duration, Match, Metric, Schedule, Schema, pipe } from "effect";
 import { SecureRandom } from "effect/crypto/SecureRandom";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -8,15 +8,18 @@ import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features
 // types
 import type { Tracer } from "effect";
 
+// constants
+import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/span-names";
+
+// Metric counter/gauge state carries bigint on bigint-backed platforms, which JSON cannot encode
+const bigIntToJson = (value: number | bigint) => (Predicate.isBigInt(value) ? value.toString() : value);
+
 const normalizeMetricPayload = (snapshot: Metric.Metric.Snapshot) =>
   pipe(
     Match.value(snapshot),
     Match.when({ type: "Frequency" }, ({ state }) => ({ occurrences: Object.fromEntries(state.occurrences) })),
-    Match.when({ type: "Counter" }, ({ state }) => ({
-      ...state,
-      count: typeof state.count === "bigint" ? state.count.toString() : state.count,
-    })),
-    Match.when({ type: "Gauge" }, ({ state }) => ({ value: typeof state.value === "bigint" ? state.value.toString() : state.value })),
+    Match.when({ type: "Counter" }, ({ state }) => ({ ...state, count: bigIntToJson(state.count) })),
+    Match.when({ type: "Gauge" }, ({ state }) => ({ value: bigIntToJson(state.value) })),
     Match.orElse(({ state }) => state)
   );
 
@@ -41,9 +44,18 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const { uuidV4 } = yield* SecureRandom;
     const instanceId = yield* uuidV4();
 
+    // Decodes a span's attributes and forwards the event through the matching RPC
+    const processSpan = (name: string, attributesObject: Record<string, unknown>) =>
+      pipe(
+        Match.value(name),
+        Match.when(SPAN_LOG_WORD_WON, () => decodeRunWordEvent(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
+        Match.when(SPAN_LOG_RUN_COMPLETED, () => decodeArcadeRunSummary(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary))),
+        Match.orElse(() => Effect.void)
+      );
+
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
     const processSpanBatch = Effect.fnUntraced(function* (spanBatch: ReadonlyArray<Tracer.Span>) {
-      if (spanBatch.length === 0) return;
+      if (!Array.isReadonlyArrayNonEmpty(spanBatch)) return;
       yield* Effect.log(`[TelemetryWorker] Processing batch of ${spanBatch.length} spans.`);
 
       // The span inserts are independent of each other, so don't serialize
@@ -63,17 +75,8 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
       );
     });
 
-    // Decodes a span's attributes and forwards the event through the matching RPC
-    const processSpan = (name: string, attributesObject: Record<string, unknown>) =>
-      pipe(
-        Match.value(name),
-        Match.when("logWordWon", () => decodeRunWordEvent(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
-        Match.when("logRunCompleted", () => decodeArcadeRunSummary(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary))),
-        Match.orElse(() => Effect.void)
-      );
-
-    const processMetrics = Effect.fnUntraced(function* (snapshots: ReadonlyArray<Metric.Metric.Snapshot> = []) {
-      if (snapshots.length === 0) return;
+    const processMetrics = Effect.fnUntraced(function* (snapshots: ReadonlyArray<Metric.Metric.Snapshot>) {
+      if (!Array.isReadonlyArrayNonEmpty(snapshots)) return;
       yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
       // A snapshot that fails to decode is logged and skipped (Option.none)
@@ -115,12 +118,15 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const metricProcessor = pipe(
       Stream.fromEffectSchedule(Metric.snapshot, Schedule.spaced(Duration.seconds(10))),
       Stream.changes,
-      Stream.runForEach((snapshots) => processMetrics(snapshots))
+      Stream.runForEach(processMetrics)
     );
 
-    // Run both processors in the background (Detach from parent scope)
-    yield* Effect.forkScoped(spanProcessor);
-    yield* Effect.forkScoped(metricProcessor);
+    // Run both processors in the background (Detach from parent scope). The
+    // fibers are supervised with tapCause so a stream-level defect (which the
+    // per-item catchCause guards cannot catch) is logged instead of dying
+    // silently inside the scope
+    yield* Effect.forkScoped(Effect.tapCause(spanProcessor, (cause) => Effect.logError("[TelemetryWorker] Span processor failed:", cause)));
+    yield* Effect.forkScoped(Effect.tapCause(metricProcessor, (cause) => Effect.logError("[TelemetryWorker] Metric processor failed:", cause)));
 
     yield* Effect.log("[TelemetryWorker] Background telemetry processors started.");
 

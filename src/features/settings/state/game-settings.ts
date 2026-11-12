@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Struct } from "effect";
+import { Equal } from "effect";
 import { Atom } from "effect/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { GameSettings } from "@/features/settings/domain/models";
@@ -13,7 +13,7 @@ import { INITIAL_GAME_SETTINGS } from "@/features/settings/domain/constants";
 const gameSettingsAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/gameSettings",
-  schema: GameSettings.mapFields(Struct.pick(["solutionsLanguage", "voiceVoice", "voiceVolume", "voiceRate", "voicePitch"])),
+  schema: GameSettings,
   defaultValue: () => INITIAL_GAME_SETTINGS,
 }).pipe(Atom.keepAlive);
 
@@ -21,7 +21,11 @@ const gameSettingsAtom = Atom.kvs({
 export const gameSettingsMachineAtom = createMachineAtom(gameSettingsMachine, {
   input: (get) => get.once(gameSettingsAtom),
   onSnapshot: (get, snapshot) => {
-    // Save back to local storage
+    // Save back to local storage only when the context actually changed:
+    // onSnapshot fires for every snapshot — including the first one, which
+    // merely re-reads what was just hydrated — and persisting an identical
+    // value back is a wasted localStorage round-trip
+    if (Equal.equals(get.once(gameSettingsAtom), snapshot.context)) return;
     get.set(gameSettingsAtom, snapshot.context);
   },
 });

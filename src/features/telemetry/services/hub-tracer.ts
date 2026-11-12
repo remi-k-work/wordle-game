@@ -5,6 +5,11 @@ import { TelemetryHub } from "./telemetry-hub";
 // types
 import type { Exit } from "effect";
 
+// Effect's RPC http client names its request spans "http.client POST"; that
+// library-internal name (not ours) is filtered out below so RPC round-trips do
+// not flood the telemetry stream
+const RPC_HTTP_SPAN_NAME = "http.client POST";
+
 // HubTracer is a custom Effect Tracer that pushes ended spans into the TelemetryHub PubSub
 export const HubTracerLayer = Layer.effect(
   Tracer.Tracer,
@@ -32,6 +37,6 @@ class HubSpan extends Tracer.NativeSpan {
     super.end(endTime, exit);
 
     // Only publish sampled spans; filter out internal RPC noise
-    if (this.sampled && this.name !== "http.client POST") PubSub.publishUnsafe(this.spanPubSub, this);
+    if (this.sampled && this.name !== RPC_HTTP_SPAN_NAME) PubSub.publishUnsafe(this.spanPubSub, this);
   }
 }

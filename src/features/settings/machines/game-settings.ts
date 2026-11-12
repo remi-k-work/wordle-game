@@ -3,6 +3,7 @@ import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { otherSolutionsLanguage } from "@/features/game/domain/helpers";
 
 // types
 import type { GameSettings } from "@/features/settings/domain/models";
@@ -19,9 +20,10 @@ export const gameSettingsMachine = setup({
     input: GameSettings;
   },
   actions: {
-    // Toggle the solutions language
+    // Toggle the solutions language (the language rule itself lives in the
+    // game domain, shared with every other place that switches language)
     toggleSolutionsLanguage: assign({
-      solutionsLanguage: ({ context }) => (context.solutionsLanguage === "En" ? "Pl" : "En"),
+      solutionsLanguage: ({ context }) => otherSolutionsLanguage(context.solutionsLanguage),
     }),
 
     // The voice related settings
@@ -50,13 +52,18 @@ export const gameSettingsMachine = setup({
       },
     }),
 
-    // Notify all the other machines about the solutions language change
+    // Notify all the other machines about the solutions language change. The
+    // actions run in declaration order, so the notification carries the
+    // ALREADY-TOGGLED value (the language the app is switching to)
     onSolutionsLanguageToggled: ({ context }) =>
       runClientCommand(Atom.set(gameFlowMachineAtom, { type: "language.changed", solutionsLanguage: context.solutionsLanguage })),
   },
 }).createMachine({
   id: "gameSettings",
-  context: ({ input }) => ({ ...input }) as const satisfies GameSettings,
+  context: ({ input }) => ({ ...input }) satisfies GameSettings,
+  // A single "active" state: the machine never branches, it exists to own the
+  // settings context with the snapshot/persistence plumbing createMachineAtom
+  // provides — a reducer in machine clothing, deliberately
   initial: "active",
 
   states: {

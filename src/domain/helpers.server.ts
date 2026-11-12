@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Config, Effect, Layer, Option } from "effect";
+import { Cause, Config, Effect, Layer, Option } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
@@ -82,10 +82,26 @@ const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Config.wit
 export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallback: Effect.Effect<A, E, R>) =>
   Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
 
-// Runs an AI-backed generation and degrades to `None` on any failure. The
-// failure is logged first so it is not silently swallowed
-export const withAiFallback = <A, E, R>(generate: Effect.Effect<Option.Option<A>, E, R>, fallback: Effect.Effect<Option.Option<A>, E, R>) =>
-  withAiEnabled(generate, fallback).pipe(
-    Effect.tapError(Effect.logError),
-    Effect.orElseSucceed(() => Option.none())
+// Runs an AI-backed generation and degrades to `None` on any failure. `tapCause`
+// (not `tapError`) logs first so the failure is not silently swallowed: the
+// recovery below catches the whole cause, defects included
+// The recovery is cause-based rather than `orElseSucceed` (which leaves a defect
+// in the error channel and cannot type the RPC handler surface). A pure
+// interruption is excluded so a cancelled request still cancels; the handler is
+// total for every remaining cause, so the trailing `orDie` (which never touches
+// an interrupt) only pins the residual error channel to `never`
+export const degradeToNone = <A, E, R>(generate: Effect.Effect<Option.Option<A>, E, R>) =>
+  generate.pipe(
+    Effect.tapCause(Effect.logError),
+    Effect.catchCauseIf(
+      (cause) => !Cause.hasInterruptsOnly(cause),
+      () => Effect.succeedNone
+    ),
+    Effect.orDie
   );
+
+// Runs the AI-backed generation unless the AI switch is off, in which case the
+// cheap fallback is served instead. The combined result degrades to `None` on
+// any failure, because AI-backed enrichment is never critical to a response
+export const withAiFallback = <A, E, R>(generate: Effect.Effect<Option.Option<A>, E, R>, fallback: Effect.Effect<Option.Option<A>, E, R>) =>
+  degradeToNone(withAiEnabled(generate, fallback));

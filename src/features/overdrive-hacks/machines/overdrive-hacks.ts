@@ -31,7 +31,7 @@ interface FetchOverrideAudioInput {
 }
 
 // constants
-import { INITIAL_OVERDRIVE_HACKS, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
+import { initialOverdriveHacks, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
 const applyEmpHackActor = effectActor(({ empNukedLetters }: ApplyEmpHackInput) =>
   Effect.gen(function* () {
@@ -176,13 +176,13 @@ export const overdriveHacksMachine = setup({
   actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor, fetchOverrideAudioActor },
 }).createMachine({
   id: "overdriveHacks",
-  context: INITIAL_OVERDRIVE_HACKS,
+  context: initialOverdriveHacks(),
   initial: "idle",
 
   on: {
-    solutionsLanguageChanged: { target: ".idle", actions: assign(() => INITIAL_OVERDRIVE_HACKS) },
+    solutionsLanguageChanged: { target: ".idle", actions: assign(initialOverdriveHacks) },
     "puzzle.started": { target: ".active" },
-    "puzzle.ended": { target: ".idle", actions: assign(() => INITIAL_OVERDRIVE_HACKS) },
+    "puzzle.ended": { target: ".idle", actions: assign(initialOverdriveHacks) },
   },
 
   states: {
@@ -213,6 +213,9 @@ export const overdriveHacksMachine = setup({
         input: ({ context }) => ({ empNukedLetters: context.empNukedLetters }),
         onDone: {
           target: "active",
+          // `getOrElse(() => [])`, not `Option.toArray`: this actor's Option already
+          // wraps the nuked-letter array, so `toArray` would nest it one level deeper
+          // (see `applyingSonarHack` below, whose Option wraps a single reveal)
           actions: { type: "applyEmpHack", params: ({ event }) => ({ empNukedLetters: event.output.pipe(Option.getOrElse(() => [])) }) },
         },
         onError: { target: "active" },

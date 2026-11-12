@@ -4,7 +4,7 @@ import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
 import { calculateScore, computeGreyLetters } from "@/features/game/domain/game-logic";
-import { canSubmitGuess, isGuessKeyValid } from "@/features/game/domain/validators";
+import { canSubmitGuess, classifyKey } from "@/features/game/domain/validators";
 import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state/actions";
@@ -13,7 +13,7 @@ import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, tr
 import type { TheSecretWord, WordChallenge } from "@/features/game/domain/models";
 
 // constants
-import { INITIAL_WORD_CHALLENGE, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
+import { initialWordChallenge, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
 
 // Shared empty dictionary reused for the no-guesses-yet case, so the per-keypress
 // `isValidWord` guard doesn't allocate a fresh HashSet on every keystroke
@@ -51,38 +51,37 @@ export const wordChallengeMachine = setup({
 
     isEnterKey: ({ event }) => {
       assertEvent(event, "keyPressed");
-      return isGuessKeyValid(event.pressedKey) && event.pressedKey.toUpperCase() === "ENTER";
+      return classifyKey(event.pressedKey).kind === "enter";
     },
 
     isBackspaceKey: ({ event }) => {
       assertEvent(event, "keyPressed");
-      return isGuessKeyValid(event.pressedKey) && event.pressedKey.toUpperCase() === "BACKSPACE";
+      return classifyKey(event.pressedKey).kind === "backspace";
     },
 
     isValidLetterKey: ({ context, event }) => {
       assertEvent(event, "keyPressed");
-      if (!isGuessKeyValid(event.pressedKey)) return false;
-      const normalizedKey = event.pressedKey.toUpperCase();
-      if (normalizedKey === "ENTER" || normalizedKey === "BACKSPACE") return false;
+      const key = classifyKey(event.pressedKey);
+      if (key.kind !== "letter") return false;
 
       // Prevent typing letters already ruled out by genuine guesses.
       // `greyLetters` is maintained at submit time, so this hot path (it runs
       // on every keypress) is a pure O(1) set lookup
-      return !HashSet.has(context.greyLetters, normalizedKey);
+      return !HashSet.has(context.greyLetters, key.letter);
     },
   },
   actions: {
     // Save the dictionary provided by the game data machine (no word yet)
     saveGameData: assign(({ event }) => {
       assertEvent(event, "gameDataLoaded");
-      return { ...INITIAL_WORD_CHALLENGE, dictionary: event.dictionary } as const satisfies WordChallenge;
+      return { ...initialWordChallenge(), dictionary: event.dictionary } as const satisfies WordChallenge;
     }),
 
     // Set up the board for a new puzzle with the secret word from gameDataMachine
     startNewPuzzle: assign(({ context, event }) => {
       assertEvent(event, "secretWordPicked");
       return {
-        ...INITIAL_WORD_CHALLENGE,
+        ...initialWordChallenge(),
         dictionary: context.dictionary,
         theSecretWord: Option.some(event.theSecretWord),
       } as const satisfies WordChallenge;
@@ -152,12 +151,12 @@ export const wordChallengeMachine = setup({
   },
 }).createMachine({
   id: "wordChallenge",
-  context: INITIAL_WORD_CHALLENGE,
+  context: initialWordChallenge(),
   initial: "awaitingGameData",
 
   on: {
     // Language changed → reset to awaiting new data
-    solutionsLanguageChanged: { target: ".awaitingGameData", actions: assign(() => INITIAL_WORD_CHALLENGE) },
+    solutionsLanguageChanged: { target: ".awaitingGameData", actions: assign(initialWordChallenge) },
 
     // Forfeit the active run
     forfeitedRun: ".runForfeited",

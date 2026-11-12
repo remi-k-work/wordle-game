@@ -4,7 +4,7 @@ import { modalMachine } from "@/machines/modal";
 import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
-export type ModalType = "help" | "status" | "voice-settings" | "high-score" | "override-hack";
+import type { ModalType } from "@/machines/modal";
 
 // The modal machine is now a living actor inside the effect atom
 export const modalMachineAtom = createMachineAtom(modalMachine);

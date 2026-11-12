@@ -1,13 +1,24 @@
+// services, features, and other libraries
 import { Effect } from "effect";
 import { SqlClient } from "effect/sql";
 
+// One statement per query: the native pg client (rc.113+) rejects
+// multi-statement prepared statements — see the same note in 000_init_telemetry.
+// All statements run in a single transaction so a partial failure rolls back
 const migration = Effect.gen(function* () {
   const sql = yield* SqlClient.SqlClient;
-  yield* sql`
+
+  yield* sql.withTransaction(
+    Effect.all(
+      [
+        sql`
 -- high-score schema
 CREATE TABLE IF NOT EXISTS high_score (
   id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  player_name CHAR(3) NOT NULL
+  -- UNIQUE makes the seed insert idempotent: the ON CONFLICT below targets
+  -- player_name, because the identity PK is never generated twice (an
+  -- un-targeted ON CONFLICT DO NOTHING could never fire)
+  player_name CHAR(3) NOT NULL UNIQUE
     CONSTRAINT high_score_player_name_check
     CHECK (player_name ~ '^[A-Z]{3}$'),
   score INT NOT NULL
@@ -21,15 +32,14 @@ CREATE TABLE IF NOT EXISTS high_score (
     CHECK (solutions_lang IN ('En', 'Pl')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-`;
-  yield* sql`
+`,
+        sql`
 CREATE INDEX IF NOT EXISTS high_score_ranking_idx
   ON high_score (solutions_lang, score DESC, streak DESC);
-`;
-  // One statement per query: the native pg client (rc.113+) rejects
-  // multi-statement prepared statements.
-  // seed data (only runs once on first migration)
-  yield* sql`
+`,
+        // Seed data (only runs once on first migration; the UNIQUE constraint
+        // above keeps this idempotent)
+        sql`
 INSERT INTO high_score (player_name, score, streak, solutions_lang)
 VALUES
   ('ACE', 4200, 18, 'En'),
@@ -42,8 +52,12 @@ VALUES
   ('ORB', 2100, 9, 'En'),
   ('VEX', 1800, 8, 'Pl'),
   ('PIP', 1500, 7, 'En')
-ON CONFLICT DO NOTHING;
-`;
+ON CONFLICT (player_name) DO NOTHING;
+`,
+      ],
+      { discard: true }
+    )
+  );
 });
 
 export default migration;

@@ -21,18 +21,17 @@ export const calculateScore = (currentTurn: WordChallenge["currentTurn"], startT
   } as const satisfies WordScore;
 };
 
-// Calculates the "live" potential word score based on current turn and time elapsed
-// This projects what the player stands to gain based on their current speed and turn count
-export function calculatePotentialScore(currentTurn: WordChallenge["currentTurn"], startTime: WordChallenge["startTime"], now: DateTime.Utc): number;
-export function calculatePotentialScore(currentTurn: WordChallenge["currentTurn"], elapsedSeconds: number): number;
-export function calculatePotentialScore(
-  currentTurn: WordChallenge["currentTurn"],
-  startTimeOrSeconds: WordChallenge["startTime"] | number,
-  now?: DateTime.Utc
-) {
-  const elapsedSeconds = typeof startTimeOrSeconds === "number" ? startTimeOrSeconds : getElapsedSeconds(startTimeOrSeconds, now ?? DateTime.nowUnsafe());
-  return Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds));
-}
+// Calculates the "live" potential word score: what the player stands to gain
+// from the current turn and the time elapsed since `startTime`, resolved
+// against an explicit `now`. One pure core per entry point (no overloads, no
+// ambient clock read) so both forms stay directly testable
+export const calculatePotentialScore = (currentTurn: WordChallenge["currentTurn"], startTime: WordChallenge["startTime"], now: DateTime.Utc): number =>
+  Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(getElapsedSeconds(startTime, now)));
+
+// The same projection from an already-elapsed duration: the persisted-run and
+// read-only simulator path, which has no start time to resolve
+export const calculatePotentialScoreFromElapsed = (currentTurn: WordChallenge["currentTurn"], elapsedSeconds: number): number =>
+  Math.round(getBasePointsPerTurn(currentTurn) * getSpeedMultiplier(elapsedSeconds));
 
 // Compute the final keypad state by reducing all guesses and picking the strongest colors
 // Absent keys in the HashMap denote "never guessed" — downstream code can distinguish them

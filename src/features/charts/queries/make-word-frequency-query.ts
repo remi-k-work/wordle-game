@@ -1,8 +1,11 @@
 // services, features, and other libraries
-import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 import { AnyChartArgs } from "@/features/charts/domain/models";
 import { dieOnDbFailure } from "@/domain/db-policy";
+
+// types
+import type { RowCodec } from "./make-histogram-distribution-query";
+import type { MetricName } from "@/features/charts/domain/constants";
 
 // Factory backing openingGuesses + failedWords. Both queries are identical
 // except for metricName and Result schema (passed per call-site).
@@ -10,11 +13,13 @@ import { dieOnDbFailure } from "@/domain/db-policy";
 // FILTER computes personal/global in one JSONB scan. Row-equality validated
 // against e2e fixture. Words are stored uppercase in DB, so no UPPER() needed.
 //
-// The generic bound is `Schema.Codec<any>` — see the matching comment in
-// make-histogram-distribution-query.ts for why not the plain `Constraint`
+// The generic bound is `RowCodec` — see its justification (why not the full
+// `Codec` / plain `Constraint`) in make-histogram-distribution-query.ts
 export const makeWordFrequencyQuery =
-  <R extends Schema.Codec<any>>(sql: SqlClient.SqlClient) =>
-  (args: { metricName: string; Result: R }) => {
+  <R extends RowCodec>(sql: SqlClient.SqlClient) =>
+  // `metricName` is a bound parameter, so it is safe to interpolate; typing it
+  // against the telemetry registry keeps the reader and the writer in step
+  (args: { metricName: MetricName; Result: R }) => {
     const query = SqlSchema.findAll({
       Request: AnyChartArgs,
       Result: args.Result,

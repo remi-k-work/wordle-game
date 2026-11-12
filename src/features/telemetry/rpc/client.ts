@@ -2,4 +2,7 @@
 import { makeRpcClient } from "@/domain/rpc-client";
 import { RpcTelemetry } from "./requests";
 
-export class RpcTelemetryClient extends makeRpcClient("RpcTelemetryClient", RpcTelemetry, "/api/rpc/telemetry") {}
+// constants
+import { RPC_TELEMETRY_PATH } from "./requests";
+
+export class RpcTelemetryClient extends makeRpcClient("RpcTelemetryClient", RpcTelemetry, RPC_TELEMETRY_PATH) {}

@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Option, Struct } from "effect";
+import { Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/domain/models";
@@ -16,7 +16,7 @@ import { INITIAL_RUN_SESSION } from "@/features/game/domain/constants";
 const runSessionAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/runSession",
-  schema: RunSession.mapFields(Struct.pick(["runId", "createdAt", "runScore", "streak", "bestRunScore", "bestStreak"])),
+  schema: RunSession,
   defaultValue: () => INITIAL_RUN_SESSION,
 }).pipe(Atom.keepAlive);
 

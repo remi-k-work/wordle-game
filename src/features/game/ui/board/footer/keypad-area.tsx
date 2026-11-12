@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { HashMap, Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { KeypadPool, KeypadPoolSkeleton } from "./keypad-pool";
@@ -15,6 +16,8 @@ import { KeypadActionKeys } from "./keypad-action-keys";
 import type { Keypad } from "@/features/game/domain/models";
 
 // constants
+import { KEYPAD_SKELETON_LETTERS } from "@/features/game/domain/constants";
+
 const EMPTY_KEY_COLOR = "" as const;
 
 // Fully static class string, hoisted so neither the live keypad nor its
@@ -63,9 +66,13 @@ export function KeypadArea({ keys }: { keys: Keypad }) {
 }
 
 export function KeypadAreaSkeleton() {
+  // The placeholder shows the active language's keys, so the skeleton has the
+  // same key count as the pool that replaces it (32 for Polish, 26 for English)
+  const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
+
   return (
     <section className={KEYPAD_AREA_CLASSES}>
-      <KeypadPoolSkeleton />
+      <KeypadPoolSkeleton letters={KEYPAD_SKELETON_LETTERS[solutionsLanguage]} />
       <KeypadActionKeys position="area" disabled />
     </section>
   );

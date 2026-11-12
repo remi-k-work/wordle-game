@@ -1,6 +1,7 @@
 // services, features, and other libraries
-import { Array, Option } from "effect";
+import { Array, Effect, Option } from "effect";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
+import { RuntimeClient } from "@/lib/runtime-client";
 import {
   gameSettingsSolutionsLanguageAtom,
   gameSettingsVoicePitchAtom,
@@ -17,7 +18,9 @@ import { matchLanguage } from "@/features/game/domain/helpers";
 export function useSpeakText() {
   return (sanitizedText: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) {
-      console.warn("Speech Synthesis is not supported in this environment.");
+      // Fire-and-forget through the shared client runtime so browser warnings
+      // share the app's logging sink (same policy as runClientCommand)
+      void RuntimeClient.runPromise(Effect.logWarning("Speech Synthesis is not supported in this environment."));
       return;
     }
 

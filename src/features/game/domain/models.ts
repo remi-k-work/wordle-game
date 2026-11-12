@@ -71,23 +71,30 @@ export const WordMeta = Schema.Struct({
   wordDefinitionAudio: Schema.Option(Schema.Uint8Array),
 });
 
+// Wire schemas for the fields the active run session and the completed-run
+// summary both carry: declared once so the two representations of the same
+// persisted field (an Option there, a required value here) cannot drift
+const RunId = Schema.Trim.check(Schema.isUUID());
+const RunTimestamp = Schema.DateTimeUtc;
+const RunPoints = Schema.Int.check(Schema.isGreaterThanOrEqualTo(0));
+
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
 export const RunSession = Schema.Struct({
-  runId: Schema.Option(Schema.Trim.check(Schema.isUUID())),
-  createdAt: Schema.Option(Schema.DateTimeUtc),
-  runScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  bestRunScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  bestStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  runId: Schema.Option(RunId),
+  createdAt: Schema.Option(RunTimestamp),
+  runScore: RunPoints,
+  streak: RunPoints,
+  bestRunScore: RunPoints,
+  bestStreak: RunPoints,
 });
 
 // Immutable summary of a completed run. This is intentionally separate from the active persisted session
 export const RunResult = Schema.Struct({
-  runId: Schema.Trim.check(Schema.isUUID()),
-  createdAt: Schema.DateTimeUtc,
-  finishedAt: Schema.DateTimeUtc,
-  runScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  runId: RunId,
+  createdAt: RunTimestamp,
+  finishedAt: RunTimestamp,
+  runScore: RunPoints,
+  streak: RunPoints,
   deathReason: RunDeathReason,
 });
 

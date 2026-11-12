@@ -51,5 +51,7 @@ export const calculateSonarTarget = Effect.fnUntraced(function* (
 });
 
 // O(1) tile lookup: flatten reveal positions once instead of scanning per tile
-export const sonarVowelByPosition = (reveals: ReadonlyArray<SonarReveal>): Map<number, SonarReveal["vowel"]> =>
-  new Map(reveals.flatMap((reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const)));
+// An Effect HashMap (like every other collection in this codebase) rather than a
+// native Map, so lookups yield an Option and the two idioms do not mix
+export const sonarVowelByPosition = (reveals: ReadonlyArray<SonarReveal>): HashMap.HashMap<number, SonarReveal["vowel"]> =>
+  HashMap.fromIterable(reveals.flatMap((reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const)));

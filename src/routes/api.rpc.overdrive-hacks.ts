@@ -5,4 +5,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { routeHandler } from "@/domain/helpers.server";
 import { handler } from "@/features/overdrive-hacks/rpc/handlers.server";
 
+// The path is a literal by framework requirement: TanStack's router plugin
+// statically crawls route files and rejects a variable route id
 export const Route = createFileRoute("/api/rpc/overdrive-hacks")({ server: { handlers: { POST: routeHandler(handler) } } });

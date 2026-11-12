@@ -36,10 +36,11 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
     );
   },
   Effect.withExecutionPlan(makeFallbackPlan2),
-  Effect.mapError((error) => {
-    if (AiError.isAiError(error)) return AiProviderError.fromAiError(error);
-    // The full fidelity of any non-AI failure was already logged above; surface
-    // its message (when present) in the normalized error
-    return new AiProviderError({ reason: new AiError.UnknownError({ description: describeFailure(error) }) });
-  })
+  Effect.mapError((error) =>
+    AiError.isAiError(error)
+      ? AiProviderError.fromAiError(error)
+      : // The full fidelity of any non-AI failure was already logged above; surface
+        // its message (when present) in the normalized error
+        new AiProviderError({ reason: new AiError.UnknownError({ description: describeFailure(error) }) })
+  )
 );

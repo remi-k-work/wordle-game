@@ -6,6 +6,9 @@ import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
+// constants
+import { RPC_OVERDRIVE_HACKS_PATH } from "./requests";
+
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverride: ({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage }) =>
     withAiFallback(
@@ -18,4 +21,4 @@ const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
 
 const RpcOverdriveHacksLayerWithAi = RpcOverdriveHacksLayer.pipe(Layer.provide(AiClientsWithHttp), Layer.provide(OpenRouter.layer));
 
-export const handler = makeRpcHandler(RpcOverdriveHacks, "/api/rpc/overdrive-hacks", RpcOverdriveHacksLayerWithAi);
+export const handler = makeRpcHandler(RpcOverdriveHacks, RPC_OVERDRIVE_HACKS_PATH, RpcOverdriveHacksLayerWithAi);

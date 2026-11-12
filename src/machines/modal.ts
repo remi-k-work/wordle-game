@@ -1,11 +1,13 @@
 // services, features, and other libraries
 import { setup } from "xstate";
 
+// Every modal the app can show. The single source of truth shared by the event
+// union below and by state/modal.ts's keyed selectors (imported, not re-declared)
+export type ModalType = "help" | "status" | "voice-settings" | "high-score" | "override-hack";
+
 export const modalMachine = setup({
   types: {} as {
-    events:
-      | { readonly type: "opened"; readonly modalType: "help" | "status" | "voice-settings" | "high-score" | "override-hack" }
-      | { readonly type: "closed" };
+    events: { readonly type: "opened"; readonly modalType: ModalType } | { readonly type: "closed" };
   },
 }).createMachine({
   id: "modal",

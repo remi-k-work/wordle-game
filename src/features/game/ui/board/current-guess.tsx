@@ -3,6 +3,7 @@ import { memo } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Array, HashMap, Option } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentGuessWordAtom, wordChallengeIsRejectedAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksSonarRevealsAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
@@ -19,7 +20,7 @@ import type { OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 // The typing row lays its tiles out on the same tracks as the rows around it, so
 // the letters stay aligned with the guesses above and below (see `ROW_CLASSES`)
 import { ROW_CLASSES } from "./constants";
-import { WORD_LENGTH } from "@/features/game/domain/constants";
+import { EMPTY_TILE_KEY, WORD_LENGTH } from "@/features/game/domain/constants";
 
 // The one class the row adds beyond its grid track, keyed by the reason it is
 // being added. `CurrentGuess` is the only component in the app that re-renders
@@ -57,21 +58,23 @@ function buildCurrentGuessTiles(
   const vowelByPosition = sonarVowelByPosition(sonarReveals);
   const currentLength = currentGuessWord.length;
 
-  return Array.from({ length: WORD_LENGTH }, (_, position): CurrentGuessTile => {
+  return Array.makeBy(WORD_LENGTH, (position): CurrentGuessTile => {
     const typedLetter = currentGuessWord[position];
     if (typedLetter !== undefined) {
       return {
         tileKey: typedLetter,
         color: isInvalidGuess ? "red" : "",
-        isLastTyped: typedLetter !== "" && position === currentLength - 1,
+        // No `!== ""` check: `currentGuessWord` only ever grows by appending
+        // letters, so a present position always holds a real letter
+        isLastTyped: position === currentLength - 1,
         isSonarReveal: false,
       };
     }
 
-    const sonarVowel = vowelByPosition.get(position);
-    return sonarVowel
-      ? { tileKey: sonarVowel, color: "green", isLastTyped: false, isSonarReveal: true }
-      : { tileKey: "", color: "", isLastTyped: false, isSonarReveal: false };
+    const sonarVowel = HashMap.get(vowelByPosition, position);
+    return Option.isNone(sonarVowel)
+      ? { tileKey: EMPTY_TILE_KEY, color: "", isLastTyped: false, isSonarReveal: false }
+      : { tileKey: sonarVowel.value, color: "green", isLastTyped: false, isSonarReveal: true };
   });
 }
 

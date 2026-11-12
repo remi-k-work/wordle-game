@@ -13,8 +13,10 @@ export class BasePage extends Schema.Class<BasePage, { readonly brand: unique sy
 }) {}
 
 export class SpeechRequest extends Schema.Class<SpeechRequest, { readonly brand: unique symbol }>("SpeechRequest")({
-  model: Schema.optionalKey(Schema.Trim.pipe(Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")))),
+  // `Schema.optional` (not `optionalKey`) so a caller may pass an explicit
+  // `undefined` for an absent field; the defaults still apply for both forms
+  model: Schema.optional(Schema.Trim.pipe(Schema.withDecodingDefaultType(Effect.succeed("fish-audio/s2.1-pro-free:free")))),
   input: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty())),
-  voice: Schema.optionalKey(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
-  response_format: Schema.optionalKey(Schema.Literal("mp3").pipe(Schema.withDecodingDefaultType(Effect.succeed("mp3")))),
+  voice: Schema.optional(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
+  response_format: Schema.optional(Schema.Literal("mp3").pipe(Schema.withDecodingDefaultType(Effect.succeed("mp3")))),
 }) {}

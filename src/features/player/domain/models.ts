@@ -6,5 +6,6 @@ export type PlayerSession = typeof PlayerSession.Type;
 
 // Persistent storage for uniquely identifying the player in the local browser
 export const PlayerSession = Schema.Struct({
-  sessionId: Schema.Trim.check(Schema.isUUID()),
+  // Version 4 exactly: the only producer is crypto.randomUUID(), which emits v4
+  sessionId: Schema.Trim.check(Schema.isUUID(4)),
 });

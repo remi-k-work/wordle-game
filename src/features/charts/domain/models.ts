@@ -31,9 +31,10 @@ export class AnyCounterData extends Schema.Class<AnyCounterData, { readonly bran
   global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}
 
-export class AnyAvgStatData extends AnyCounterData.extend<AnyAvgStatData>("AnyAvgStatData")({}) {}
-
-// Shared 0-100 percentage field used by every distribution chart
+// Shared 0-100 percentage fields every distribution chart carries. Optional:
+// the raw SQL rows (and the e2e fixtures) only carry the bucket and the counts,
+// and `cumulativeToDistribution` is what fills the percentages in — the widened
+// (optional) shape is pinned by the guess-distribution e2e suite
 const Pct = Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))));
 
 export class GuessDistributionData extends AnyCounterData.extend<GuessDistributionData>("GuessDistributionData")({

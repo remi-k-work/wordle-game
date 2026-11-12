@@ -1,7 +1,6 @@
 // services, features, and other libraries
 import { Atom } from "effect/reactivity";
 import { createActor } from "xstate";
-import { inspect } from "@/machines/inspect";
 
 // types
 import type { Actor, ActorOptions, AnyStateMachine, EventFromLogic, InputFrom, SnapshotFrom } from "xstate";
@@ -25,13 +24,15 @@ export const createMachineAtom = <M extends AnyStateMachine>(
 ): Atom.Writable<SnapshotFrom<M>, EventFromLogic<M>> => {
   // Creates an Atom-owned XState actor reference
   const actorAtom = Atom.make<Actor<M>>((get) => {
-    // The generic machine type makes createActor's conditional `input` requirement undecidable;
-    // the concrete call site still enforces this via the returned atom's typed surface
-    const actorOptions = {
+    // The generic machine type makes createActor's conditional `input`
+    // requirement undecidable, so only that field is cast (the concrete call
+    // site still enforces the input shape via the returned atom's typed
+    // surface). No `inspect` option: XState's browser inspector is a dev-only
+    // manual switch onto @statelyai/inspect, whose transitive graph (ws,
+    // partysocket, superjson) must never reach the client bundle
+    const actorOptions: ActorOptions<M> =
       // Resolve the input lazily here (inside the read function), so it may read from peer atoms
-      ...(options.input === undefined ? {} : { input: options.input(get) }),
-      inspect,
-    } as ActorOptions<M>;
+      options.input === undefined ? {} : { input: options.input(get) as InputFrom<M> };
 
     const actor = createActor(machine, actorOptions);
 

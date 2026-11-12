@@ -16,7 +16,17 @@ export function useGameKeyboardInput() {
   useEffect(() => {
     // Single AbortController removes the keyup listener on unmount or re-run
     const controller = new AbortController();
-    window.addEventListener("keyup", (ev) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: ev.key }), { signal: controller.signal });
+    window.addEventListener(
+      "keyup",
+      // Modifier combos (Ctrl/Meta/Alt) are shortcuts, never letter keys, so
+      // they are dropped at the source instead of being forwarded for the
+      // machine to ignore
+      (ev) => {
+        if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+        overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: ev.key });
+      },
+      { signal: controller.signal }
+    );
 
     return () => controller.abort();
   }, [overdriveHacksMachineEvent]);

@@ -22,7 +22,7 @@ interface SelectSecretWordInput {
 }
 
 // constants
-import { INITIAL_GAME_DATA } from "@/features/game/domain/constants";
+import { initialGameData } from "@/features/game/domain/constants";
 
 // Load the needed game data and create the dictionary of valid words
 const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: OnLoadingInput) =>
@@ -39,12 +39,7 @@ const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: On
   })
 );
 
-const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) =>
-  Effect.gen(function* () {
-    const solutionsList = yield* Effect.fromOption(solutions);
-    return yield* Random.choice(solutionsList);
-  })
-);
+const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) => Effect.flatMap(Effect.fromOption(solutions), Random.choice));
 
 export const gameDataMachine = setup({
   types: {} as {
@@ -58,6 +53,9 @@ export const gameDataMachine = setup({
     // Save the loaded game data
     saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
 
+    // The secret word must never be logged here (or anywhere else): the browser
+    // console is part of the player's attack surface, and `theSecretWord` only
+    // fans out to the three machines that need it
     onSecretWordSelected: (_, { theSecretWord }: { theSecretWord: TheSecretWord }) =>
       runClientCommand(
         Effect.all([
@@ -81,7 +79,7 @@ export const gameDataMachine = setup({
   actors: { onLoadingActor, selectSecretWordActor },
 }).createMachine({
   id: "gameData",
-  context: INITIAL_GAME_DATA,
+  context: initialGameData(),
   initial: "loading",
 
   on: { solutionsLanguageChanged: { target: ".loading", reenter: true } },

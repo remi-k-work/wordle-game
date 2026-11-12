@@ -21,4 +21,4 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.cam
 // scheduler (see domain/helpers.server.ts) — both fixes are required
 
 export const makePgClientLayer = (url: Redacted.Redacted<string>) =>
-  PgClient.layer({ ...pgConfig, url, idleTimeout: "10 seconds", connectTimeout: "10 seconds", ...(isWorkerd ? { connectionTTL: "0 seconds" as const } : {}) });
+  PgClient.layer({ ...pgConfig, url, idleTimeout: "10 seconds", connectTimeout: "10 seconds", ...(isWorkerd ? { connectionTTL: "0 seconds" } : {}) });

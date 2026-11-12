@@ -1,34 +1,40 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Effect, Layer, Option } from "effect";
-import { NodeRuntime } from "@effect/platform-node";
+import { Effect, Option } from "effect";
 import { generateSingleField2 } from "@/domain/generate-single-field2";
 import { AiClientsWithHttp } from "@/domain/fallback-plan2";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
-import { SeedLayer } from "./runtime";
+import { runSeed } from "./runtime";
 
-const MainLayer = Layer.mergeAll(SeedLayer, AiClientsWithHttp);
+// types
+import type { SolutionsLanguage } from "@/features/game/domain/models";
+
+// Both languages run the same pipeline, so they differ only by their literals
+const TEST_CASES = [
+  { theSecretWord: "MIRROR", solutionsLanguage: "En" },
+  { theSecretWord: "LUSTRO", solutionsLanguage: "Pl" },
+] as const satisfies ReadonlyArray<{
+  readonly theSecretWord: string;
+  readonly solutionsLanguage: SolutionsLanguage;
+}>;
+
+// Generation failures degrade to a placeholder so the proof always reports
+// something for each language instead of aborting on the first one
+const proveLanguage = ({ theSecretWord, solutionsLanguage }: (typeof TEST_CASES)[number]) =>
+  generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage)).pipe(
+    Effect.tapError(Effect.logError),
+    Effect.orElseSucceed(() => Option.some("Riddle unavailable. You are on your own!"))
+  );
 
 const main = Effect.gen(function* () {
   yield* Effect.log("Proving Effect-v4 AI + OpenRouter `ExecutionPlan` fallback end-to-end...\n");
 
-  const riddleEn = yield* generateSingleField2(riddleGenerationOptions("MIRROR", "En")).pipe(
-    Effect.tapError(Effect.logError),
-    Effect.orElseSucceed(() => Option.some("Riddle unavailable. You are on your own!"))
-  );
+  for (const testCase of TEST_CASES) {
+    const riddle = yield* proveLanguage(testCase);
+    yield* Effect.log(`${Option.getOrUndefined(riddle)}\n**********************\n`);
+  }
+}).pipe(Effect.provide(AiClientsWithHttp));
 
-  yield* Effect.log(`${riddleEn.valueOrUndefined}\n`);
-  yield* Effect.log("**********************\n");
-
-  const riddlePl = yield* generateSingleField2(riddleGenerationOptions("LUSTRO", "Pl")).pipe(
-    Effect.tapError(Effect.logError),
-    Effect.orElseSucceed(() => Option.some("Riddle unavailable. You are on your own!"))
-  );
-
-  yield* Effect.log(`${riddlePl.valueOrUndefined}\n`);
-  yield* Effect.log("**********************\n");
-}).pipe(Effect.provide(MainLayer));
-
-// Use NodeRuntime.runMain for graceful teardown on CTRL+C
-NodeRuntime.runMain(main);
+// runSeed provides the shared Node layer and graceful teardown on CTRL+C
+runSeed(main);

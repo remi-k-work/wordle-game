@@ -1,8 +1,9 @@
 // services, features, and other libraries
-import { Config, Context, Effect, Layer, Option, Random, Schedule, Schema, flow } from "effect";
+import { Config, Context, Effect, flow, Layer, Option, Random, Schedule, Schema } from "effect";
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/http";
 import { SpeechRequest } from "@/domain/models";
 import { OpenRouterError } from "@/domain/errors";
+import { degradeToNone } from "@/domain/helpers.server";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -32,8 +33,8 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
     const generateSpeech = Effect.fn("generateSpeech")(
       function* ({ input, voice }: { readonly input: string; readonly voice?: string }) {
         // Decode and validate the text and optional voice at the service boundary
-        // (`optionalKey` requires the key to be absent, not explicitly `undefined`)
-        const speechRequest = yield* decodeSpeechRequest(voice === undefined ? { input } : { input, voice });
+        // (`voice` accepts an explicit `undefined`, so it is forwarded as-is)
+        const speechRequest = yield* decodeSpeechRequest({ input, voice });
 
         // Execute request
         const request = yield* HttpClientRequest.post("/audio/speech").pipe(HttpClientRequest.bodyJson(speechRequest));
@@ -73,20 +74,15 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
 // for a text input, picking a random "Top Recommended" Polish voice for the Pl
 // mode and OpenRouter's default voice for En. Audio is a non-critical
 // enrichment, so failures are logged and degrade to Option.none() instead of
-// failing the request
-export const fetchSpeechAudio = Effect.fnUntraced(
-  function* ({ input, solutionsLanguage }: { input: string; solutionsLanguage: SolutionsLanguage }) {
-    const { generateSpeech } = yield* OpenRouter;
+// failing the request — the same recovery `withAiFallback` uses, factored into
+// `degradeToNone` so the two cannot drift apart
+export const fetchSpeechAudio = Effect.fnUntraced(function* ({ input, solutionsLanguage }: { input: string; solutionsLanguage: SolutionsLanguage }) {
+  const { generateSpeech } = yield* OpenRouter;
 
-    // OpenRouter's default voice is used for English; pick a random recommended Polish voice otherwise
-    const voice = solutionsLanguage === "En" ? undefined : yield* Random.choice(VOICES_PL);
+  // OpenRouter's default voice is used for English; pick a random recommended Polish voice otherwise
+  const voice = solutionsLanguage === "En" ? undefined : yield* Random.choice(VOICES_PL);
 
-    // generateSpeech already normalizes an absent vs explicitly-undefined voice before
-    // decoding (optionalKey needs the key absent), so the English `undefined` is forwarded as-is
-    const { audioData } = yield* generateSpeech({ input, voice });
+  const { audioData } = yield* generateSpeech({ input, voice });
 
-    return Option.some(audioData);
-  },
-  Effect.tapError(Effect.logError),
-  Effect.orElseSucceed(() => Option.none())
-);
+  return Option.some(audioData);
+}, degradeToNone);

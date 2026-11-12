@@ -8,15 +8,25 @@ import type { TheSecretWord, WordChallenge } from "./models";
 import { MAX_TURNS, WORD_LENGTH } from "./constants";
 
 const LETTER_REGEX = /^[A-ZĄĆĘŁŃÓŚŹŻ]$/u;
-const CONTROL_KEYS = HashSet.fromIterable(["BACKSPACE", "ENTER"]);
+
+// Classifies a physical key once — normalizing its case — so every consumer
+// shares one normalization and one validity rule instead of re-running
+// `toUpperCase` and the letter regex per guard
+export type ClassifiedKey =
+  | { readonly kind: "enter" }
+  | { readonly kind: "backspace" }
+  | { readonly kind: "letter"; readonly letter: string }
+  | { readonly kind: "invalid" };
+
+export const classifyKey = (pressedKey: string): ClassifiedKey => {
+  const letter = pressedKey.toUpperCase();
+  if (letter === "ENTER") return { kind: "enter" };
+  if (letter === "BACKSPACE") return { kind: "backspace" };
+  return LETTER_REGEX.test(letter) ? { kind: "letter", letter } : { kind: "invalid" };
+};
 
 // Validate the guess entry as the user types from the keyboard in real time
-export const isGuessKeyValid = (pressedKey: string) => {
-  const normalizedKey = pressedKey.toUpperCase();
-
-  // Accept control keys and letters; reject everything else
-  return HashSet.has(CONTROL_KEYS, normalizedKey) || LETTER_REGEX.test(normalizedKey);
-};
+export const isGuessKeyValid = (pressedKey: string) => classifyKey(pressedKey).kind !== "invalid";
 
 // Accept or reject the submitted guess
 export const canSubmitGuess = (

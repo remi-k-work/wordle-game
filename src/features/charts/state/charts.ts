@@ -1,5 +1,3 @@
-// oxlint-disable typescript/no-misused-spread
-
 // services, features, and other libraries
 import { Effect } from "effect";
 import { Atom } from "effect/reactivity";
@@ -24,10 +22,7 @@ const chartAtom = <A, E>(fetch: (client: Context.Service.Shape<typeof RpcTelemet
     // (and re-subscribes) when the player's session changes
     const sessionId = get(sessionIdAtom);
 
-    return Effect.gen(function* () {
-      const client = yield* RpcTelemetryClient;
-      return yield* fetch(client, sessionId);
-    });
+    return Effect.flatMap(RpcTelemetryClient, (client) => fetch(client, sessionId));
   }).pipe(Atom.setIdleTTL("5 minutes"));
 
 export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
@@ -38,6 +33,7 @@ export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: Solut
   chartAtom((client, sessionId) =>
     client.getTimeToSolveDistribution({ sessionId, solutionsLanguage }).pipe(
       // A non-empty `maxSeconds` is a rounding artifact of the bucket boundary
+      // oxlint-disable-next-line typescript/no-misused-spread -- spreading a decoded Schema.Class row is safe: decoding yields a plain object
       Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) })))
     )
   )
@@ -47,6 +43,7 @@ export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: Solu
   chartAtom((client, sessionId) =>
     client
       .getArcadeStreakDistribution({ sessionId, solutionsLanguage })
+      // oxlint-disable-next-line typescript/no-misused-spread -- spreading a decoded Schema.Class row is safe: decoding yields a plain object
       .pipe(Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) }))))
   )
 );

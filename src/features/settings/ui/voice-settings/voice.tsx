@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state/game-settings";
-import { useSpeechVoices } from "@/hooks/use-speech-voices";
+import { speechVoicesAtom } from "@/hooks/use-speech-voices";
 import { matchLanguage } from "@/features/game/domain/helpers";
 import { useGT } from "gt-react";
 
@@ -31,7 +31,7 @@ export function Voice() {
   const selectedVoice = useAtomValue(gameSettingsVoiceAtom);
   const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
   const gt = useGT();
-  const speechVoices = useSpeechVoices();
+  const speechVoices = useAtomValue(speechVoicesAtom);
 
   const targetLangPrefix = matchLanguage(solutionsLanguage, "en", "pl");
 

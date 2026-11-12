@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Array, Option } from "effect";
-import { calculatePotentialScore } from "@/features/game/domain/game-logic";
+import { calculatePotentialScoreFromElapsed } from "@/features/game/domain/game-logic";
 import { getBasePointsPerTurn, getSpeedMultiplier } from "@/features/game/domain/helpers";
 
 // Compare a candidate run against the tail (last/10th) entry of the top-10 list
@@ -26,7 +26,7 @@ export const qualifiesForTop10 = <T extends { score: number; streak: number }>(t
 // needs for its own labels/formatting, not score readings, and taking them here
 // would only push them back out through the return value
 export const getScoreReadings = (guessedTurn: number, timeElapsed: number) => ({
-  potentialScore: calculatePotentialScore(guessedTurn, timeElapsed),
+  potentialScore: calculatePotentialScoreFromElapsed(guessedTurn, timeElapsed),
   basePointsPerTurn: getBasePointsPerTurn(guessedTurn),
   speedMultiplier: getSpeedMultiplier(timeElapsed),
 });

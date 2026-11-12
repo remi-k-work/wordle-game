@@ -4,16 +4,11 @@ import { FetchHttpClient } from "effect/http";
 import { OpenAiClient, OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter";
 
-// Builds a single OpenRouter fallback step for the specified model
-const openRouterStep = (model: string, config: typeof OpenRouterLanguageModel.Config.Service) => ({
-  provide: OpenRouterLanguageModel.model(model, config),
-  attempts: 2,
-  schedule: Schedule.exponential("1 second", 2),
-});
-
-// Builds a single Cloudflare fallback step for the specified model
-const cloudflareStep = (model: string, config: typeof OpenAiLanguageModel.Config.Service) => ({
-  provide: OpenAiLanguageModel.model(model, config),
+// Builds one fallback step: the provider to try, bounded attempts, and a shared
+// retry policy; both provider clients go through this so the ladder cannot end
+// up retrying Cloudflare and OpenRouter differently
+const aiStep = <A>(provide: A) => ({
+  provide,
   attempts: 2,
   schedule: Schedule.exponential("1 second", 2),
 });
@@ -22,12 +17,12 @@ const cloudflareStep = (model: string, config: typeof OpenAiLanguageModel.Config
 // Gemma is the quality-first primary with thinking disabled to avoid multi-minute reasoning turns
 // Llama and GPT-OSS are the remaining Cloudflare fallbacks; OpenRouter is strictly secondary
 export const makeFallbackPlan2 = ExecutionPlan.make(
-  cloudflareStep("@cf/google/gemma-4-26b-a4b-it", { strictJsonSchema: true, chat_template_kwargs: { enable_thinking: false } }),
-  cloudflareStep("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { strictJsonSchema: true }),
-  cloudflareStep("@cf/openai/gpt-oss-120b", { strictJsonSchema: true, reasoning_effort: "low" }),
-  openRouterStep("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
-  openRouterStep("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" }),
-  openRouterStep("openrouter/free", { strictJsonSchema: true, reasoning_effort: "low" })
+  aiStep(OpenAiLanguageModel.model("@cf/google/gemma-4-26b-a4b-it", { strictJsonSchema: true, chat_template_kwargs: { enable_thinking: false } })),
+  aiStep(OpenAiLanguageModel.model("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { strictJsonSchema: true })),
+  aiStep(OpenAiLanguageModel.model("@cf/openai/gpt-oss-120b", { strictJsonSchema: true, reasoning_effort: "low" })),
+  aiStep(OpenRouterLanguageModel.model("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" })),
+  aiStep(OpenRouterLanguageModel.model("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" })),
+  aiStep(OpenRouterLanguageModel.model("openrouter/free", { strictJsonSchema: true, reasoning_effort: "low" }))
 );
 
 // The OpenRouter client layer, backed by the OpenAI-compatible endpoint

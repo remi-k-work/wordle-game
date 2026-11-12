@@ -9,7 +9,9 @@ export class AddGlobalPulse extends Schema.Class<AddGlobalPulse, { readonly bran
   sessionId: Schema.Trim.check(Schema.isUUID()),
   instanceId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
-  metricName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(50))),
+  metricName: Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(50)),
+  // The already-encoded JSON payload from the worker (a JSON string, written
+  // into the JSONB column as-is by the pg client's transformJson)
   metricPayload: Schema.Unknown,
 }) {}
 
@@ -28,6 +30,6 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent, { readonly br
   runId: Schema.Trim.check(Schema.isUUID()),
   solutionsLanguage: SolutionsLanguage,
   theSecretWord: TheSecretWord,
-  guessedTurn: Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS }))),
+  guessedTurn: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS })),
   timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
 }) {}

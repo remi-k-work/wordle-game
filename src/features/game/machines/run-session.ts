@@ -94,23 +94,22 @@ export const runSessionMachine = setup({
     // The telemetry action guards the no-active-run case itself, so no outer check is needed here
     trackForfeitedRun: ({ context, event }) => {
       assertEvent(event, "forfeitedRun");
-      void runClientCommand(trackForfeitedRun(context, event.wordChallenge));
+      return runClientCommand(trackForfeitedRun(context, event.wordChallenge));
     },
 
     // Notify high score machine that a run has finished
-    onRunFinished: ({ context }) => {
-      void runClientCommand(
+    onRunFinished: ({ context }) =>
+      runClientCommand(
         Effect.gen(function* () {
           const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
           yield* Atom.set(highScoreMachineAtom, { type: "runFinished", runScore: context.runScore, streak: context.streak, solutionsLanguage });
         })
-      );
-    },
+      ),
   },
 }).createMachine({
   id: "runSession",
   // Hydrate the machine with the input from the KVS Atom
-  context: ({ input }) => ({ ...input }) as const satisfies RunSession,
+  context: ({ input }) => ({ ...input }) satisfies RunSession,
   initial: "classifying",
 
   states: {

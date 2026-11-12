@@ -20,6 +20,13 @@ const decodeSolutions = Schema.decodeEffect(SolutionsFromJson);
 const decodeDefinitions = Schema.decodeEffect(DefinitionsFromJson);
 const encodeDefinitions = Schema.encodeEffect(DefinitionsFromJson);
 
+// Every step of the pipeline reads or writes one of the two files, so the
+// file-scoped error wrapper is built once and applied per step
+const asSeedError =
+  (file: string) =>
+  <A, E>(effect: Effect.Effect<A, E, never>) =>
+    Effect.mapError(effect, (cause) => new SeedJsonParseError({ file, cause }));
+
 export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, definitionsPath: string) {
   const fs = yield* FileSystem.FileSystem;
 
@@ -30,28 +37,29 @@ export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, 
   const definitionsRaw = yield* fs.readFileString(definitionsPath, "utf8");
 
   // Parse + validate in one step via fromJsonString (no `as` cast, no global Error in failure channel)
-  const solutions = yield* decodeSolutions(solutionsRaw).pipe(Effect.mapError((cause) => new SeedJsonParseError({ file: solutionsPath, cause })));
-  const definitions = yield* decodeDefinitions(definitionsRaw).pipe(Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })));
+  const solutions = yield* asSeedError(solutionsPath)(decodeSolutions(solutionsRaw));
+  const definitions = yield* asSeedError(definitionsPath)(decodeDefinitions(definitionsRaw));
 
   // Convert solutions into an uppercase HashSet for O(1) lookups
   const solutionsSet = HashSet.fromIterable(solutions.map((w) => w.toUpperCase()));
 
-  // Keep only definitions for known solutions and normalize their keys
-  const cleanDefinitions = Record.mapKeys(
-    Record.filter(definitions, (_, word) => HashSet.has(solutionsSet, word.toUpperCase())),
-    (word) => word.toUpperCase()
+  // Normalize definition keys to uppercase once, then keep only known solutions
+  const cleanDefinitions = Record.filter(
+    Record.mapKeys(definitions, (word) => word.toUpperCase()),
+    (word) => HashSet.has(solutionsSet, word)
   );
   const removalCount = Record.size(definitions) - Record.size(cleanDefinitions);
 
   // Early return if nothing needs pruning
   if (removalCount === 0) {
-    return yield* Effect.log("✅ Dataset is already pristine! Definitions match your solutions perfectly.");
+    yield* Effect.log("✅ Dataset is already pristine! Definitions match your solutions perfectly.");
+    return;
   }
 
   yield* Effect.log(`🧹 Found ${removalCount} phantom words inside definitions. Pruning...`);
 
   // Encode to JSON string via the same fromJsonString schema (pretty-printed via { space: 2 })
-  const cleanJson = yield* encodeDefinitions(cleanDefinitions).pipe(Effect.mapError((cause) => new SeedJsonParseError({ file: definitionsPath, cause })));
+  const cleanJson = yield* asSeedError(definitionsPath)(encodeDefinitions(cleanDefinitions));
   yield* fs.writeFileString(definitionsPath, cleanJson);
 
   yield* Effect.log(`✨ Sync complete! Solutions: ${solutions.length} | Synchronized Definitions: ${Record.size(cleanDefinitions)}`);

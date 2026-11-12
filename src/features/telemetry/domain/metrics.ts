@@ -34,30 +34,15 @@ const runDeathReason = Metric.frequency("runDeathReason", {
 
 // --- Counters (Cumulative Totals) ---
 
-const gamesPlayed = Metric.counter("gamesPlayed", {
-  description: "Total number of games played (both won and lost).",
-  incremental: true,
-}).pipe(Metric.withConstantInput(1));
+// Every counter records "one event happened", so the constant-input tail is
+// shared instead of being repeated per metric
+const unitCounter = (name: string, description: string) => Metric.counter(name, { description, incremental: true }).pipe(Metric.withConstantInput(1));
 
-const runsStarted = Metric.counter("runsStarted", {
-  description: "Total number of arcade runs started.",
-  incremental: true,
-}).pipe(Metric.withConstantInput(1));
-
-const perfectGames = Metric.counter("perfectGames", {
-  description: "Total number of games won on the first try.",
-  incremental: true,
-}).pipe(Metric.withConstantInput(1));
-
-const invalidGuesses = Metric.counter("invalidGuesses", {
-  description: "Total number of invalid guesses (not in dictionary).",
-  incremental: true,
-}).pipe(Metric.withConstantInput(1));
-
-const validGuesses = Metric.counter("validGuesses", {
-  description: "Total number of valid guesses submitted.",
-  incremental: true,
-}).pipe(Metric.withConstantInput(1));
+const gamesPlayed = unitCounter("gamesPlayed", "Total number of games played (both won and lost).");
+const runsStarted = unitCounter("runsStarted", "Total number of arcade runs started.");
+const perfectGames = unitCounter("perfectGames", "Total number of games won on the first try.");
+const invalidGuesses = unitCounter("invalidGuesses", "Total number of invalid guesses (not in dictionary).");
+const validGuesses = unitCounter("validGuesses", "Total number of valid guesses submitted.");
 
 export const metrics = {
   guessesToWin,

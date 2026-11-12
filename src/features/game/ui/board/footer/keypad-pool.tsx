@@ -18,9 +18,6 @@ interface KeypadPoolProps {
   onPressed: (pressedKey: string) => void;
 }
 
-// constants
-import { ALPHABET } from "@/features/game/ui/board/constants";
-
 // Fully static class string, hoisted so the live pool and its skeleton re-run
 // neither it through twMerge. The `[grid-area:pool]` name has to agree with the
 // area shell's `[grid-template-areas:…]` (see `KeypadArea`), so the pool's slot is
@@ -40,10 +37,13 @@ export function KeypadPool({ keys, onPressed }: KeypadPoolProps) {
   );
 }
 
-export function KeypadPoolSkeleton() {
+// The skeleton is handed the active language's letters (see
+// KEYPAD_SKELETON_LETTERS) so the placeholder has the same key count as the pool
+// that replaces it — Polish loads 32 keys, English 26
+export function KeypadPoolSkeleton({ letters }: { letters: ReadonlyArray<string> }) {
   return (
     <div className={POOL_ROOT_CLASSES}>
-      {ALPHABET.map((letter) => (
+      {letters.map((letter) => (
         <KeypadKeySkeleton key={letter} letter={letter} />
       ))}
       <KeypadActionKeys position="pool" disabled />

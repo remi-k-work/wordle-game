@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger, ManagedRuntime } from "effect";
+import { Cause, Effect, Layer, Logger, ManagedRuntime } from "effect";
 import { Atom, AtomRegistry, Reactivity } from "effect/reactivity";
 import { BrowserCrypto, BrowserKeyValueStore } from "@effect/platform-browser";
 import { RpcGameClient } from "@/features/game/rpc/client";
@@ -48,12 +48,21 @@ export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: sharedMem
 // generics collapse the error channel to `unknown`
 export type ClientRuntimeServices = Layer.Success<typeof MainLayer>;
 
-// Runs an Effect from a fire-and-forget XState command action. Failures are logged but never
-// reject, so unhandled Promise rejections cannot escape the synchronous XState action contract
+// Runs an Effect from a fire-and-forget XState command action. Failures are logged
+// but never reject, so unhandled Promise rejections cannot escape the synchronous
+// XState action contract. `tapCause` (not `tapError`) logs first so nothing is
+// silently swallowed, and a pure interruption is excluded from the recovery — the
+// same cause-based shape as `degradeToNone` in @/domain/helpers.server — so a
+// cancelled command still cancels instead of resolving as success
 export const runClientCommand = <A, E>(effect: Effect.Effect<A, E, ClientRuntimeServices>): Promise<void> =>
   RuntimeClient.runPromise(
     effect.pipe(
       Effect.asVoid,
-      Effect.catchCause((cause) => Effect.logError("[CLIENT COMMAND FAILED]:", cause))
+      Effect.tapCause(Effect.logError),
+      Effect.catchCauseIf(
+        (cause) => !Cause.hasInterruptsOnly(cause),
+        () => Effect.void
+      ),
+      Effect.orDie
     )
   );

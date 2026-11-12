@@ -8,7 +8,13 @@ import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/gam
 // types
 import type { RunDeathReason, RunSession, SolutionsLanguage, WordChallenge } from "@/features/game/domain/models";
 
+// constants
+import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/span-names";
+
 type SharedAttributes = { readonly sessionId: string; readonly solutionsLanguage: SolutionsLanguage };
+
+// The turn the player actually guessed on (the machine increments `currentTurn` on submit)
+const guessedTurnOf = (wordChallenge: WordChallenge) => wordChallenge.currentTurn - 1;
 
 // The attribute pair every tracker annotates its span/metric with: the current session id and the active solutions language
 const sharedAttributes = Effect.fnUntraced(function* () {
@@ -23,10 +29,9 @@ const trackMetric = <Input>(attributes: SharedAttributes, metric: Metric.Metric<
 
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 // All three fields are required for the span; if any is absent the annotation is skipped instead of failing
-export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSession, wordChallenge: WordChallenge) {
-  const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-  const currentTurn = wordChallenge.currentTurn;
-  const guessedTurn = currentTurn - 1;
+export const logWordWon = Effect.fn(SPAN_LOG_WORD_WON)(function* (runSession: RunSession, wordChallenge: WordChallenge) {
+  const { solutionsLanguage } = yield* sharedAttributes();
+  const guessedTurn = guessedTurnOf(wordChallenge);
 
   yield* Option.match(Option.all({ runId: runSession.runId, theSecretWord: wordChallenge.theSecretWord, wordScore: wordChallenge.wordScore }), {
     onNone: () => Effect.void,
@@ -39,15 +44,18 @@ export const logWordWon = Effect.fn("logWordWon")(function* (runSession: RunSess
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
 // `runId` is always required; `theSecretWord` is only needed for "Guesses" deaths, so a missing secret word
 // degrades to "N/A" instead of failing the entire span annotation
-export const logRunCompleted = Effect.fn("logRunCompleted")(function* (runSession: RunSession, wordChallenge: WordChallenge, deathReason: RunDeathReason) {
+export const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (runSession: RunSession, wordChallenge: WordChallenge, deathReason: RunDeathReason) {
   const { sessionId, solutionsLanguage } = yield* sharedAttributes();
   const finalScore = runSession.runScore;
   const finalStreak = runSession.streak;
 
-  // We calculate the total real-world time the run was alive
+  // We calculate the total real-world time the run was alive, clamped at 0 so a
+  // persisted `createdAt` ahead of the current clock (skew, tampering) cannot make
+  // the duration negative — `AddArcadeRunSummary` rejects negatives, which would
+  // drop the whole run summary downstream
   const now = yield* DateTime.now;
   const createdAt = Option.getOrElse(runSession.createdAt, () => now);
-  const durationSeconds = DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor);
+  const durationSeconds = Math.max(0, DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor));
 
   yield* Option.match(runSession.runId, {
     onNone: () => Effect.void,
@@ -108,8 +116,7 @@ export const trackForfeitedRun = Effect.fnUntraced(function* (runSession: RunSes
 // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
 export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
   const attributes = yield* sharedAttributes();
-  const currentTurn = wordChallenge.currentTurn;
-  const guessedTurn = currentTurn - 1;
+  const guessedTurn = guessedTurnOf(wordChallenge);
 
   yield* trackMetric(attributes, metrics.guessesToWin, guessedTurn);
 
@@ -130,6 +137,9 @@ export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession,
 export const trackWordLost = Effect.fnUntraced(function* (runSession: RunSession, wordChallenge: WordChallenge) {
   const attributes = yield* sharedAttributes();
   const streak = runSession.streak;
+
+  // Same policy as trackForfeitedRun: a loss without a started run has nothing to track
+  if (Option.isNone(runSession.runId)) return;
 
   yield* trackMetric(attributes, metrics.gamesPlayed, 1);
   yield* trackMetric(attributes, metrics.arcadeRunLength, streak);

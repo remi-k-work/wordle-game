@@ -2,4 +2,7 @@
 import { makeRpcClient } from "@/domain/rpc-client";
 import { RpcOverdriveHacks } from "./requests";
 
-export class RpcOverdriveHacksClient extends makeRpcClient("RpcOverdriveHacksClient", RpcOverdriveHacks, "/api/rpc/overdrive-hacks") {}
+// constants
+import { RPC_OVERDRIVE_HACKS_PATH } from "./requests";
+
+export class RpcOverdriveHacksClient extends makeRpcClient("RpcOverdriveHacksClient", RpcOverdriveHacks, RPC_OVERDRIVE_HACKS_PATH) {}

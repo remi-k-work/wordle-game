@@ -1,15 +1,7 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/sql";
-import {
-  AnyChartArgs,
-  AnyCounterArgs,
-  AnyAvgStatArgs,
-  ArcadeStreakDistributionData,
-  BestRunTrophyCardArgs,
-  GuessDistributionData,
-  TimeToSolveDistributionData,
-} from "@/features/charts/domain/models";
+import { AnyChartArgs, ArcadeStreakDistributionData, GuessDistributionData, TimeToSolveDistributionData } from "@/features/charts/domain/models";
 import { cumulativeToDistribution } from "@/features/charts/domain/helpers";
 import { dieOnDbFailure } from "@/domain/db-policy";
 import { anyAvgStatQuery } from "@/features/charts/queries/any-avg-stat";
@@ -46,50 +38,48 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     const hardestWordsLeaderboardQueryFn = hardestWordsLeaderboardQuery(sql);
     const bestRunTrophyCardQueryFn = bestRunTrophyCardQuery(sql);
 
-    const getGuessDistribution = Effect.fn("getGuessDistribution")(function* (request: AnyChartArgs) {
-      const rows = yield* guessDistributionQueryFn(request);
+    // Every distribution chart shares one rule for the trailing `[null, total]`
+    // bucket the histogram SQL emits: `cumulativeToDistribution` must see it (it
+    // is the percentage denominator), but it carries no bucket of its own, so
+    // whether it survives into the decoded rows depends on whether the chart's
+    // bucket has an open-ended range:
+    //   - guesses-per-win is a closed 1..MAX_TURNS range, so that NULL row is
+    //     pure total and is dropped below
+    //   - time-to-solve and arcade-streak are open-ended ("20+ seconds", "5+
+    //     wins"), so the NULL row IS their last bucket. It is kept here and the
+    //     state layer resolves it to `Infinity` (see state/charts.ts)
+    //
+    // The three distribution getters are therefore one pipeline — query, derive
+    // discrete buckets, optionally drop the total row, decode against the
+    // strict schema — differing only in the bucket key (turn / maxSeconds /
+    // streak), the decoder, and `dropNullBucket`. fnUntraced because the server
+    // graph has no Tracer layer: a traced span here is pure per-request overhead
+    const makeDistributionGetter = <Row extends { readonly personal: number; readonly global: number }, Data, DecodeError extends { _tag: string }>(
+      queryFn: (request: AnyChartArgs) => Effect.Effect<ReadonlyArray<Row>, never, never>,
+      decodeData: (chartData: readonly Row[]) => Effect.Effect<ReadonlyArray<Data>, DecodeError, never>,
+      bucketKey: keyof Row & string,
+      dropNullBucket: boolean
+    ) =>
+      Effect.fnUntraced(function* (request: AnyChartArgs) {
+        const rows = yield* queryFn(request);
 
-      const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-        turn: row.turn,
-        personal,
-        global,
-        personalPct,
-        globalPct,
-      })).filter((row) => row.turn !== null);
+        // Re-broadcast the row (so its bucket column survives) with the derived
+        // discrete counts and percentages in place of the cumulative ones
+        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
+          ...row,
+          personal,
+          global,
+          personalPct,
+          globalPct,
+        }));
 
-      // Decode against the strict schema, as recommended for final domain mapping
-      return yield* decodeGuessDistributionData(chartData).pipe(dieOnDbFailure);
-    });
+        // Decode against the strict schema, as recommended for final domain mapping
+        return yield* decodeData(dropNullBucket ? chartData.filter((row) => row[bucketKey] !== null) : chartData).pipe(dieOnDbFailure);
+      });
 
-    const getTimeToSolveDistribution = Effect.fn("getTimeToSolveDistribution")(function* (request: AnyChartArgs) {
-      const rows = yield* timeToSolveDistributionQueryFn(request);
-
-      const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-        maxSeconds: row.maxSeconds,
-        personal,
-        global,
-        personalPct,
-        globalPct,
-      }));
-
-      // Decode against the strict schema, as recommended for final domain mapping
-      return yield* decodeTimeToSolveDistributionData(chartData).pipe(dieOnDbFailure);
-    });
-
-    const getArcadeStreakDistribution = Effect.fn("getArcadeStreakDistribution")(function* (request: AnyChartArgs) {
-      const rows = yield* arcadeStreakDistributionQueryFn(request);
-
-      const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-        streak: row.streak,
-        personal,
-        global,
-        personalPct,
-        globalPct,
-      }));
-
-      // Decode against the strict schema, as recommended for final domain mapping
-      return yield* decodeArcadeStreakDistributionData(chartData).pipe(dieOnDbFailure);
-    });
+    const getGuessDistribution = makeDistributionGetter(guessDistributionQueryFn, decodeGuessDistributionData, "turn", true);
+    const getTimeToSolveDistribution = makeDistributionGetter(timeToSolveDistributionQueryFn, decodeTimeToSolveDistributionData, "maxSeconds", false);
+    const getArcadeStreakDistribution = makeDistributionGetter(arcadeStreakDistributionQueryFn, decodeArcadeStreakDistributionData, "streak", false);
 
     // Simple passthroughs to query functions. Referencing the hoisted query
     // directly keeps this layer a thin boundary: the queries already carry the
@@ -99,14 +89,14 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
       getGuessDistribution,
       getTimeToSolveDistribution,
       getArcadeStreakDistribution,
-      getOpeningGuessesFrequency: (request: AnyChartArgs) => openingGuessesFrequencyQueryFn(request),
-      getFailedWordsFrequency: (request: AnyChartArgs) => failedWordsFrequencyQueryFn(request),
-      getRunDeathReasonFrequency: (request: AnyChartArgs) => runDeathReasonFrequencyQueryFn(request),
-      getAnyCounter: (request: AnyCounterArgs) => anyCounterQueryFn(request),
-      getAnyAvgStat: (request: AnyAvgStatArgs) => anyAvgStatQueryFn(request),
-      getHardestWordsLeaderboard: (request: AnyChartArgs) => hardestWordsLeaderboardQueryFn(request),
-      getBestRunTrophyCard: (request: BestRunTrophyCardArgs) => bestRunTrophyCardQueryFn(request),
-    } as const;
+      getOpeningGuessesFrequency: openingGuessesFrequencyQueryFn,
+      getFailedWordsFrequency: failedWordsFrequencyQueryFn,
+      getRunDeathReasonFrequency: runDeathReasonFrequencyQueryFn,
+      getAnyCounter: anyCounterQueryFn,
+      getAnyAvgStat: anyAvgStatQueryFn,
+      getHardestWordsLeaderboard: hardestWordsLeaderboardQueryFn,
+      getBestRunTrophyCard: bestRunTrophyCardQueryFn,
+    };
   }),
 }) {
   static readonly layer = Layer.effect(this, this.make);

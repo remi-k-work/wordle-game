@@ -12,7 +12,7 @@ export class TelemetryHub extends Context.Service<TelemetryHub>()("TelemetryHub"
     // Ensure the PubSub is properly shut down when the service is no longer needed
     yield* Effect.addFinalizer(() => PubSub.shutdown(spanPubSub));
 
-    return { spanPubSub } as const;
+    return { spanPubSub };
   }),
 }) {
   static readonly layer = Layer.effect(this, this.make);

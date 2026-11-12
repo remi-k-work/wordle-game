@@ -16,9 +16,12 @@ export const VOWELS_BY_LANGUAGE = {
   Pl: ["A", "Ą", "E", "Ę", "I", "O", "Ó", "U", "Y"],
 } as const satisfies Record.ReadonlyRecord<SolutionsLanguage, readonly string[]>;
 
-export const INITIAL_OVERDRIVE_HACKS = {
-  empNukedLetters: [],
-  sonarReveals: [],
-  theOverride: Option.none(),
-  theOverrideAudio: Option.none(),
-} as const satisfies OverdriveHacks;
+// A factory rather than a shared constant: every machine reset gets its own empty
+// arrays, so a single in-place mutation cannot leak into every live context
+export const initialOverdriveHacks = () =>
+  ({
+    empNukedLetters: [],
+    sonarReveals: [],
+    theOverride: Option.none(),
+    theOverrideAudio: Option.none(),
+  }) as const satisfies OverdriveHacks;

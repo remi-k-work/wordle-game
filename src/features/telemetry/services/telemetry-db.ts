@@ -12,6 +12,9 @@ export class TelemetryDB extends Context.Service<TelemetryDB>()("TelemetryDB", {
       // Non-empty is required by `sql.insert`, which compiles one or more rows
       Request: Schema.NonEmptyArray(AddGlobalPulse),
       execute: (request) =>
+        // The conflict target restates the global_pulse primary key declared in
+        // seed/migrations/000_init_telemetry.ts — if that PK ever changes, this
+        // upsert turns into a failing INSERT
         sql`INSERT INTO global_pulse ${sql.insert(request)} ON CONFLICT (session_id, instance_id, solutions_language, metric_name) DO UPDATE SET metric_payload = EXCLUDED.metric_payload, created_at = NOW()`,
     });
 

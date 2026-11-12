@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, HashSet, Layer, Option, Schema } from "effect";
+import { Effect, HashSet, Layer, Option, Record, Schema } from "effect";
 import { RpcGame } from "./requests";
 import { Keypad, TheSecretWord } from "@/features/game/domain/models";
 import { matchLanguage } from "@/features/game/domain/helpers";
@@ -21,6 +21,9 @@ import dictionaryPlJson from "@/assets/data/dictionary-pl.json";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
+
+// constants
+import { RPC_GAME_PATH } from "./requests";
 
 // Definitions are build-time assets produced by the seed scripts; validate them
 // once at module scope (fail fast on a malformed asset) instead of casting. The
@@ -53,8 +56,11 @@ const DICTIONARY_PL = HashSet.fromIterable(dictionaryPlJson);
 // Definitions are already local build-time assets, so riddle generation can
 // use the raw dictionary meaning without waiting for the client's parallel
 // fetchDefinition request to finish
+// `Record.get` rather than an index: `Record.get` returns an `Option`, and the
+// decoded record has no index signature guaranteeing a hit (tsconfig does not
+// enable noUncheckedIndexedAccess), so a miss is `None` by construction
 const getWordDefinition = (theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage) =>
-  Option.fromNullishOr(matchLanguage(solutionsLanguage, DEFINITIONS_EN[theSecretWord], DEFINITIONS_PL[theSecretWord]));
+  Record.get(matchLanguage(solutionsLanguage, DEFINITIONS_EN, DEFINITIONS_PL), theSecretWord);
 
 const RpcGameLayer = RpcGame.toLayer({
   fetchSolutions: ({ solutionsLanguage }) => Effect.succeedSome(matchLanguage(solutionsLanguage, SOLUTIONS_EN, SOLUTIONS_PL)),
@@ -78,4 +84,4 @@ const RpcGameLayer = RpcGame.toLayer({
 
 const RpcGameLayerWithAi = RpcGameLayer.pipe(Layer.provide(AiClientsWithHttp), Layer.provide(OpenRouter.layer));
 
-export const handler = makeRpcHandler(RpcGame, "/api/rpc/game", RpcGameLayerWithAi);
+export const handler = makeRpcHandler(RpcGame, RPC_GAME_PATH, RpcGameLayerWithAi);

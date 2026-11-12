@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, HashMap, pipe } from "effect";
+import { Array, HashMap, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
@@ -8,6 +8,9 @@ import { createMachineAtom } from "@/domain/machine-atom";
 
 // types
 import type { BoardTile } from "@/features/game/domain/models";
+
+// constants
+import { EMPTY_TILE_KEY } from "@/features/game/domain/constants";
 
 // The overdrive hacks machine is now a living actor inside the effect atom
 export const overdriveHacksMachineAtom = createMachineAtom(overdriveHacksMachine);
@@ -24,10 +27,7 @@ export const overdriveHacksIsApplyingOverrideAtom = overdriveHacksMachineAtom.pi
 export const overdriveHacksIsIdleAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("idle")));
 
 export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>
-  pipe(
-    get(overdriveHacksEmpNukedLettersAtom),
-    Array.reduce(get(wordChallengeKeypadColorsAtom), (acc, letter) => HashMap.set(acc, letter, "grey"))
-  )
+  Array.reduce(get(overdriveHacksEmpNukedLettersAtom), get(wordChallengeKeypadColorsAtom), (acc, letter) => HashMap.set(acc, letter, "grey"))
 );
 
 // Projection for the rendered board: one grid, each tile stating whether it is a
@@ -42,17 +42,17 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
 
   // A tile is a reveal when the base grid leaves its position empty and a reveal
   // fills it — a letter the player typed is never a reveal. The annotation runs
-  // whether or not there are reveals, so the board always renders one uniform
-  // grid shape instead of a projection that sometimes carries the flag and
-  // sometimes does not
-  if (reveals.length === 0) return wordleGrid.map((row) => row.map((tile): BoardTile => ({ ...tile, isSonarReveal: false })));
-
+  // for every grid, with or without reveals (empty reveals simply leave all
+  // tiles plain), so the board always renders one uniform grid shape instead of
+  // a projection that sometimes carries the flag and sometimes does not
   const vowelByPosition = sonarVowelByPosition(reveals);
 
   return wordleGrid.map((row) =>
     row.map((tile, index): BoardTile => {
-      const vowel = vowelByPosition.get(index);
-      return vowel === undefined || tile.tileKey !== "" ? { ...tile, isSonarReveal: false } : { tileKey: vowel, color: "green", isSonarReveal: true };
+      const vowel = HashMap.get(vowelByPosition, index);
+      return Option.isNone(vowel) || tile.tileKey !== EMPTY_TILE_KEY
+        ? { ...tile, isSonarReveal: false }
+        : { tileKey: vowel.value, color: "green", isSonarReveal: true };
     })
   );
 });

@@ -7,7 +7,7 @@ import { msg, useMessages } from "gt-react";
 import { Modal } from "@/ui/modal";
 
 // types
-import type { ModalType } from "@/state/modal";
+import type { ModalType } from "@/machines/modal";
 import type { ReactNode } from "react";
 
 // The win-or-lose modal derives its title from game state, so it builds its own `Modal`; every other modal registers its static title here

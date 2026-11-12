@@ -1,6 +1,9 @@
 // services, features, and other libraries
 import { Array, Effect, FileSystem, Schema } from "effect";
 
+// constants
+import { WORD_LENGTH } from "@/features/game/domain/constants";
+
 class WordlistJsonEncodeError extends Schema.TaggedError<WordlistJsonEncodeError, { readonly brand: unique symbol }>()("WordlistJsonEncodeError", {
   file: Schema.String,
   cause: Schema.Defect(),
@@ -29,8 +32,9 @@ export const makeWordlistSync = Effect.fn("makeWordlistSync")(function* ({ input
 
   yield* Effect.log("Reading the raw dictionary...");
 
-  // Read the entire dictionaries into memory
-  const rawTexts = yield* Effect.forEach(inputs, (input) => fs.readFileString(input, "utf8"));
+  // Read the entire dictionaries into memory; the inputs are independent, so
+  // they are read concurrently rather than one round of IO at a time
+  const rawTexts = yield* Effect.forEach(inputs, (input) => fs.readFileString(input, "utf8"), { concurrency: "unbounded" });
 
   yield* Effect.log("Processing and filtering words...");
 
@@ -39,7 +43,7 @@ export const makeWordlistSync = Effect.fn("makeWordlistSync")(function* ({ input
     rawText
       .split("\n")
       .map((word) => word.trim().toUpperCase())
-      .filter((word) => word.length === 5)
+      .filter((word) => word.length === WORD_LENGTH)
   );
 
   // Deduplicate (just in case the raw file has duplicates)
