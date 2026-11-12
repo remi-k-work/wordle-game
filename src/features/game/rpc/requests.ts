@@ -3,12 +3,6 @@ import { Rpc, RpcGroup } from "effect/rpc";
 import { GameData, SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain/models";
 import { SpeechRequest } from "@/domain/models";
 
-// The HTTP path this group is mounted on, shared by the server handler and the
-// client so the two cannot drift apart. The route file (routes/api.rpc.game.ts)
-// keeps a literal: TanStack's router plugin statically crawls route files and
-// rejects a variable route id
-export const RPC_GAME_PATH = "/api/rpc/game";
-
 // Payload shapes reused by several RPCs
 const SolutionsLanguagePayload = { solutionsLanguage: SolutionsLanguage };
 const SecretWordPayload = { theSecretWord: TheSecretWord, solutionsLanguage: SolutionsLanguage };

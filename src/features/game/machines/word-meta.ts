@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { Effect, Option, Result } from "effect";
 import { Atom } from "effect/reactivity";
-import { effectActor } from "@/lib/effect-actor";
+import { effectActor } from "@/domain/helpers";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";

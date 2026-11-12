@@ -1,13 +1,15 @@
 // services, features, and other libraries
-import { Cause, Config, Effect, Layer, Option } from "effect";
+import { Config, Effect, Layer, Option } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
-import { SyncScheduler } from "@/lib/sync-scheduler";
-import { isWorkerd } from "@/lib/is-workerd";
+import { degradeToNone } from "./helpers";
 
 // types
 import type { Rpc } from "effect/rpc";
+
+// constants
+import { IS_WORKERD, SYNC_SCHEDULER_LAYER } from "@/domain/constants";
 
 // Belt-and-braces for workerd: the default async scheduler dispatches fibers
 // through setImmediate timers owned by the request that first scheduled them,
@@ -45,10 +47,10 @@ export const makeRpcHandler = <Rpcs extends Rpc.Any, LE>(
     disableTracing: true,
   }).pipe(
     Layer.provide(Layer.mergeAll(handlersLayer, RpcSerialization.layerSchemaBinary(), HttpServer.layerServices, RpcLogger.layer)),
-    Layer.provideMerge(SyncScheduler)
+    Layer.provideMerge(SYNC_SCHEDULER_LAYER)
   );
 
-  if (isWorkerd) {
+  if (IS_WORKERD) {
     // The handler's `context` parameter stays a required, unresolved generic inside
     // this function (it resolves to optional at the concrete route call sites, which
     // type-check), and the runtime handler treats a missing context as empty — the
@@ -81,24 +83,6 @@ const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Config.wit
 // Combinator-based (no Effect.gen wrapper) per Effect conventions for reusable functions
 export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallback: Effect.Effect<A, E, R>) =>
   Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
-
-// Runs an AI-backed generation and degrades to `None` on any failure. `tapCause`
-// (not `tapError`) logs first so the failure is not silently swallowed: the
-// recovery below catches the whole cause, defects included
-// The recovery is cause-based rather than `orElseSucceed` (which leaves a defect
-// in the error channel and cannot type the RPC handler surface). A pure
-// interruption is excluded so a cancelled request still cancels; the handler is
-// total for every remaining cause, so the trailing `orDie` (which never touches
-// an interrupt) only pins the residual error channel to `never`
-export const degradeToNone = <A, E, R>(generate: Effect.Effect<Option.Option<A>, E, R>) =>
-  generate.pipe(
-    Effect.tapCause(Effect.logError),
-    Effect.catchCauseIf(
-      (cause) => !Cause.hasInterruptsOnly(cause),
-      () => Effect.succeedNone
-    ),
-    Effect.orDie
-  );
 
 // Runs the AI-backed generation unless the AI switch is off, in which case the
 // cheap fallback is served instead. The combined result degrades to `None` on

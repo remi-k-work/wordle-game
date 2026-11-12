@@ -7,7 +7,7 @@ import { PgLive } from "@/lib/pg.server";
 import { makeRpcHandler } from "@/domain/helpers.server";
 
 // constants
-import { RPC_TELEMETRY_PATH } from "./requests";
+import { RPC_TELEMETRY_PATH } from "@/domain/constants";
 
 // Every handler is a pass-through to the same DB service method
 const RpcTelemetryLayer = RpcTelemetry.toLayer({

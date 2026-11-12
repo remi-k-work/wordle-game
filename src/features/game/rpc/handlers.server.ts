@@ -23,7 +23,7 @@ import dictionaryPlJson from "@/assets/data/dictionary-pl.json";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 // constants
-import { RPC_GAME_PATH } from "./requests";
+import { RPC_GAME_PATH } from "@/domain/constants";
 
 // Definitions are build-time assets produced by the seed scripts; validate them
 // once at module scope (fail fast on a malformed asset) instead of casting. The

@@ -9,7 +9,7 @@ import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/gam
 import type { RunDeathReason, RunSession, SolutionsLanguage, WordChallenge } from "@/features/game/domain/models";
 
 // constants
-import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/span-names";
+import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/constants";
 
 type SharedAttributes = { readonly sessionId: string; readonly solutionsLanguage: SolutionsLanguage };
 

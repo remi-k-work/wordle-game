@@ -9,7 +9,7 @@ import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features
 import type { Tracer } from "effect";
 
 // constants
-import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/span-names";
+import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/constants";
 
 // Metric counter/gauge state carries bigint on bigint-backed platforms, which JSON cannot encode
 const bigIntToJson = (value: number | bigint) => (Predicate.isBigInt(value) ? value.toString() : value);

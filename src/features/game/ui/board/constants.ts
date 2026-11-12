@@ -31,10 +31,6 @@ export const KEYPAD_COLOR_MAP = {
   "": "transparent",
 } as const satisfies Record.ReadonlyRecord<Color, string>;
 
-// The skeleton keypad letters now live with the other per-language game data
-// (KEYPAD_SKELETON_LETTERS in @/features/game/domain/constants), so the
-// placeholder can match the live pool of whichever language is active
-
 // EMP "electrical fry" exit — jitter, flicker, glow, and burn out
 export const EMP_FRY_EXIT = {
   x: [0, -8, 12, -14, 10, -7, 3, 0],

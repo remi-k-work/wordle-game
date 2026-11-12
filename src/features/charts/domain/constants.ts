@@ -16,6 +16,4 @@ export type MetricName = keyof typeof metrics;
 export type BucketAlias = "turn" | "max_seconds" | "streak";
 
 // constants
-export const INITIAL_BROWSE_CHARTS = {
-  sl: "En",
-} as const satisfies BrowseCharts;
+export const INITIAL_BROWSE_CHARTS = { sl: "En" } as const satisfies BrowseCharts;

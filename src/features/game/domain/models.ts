@@ -24,21 +24,18 @@ export type WordScore = typeof WordScore.Type;
 export type WordChallenge = typeof WordChallenge.Type;
 
 // A single normalized letter — shared by the grid, keypad, grey-letter set and overdrive hacks
-export const Letter = Schema.Trim.pipe(Schema.check(Schema.isBetweenLength(1, 1)));
+export const Letter = Schema.Trim.check(Schema.isBetweenLength(1, 1));
 
-export const TheSecretWord = Schema.Trim.pipe(Schema.check(Schema.isBetweenLength(WORD_LENGTH, WORD_LENGTH)));
+export const TheSecretWord = Schema.Trim.check(Schema.isBetweenLength(WORD_LENGTH, WORD_LENGTH));
 
 // The word a run died on, or the "N/A" sentinel when the run never reached a
 // word (e.g. forfeited during arcade setup). A single string schema (not a
 // Union of two string members): SchemaBinary requires union members to be
 // uniquely identifiable on the wire, and two plain-string members are not
-export const FailedOnWord = Schema.Trim.pipe(
-  Schema.check(
-    Schema.makeFilter((word: string) => word === "N/A" || word.length === WORD_LENGTH, {
-      expected: `a ${WORD_LENGTH}-letter word or "N/A"`,
-    })
-  )
+export const FailedOnWord = Schema.Trim.check(
+  Schema.makeFilter((word: string) => word === "N/A" || word.length === WORD_LENGTH, { expected: `a ${WORD_LENGTH}-letter word or "N/A"` })
 );
+
 export const SolutionsLanguage = Schema.Literals(["En", "Pl"]);
 export const RunDeathReason = Schema.Literals(["Forfeit", "Guesses"]);
 
@@ -65,8 +62,8 @@ export const GameData = Schema.Struct({
 });
 
 export const WordMeta = Schema.Struct({
-  theRiddle: Schema.Option(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
-  wordDefinition: Schema.Option(Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()))),
+  theRiddle: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),
+  wordDefinition: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),
   theRiddleAudio: Schema.Option(Schema.Uint8Array),
   wordDefinitionAudio: Schema.Option(Schema.Uint8Array),
 });

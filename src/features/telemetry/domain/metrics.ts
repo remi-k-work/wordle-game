@@ -34,8 +34,7 @@ const runDeathReason = Metric.frequency("runDeathReason", {
 
 // --- Counters (Cumulative Totals) ---
 
-// Every counter records "one event happened", so the constant-input tail is
-// shared instead of being repeated per metric
+// Every counter records "one event happened", so the constant-input tail is shared instead of being repeated per metric
 const unitCounter = (name: string, description: string) => Metric.counter(name, { description, incremental: true }).pipe(Metric.withConstantInput(1));
 
 const gamesPlayed = unitCounter("gamesPlayed", "Total number of games played (both won and lost).");

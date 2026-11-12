@@ -3,7 +3,7 @@ import { Config, Context, Effect, flow, Layer, Option, Random, Schedule, Schema 
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/http";
 import { SpeechRequest } from "@/domain/models";
 import { OpenRouterError } from "@/domain/errors";
-import { degradeToNone } from "@/domain/helpers.server";
+import { degradeToNone } from "@/domain/helpers";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
@@ -81,7 +81,6 @@ export const fetchSpeechAudio = Effect.fnUntraced(function* ({ input, solutionsL
 
   // OpenRouter's default voice is used for English; pick a random recommended Polish voice otherwise
   const voice = solutionsLanguage === "En" ? undefined : yield* Random.choice(VOICES_PL);
-
   const { audioData } = yield* generateSpeech({ input, voice });
 
   return Option.some(audioData);

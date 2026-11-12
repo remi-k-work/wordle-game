@@ -1,7 +1,9 @@
 // services, features, and other libraries
 import { Redacted, String } from "effect";
 import { PgClient } from "@effect/sql-pg";
-import { isWorkerd } from "./is-workerd";
+
+// constants
+import { IS_WORKERD } from "@/domain/constants";
 
 // This module is deliberately free of `cloudflare:workers`: pgConfig and makePgClientLayer are
 // shared by the worker (see pg.server.ts), the migration runner (seed/run-migrations.ts) and the
@@ -21,4 +23,4 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.cam
 // scheduler (see domain/helpers.server.ts) — both fixes are required
 
 export const makePgClientLayer = (url: Redacted.Redacted<string>) =>
-  PgClient.layer({ ...pgConfig, url, idleTimeout: "10 seconds", connectTimeout: "10 seconds", ...(isWorkerd ? { connectionTTL: "0 seconds" } : {}) });
+  PgClient.layer({ ...pgConfig, url, idleTimeout: "10 seconds", connectTimeout: "10 seconds", ...(IS_WORKERD ? { connectionTTL: "0 seconds" } : {}) });

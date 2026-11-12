@@ -18,12 +18,6 @@ import {
   TimeToSolveDistributionData,
 } from "@/features/charts/domain/models";
 
-// The HTTP path this group is mounted on, shared by the server handler and the
-// client so the two cannot drift apart. The route file keeps a literal:
-// TanStack's router plugin statically crawls route files and rejects a variable
-// route id
-export const RPC_TELEMETRY_PATH = "/api/rpc/telemetry";
-
 export class RpcTelemetry extends RpcGroup.make(
   Rpc.make("addGlobalPulse", {
     // `sql.insert` compiles one or more rows; an empty batch is never valid

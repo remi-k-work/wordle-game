@@ -2,7 +2,7 @@
 import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
-import { effectActor } from "@/lib/effect-actor";
+import { effectActor } from "@/domain/helpers";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";

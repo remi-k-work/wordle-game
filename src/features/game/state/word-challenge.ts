@@ -10,7 +10,7 @@ import { createMachineAtom } from "@/domain/machine-atom";
 import type { Color, Tile } from "@/features/game/domain/models";
 
 // constants
-import { MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
+import { EMPTY_TILE_KEY, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
 
 // The word challenge machine is now a living actor inside the effect atom
 export const wordChallengeMachineAtom = createMachineAtom(wordChallengeMachine);
@@ -27,13 +27,34 @@ export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map
 export const wordChallengeIsRejectedAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("rejected")));
 export const wordChallengeHasWonAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("wordWon")));
 
+// A once-a-second clock signal, in the same shape as Effect's own
+// `Atom.windowFocusSignal`: the read registers a listener, publishes a new tick
+// with `setSelf`, and tears the listener down through `addFinalizer` when the
+// atom loses its last subscriber (so no timer survives an unmounted board).
+// No `window` (SSR) means a single value and no listener
+const secondTickAtom = Atom.readable<number>((get) => {
+  if (typeof window === "undefined") return 0;
+
+  let ticks = 0;
+  const interval = setInterval(() => get.setSelf(++ticks), 1000);
+  get.addFinalizer(() => clearInterval(interval));
+
+  return ticks;
+});
+
 // Reactive selector for the "live" potential word score based on current progress
-export const wordChallengePotentialScoreAtom = Atom.make((get) =>
-  calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.nowUnsafe())
-);
+export const wordChallengePotentialScoreAtom = Atom.make((get) => {
+  // Subscribed, not `get.once`: every tick invalidates this read, which is what
+  // makes the projected score track the clock. The turn and the start time only
+  // move when the player acts, so without this dependency the "live" score would
+  // freeze between keystrokes instead of bleeding away with every second
+  get(secondTickAtom);
+
+  return calculatePotentialScore(get(wordChallengeCurrentTurnAtom), get(wordChallengeStartTimeAtom), DateTime.nowUnsafe());
+});
 
 // An empty row of unplayed tiles, e.g. for the rows below the current guess
-const emptyRow = (): Tile[] => Array.makeBy(WORD_LENGTH, (): Tile => ({ tileKey: "", color: "" }));
+const emptyRow = (): Tile[] => Array.makeBy(WORD_LENGTH, (): Tile => ({ tileKey: EMPTY_TILE_KEY, color: "" }));
 
 // Derive the full 6x5 grid state for rendering based on completed guesses
 export const wordChallengeWordleGridAtom = Atom.make((get) =>

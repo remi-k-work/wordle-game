@@ -3,7 +3,7 @@ import { Context, Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/sql";
 import { AnyChartArgs, ArcadeStreakDistributionData, GuessDistributionData, TimeToSolveDistributionData } from "@/features/charts/domain/models";
 import { cumulativeToDistribution } from "@/features/charts/domain/helpers";
-import { dieOnDbFailure } from "@/domain/db-policy";
+import { dieOnDbFailure } from "@/domain/helpers";
 import { anyAvgStatQuery } from "@/features/charts/queries/any-avg-stat";
 import { anyCounterQuery } from "@/features/charts/queries/any-counter";
 import { arcadeStreakDistributionQuery } from "@/features/charts/queries/arcade-streak-distribution";

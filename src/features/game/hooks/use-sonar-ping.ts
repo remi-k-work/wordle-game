@@ -38,7 +38,6 @@ export function useSonarPing(isEnabled: boolean) {
       stopPulseRef.current = () => ping.stop();
 
       await ping;
-
       if (cancelled.signal.aborted) return;
 
       // Infinite subtle pulse

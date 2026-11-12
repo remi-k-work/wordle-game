@@ -2,7 +2,7 @@
 import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 import { AnyChartArgs } from "@/features/charts/domain/models";
-import { dieOnDbFailure } from "@/domain/db-policy";
+import { dieOnDbFailure } from "@/domain/helpers";
 
 // types
 import type { BucketAlias, MetricName } from "@/features/charts/domain/constants";

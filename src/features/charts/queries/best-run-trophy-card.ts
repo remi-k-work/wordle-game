@@ -2,7 +2,7 @@
 import { Match } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 import { BestRunTrophyCardArgs, BestRunTrophyCardData } from "@/features/charts/domain/models";
-import { dieOnDbFailure } from "@/domain/db-policy";
+import { dieOnDbFailure } from "@/domain/helpers";
 
 export const bestRunTrophyCardQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findOneOption({

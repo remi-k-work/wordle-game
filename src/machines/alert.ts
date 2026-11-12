@@ -6,7 +6,7 @@ import { runClientCommand } from "@/lib/runtime-client";
 // A confirm callback that rejects is modeled as a typed error rather than an
 // anonymous defect, so the machine can log it deliberately instead of letting
 // the actor die with it
-export class AlertOkayedError extends Schema.TaggedError<AlertOkayedError, { readonly brand: unique symbol }>()("AlertOkayedError", {
+class AlertOkayedError extends Schema.TaggedError<AlertOkayedError, { readonly brand: unique symbol }>()("AlertOkayedError", {
   cause: Schema.Defect(),
 }) {}
 
@@ -61,9 +61,9 @@ export const alertMachine = setup({
           assertEvent(event, "okayed");
           return event.onOkayed;
         },
-        onDone: ".closed",
+        onDone: "closed",
         onError: {
-          target: ".closed",
+          target: "closed",
           actions: ({ event }) => {
             // The confirm failed and the dialog still closes (there is nothing
             // to retry in place), but the failure is logged through the client

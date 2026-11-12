@@ -4,7 +4,7 @@ import { SqlClient, SqlSchema } from "effect/sql";
 import { HighScore, AddHighScore } from "@/features/high-score/domain/models";
 import { qualifiesForTop10 } from "@/features/high-score/domain/helpers";
 import { SolutionsLanguage } from "@/features/game/domain/models";
-import { dieOnDbFailure } from "@/domain/db-policy";
+import { dieOnDbFailure } from "@/domain/helpers";
 
 export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
   make: Effect.gen(function* () {

@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
 import { wordChallengeCurrentTurnAtom } from "@/features/game/state/word-challenge";
 import { overdriveHacksWordleGridAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
@@ -13,7 +14,7 @@ import { MAX_TURNS } from "@/features/game/domain/constants";
 // The board's grid shell, hoisted so the live board and its skeleton cannot drift
 // into different row tracks — which would reflow the whole board at the moment
 // real content replaces the placeholder rows
-const BOARD_CLASSES = "grid min-h-full grid-cols-1 grid-rows-6 gap-1";
+const BOARD_CLASSES = cn("grid min-h-full grid-cols-1 grid-rows-6 gap-1");
 
 // The row count comes from the same constant the wordle-grid schema bounds rows
 // with, so a live board and its skeleton can never disagree on how many rows the

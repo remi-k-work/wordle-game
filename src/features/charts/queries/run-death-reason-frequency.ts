@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/sql";
 import { AnyChartArgs, RunDeathReasonFrequencyData } from "@/features/charts/domain/models";
-import { dieOnDbFailure } from "@/domain/db-policy";
+import { dieOnDbFailure } from "@/domain/helpers";
 
 // types
 import type { MetricName } from "@/features/charts/domain/constants";

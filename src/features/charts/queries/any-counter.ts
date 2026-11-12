@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { SqlClient, SqlSchema } from "effect/sql";
 import { AnyCounterArgs, AnyCounterData } from "@/features/charts/domain/models";
-import { dieOnDbFailure } from "@/domain/db-policy";
+import { dieOnDbFailure } from "@/domain/helpers";
 
 export const anyCounterQuery = (sql: SqlClient.SqlClient) => {
   const query = SqlSchema.findOne({

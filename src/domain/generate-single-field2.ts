@@ -39,8 +39,7 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
   Effect.mapError((error) =>
     AiError.isAiError(error)
       ? AiProviderError.fromAiError(error)
-      : // The full fidelity of any non-AI failure was already logged above; surface
-        // its message (when present) in the normalized error
+      : // The full fidelity of any non-AI failure was already logged above; surface its message (when present) in the normalized error
         new AiProviderError({ reason: new AiError.UnknownError({ description: describeFailure(error) }) })
   )
 );

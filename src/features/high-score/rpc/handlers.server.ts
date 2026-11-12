@@ -6,7 +6,7 @@ import { PgLive } from "@/lib/pg.server";
 import { makeRpcHandler } from "@/domain/helpers.server";
 
 // constants
-import { RPC_HIGH_SCORE_PATH } from "./requests";
+import { RPC_HIGH_SCORE_PATH } from "@/domain/constants";
 
 // Every handler is a pass-through to the same DB service method, so the
 // service lookup is hoisted once and the handlers delegate point-free

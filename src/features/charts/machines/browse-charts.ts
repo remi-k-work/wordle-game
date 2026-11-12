@@ -20,13 +20,8 @@ export const browseChartsMachine = setup({
   actions: {
     syncUrl: assign(({ event }) => {
       assertEvent(event, "urlSynced");
-      // `browseCharts` is already schema-decoded (full language included), so
-      // only the navigate callback needs adding. Spreading the decoded
-      // Schema.Class instance is safe (decoding yields a plain object)
       // oxlint-disable-next-line typescript/no-misused-spread -- decoded Schema.Class values are plain objects
-      return { ...event.browseCharts, navigate: event.navigate } satisfies BrowseCharts & {
-        navigate?: ReturnType<typeof useUrlScribe>["navigate"];
-      };
+      return { ...event.browseCharts, navigate: event.navigate } satisfies BrowseCharts & { navigate?: ReturnType<typeof useUrlScribe>["navigate"] };
     }),
 
     changeSl: assign(({ context, event }) => {

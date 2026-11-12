@@ -7,11 +7,7 @@ import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter
 // Builds one fallback step: the provider to try, bounded attempts, and a shared
 // retry policy; both provider clients go through this so the ladder cannot end
 // up retrying Cloudflare and OpenRouter differently
-const aiStep = <A>(provide: A) => ({
-  provide,
-  attempts: 2,
-  schedule: Schedule.exponential("1 second", 2),
-});
+const aiStep = <A>(provide: A) => ({ provide, attempts: 2, schedule: Schedule.exponential("1 second", 2) });
 
 // Builds the shared fallback ladder for any LanguageModel service; Cloudflare is always tried first because it runs closest to the Worker
 // Gemma is the quality-first primary with thinking disabled to avoid multi-minute reasoning turns

@@ -35,10 +35,10 @@ export class AnyCounterData extends Schema.Class<AnyCounterData, { readonly bran
 // the raw SQL rows (and the e2e fixtures) only carry the bucket and the counts,
 // and `cumulativeToDistribution` is what fills the percentages in — the widened
 // (optional) shape is pinned by the guess-distribution e2e suite
-const Pct = Schema.optional(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: 100 }))));
+const Pct = Schema.optional(Schema.Int.check(Schema.isBetween({ minimum: 0, maximum: 100 })));
 
 export class GuessDistributionData extends AnyCounterData.extend<GuessDistributionData>("GuessDistributionData")({
-  turn: Schema.NullOr(Schema.Int.pipe(Schema.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS })))),
+  turn: Schema.NullOr(Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS }))),
   personalPct: Pct,
   globalPct: Pct,
 }) {}
@@ -70,9 +70,9 @@ export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathR
 export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData, { readonly brand: unique symbol }>("HardestWordsLeaderboardData")({
   word: TheSecretWord,
   personalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  personalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS }))),
+  personalAvgGuesses: Schema.FiniteFromString.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS })),
   globalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  globalAvgGuesses: Schema.FiniteFromString.pipe(Schema.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS }))),
+  globalAvgGuesses: Schema.FiniteFromString.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS })),
 }) {}
 
 export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCardArgs>("BestRunTrophyCardArgs")({

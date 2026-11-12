@@ -4,12 +4,6 @@ import { SolutionsLanguage, TheSecretWord, WordChallenge, WordMeta } from "@/fea
 import { OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 import { SpeechRequest } from "@/domain/models";
 
-// The HTTP path this group is mounted on, shared by the server handler and the
-// client so the two cannot drift apart. The route file keeps a literal:
-// TanStack's router plugin statically crawls route files and rejects a variable
-// route id
-export const RPC_OVERDRIVE_HACKS_PATH = "/api/rpc/overdrive-hacks";
-
 // Payload shapes reused by several RPCs
 const AudioPayload = { input: SpeechRequest.fields.input, solutionsLanguage: SolutionsLanguage };
 

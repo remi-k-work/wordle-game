@@ -1,6 +1,8 @@
 // services, features, and other libraries
 import { Array, Option, Schema } from "effect";
 import { BrowseCharts } from "./models";
+
+// constants
 import { INITIAL_BROWSE_CHARTS } from "./constants";
 
 // Telemetry stores histograms in cumulative form because they are easy to

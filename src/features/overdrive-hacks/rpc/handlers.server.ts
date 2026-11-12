@@ -7,7 +7,7 @@ import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
 // constants
-import { RPC_OVERDRIVE_HACKS_PATH } from "./requests";
+import { RPC_OVERDRIVE_HACKS_PATH } from "@/domain/constants";
 
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverride: ({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage }) =>
