@@ -1,26 +1,26 @@
 import { describe, expect, it } from "@effect/vitest";
 import { HashSet } from "effect";
-import { isGuessKeyValid, canSubmitGuess } from "../validators";
+import { canSubmitGuess, classifyKey } from "../validators";
 
 describe("validators", () => {
-  describe("isGuessKeyValid", () => {
-    it("accepts valid letters", () => {
-      expect(isGuessKeyValid("a")).toBe(true);
-      expect(isGuessKeyValid("Z")).toBe(true);
-      expect(isGuessKeyValid("ą")).toBe(true);
-      expect(isGuessKeyValid("Ź")).toBe(true);
+  describe("classifyKey", () => {
+    it("classifies valid letters, normalizing them to uppercase", () => {
+      expect(classifyKey("a")).toEqual({ kind: "letter", letter: "A" });
+      expect(classifyKey("Z")).toEqual({ kind: "letter", letter: "Z" });
+      expect(classifyKey("ą")).toEqual({ kind: "letter", letter: "Ą" });
+      expect(classifyKey("Ź")).toEqual({ kind: "letter", letter: "Ź" });
     });
 
-    it("accepts control keys", () => {
-      expect(isGuessKeyValid("backspace")).toBe(true);
-      expect(isGuessKeyValid("ENTER")).toBe(true);
+    it("classifies control keys", () => {
+      expect(classifyKey("backspace")).toEqual({ kind: "backspace" });
+      expect(classifyKey("ENTER")).toEqual({ kind: "enter" });
     });
 
     it("rejects invalid keys", () => {
-      expect(isGuessKeyValid("1")).toBe(false);
-      expect(isGuessKeyValid("!")).toBe(false);
-      expect(isGuessKeyValid(" ")).toBe(false);
-      expect(isGuessKeyValid("Escape")).toBe(false);
+      expect(classifyKey("1")).toEqual({ kind: "invalid" });
+      expect(classifyKey("!")).toEqual({ kind: "invalid" });
+      expect(classifyKey(" ")).toEqual({ kind: "invalid" });
+      expect(classifyKey("Escape")).toEqual({ kind: "invalid" });
     });
   });
 

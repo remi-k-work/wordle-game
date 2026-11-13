@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Option } from "effect";
+import { Option, Predicate } from "effect";
 import { useAtomValue } from "@effect/atom-react";
 import { msg, useGT, useMessages } from "gt-react";
 import { timeToSolveDistributionAtom } from "@/features/charts/state/charts";
@@ -32,7 +32,10 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
       onSome: (speedMultiplier) => (emojiOnly ? speedMultiplierToCategoryEmoji(speedMultiplier) : messages(speedMultiplierToCategoryMessage(speedMultiplier))),
     });
   const tickFormatter = (tick: number | null) => formatSpeedCategory(tick, true);
-  const tooltipLabelFormatter = (label: unknown) => formatSpeedCategory(label as number | null);
+  // Recharts hands tooltip labels over as `unknown`; a non-number label (a
+  // malformed tick) resolves to the "Unknown" fallback instead of being cast
+  // into the number path
+  const tooltipLabelFormatter = (label: unknown) => formatSpeedCategory(Predicate.isNumber(label) ? label : null);
 
   // Both the empty state and the chart carry the same heading, so it is resolved once here instead of being re-translated in each branch
   const title = gt("Time taken to solve a word");

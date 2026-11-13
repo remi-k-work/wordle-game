@@ -32,9 +32,12 @@ export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, 
 
   yield* Effect.log("🔄 Starting structural synchronization between solutions and definitions...");
 
-  // Read both JSON files asynchronously via Effect Platform
-  const solutionsRaw = yield* fs.readFileString(solutionsPath, "utf8");
-  const definitionsRaw = yield* fs.readFileString(definitionsPath, "utf8");
+  // Read both JSON files asynchronously via Effect Platform. The two reads are
+  // independent, so they run concurrently (the same shape wordlist.ts uses for
+  // its input scan)
+  const [solutionsRaw, definitionsRaw] = yield* Effect.all([fs.readFileString(solutionsPath, "utf8"), fs.readFileString(definitionsPath, "utf8")], {
+    concurrency: "unbounded",
+  });
 
   // Parse + validate in one step via fromJsonString (no `as` cast, no global Error in failure channel)
   const solutions = yield* asSeedError(solutionsPath)(decodeSolutions(solutionsRaw));

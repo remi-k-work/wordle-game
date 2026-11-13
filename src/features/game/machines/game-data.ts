@@ -2,7 +2,7 @@
 import { Effect, Option, Random } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
-import { effectActor } from "@/domain/helpers";
+import { effectActor } from "@/lib/effect-actor";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { assign, setup } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";

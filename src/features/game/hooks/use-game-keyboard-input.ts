@@ -18,11 +18,16 @@ export function useGameKeyboardInput() {
     const controller = new AbortController();
     window.addEventListener(
       "keyup",
-      // Modifier combos (Ctrl/Meta/Alt) are shortcuts, never letter keys, so
-      // they are dropped at the source instead of being forwarded for the
-      // machine to ignore
       (ev) => {
-        if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+        // Ctrl/Meta combos are browser/OS shortcuts, never letter keys, so they
+        // are dropped at the source instead of being forwarded for the machine
+        // to ignore. Alt is the exception: AltGr (Windows' right Alt) sets
+        // ctrlKey+altKey together and produces text — it is the only way to
+        // type Polish diacritics (AltGr+A -> ą) on the programmers layout —
+        // and macOS' Option-based input sets altKey alone. Anything produced
+        // that is not a game letter is rejected downstream by `classifyKey`
+        const isAltGr = ev.getModifierState("AltGraph");
+        if ((ev.ctrlKey && !isAltGr) || ev.metaKey) return;
         overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: ev.key });
       },
       { signal: controller.signal }

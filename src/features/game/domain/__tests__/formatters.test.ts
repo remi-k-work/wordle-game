@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { formatGuess, speedMultiplierToCategory } from "../formatters";
+import { formatGuess, speedMultiplierToCategoryEmoji } from "../formatters";
 
 describe("formatters", () => {
   describe("formatGuess", () => {
@@ -68,10 +68,16 @@ describe("formatters", () => {
     });
   });
 
-  describe("speedMultiplierToCategory", () => {
-    it("returns stable category identifiers", () => {
-      expect(speedMultiplierToCategory(1.5)).toBe("speed-demon");
-      expect(speedMultiplierToCategory(0.8)).toBe("slow-learner");
+  describe("speedMultiplierToCategoryEmoji", () => {
+    it("returns the category emoji for known multipliers", () => {
+      expect(speedMultiplierToCategoryEmoji(1.5)).toBe("🚀");
+      expect(speedMultiplierToCategoryEmoji(1.2)).toBe("⚡");
+      expect(speedMultiplierToCategoryEmoji(1)).toBe("⏱️");
+      expect(speedMultiplierToCategoryEmoji(0.8)).toBe("🐌");
+    });
+
+    it("falls back for an unknown multiplier", () => {
+      expect(speedMultiplierToCategoryEmoji(2)).toBe("?");
     });
   });
 });

@@ -15,11 +15,19 @@ import { openingGuessesFrequencyQuery } from "@/features/charts/queries/opening-
 import { runDeathReasonFrequencyQuery } from "@/features/charts/queries/run-death-reason-frequency";
 import { timeToSolveDistributionQuery } from "@/features/charts/queries/time-to-solve-distribution";
 
-// Schema.decodeEffect builds a parser on every call, so build the array
-// decoders once at module scope instead of per request
+// Schema.decodeEffect builds a parser on every call, so build the array decoders once at module scope instead of per request
 const decodeGuessDistributionData = Schema.decodeEffect(Schema.Array(GuessDistributionData));
 const decodeTimeToSolveDistributionData = Schema.decodeEffect(Schema.Array(TimeToSolveDistributionData));
 const decodeArcadeStreakDistributionData = Schema.decodeEffect(Schema.Array(ArcadeStreakDistributionData));
+
+// types
+// The bucket column of a distribution row: the string keys whose value may be
+// null (the trailing cumulative-total bucket). Deriving the key from the column
+// type keeps non-bucket columns (the counts, the percentages) out of the
+// dropNull filter's type, where passing one would silently no-op
+type BucketKey<Row> = {
+  [K in keyof Row & string]: null extends Row[K] ? K : never;
+}[keyof Row & string];
 
 export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
   make: Effect.gen(function* () {
@@ -52,13 +60,25 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
     // The three distribution getters are therefore one pipeline — query, derive
     // discrete buckets, optionally drop the total row, decode against the
     // strict schema — differing only in the bucket key (turn / maxSeconds /
-    // streak), the decoder, and `dropNullBucket`. fnUntraced because the server
-    // graph has no Tracer layer: a traced span here is pure per-request overhead
-    const makeDistributionGetter = <Row extends { readonly personal: number; readonly global: number }, Data, DecodeError extends { _tag: string }>(
+    // streak), the decoder, and how the trailing NULL bucket is handled.
+    // fnUntraced because the server graph has no Tracer layer: a traced span
+    // here is pure per-request overhead
+    // `keepNull` vs `dropNull` is spelled out at each call site rather than
+    // passed as a bare boolean, so the choice is readable where it is made
+    // instead of only in the comment above
+    // The bucket columns of a distribution row: the nullable ones. Derived from
+    // the column type rather than spelled as `keyof Row & string`, which would
+    // also admit `personal`/`global`/the percentage columns — there the
+    // dropNull filter would silently become a no-op instead of failing to
+    // compile
+    const makeDistributionGetter = <Row extends { readonly personal: number; readonly global: number }, Data>(
       queryFn: (request: AnyChartArgs) => Effect.Effect<ReadonlyArray<Row>, never, never>,
-      decodeData: (chartData: readonly Row[]) => Effect.Effect<ReadonlyArray<Data>, DecodeError, never>,
-      bucketKey: keyof Row & string,
-      dropNullBucket: boolean
+      // Every decoder passed here is a module-scope `Schema.decodeEffect`, so its
+      // only failure mode is `SchemaError` — naming it here (rather than leaving
+      // it a free type parameter) is what lets `dieOnDbFailure` below stay a
+      // one-liner instead of carrying a tag table
+      decodeData: (chartData: readonly Row[]) => Effect.Effect<ReadonlyArray<Data>, Schema.SchemaError, never>,
+      bucket: { readonly key: BucketKey<Row>; readonly nullBucket: "dropNull" | "keepNull" }
     ) =>
       Effect.fnUntraced(function* (request: AnyChartArgs) {
         const rows = yield* queryFn(request);
@@ -74,12 +94,18 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
         }));
 
         // Decode against the strict schema, as recommended for final domain mapping
-        return yield* decodeData(dropNullBucket ? chartData.filter((row) => row[bucketKey] !== null) : chartData).pipe(dieOnDbFailure);
+        return yield* decodeData(bucket.nullBucket === "dropNull" ? chartData.filter((row) => row[bucket.key] !== null) : chartData).pipe(dieOnDbFailure);
       });
 
-    const getGuessDistribution = makeDistributionGetter(guessDistributionQueryFn, decodeGuessDistributionData, "turn", true);
-    const getTimeToSolveDistribution = makeDistributionGetter(timeToSolveDistributionQueryFn, decodeTimeToSolveDistributionData, "maxSeconds", false);
-    const getArcadeStreakDistribution = makeDistributionGetter(arcadeStreakDistributionQueryFn, decodeArcadeStreakDistributionData, "streak", false);
+    const getGuessDistribution = makeDistributionGetter(guessDistributionQueryFn, decodeGuessDistributionData, { key: "turn", nullBucket: "dropNull" });
+    const getTimeToSolveDistribution = makeDistributionGetter(timeToSolveDistributionQueryFn, decodeTimeToSolveDistributionData, {
+      key: "maxSeconds",
+      nullBucket: "keepNull",
+    });
+    const getArcadeStreakDistribution = makeDistributionGetter(arcadeStreakDistributionQueryFn, decodeArcadeStreakDistributionData, {
+      key: "streak",
+      nullBucket: "keepNull",
+    });
 
     // Simple passthroughs to query functions. Referencing the hoisted query
     // directly keeps this layer a thin boundary: the queries already carry the

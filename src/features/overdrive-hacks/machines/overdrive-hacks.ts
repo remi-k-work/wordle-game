@@ -1,8 +1,8 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
+import { Array, Effect, Option, Schema } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
-import { effectActor } from "@/domain/helpers";
+import { effectActor } from "@/lib/effect-actor";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
@@ -16,7 +16,14 @@ import { calculateSonarTarget } from "@/features/overdrive-hacks/domain/sonar";
 import { modalMachineAtom } from "@/state/modal";
 
 // types
-import type { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
+import type { OverdriveHackId, OverdriveHacks, SonarReveal } from "@/features/overdrive-hacks/domain/models";
+
+// A hack actor that cannot read its inputs fails with this instead of a bare
+// NoSuchElementError: the machine's onError branch logs it as a diagnosable
+// failure rather than an anonymous defect
+class HackInputUnavailable extends Schema.TaggedError<HackInputUnavailable, { readonly brand: unique symbol }>()("HackInputUnavailable", {
+  input: Schema.Literals(["theSecretWord", "keypad"]),
+}) {}
 
 interface ApplyEmpHackInput {
   empNukedLetters: OverdriveHacks["empNukedLetters"];
@@ -33,69 +40,82 @@ interface FetchOverrideAudioInput {
 // constants
 import { initialOverdriveHacks, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
+// The shared overdrive-hack purchase preamble: check affordability, produce the
+// hack's result, and charge the run score only when a result was produced.
+// Every hack runs through this one gate so the affordability check and the
+// charge cannot drift apart between the three actors
+const withHackPurchase = <A, E, R>(hackId: OverdriveHackId, produce: Effect.Effect<Option.Option<A>, E, R>) =>
+  Atom.get(overdriveHacksCanApplyHackAtom(hackId)).pipe(
+    Effect.flatMap((canApplyHack) => (canApplyHack ? produce : Effect.succeedNone)),
+    Effect.tap((result) =>
+      Option.isSome(result) ? Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(hackId) }) : Effect.void
+    )
+  );
+
+// One shared onError action for every hack: the hack id is the only difference
+// between the four branches below, so it is a factory argument rather than four
+// hand-written closures that can drift. The id stays inside the message (not a
+// structured field) so the log line a developer greps for does not change
+const logHackFailure =
+  (hackId: string) =>
+  ({ event }: { readonly event: { readonly error: unknown } }) => {
+    void runClientCommand(Effect.logError(`[OVERDRIVE HACK FAILED]: ${hackId}`, event.error));
+  };
+
 const applyEmpHackActor = effectActor(({ empNukedLetters }: ApplyEmpHackInput) =>
-  Effect.gen(function* () {
-    // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-    const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("emp"));
-    if (!canApplyHack) return Option.none();
+  withHackPurchase(
+    "emp",
+    Effect.gen(function* () {
+      const theSecretWord = yield* Effect.fromOption(
+        yield* Atom.get(wordChallengeTheSecretWordAtom),
+        () => new HackInputUnavailable({ input: "theSecretWord" })
+      );
+      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+      const keypad = yield* Effect.fromOption(yield* Atom.get(gameDataKeypadAtom), () => new HackInputUnavailable({ input: "keypad" }));
 
-    const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
-    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-    const keypad = yield* Effect.fromOption(yield* Atom.get(gameDataKeypadAtom));
-
-    const empTargets = yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
-
-    // Charge the player's run score for the hack, if applicable
-    if (Option.isSome(empTargets)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("emp") });
-
-    return empTargets;
-  })
+      return yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
+    })
+  )
 );
 
 const applySonarHackActor = effectActor(({ sonarReveals }: ApplySonarHackInput) =>
-  Effect.gen(function* () {
-    // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-    const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("sonar"));
-    if (!canApplyHack) return Option.none();
+  withHackPurchase(
+    "sonar",
+    Effect.gen(function* () {
+      const theSecretWord = yield* Effect.fromOption(
+        yield* Atom.get(wordChallengeTheSecretWordAtom),
+        () => new HackInputUnavailable({ input: "theSecretWord" })
+      );
+      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-    const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
-    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-
-    const sonarTarget = yield* calculateSonarTarget(
-      theSecretWord,
-      wordleGuesses,
-      VOWELS_BY_LANGUAGE[solutionsLanguage],
-      sonarReveals.map((reveal) => reveal.vowel)
-    );
-
-    // Charge the player's run score for the hack, if applicable
-    if (Option.isSome(sonarTarget)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("sonar") });
-
-    return sonarTarget;
-  })
+      return yield* calculateSonarTarget(
+        theSecretWord,
+        wordleGuesses,
+        VOWELS_BY_LANGUAGE[solutionsLanguage],
+        sonarReveals.map((reveal) => reveal.vowel)
+      );
+    })
+  )
 );
 
 const applyOverrideHackActor = effectActor(() =>
-  Effect.gen(function* () {
-    // Determines whether a specific overdrive hack can be used (the player must be able to afford it and the game must be running)
-    const canApplyHack = yield* Atom.get(overdriveHacksCanApplyHackAtom("override"));
-    if (!canApplyHack) return Option.none();
+  withHackPurchase(
+    "override",
+    Effect.gen(function* () {
+      const theSecretWord = yield* Effect.fromOption(
+        yield* Atom.get(wordChallengeTheSecretWordAtom),
+        () => new HackInputUnavailable({ input: "theSecretWord" })
+      );
+      const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
+      const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
+      const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-    const theSecretWord = yield* Effect.fromOption(yield* Atom.get(wordChallengeTheSecretWordAtom));
-    const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
-    const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
-    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-
-    const { fetchOverride } = yield* RpcOverdriveHacksClient;
-    const theOverride = yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
-
-    // Charge the player's run score for the hack, if applicable
-    if (Option.isSome(theOverride)) yield* Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST("override") });
-
-    return theOverride;
-  })
+      const { fetchOverride } = yield* RpcOverdriveHacksClient;
+      return yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
+    })
+  )
 );
 
 const fetchOverrideAudioActor = effectActor(({ theOverride }: FetchOverrideAudioInput) =>
@@ -118,7 +138,21 @@ export const overdriveHacksMachine = setup({
       | { readonly type: "puzzle.started" }
       | { readonly type: "puzzle.ended" }
       | { readonly type: "input.keyPressed"; readonly pressedKey: string }
-      | { readonly type: "hack.useRequested"; readonly overdriveHackId: OverdriveHackId };
+      | { readonly type: "hack.useRequested"; readonly overdriveHackId: OverdriveHackId }
+      // The invoked actors' done events, declared so onDone can read `event.output`
+      // through assertEvent — the hand-annotated `params` they replace needed a
+      // type-suppression comment per action, which silently disabled every type
+      // error on the statement
+      | { readonly type: "xstate.done.actor.applyEmpHackActor"; readonly output: Option.Option<OverdriveHacks["empNukedLetters"]> }
+      | { readonly type: "xstate.done.actor.applySonarHackActor"; readonly output: Option.Option<SonarReveal> }
+      | { readonly type: "xstate.done.actor.applyOverrideHackActor"; readonly output: OverdriveHacks["theOverride"] }
+      | { readonly type: "xstate.done.actor.fetchOverrideAudioActor"; readonly output: OverdriveHacks["theOverrideAudio"] }
+      // The invoked actors' error events, declared so onError can log the failure
+      // (see the onError branches below) instead of discarding it silently
+      | { readonly type: "xstate.error.actor.applyEmpHackActor"; readonly error: unknown }
+      | { readonly type: "xstate.error.actor.applySonarHackActor"; readonly error: unknown }
+      | { readonly type: "xstate.error.actor.applyOverrideHackActor"; readonly error: unknown }
+      | { readonly type: "xstate.error.actor.fetchOverrideAudioActor"; readonly error: unknown };
   },
   guards: {
     isEmpHackRequested: ({ event }) => {
@@ -135,40 +169,42 @@ export const overdriveHacksMachine = setup({
     },
   },
   actions: {
-    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
-    applyEmpHack: assign(
-      ({ context }, params: { readonly empNukedLetters: OverdriveHacks["empNukedLetters"] }) =>
-        ({ ...context, empNukedLetters: [...context.empNukedLetters, ...params.empNukedLetters] }) as const satisfies OverdriveHacks
-    ),
+    applyEmpHack: assign(({ context, event }) => {
+      assertEvent(event, "xstate.done.actor.applyEmpHackActor");
+      // `getOrElse(() => [])`, not `Option.toArray`: this actor's Option already
+      // wraps the nuked-letter array, so `toArray` would nest it one level deeper
+      // (see `applySonarHack` below, whose Option wraps a single reveal)
+      const empNukedLetters = event.output.pipe(Option.getOrElse(() => []));
+      return { ...context, empNukedLetters: [...context.empNukedLetters, ...empNukedLetters] } satisfies OverdriveHacks;
+    }),
 
-    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
-    applySonarHack: assign(
-      ({ context }, params: { readonly sonarReveals: OverdriveHacks["sonarReveals"] }) =>
-        ({ ...context, sonarReveals: [...context.sonarReveals, ...params.sonarReveals] }) as const satisfies OverdriveHacks
-    ),
+    applySonarHack: assign(({ context, event }) => {
+      assertEvent(event, "xstate.done.actor.applySonarHackActor");
+      const sonarReveals = event.output.pipe(Option.toArray);
+      return { ...context, sonarReveals: [...context.sonarReveals, ...sonarReveals] } satisfies OverdriveHacks;
+    }),
 
-    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
-    applyOverrideHack: assign(
-      ({ context }, params: { readonly theOverride: OverdriveHacks["theOverride"] }) =>
-        ({ ...context, theOverride: params.theOverride }) as const satisfies OverdriveHacks
-    ),
+    applyOverrideHack: assign(({ context, event }) => {
+      assertEvent(event, "xstate.done.actor.applyOverrideHackActor");
+      return { ...context, theOverride: event.output } satisfies OverdriveHacks;
+    }),
 
     onOverrideHackApplied: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
 
-    // @ts-expect-error XState cannot infer actor-output `params` type due to circular module dependency; runtime types are correct
-    saveOverrideAudio: assign(
-      ({ context }, params: { readonly theOverrideAudio: OverdriveHacks["theOverrideAudio"] }) =>
-        ({ ...context, theOverrideAudio: params.theOverrideAudio }) as const satisfies OverdriveHacks
-    ),
+    saveOverrideAudio: assign(({ context, event }) => {
+      assertEvent(event, "xstate.done.actor.fetchOverrideAudioActor");
+      return { ...context, theOverrideAudio: event.output } satisfies OverdriveHacks;
+    }),
 
     // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
     forwardKeyPress: ({ context, event }) => {
       assertEvent(event, "input.keyPressed");
       const normalizedKey = event.pressedKey.toUpperCase();
-      // The nuked list is empty for nearly every keystroke, so skip the scan then
-      // (js-length-check-first; word-challenge's greyLetters keeps a HashSet for the
-      // same reason, but this list holds at most a handful of letters per run)
-      if (context.empNukedLetters.length > 0 && context.empNukedLetters.includes(normalizedKey)) return;
+      // A linear membership test over the handful of nuked letters (the same
+      // `Array.contains` spelling validators.canSubmitGuess uses for the guess
+      // history); word-challenge's greyLetters keeps a HashSet because the same
+      // per-keypress lookup there runs over a far larger key set
+      if (Array.contains(context.empNukedLetters, normalizedKey)) return;
 
       void runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
     },
@@ -211,14 +247,13 @@ export const overdriveHacksMachine = setup({
       invoke: {
         src: "applyEmpHackActor",
         input: ({ context }) => ({ empNukedLetters: context.empNukedLetters }),
-        onDone: {
-          target: "active",
-          // `getOrElse(() => [])`, not `Option.toArray`: this actor's Option already
-          // wraps the nuked-letter array, so `toArray` would nest it one level deeper
-          // (see `applyingSonarHack` below, whose Option wraps a single reveal)
-          actions: { type: "applyEmpHack", params: ({ event }) => ({ empNukedLetters: event.output.pipe(Option.getOrElse(() => [])) }) },
-        },
-        onError: { target: "active" },
+        onDone: { target: "active", actions: "applyEmpHack" },
+
+        // The hack failed (missing inputs, a rejected RPC): the machine returns
+        // to `active` — the player can retry or play on — but the failure is
+        // logged through the client runtime instead of dying silently with the
+        // actor
+        onError: { target: "active", actions: logHackFailure("emp") },
       },
     },
 
@@ -228,11 +263,8 @@ export const overdriveHacksMachine = setup({
       invoke: {
         src: "applySonarHackActor",
         input: ({ context }) => ({ sonarReveals: context.sonarReveals }),
-        onDone: {
-          target: "active",
-          actions: { type: "applySonarHack", params: ({ event }) => ({ sonarReveals: event.output.pipe(Option.toArray) }) },
-        },
-        onError: { target: "active" },
+        onDone: { target: "active", actions: "applySonarHack" },
+        onError: { target: "active", actions: logHackFailure("sonar") },
       },
     },
 
@@ -241,11 +273,10 @@ export const overdriveHacksMachine = setup({
 
       invoke: {
         src: "applyOverrideHackActor",
-        onDone: {
-          target: "fetchingOverrideAudio",
-          actions: [{ type: "applyOverrideHack", params: ({ event }) => ({ theOverride: event.output }) }, "onOverrideHackApplied"],
-        },
-        onError: { target: "active", actions: "onOverrideHackApplied" },
+        onDone: { target: "fetchingOverrideAudio", actions: ["applyOverrideHack", "onOverrideHackApplied"] },
+        // A failed override still opens the modal, which has its own
+        // "unavailable" state — the failure is logged like every other hack
+        onError: { target: "active", actions: ["onOverrideHackApplied", logHackFailure("override")] },
       },
     },
 
@@ -256,10 +287,10 @@ export const overdriveHacksMachine = setup({
         src: "fetchOverrideAudioActor",
 
         input: ({ context }) => ({ theOverride: context.theOverride }),
-        onDone: { target: "active", actions: { type: "saveOverrideAudio", params: ({ event }) => ({ theOverrideAudio: event.output }) } },
+        onDone: { target: "active", actions: "saveOverrideAudio" },
 
-        // Metadata loading is non-critical; even if the actor itself fails unexpectedly, the game remains playable
-        onError: "active",
+        // Audio is a non-critical enrichment; even if the actor itself fails unexpectedly, the game remains playable
+        onError: { target: "active", actions: logHackFailure("override audio") },
       },
     },
   },

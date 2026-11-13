@@ -4,6 +4,8 @@ import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "
 
 // types
 export type BrowseCharts = typeof BrowseCharts.Type;
+export type BucketAlias = "turn" | "max_seconds" | "streak";
+export type RowCodec = Schema.ConstraintCodec<any>;
 
 // constants
 import { MAX_TURNS } from "@/features/game/domain/constants";
@@ -27,8 +29,8 @@ export class AnyAvgStatArgs extends AnyChartArgs.extend<AnyAvgStatArgs>("AnyAvgS
 }) {}
 
 export class AnyCounterData extends Schema.Class<AnyCounterData, { readonly brand: unique symbol }>("AnyCounterData")({
-  personal: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  global: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  personal: Schema.Natural,
+  global: Schema.Natural,
 }) {}
 
 // Shared 0-100 percentage fields every distribution chart carries. Optional:
@@ -44,13 +46,13 @@ export class GuessDistributionData extends AnyCounterData.extend<GuessDistributi
 }) {}
 
 export class TimeToSolveDistributionData extends AnyCounterData.extend<TimeToSolveDistributionData>("TimeToSolveDistributionData")({
-  maxSeconds: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
+  maxSeconds: Schema.NullOr(Schema.Natural),
   personalPct: Pct,
   globalPct: Pct,
 }) {}
 
 export class ArcadeStreakDistributionData extends AnyCounterData.extend<ArcadeStreakDistributionData>("ArcadeStreakDistributionData")({
-  streak: Schema.NullOr(Schema.Int.check(Schema.isGreaterThanOrEqualTo(0))),
+  streak: Schema.NullOr(Schema.Natural),
   personalPct: Pct,
   globalPct: Pct,
 }) {}
@@ -69,9 +71,9 @@ export class RunDeathReasonFrequencyData extends AnyCounterData.extend<RunDeathR
 
 export class HardestWordsLeaderboardData extends Schema.Class<HardestWordsLeaderboardData, { readonly brand: unique symbol }>("HardestWordsLeaderboardData")({
   word: TheSecretWord,
-  personalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  personalAvgTimeSeconds: Schema.Natural,
   personalAvgGuesses: Schema.FiniteFromString.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS })),
-  globalAvgTimeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  globalAvgTimeSeconds: Schema.Natural,
   globalAvgGuesses: Schema.FiniteFromString.check(Schema.isBetween({ minimum: 0, maximum: MAX_TURNS })),
 }) {}
 
@@ -82,9 +84,9 @@ export class BestRunTrophyCardArgs extends AnyChartArgs.extend<BestRunTrophyCard
 export class BestRunTrophyCardData extends Schema.Class<BestRunTrophyCardData, { readonly brand: unique symbol }>("BestRunTrophyCardData")({
   deathReason: RunDeathReason,
   failedOnWord: FailedOnWord,
-  finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  finalScore: Schema.Natural,
+  finalStreak: Schema.Natural,
+  durationSeconds: Schema.Natural,
   // The pg client (v4 stable) decodes `timestamptz` columns as JS `Date`
   // instances (it decoded epoch millis in the v4 beta), so the DB boundary
   // schema must accept `Date` and turn it into a `DateTime.Utc`

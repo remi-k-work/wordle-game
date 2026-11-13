@@ -1,7 +1,8 @@
 // services, features, and other libraries
-import { Cause, Effect, Layer, Logger, ManagedRuntime } from "effect";
+import { Effect, Layer, Logger, ManagedRuntime } from "effect";
 import { Atom, AtomRegistry, Reactivity } from "effect/reactivity";
 import { BrowserCrypto, BrowserKeyValueStore } from "@effect/platform-browser";
+import { degradeCause } from "@/domain/helpers";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -50,19 +51,10 @@ export type ClientRuntimeServices = Layer.Success<typeof MainLayer>;
 
 // Runs an Effect from a fire-and-forget XState command action. Failures are logged
 // but never reject, so unhandled Promise rejections cannot escape the synchronous
-// XState action contract. `tapCause` (not `tapError`) logs first so nothing is
-// silently swallowed, and a pure interruption is excluded from the recovery — the
-// same cause-based shape as `degradeToNone` in @/domain/helpers.server — so a
-// cancelled command still cancels instead of resolving as success
+// XState action contract. The shared `degradeCause` policy (in @/domain/helpers)
+// logs every real failure first — nothing silently swallowed — and leaves a pure
+// interruption both unlogged and propagating, so a cancelled command still
+// cancels instead of resolving as success. Sharing the policy is what keeps this
+// and the RPC handler recovery (`degradeToNone`) in sync
 export const runClientCommand = <A, E>(effect: Effect.Effect<A, E, ClientRuntimeServices>): Promise<void> =>
-  RuntimeClient.runPromise(
-    effect.pipe(
-      Effect.asVoid,
-      Effect.tapCause(Effect.logError),
-      Effect.catchCauseIf(
-        (cause) => !Cause.hasInterruptsOnly(cause),
-        () => Effect.void
-      ),
-      Effect.orDie
-    )
-  );
+  RuntimeClient.runPromise(degradeCause(Effect.asVoid(effect), Effect.void));

@@ -57,12 +57,24 @@ export function Voice() {
       }));
   }, [speechVoices, targetLangPrefix, gt]);
 
+  // A voice stored while the other solutions language was active is not among
+  // this language's candidates, and Base UI renders a value with no matching
+  // item as its raw string — a stale English voice name inside the Polish
+  // selector. Clamping the selection to the current list shows the placeholder
+  // instead. The stored name is deliberately left untouched: `useSpeakText`
+  // resolves it against the live voice list, where a name that no longer
+  // exists simply falls through the language-based chain
+  const selectedValue = useMemo(
+    () => (selectedVoice !== null && voices.some(({ value }) => value === selectedVoice) ? selectedVoice : null),
+    [selectedVoice, voices]
+  );
+
   return (
     <section>
       <Select.Root
         name="voiceVoice"
         items={voices}
-        value={selectedVoice}
+        value={selectedValue}
         onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}
       >
         <VoiceLabel />

@@ -1,6 +1,7 @@
 // services, features, and other libraries
-import { Cause, Duration, Effect, Option, Schema } from "effect";
+import { Cause, Duration, Effect, ExecutionPlan, Option, Schedule, Schema } from "effect";
 import { LanguageModel, Model, Prompt } from "effect/ai";
+import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
 
 // types
@@ -10,6 +11,27 @@ export type GeneratedRiddle = {
   readonly modelName: string;
   readonly riddle: string;
 };
+
+// The bilingual proof matrix every model-level proof runs: one English and one
+// Polish case, so a regression in either language's prompt is visible. Shared so
+// the proofs cannot silently test different words than each other
+export const PROOF_TEST_CASES = [
+  { theSecretWord: "MIRROR", solutionsLanguage: "En" },
+  { theSecretWord: "LUSTRO", solutionsLanguage: "Pl" },
+] as const satisfies ReadonlyArray<{
+  readonly theSecretWord: string;
+  readonly solutionsLanguage: SolutionsLanguage;
+}>;
+
+// One proof step: the model to try, a single attempt, and a bounded retry.
+// Shared by the proof scripts so they exercise every provider with one retry
+// policy instead of each hand-rolling (and drifting from) its own
+export const planFor = (id: string, config: typeof OpenAiLanguageModel.Config.Service) =>
+  ExecutionPlan.make({
+    provide: OpenAiLanguageModel.model(id, config),
+    attempts: 1,
+    schedule: Schedule.exponential("1 second", 2),
+  });
 
 // Mirrors the production single-field generation flow (same prompt and schema
 // construction, driven by the shared `riddleGenerationOptions`) while also

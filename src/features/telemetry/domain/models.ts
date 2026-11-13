@@ -21,9 +21,9 @@ export class AddArcadeRunSummary extends Schema.Class<AddArcadeRunSummary, { rea
   solutionsLanguage: SolutionsLanguage,
   deathReason: RunDeathReason,
   failedOnWord: FailedOnWord,
-  finalScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  finalStreak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  durationSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  finalScore: Schema.Natural,
+  finalStreak: Schema.Natural,
+  durationSeconds: Schema.Natural,
 }) {}
 
 export class AddRunWordEvent extends Schema.Class<AddRunWordEvent, { readonly brand: unique symbol }>("AddRunWordEvent")({
@@ -31,5 +31,5 @@ export class AddRunWordEvent extends Schema.Class<AddRunWordEvent, { readonly br
   solutionsLanguage: SolutionsLanguage,
   theSecretWord: TheSecretWord,
   guessedTurn: Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: MAX_TURNS })),
-  timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  timeSeconds: Schema.Natural,
 }) {}

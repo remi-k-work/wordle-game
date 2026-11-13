@@ -10,8 +10,8 @@ export type HighScoreMachineContext = typeof HighScoreMachineContext.Type;
 export class HighScore extends Schema.Class<HighScore, { readonly brand: unique symbol }>("HighScore")({
   id: Schema.Int.check(Schema.isGreaterThan(0)),
   playerName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(3))),
-  score: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  streak: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  score: Schema.Natural,
+  streak: Schema.Natural,
   solutionsLang: SolutionsLanguage,
   // The pg client (v4 stable) decodes `timestamptz` columns as JS `Date`
   // instances (it decoded epoch millis in the v4 beta), so the DB boundary

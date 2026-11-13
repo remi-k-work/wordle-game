@@ -1,6 +1,9 @@
 // services, features, and other libraries
 import { Metric } from "effect";
 
+// types
+export type MetricName = keyof typeof metrics;
+
 // --- Histograms (Distributions) ---
 
 const guessesToWin = Metric.histogram("guessesToWin", {

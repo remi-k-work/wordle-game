@@ -4,7 +4,7 @@ import { AnyChartArgs, RunDeathReasonFrequencyData } from "@/features/charts/dom
 import { dieOnDbFailure } from "@/domain/helpers";
 
 // types
-import type { MetricName } from "@/features/charts/domain/constants";
+import type { MetricName } from "@/features/telemetry/domain/metrics";
 
 // Pinned to the telemetry registry's key so a metric rename surfaces here as a
 // compile error rather than as a chart that quietly stops returning rows

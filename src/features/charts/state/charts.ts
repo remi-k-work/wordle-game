@@ -33,7 +33,7 @@ export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: Solut
   chartAtom((client, sessionId) =>
     client.getTimeToSolveDistribution({ sessionId, solutionsLanguage }).pipe(
       // A non-empty `maxSeconds` is a rounding artifact of the bucket boundary
-      // oxlint-disable-next-line typescript/no-misused-spread -- spreading a decoded Schema.Class row is safe: decoding yields a plain object
+      // oxlint-disable-next-line typescript/no-misused-spread -- spreading a decoded Schema.Class row deliberately drops its prototype: the rows feed recharts as plain data objects, and no consumer calls a class method on them
       Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) })))
     )
   )
@@ -41,10 +41,12 @@ export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: Solut
 
 export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
-    client
-      .getArcadeStreakDistribution({ sessionId, solutionsLanguage })
-      // oxlint-disable-next-line typescript/no-misused-spread -- spreading a decoded Schema.Class row is safe: decoding yields a plain object
-      .pipe(Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) }))))
+    client.getArcadeStreakDistribution({ sessionId, solutionsLanguage }).pipe(
+      // Same deliberate prototype drop as timeToSolveDistribution above: the
+      // rows are recharts data, not class instances anyone calls methods on
+      // oxlint-disable-next-line typescript/no-misused-spread
+      Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) })))
+    )
   )
 );
 

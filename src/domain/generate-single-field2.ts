@@ -32,7 +32,14 @@ export const generateSingleField2 = Effect.fn("generateSingleField2")(
     return yield* languageModel.generateObject({ prompt, schema }).pipe(
       // Normalize for TTS and keep only non-empty output (an empty riddle is no riddle)
       Effect.map(({ value }) => Option.liftPredicate(formatTextForTTS(value[fieldName]), String.isNonEmpty)),
-      Effect.tapCause((cause) => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(cause)}`))
+      // A pure interruption (the request was cancelled) is normal lifecycle, not
+      // an unsuccessful attempt: logging it would report every cancellation as a
+      // model failure, on top of the error the shared `degradeCause` recovery
+      // policy in domain/helpers deliberately never emits for one
+      Effect.tapCauseIf(
+        (cause) => !Cause.hasInterruptsOnly(cause),
+        (cause) => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(cause)}`)
+      )
     );
   },
   Effect.withExecutionPlan(makeFallbackPlan2),

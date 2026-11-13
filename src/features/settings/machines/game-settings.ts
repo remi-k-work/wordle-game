@@ -1,4 +1,5 @@
 // services, features, and other libraries
+import { Number } from "effect";
 import { Atom } from "effect/reactivity";
 import { runClientCommand } from "@/lib/runtime-client";
 import { setup, assign, assertEvent } from "xstate";
@@ -7,6 +8,9 @@ import { otherSolutionsLanguage } from "@/features/game/domain/helpers";
 
 // types
 import type { GameSettings } from "@/features/settings/domain/models";
+
+// constants
+import { VOICE_PITCH_RANGE, VOICE_RATE_RANGE, VOICE_VOLUME_RANGE } from "@/features/settings/domain/constants";
 
 export const gameSettingsMachine = setup({
   types: {} as {
@@ -26,7 +30,11 @@ export const gameSettingsMachine = setup({
       solutionsLanguage: ({ context }) => otherSolutionsLanguage(context.solutionsLanguage),
     }),
 
-    // The voice related settings
+    // The voice related settings. Each slider event is clamped to the range its
+    // schema enforces before entering context: the persisted schema rejects
+    // out-of-range values, and `Atom.kvs` surfaces that rejection on an atom
+    // nobody observes — the value would be shown but never stored. The ranges
+    // come from the domain models so the schema and the reducer cannot drift
     changeVoiceVoice: assign({
       voiceVoice: ({ event }) => {
         assertEvent(event, "voiceVoiceChanged");
@@ -36,19 +44,19 @@ export const gameSettingsMachine = setup({
     changeVoiceVolume: assign({
       voiceVolume: ({ event }) => {
         assertEvent(event, "voiceVolumeChanged");
-        return event.voiceVolume;
+        return Number.clamp(VOICE_VOLUME_RANGE)(event.voiceVolume);
       },
     }),
     changeVoiceRate: assign({
       voiceRate: ({ event }) => {
         assertEvent(event, "voiceRateChanged");
-        return event.voiceRate;
+        return Number.clamp(VOICE_RATE_RANGE)(event.voiceRate);
       },
     }),
     changeVoicePitch: assign({
       voicePitch: ({ event }) => {
         assertEvent(event, "voicePitchChanged");
-        return event.voicePitch;
+        return Number.clamp(VOICE_PITCH_RANGE)(event.voicePitch);
       },
     }),
 

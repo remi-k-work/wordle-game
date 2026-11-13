@@ -1,55 +1,16 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Option, Schema } from "effect";
 import { SqlClient } from "effect/sql";
-import { PgContainer, runDdlStatements } from "./_pg-container";
+import { PgContainer } from "./_pg-container";
+import { EN_SESSION, SESSION_A, SESSION_B, seedRunTables, type RunSummaryRow } from "./_pg-fixtures";
 import { BestRunTrophyCardArgs } from "@/features/charts/domain/models";
 import { bestRunTrophyCardQuery } from "@/features/charts/queries/best-run-trophy-card";
-
-// Minimal slice of init-telemetry.sql — only the arcade_run_summary table, since the
-// best-run-trophy-card query touches nothing else. Mirrors production DDL.
-const ARCADE_RUN_SUMMARY_DDL = `
-DROP TABLE IF EXISTS arcade_run_summary;
-CREATE TABLE arcade_run_summary (
-  run_id UUID PRIMARY KEY,
-  session_id UUID NOT NULL,
-  solutions_language VARCHAR(2) NOT NULL
-    CONSTRAINT arcade_run_summary_solutions_language_check
-    CHECK (solutions_language IN ('En', 'Pl')),
-  death_reason VARCHAR(10) NOT NULL
-    CONSTRAINT arcade_run_summary_death_reason_check
-    CHECK (death_reason IN ('Forfeit', 'Guesses')),
-  failed_on_word VARCHAR(5) NOT NULL,
-  final_score INT NOT NULL
-    CONSTRAINT arcade_run_summary_score_check
-    CHECK (final_score >= 0),
-  final_streak INT NOT NULL
-    CONSTRAINT arcade_run_summary_streak_check
-    CHECK (final_streak >= 0),
-  duration_seconds INT NOT NULL
-    CONSTRAINT arcade_run_summary_duration_check
-    CHECK (duration_seconds >= 0),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-`;
-
-const SESSION_A = "829087ad-9e88-46f9-9f45-174c3bc9e046";
-const SESSION_B = "044a83ea-9fa8-415a-8186-28baaf86657d";
-const EN_SESSION = "80633be7-9d66-4d70-935e-fb031eeb3628";
 
 // Three runs:
 // - SESSION_A (Pl): score 500, streak 3, Forfeit, failedOnWord "N/A" (personal best)
 // - SESSION_B (Pl): score 800, streak 5, Guesses, failedOnWord "WORDS" (global best)
 // - EN_SESSION (En): score 1000, streak 10, Guesses, failedOnWord "WORDS" (must be language-filtered)
-const FIXTURE_ROWS: Array<{
-  runId: string;
-  sessionId: string;
-  language: "Pl" | "En";
-  deathReason: "Forfeit" | "Guesses";
-  failedOnWord: string;
-  finalScore: number;
-  finalStreak: number;
-  durationSeconds: number;
-}> = [
+const FIXTURE_ROWS: ReadonlyArray<RunSummaryRow> = [
   {
     runId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
     sessionId: SESSION_A,
@@ -82,16 +43,7 @@ const FIXTURE_ROWS: Array<{
   },
 ];
 
-const seedFixture = Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
-  yield* runDdlStatements(ARCADE_RUN_SUMMARY_DDL);
-  for (const row of FIXTURE_ROWS) {
-    yield* sql`
-      INSERT INTO arcade_run_summary (run_id, session_id, solutions_language, death_reason, failed_on_word, final_score, final_streak, duration_seconds)
-      VALUES (${row.runId}, ${row.sessionId}, ${row.language}, ${row.deathReason}, ${row.failedOnWord}, ${row.finalScore}, ${row.finalStreak}, ${row.durationSeconds})
-    `;
-  }
-});
+const seedFixture = seedRunTables(FIXTURE_ROWS, []);
 
 const makeRequest = (sessionId: string, whichBestRun: "personal" | "global"): BestRunTrophyCardArgs =>
   Schema.decodeSync(BestRunTrophyCardArgs)({ sessionId, solutionsLanguage: "Pl", whichBestRun });
@@ -109,13 +61,13 @@ describe("best-run-trophy-card e2e", () => {
 
         // Session A has one run (score 500). Session B has higher score (800) but is a different session.
         // The EN row is excluded by language filter.
-        expect(Option.isSome(result)).toBe(true);
-        if (Option.isSome(result)) {
-          expect(result.value.finalScore).toBe(500);
-          expect(result.value.finalStreak).toBe(3);
-          expect(result.value.deathReason).toBe("Forfeit");
-          expect(result.value.failedOnWord).toBe("N/A");
-        }
+        // `getOrThrow` over the `isSome` guard + nested assertions: the earlier
+        // shape asserted twice and then re-read the unwrapped value by hand
+        const bestRun = Option.getOrThrow(result);
+        expect(bestRun.finalScore).toBe(500);
+        expect(bestRun.finalStreak).toBe(3);
+        expect(bestRun.deathReason).toBe("Forfeit");
+        expect(bestRun.failedOnWord).toBe("N/A");
       })
     );
 
@@ -128,13 +80,11 @@ describe("best-run-trophy-card e2e", () => {
 
         // Global mode considers all Pl sessions; Session B has score 800 > Session A's 500.
         // The EN row (score 1000) is excluded by language filter.
-        expect(Option.isSome(result)).toBe(true);
-        if (Option.isSome(result)) {
-          expect(result.value.finalScore).toBe(800);
-          expect(result.value.finalStreak).toBe(5);
-          expect(result.value.deathReason).toBe("Guesses");
-          expect(result.value.failedOnWord).toBe("WORDS");
-        }
+        const bestRun = Option.getOrThrow(result);
+        expect(bestRun.finalScore).toBe(800);
+        expect(bestRun.finalStreak).toBe(5);
+        expect(bestRun.deathReason).toBe("Guesses");
+        expect(bestRun.failedOnWord).toBe("WORDS");
       })
     );
 

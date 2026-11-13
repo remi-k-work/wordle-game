@@ -1,46 +1,17 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Effect, Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 import { SqlClient } from "effect/sql";
-import { PgContainer, runDdlStatements } from "./_pg-container";
-import { AnyChartArgs, GuessDistributionData } from "@/features/charts/domain/models";
-import { cumulativeToDistribution } from "@/features/charts/domain/helpers";
+import { ChartsDB } from "@/features/charts/services/charts-db";
+import { AnyChartArgs } from "@/features/charts/domain/models";
 import { guessDistributionQuery } from "@/features/charts/queries/guess-distribution";
-
-// Minimal slice of init-telemetry.sql — only the global_pulse table, since the
-// guess-distribution query touches nothing else. Mirrors production DDL.
-const GLOBAL_PULSE_DDL = `
-DROP TABLE IF EXISTS global_pulse;
-CREATE TABLE global_pulse (
-  session_id UUID NOT NULL,
-  instance_id UUID NOT NULL,
-  solutions_language VARCHAR(2) NOT NULL
-    CONSTRAINT global_pulse_solutions_language_check
-    CHECK (solutions_language IN ('En', 'Pl')),
-  metric_name VARCHAR(50) NOT NULL,
-  metric_payload JSONB NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (session_id, instance_id, solutions_language, metric_name)
-);
-`;
-
-const SESSION_A = "829087ad-9e88-46f9-9f45-174c3bc9e046";
-const SESSION_B = "044a83ea-9fa8-415a-8186-28baaf86657d";
-const INSTANCE_A1 = "9808cf3c-8d89-499d-b4a6-1246a068dae4";
-const INSTANCE_B1 = "89925de3-c13b-4f8a-9a03-5a89c67f9418";
-const EN_SESSION = "80633be7-9d66-4d70-935e-fb031eeb3628";
-const EN_INSTANCE = "3f76a487-99df-41d2-8ae7-6fb58d87d488";
+import { PgContainer } from "./_pg-container";
+import { EN_INSTANCE, EN_SESSION, INSTANCE_A1, INSTANCE_B1, SESSION_A, SESSION_B, seedGlobalPulse, type GlobalPulseRow } from "./_pg-fixtures";
 
 // Two Pl sessions (A = personal, B = other player) + one En row that must be
 // filtered out by solutions_language = 'Pl'. Each payload is the full producer
 // shape (max/min/sum/count/buckets) — the query reads metric_payload->'buckets'.
 // Each bucket array is cumulative within its own metric pulse (D1).
-const FIXTURE_ROWS: Array<{
-  sessionId: string;
-  instanceId: string;
-  language: "Pl" | "En";
-  metric: "guessesToWin";
-  payload: string;
-}> = [
+const FIXTURE_ROWS: ReadonlyArray<GlobalPulseRow> = [
   {
     sessionId: SESSION_A,
     instanceId: INSTANCE_A1,
@@ -64,29 +35,21 @@ const FIXTURE_ROWS: Array<{
   },
 ];
 
-const seedFixture = Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
-  // runDdlStatements — the native pg client rejects multi-statement prepared
-  // statements, so DROP + CREATE runs statement-by-statement.
-  yield* runDdlStatements(GLOBAL_PULSE_DDL);
-  for (const row of FIXTURE_ROWS) {
-    yield* sql`
-      INSERT INTO global_pulse (session_id, instance_id, solutions_language, metric_name, metric_payload)
-      VALUES (${row.sessionId}, ${row.instanceId}, ${row.language}, ${row.metric}, ${row.payload}::jsonb)
-    `;
-  }
-});
+const seedFixture = seedGlobalPulse(FIXTURE_ROWS);
 
 // SqlSchema validates the Request via Schema — a plain object fails the
 // class's encode step, so build the request through the schema first.
 const makeRequest = (sessionId: string): AnyChartArgs => Schema.decodeSync(AnyChartArgs)({ sessionId, solutionsLanguage: "Pl" });
 
-// Build the same layer the production service uses, but backed by the test
-// container instead of PgLive. guessDistributionQuery only needs SqlClient.
-const TestLayer = PgContainer.ClientLive;
+// The same service graph the production RPC handler builds (ChartsDB over
+// SqlClient), only with the driver swapped for the test container. Providing
+// ChartsDB here is what lets the last test drive the real pipeline — the
+// dropNull filter, the strict array decode and the `dieOnDbFailure`
+// escalation — instead of re-implementing it inline
+const ChartsDBLive = ChartsDB.layer.pipe(Layer.provideMerge(PgContainer.ClientLive));
 
 describe("guess-distribution e2e", () => {
-  it.layer(TestLayer, { timeout: "120 seconds" })("A3 sentinel pattern", (it) => {
+  it.layer(ChartsDBLive, { timeout: "120 seconds" })("A3 sentinel pattern", (it) => {
     it.effect("survives the trailing NULL bucket (A3) after the schema widening", () =>
       Effect.gen(function* () {
         const sql = yield* SqlClient.SqlClient;
@@ -125,26 +88,18 @@ describe("guess-distribution e2e", () => {
       })
     );
 
-    it.effect("end-to-end cumulativeToDistribution derives correct percentages and hides the NULL row", () =>
+    // The service-level view of the same data: `cumulativeToDistribution` runs
+    // against the trailing row as the percentage denominator, the NULL row is
+    // dropped because guesses-per-win has a closed 1..MAX_TURNS range, and the
+    // result is decoded against the strict schema
+    it.effect("through ChartsDB derives discrete percentages and drops the NULL row", () =>
       Effect.gen(function* () {
-        const sql = yield* SqlClient.SqlClient;
+        const chartsDB = yield* ChartsDB;
         yield* seedFixture;
 
-        const rows = yield* guessDistributionQuery(sql)(makeRequest(SESSION_A));
+        const decoded = yield* chartsDB.getGuessDistribution(makeRequest(SESSION_A));
 
-        // Mirror charts-db.ts getGuessDistribution: derive percentages against
-        // the trailing row, then filter out the NULL row before strict decode.
-        const chartData = cumulativeToDistribution(rows, (row, personal, global, personalPct, globalPct) => ({
-          turn: row.turn,
-          personal,
-          global,
-          personalPct,
-          globalPct,
-        })).filter((row) => row.turn !== null);
-
-        const decoded = yield* Schema.decodeEffect(Schema.Array(GuessDistributionData))(chartData).pipe(Effect.orDie);
-
-        // NULL row hidden — only 6 turn rows reach the UI.
+        // NULL row hidden by the DB layer — only 6 turn rows reach the UI.
         expect(decoded.length).toBe(6);
         expect(decoded.map((r) => r.turn)).toEqual([1, 2, 3, 4, 5, 6]);
 

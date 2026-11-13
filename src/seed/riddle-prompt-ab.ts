@@ -1,10 +1,9 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Effect, ExecutionPlan, Option, Schedule, Schema } from "effect";
-import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
+import { Effect, Option, Record, Schema } from "effect";
 import { AiClientsWithHttp } from "@/domain/fallback-plan2";
-import { generateRiddle, runCase } from "./riddle-proof";
+import { planFor, runCase, generateRiddle } from "./riddle-proof";
 import { runSeed } from "./runtime";
 
 // assets
@@ -12,14 +11,6 @@ import definitionsPlJson from "@/assets/data/definitions-pl.json";
 
 // types
 import type { TheSecretWord } from "@/features/game/domain/models";
-
-// One plan step: the model to try, a single attempt, and a bounded retry
-const planFor = (id: string, config: typeof OpenAiLanguageModel.Config.Service) =>
-  ExecutionPlan.make({
-    provide: OpenAiLanguageModel.model(id, config),
-    attempts: 1,
-    schedule: Schedule.exponential("1 second", 2),
-  });
 
 // Both A/B arms are only comparable if the model is held constant, so each label
 // is paired with the single plan step that runs it
@@ -40,8 +31,13 @@ const TEST_WORDS = ["ABAJA", "ABCUG", "ABSTA", "ADAKS"] as const satisfies Reado
 // The build-time definition asset, mirrored from the RPC handler's schema
 const Definitions = Schema.Record(Schema.String, Schema.String);
 
+// `Record.get` rather than an index: `Record.get` returns an `Option`, and the
+// decoded record has no index signature guaranteeing a hit (tsconfig does not
+// enable `noUncheckedIndexedAccess`) — the same reason the RPC handler's
+// `getWordDefinition` reads its decoded record this way
+// Combinator-based (no Effect.fn/gen wrapper) per Effect conventions for reusable functions
 const getDefinition = (definitions: Readonly<Record<string, string>>, theSecretWord: TheSecretWord) =>
-  Option.fromNullishOr(definitions[theSecretWord]).pipe(Effect.fromOption(() => new MissingDefinitionError({ theSecretWord })));
+  Record.get(definitions, theSecretWord).pipe(Effect.fromOption(() => new MissingDefinitionError({ theSecretWord })));
 
 const main = Effect.gen(function* () {
   // Decoded inside the program rather than at module scope, so a drifting asset
@@ -51,25 +47,34 @@ const main = Effect.gen(function* () {
 
   yield* Effect.log("A/B: Polish riddles — baseline prompt vs definition-aware prompt\n");
 
-  for (const theSecretWord of TEST_WORDS) {
-    const definition = yield* getDefinition(definitions, theSecretWord);
-
-    yield* Effect.log(`=== ${theSecretWord} ===\nDefinition: ${definition}\n`);
-
-    yield* runCase(`${LLAMA_LABEL} / baseline`, theSecretWord, generateRiddle(theSecretWord, "Pl").pipe(Effect.withExecutionPlan(LLAMA_PLAN)));
-    yield* runCase(
-      `${LLAMA_LABEL} / + definition`,
-      theSecretWord,
-      generateRiddle(theSecretWord, "Pl", Option.some(definition)).pipe(Effect.withExecutionPlan(LLAMA_PLAN))
-    );
-
-    yield* runCase(`${GEMMA_LABEL} / baseline`, theSecretWord, generateRiddle(theSecretWord, "Pl").pipe(Effect.withExecutionPlan(GEMMA_PLAN)));
-    yield* runCase(
-      `${GEMMA_LABEL} / + definition`,
-      theSecretWord,
-      generateRiddle(theSecretWord, "Pl", Option.some(definition)).pipe(Effect.withExecutionPlan(GEMMA_PLAN))
-    );
-  }
+  // Sequential (the `Effect.forEach` default), and interruptible as one Effect
+  yield* Effect.forEach(
+    TEST_WORDS,
+    (theSecretWord) =>
+      getDefinition(definitions, theSecretWord).pipe(
+        Effect.tap((definition) => Effect.log(`=== ${theSecretWord} ===\nDefinition: ${definition}\n`)),
+        Effect.flatMap((definition) =>
+          Effect.all(
+            [
+              runCase(`${LLAMA_LABEL} / baseline`, theSecretWord, generateRiddle(theSecretWord, "Pl").pipe(Effect.withExecutionPlan(LLAMA_PLAN))),
+              runCase(
+                `${LLAMA_LABEL} / + definition`,
+                theSecretWord,
+                generateRiddle(theSecretWord, "Pl", Option.some(definition)).pipe(Effect.withExecutionPlan(LLAMA_PLAN))
+              ),
+              runCase(`${GEMMA_LABEL} / baseline`, theSecretWord, generateRiddle(theSecretWord, "Pl").pipe(Effect.withExecutionPlan(GEMMA_PLAN))),
+              runCase(
+                `${GEMMA_LABEL} / + definition`,
+                theSecretWord,
+                generateRiddle(theSecretWord, "Pl", Option.some(definition)).pipe(Effect.withExecutionPlan(GEMMA_PLAN))
+              ),
+            ],
+            { discard: true }
+          )
+        )
+      ),
+    { discard: true }
+  );
 }).pipe(Effect.provide(AiClientsWithHttp));
 
 // runSeed provides the shared Node layer and graceful teardown on CTRL+C

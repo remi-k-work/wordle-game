@@ -4,17 +4,10 @@ import { AnyChartArgs } from "@/features/charts/domain/models";
 import { dieOnDbFailure } from "@/domain/helpers";
 
 // types
-import type { RowCodec } from "./make-histogram-distribution-query";
-import type { MetricName } from "@/features/charts/domain/constants";
+import type { RowCodec } from "@/features/charts/domain/models";
+import type { MetricName } from "@/features/telemetry/domain/metrics";
 
-// Factory backing openingGuesses + failedWords. Both queries are identical
-// except for metricName and Result schema (passed per call-site).
-// C1: single-pass conditional aggregation replaces two-CTE FULL OUTER JOIN.
-// FILTER computes personal/global in one JSONB scan. Row-equality validated
-// against e2e fixture. Words are stored uppercase in DB, so no UPPER() needed.
-//
-// The generic bound is `RowCodec` — see its justification (why not the full
-// `Codec` / plain `Constraint`) in make-histogram-distribution-query.ts
+// Factory backing openingGuesses + failedWords
 export const makeWordFrequencyQuery =
   <R extends RowCodec>(sql: SqlClient.SqlClient) =>
   // `metricName` is a bound parameter, so it is safe to interpolate; typing it

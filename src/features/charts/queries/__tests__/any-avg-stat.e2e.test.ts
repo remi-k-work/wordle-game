@@ -1,85 +1,22 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Effect, Schema } from "effect";
 import { SqlClient } from "effect/sql";
-import { PgContainer, runDdlStatements } from "./_pg-container";
+import { PgContainer } from "./_pg-container";
+import { EN_SESSION, SESSION_A, SESSION_B, seedRunTables, type RunSummaryRow, type RunWordEventRow } from "./_pg-fixtures";
 import { AnyAvgStatArgs } from "@/features/charts/domain/models";
 import { anyAvgStatQuery } from "@/features/charts/queries/any-avg-stat";
 
-// Minimal slice of init-telemetry.sql — the two tables any-avg-stat touches.
-//   - run_word_event: rows keyed by run_id (referenced by arcade_run_summary)
-//   - arcade_run_summary: rows keyed by run_id, session_id, solutions_language
-// No FK; the query's personal branch joins through ars.run_id = rwe.run_id.
-const DDL = `
-DROP TABLE IF EXISTS run_word_event;
-DROP TABLE IF EXISTS arcade_run_summary;
-
-CREATE TABLE arcade_run_summary (
-  run_id UUID PRIMARY KEY,
-  session_id UUID NOT NULL,
-  solutions_language VARCHAR(2) NOT NULL
-    CONSTRAINT arcade_run_summary_solutions_language_check
-    CHECK (solutions_language IN ('En', 'Pl')),
-  death_reason VARCHAR(10) NOT NULL
-    CONSTRAINT arcade_run_summary_death_reason_check
-    CHECK (death_reason IN ('Forfeit', 'Guesses')),
-  failed_on_word VARCHAR(5) NOT NULL,
-  final_score INT NOT NULL
-    CONSTRAINT arcade_run_summary_score_check
-    CHECK (final_score >= 0),
-  final_streak INT NOT NULL
-    CHECK (final_streak >= 0),
-  duration_seconds INT NOT NULL
-    CHECK (duration_seconds >= 0)
-);
-
-CREATE TABLE run_word_event (
-  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-  run_id UUID NOT NULL,
-  solutions_language VARCHAR(2) NOT NULL
-    CONSTRAINT run_word_event_solutions_language_check
-    CHECK (solutions_language IN ('En', 'Pl')),
-  the_secret_word VARCHAR(5) NOT NULL,
-  guessed_turn INT NOT NULL
-    CONSTRAINT run_word_event_guessed_turn_check
-    CHECK (guessed_turn BETWEEN 1 AND 6),
-  time_seconds INT NOT NULL
-    CONSTRAINT run_word_event_time_seconds_check
-    CHECK (time_seconds >= 0)
-);
-`;
-
-const SESSION_A = "829087ad-9e88-46f9-9f45-174c3bc9e046";
-const SESSION_B = "044a83ea-9fa8-415a-8186-28baaf86657d";
-const EN_SESSION = "80633be7-9d66-4d70-935e-fb031eeb3628";
-
+// The runs the two tables reference. Session A owns two (A1 a real loss, A2 a
+// forfeit with score 0), B one, and the En run exists only to be filtered
 const RUN_A1 = "11111111-aaaa-aaaa-aaaa-111111111111";
 const RUN_A2 = "22222222-aaaa-aaaa-aaaa-222222222222";
 const RUN_B1 = "33333333-aaaa-aaaa-aaaa-333333333333";
 const EN_RUN = "44444444-aaaa-aaaa-aaaa-444444444444";
 
-type ArsRow = {
-  runId: string;
-  sessionId: string;
-  language: "Pl" | "En";
-  deathReason: "Forfeit" | "Guesses";
-  failedOnWord: string;
-  finalScore: number;
-  finalStreak: number;
-  durationSeconds: number;
-};
-
-type RweRow = {
-  runId: string;
-  language: "Pl" | "En";
-  theSecretWord: string;
-  guessedTurn: number;
-  timeSeconds: number;
-};
-
 // Two Pl sessions (A = personal, B = other player), plus an En row filtered by
 // solutions_language = 'Pl'. Session A has two runs (one Guesses, one Forfeit
 // with final_score 0 — D2's "N/A" sentinel) so the average is non-trivial.
-const ARS_ROWS: ArsRow[] = [
+const ARS_ROWS: RunSummaryRow[] = [
   { runId: RUN_A1, sessionId: SESSION_A, language: "Pl", deathReason: "Guesses", failedOnWord: "KARDA", finalScore: 120, finalStreak: 3, durationSeconds: 240 },
   { runId: RUN_A2, sessionId: SESSION_A, language: "Pl", deathReason: "Forfeit", failedOnWord: "N/A", finalScore: 0, finalStreak: 0, durationSeconds: 60 },
   { runId: RUN_B1, sessionId: SESSION_B, language: "Pl", deathReason: "Guesses", failedOnWord: "ASTRA", finalScore: 80, finalStreak: 1, durationSeconds: 180 },
@@ -90,7 +27,7 @@ const ARS_ROWS: ArsRow[] = [
 // join shows the A1 column qualification — A1 added rwe. prefixes after the
 // global CTE was unqualified). The personal-A rwe rows are 3 + 5 (avg 4); run
 // B1 has a single rwe row of 2 (avg 2, contributes to global only).
-const RWE_ROWS: RweRow[] = [
+const RWE_ROWS: RunWordEventRow[] = [
   { runId: RUN_A1, language: "Pl", theSecretWord: "KARDA", guessedTurn: 3, timeSeconds: 60 },
   { runId: RUN_A1, language: "Pl", theSecretWord: "KARDA", guessedTurn: 5, timeSeconds: 120 },
   { runId: RUN_A2, language: "Pl", theSecretWord: "ASTRA", guessedTurn: 1, timeSeconds: 30 },
@@ -98,26 +35,15 @@ const RWE_ROWS: RweRow[] = [
   { runId: EN_RUN, language: "En", theSecretWord: "BLIMP", guessedTurn: 6, timeSeconds: 200 },
 ];
 
-const seedFixture = Effect.gen(function* () {
-  const sql = yield* SqlClient.SqlClient;
-  yield* runDdlStatements(DDL);
-  for (const row of ARS_ROWS) {
-    yield* sql`
-      INSERT INTO arcade_run_summary
-        (run_id, session_id, solutions_language, death_reason, failed_on_word, final_score, final_streak, duration_seconds)
-      VALUES
-        (${row.runId}, ${row.sessionId}, ${row.language}, ${row.deathReason}, ${row.failedOnWord}, ${row.finalScore}, ${row.finalStreak}, ${row.durationSeconds})
-    `;
-  }
-  for (const row of RWE_ROWS) {
-    yield* sql`
-      INSERT INTO run_word_event (run_id, solutions_language, the_secret_word, guessed_turn, time_seconds)
-      VALUES (${row.runId}, ${row.language}, ${row.theSecretWord}, ${row.guessedTurn}, ${row.timeSeconds})
-    `;
-  }
-});
+const seedFixture = seedRunTables(ARS_ROWS, RWE_ROWS);
 
-const makeRequest = (sessionId: string, statColumn: "guessedTurn" | "finalScore", statTable: "runWordEvent" | "arcadeRunSummary"): AnyAvgStatArgs =>
+// The stat-column/table literals are derived from the request schema rather
+// than re-typed here: adding a column or table to `AnyAvgStatArgs` is then a
+// compile error in this suite instead of a silently un-exercised branch
+type AnyAvgStatStatColumn = AnyAvgStatArgs["statColumn"];
+type AnyAvgStatStatTable = AnyAvgStatArgs["statTable"];
+
+const makeRequest = (sessionId: string, statColumn: AnyAvgStatStatColumn, statTable: AnyAvgStatStatTable): AnyAvgStatArgs =>
   Schema.decodeSync(AnyAvgStatArgs)({
     sessionId,
     solutionsLanguage: "Pl",

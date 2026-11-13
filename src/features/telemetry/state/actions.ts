@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { DateTime, Duration, Effect, Metric, Option } from "effect";
+import { DateTime, Duration, Effect, Metric, Number, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { metrics } from "@/features/telemetry/domain/metrics";
 import { sessionIdAtom } from "@/features/player/state/player";
@@ -55,7 +55,7 @@ export const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (runS
   // drop the whole run summary downstream
   const now = yield* DateTime.now;
   const createdAt = Option.getOrElse(runSession.createdAt, () => now);
-  const durationSeconds = Math.max(0, DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor));
+  const durationSeconds = Number.clamp({ minimum: 0, maximum: Infinity })(DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor));
 
   yield* Option.match(runSession.runId, {
     onNone: () => Effect.void,
@@ -65,7 +65,9 @@ export const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (runS
         sessionId,
         solutionsLanguage,
         deathReason,
-        failedOnWord: deathReason === "Guesses" ? Option.getOrElse(wordChallenge.theSecretWord, () => "N/A") : "N/A",
+        // The secret word is only meaningful for "Guesses" deaths; every other
+        // death reason (and a puzzle that never had one) degrades to "N/A"
+        failedOnWord: Option.getOrElse(deathReason === "Guesses" ? wordChallenge.theSecretWord : Option.none(), () => "N/A"),
         finalScore,
         finalStreak,
         durationSeconds,

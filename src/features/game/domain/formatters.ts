@@ -11,13 +11,6 @@ import { SPEED_MULTIPLIER_CATEGORY_EMOJI_MAP, SPEED_MULTIPLIER_CATEGORY_MESSAGE_
 
 const speedMultiplierRule = (speedMultiplier: number) => Array.findFirst(SPEED_MULTIPLIER_RULES, (rule) => rule.multiplier === speedMultiplier);
 
-// Maps a speed multiplier to a stable category identifier for UI presentation
-export const speedMultiplierToCategory = (speedMultiplier: number) =>
-  speedMultiplierRule(speedMultiplier).pipe(
-    Option.map((rule) => rule.category),
-    Option.getOrUndefined
-  );
-
 // Format the current guess word into an array of letter objects with color coding
 export const formatGuess = (theSecretWord: TheSecretWord, wordleGuess: WordChallenge["wordleGuesses"][number]): Tile[] => {
   const secretChars = Array.fromIterable(theSecretWord);

@@ -5,6 +5,11 @@ import { BrowseCharts } from "./models";
 // constants
 import { INITIAL_BROWSE_CHARTS } from "./constants";
 
+// Schema.decodeUnknownOption builds a parser on every call, so build it once at
+// module scope instead of once per URL change — the same reason the telemetry
+// worker, the charts DB and the game RPC handlers hoist their decoders
+const decodeBrowseChartsOption = Schema.decodeUnknownOption(BrowseCharts);
+
 // Telemetry stores histograms in cumulative form because they are easy to
 // aggregate in SQL. This helper converts cumulative buckets back into a
 // discrete distribution suitable for charting and derives percentages from
@@ -15,7 +20,7 @@ import { INITIAL_BROWSE_CHARTS } from "./constants";
  * counts and their percentage of the total
  *
  * Invariants the caller MUST uphold (two-layer, both load-bearing):
- * 1. `rows` are ordered by bucket ascending — e.g. `ORDER BY turn/streak/
+ * 1. `rows` are ordered by bucket ascending — e.g. `ORDER BY turn / streak /
  *    max_seconds ASC NULLS LAST` in every upstream SQL query. A future query
  *    that forgets `ORDER BY … ASC` silently mis-rounds every percentage.
  * 2. The final row holds the maximum cumulative total. The SQL emits a
@@ -54,5 +59,5 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
  * browse-charts machine, the chart RPC payloads, and matchLanguage (which maps
  * anything that is not "En" to Polish)
  */
-export const decodeBrowseCharts = (searchEntries: Readonly<Record<string, string>>): BrowseCharts =>
-  Option.getOrElse(Schema.decodeUnknownOption(BrowseCharts)(searchEntries), () => INITIAL_BROWSE_CHARTS);
+export const decodeBrowseCharts = (searchEntries: Readonly<Record<string, string>>) =>
+  Option.getOrElse(decodeBrowseChartsOption(searchEntries), () => INITIAL_BROWSE_CHARTS);

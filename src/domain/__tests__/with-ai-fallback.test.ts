@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest";
-import { Cause, Effect, Exit, Fiber, Option } from "effect";
+import { Cause, Effect, Exit, Fiber, Logger, Option } from "effect";
 import { withAiFallback } from "../helpers.server";
 
 // `withAiFallback` backs the non-critical AI enrichment RPCs (riddle, override,
@@ -46,6 +46,39 @@ describe("withAiFallback", () => {
       // in its type, the interrupt only shows up at runtime
       if (!Exit.isFailure(exit)) return;
       expect(Cause.hasInterrupts(exit.cause)).toBe(true);
+    })
+  );
+
+  it.effect("logs exactly the failures it recovers, and no cancellation", () =>
+    Effect.gen(function* () {
+      // The recovery policy observes failures through `Effect.logError`, so a
+      // recording logger scoped to each run is how its behaviour is pinned.
+      // `Logger.layer` replaces the active loggers for the provided program
+      // (and any fiber forked inside it), keeping the test harness's own
+      // output out of the count
+      let logCount = 0;
+      const Recorder = Logger.make<unknown, void>(() => {
+        logCount += 1;
+      });
+
+      const runUnderRecorder = <A, E>(program: Effect.Effect<A, E, never>) =>
+        Effect.gen(function* () {
+          const fiber = yield* Effect.forkChild(program);
+          return yield* Fiber.await(fiber);
+        }).pipe(Effect.provide(Logger.layer([Recorder])));
+
+      // A real failure is logged once, then degraded: the recovery must never
+      // be silent
+      yield* runUnderRecorder(withAiFallback(Effect.fail("AiProviderError"), Effect.succeedNone));
+      expect(logCount).toBe(1);
+
+      // A pure interruption is lifecycle, not a failure: it propagates (the
+      // test above pins that) and emits no error-level log — otherwise every
+      // cancelled request would report itself as a failure
+      logCount = 0;
+      const exit = yield* runUnderRecorder(withAiFallback(Effect.interrupt, Effect.succeedNone));
+      expect(Exit.isFailure(exit)).toBe(true);
+      expect(logCount).toBe(0);
     })
   );
 });

@@ -5,6 +5,9 @@ import { SolutionsLanguage } from "@/features/game/domain/models";
 // types
 export type GameSettings = typeof GameSettings.Type;
 
+// constants
+import { VOICE_PITCH_RANGE, VOICE_RATE_RANGE, VOICE_VOLUME_RANGE } from "./constants";
+
 // A finite number constrained to an inclusive range (volume, rate, pitch)
 const Bounded = (minimum: number, maximum: number) => Schema.Finite.check(Schema.isBetween({ minimum, maximum }));
 
@@ -15,7 +18,7 @@ const Bounded = (minimum: number, maximum: number) => Schema.Finite.check(Schema
 export const GameSettings = Schema.Struct({
   solutionsLanguage: SolutionsLanguage,
   voiceVoice: Schema.NullOr(Schema.Trim.check(Schema.isNonEmpty())),
-  voiceVolume: Bounded(0, 1),
-  voiceRate: Bounded(0.5, 2),
-  voicePitch: Bounded(0.5, 1.5),
+  voiceVolume: Bounded(VOICE_VOLUME_RANGE.minimum, VOICE_VOLUME_RANGE.maximum),
+  voiceRate: Bounded(VOICE_RATE_RANGE.minimum, VOICE_RATE_RANGE.maximum),
+  voicePitch: Bounded(VOICE_PITCH_RANGE.minimum, VOICE_PITCH_RANGE.maximum),
 });

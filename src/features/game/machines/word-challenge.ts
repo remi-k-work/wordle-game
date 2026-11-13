@@ -138,9 +138,15 @@ export const wordChallengeMachine = setup({
     trackWordWon: ({ context }) =>
       runClientCommand(Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordWon(runSession, context)))),
 
+    // `wordScore` is guaranteed `Some` here (calculateScore runs first in the
+    // same entry array), but the branch is total anyway: an impossible `None`
+    // resolves as a no-op instead of a NoSuchElementError that has no recovery
     onWordWon: ({ context }) =>
       runClientCommand(
-        Effect.fromOption(context.wordScore).pipe(Effect.flatMap((wordScore) => Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore })))
+        Option.match(context.wordScore, {
+          onNone: () => Effect.void,
+          onSome: (wordScore) => Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore }),
+        })
       ),
 
     // Track metrics related to the event of losing the game (stream 2 -> global_pulse)

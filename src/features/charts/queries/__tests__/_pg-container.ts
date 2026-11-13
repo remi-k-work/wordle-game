@@ -18,7 +18,11 @@ class PgContainer extends Context.Service<PgContainer>()("test/PgContainer", {
       Effect.tryPromise({
         try: () => container.stop(),
         catch: (cause) => new ContainerError({ cause }),
-      }).pipe(Effect.tapError(Effect.logError), Effect.orDie)
+        // A `stop()` that throws synchronously (rather than rejecting) surfaces
+        // as a defect, which an error-based `tapError` would skip — teardown is
+        // where a silent failure costs the most, so the log is cause-based like
+        // every other log-then-recover in this repo
+      }).pipe(Effect.tapCause(Effect.logError), Effect.orDie)
   ),
 }) {
   static layer = Layer.effect(this, this.make);
@@ -36,7 +40,10 @@ class PgContainer extends Context.Service<PgContainer>()("test/PgContainer", {
 export { PgContainer };
 
 // The native pg client (rc.113+) rejects multi-statement prepared statements,
-// so test DDL containing DROP + CREATE must run statement-by-statement
+// so test DDL containing DROP + CREATE must run statement-by-statement.
+// The split is a plain `;` split, which is only sound because the fixtures
+// below are hand-written DDL with no `;` inside a string literal, a `$$` body
+// or a `--` comment — keep it that way rather than teaching this a parser
 export const runDdlStatements = Effect.fn("runDdlStatements")(function* (ddl: string) {
   const sql = yield* SqlClient.SqlClient;
   const statements = ddl

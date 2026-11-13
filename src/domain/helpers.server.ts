@@ -18,7 +18,7 @@ import { IS_WORKERD, SYNC_SCHEDULER_LAYER } from "@/domain/constants";
 // created". The sync scheduler dispatches via microtasks, which are not
 // request-owned. (See Scheduler.MixedScheduler and the Workers recipe on
 // HttpRouter.toWebHandler; the per-request runtime below is the primary fix.)
-// SyncScheduler is defined once in @/lib/sync-scheduler and shared with
+// SYNC_SCHEDULER_LAYER is defined once in @/domain/constants and shared with
 // lib/runtime.server.ts so both stay in sync
 
 // Builds the web handler for an RPC group's HTTP route. disableFatalDefects serializes defects

@@ -1,30 +1,13 @@
 // services, features, and other libraries
-import { Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 import { AnyChartArgs } from "@/features/charts/domain/models";
 import { dieOnDbFailure } from "@/domain/helpers";
 
 // types
-import type { BucketAlias, MetricName } from "@/features/charts/domain/constants";
+import type { BucketAlias, RowCodec } from "@/features/charts/domain/models";
+import type { MetricName } from "@/features/telemetry/domain/metrics";
 
-// Factory backing timeToSolve, arcadeStreak, guessDistribution. All three
-// share the same query shape; metricName, bucketAlias, and Result schema
-// differ per call-site. A2/A3: sentinel -1 pattern + GROUP BY join_boundary
-// preserves trailing cumulative total row (NULLIF back to NULL).
-// C1: single-pass conditional aggregation replaces two-CTE FULL OUTER JOIN.
-
-/**
- * The generic bound for every query factory's `Result` schema.
- *
- * Not the full `Codec` (whose extra `annotate`/`rebuild`/... protocol
- * `SqlSchema.findAll` never calls) and not the plain `Constraint` (which types
- * `Type` as `unknown`, collapsing the decoded rows to `unknown[]` at every
- * generic inference hop — dieOnDbFailure, `.pipe — and breaking every
- * consumer). `ConstraintCodec`'s typed views keep the row type threading while
- * the runtime decode inside SqlSchema.findAll stays strict
- */
-export type RowCodec = Schema.ConstraintCodec<any>;
-
+// Factory backing timeToSolve, arcadeStreak, guessDistribution
 export const makeHistogramDistributionQuery =
   <R extends RowCodec>(sql: SqlClient.SqlClient) =>
   // `bucketAlias` is interpolated into the statement text (not bound as a

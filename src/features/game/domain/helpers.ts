@@ -10,15 +10,23 @@ import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_
 // Pick the color with the higher priority; `a` comes from HashMap.get (already
 // an Option) so accepting Option directly avoids an intermediate getOrUndefined
 export const pickStrongerColor = (a: Option.Option<Color>, b: Color) =>
-  Option.map(a, (color) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[color] ? b : color)).pipe(Option.getOrElse(() => b));
+  Option.match(a, {
+    onNone: () => b,
+    onSome: (color) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[color] ? b : color),
+  });
+
+// The last rule is the catch-all (`maxSeconds: Infinity`), so `findFirst` below
+// always matches and the fallback is unreachable — it only keeps the return
+// type total. Read from the last rule rather than restating its multiplier, so
+// the slowest tier's number lives in exactly one place (the same reason
+// POTENTIAL_SCORE_RANGE derives its extremes from the table)
+const CATCH_ALL_SPEED_MULTIPLIER = SPEED_MULTIPLIER_RULES[SPEED_MULTIPLIER_RULES.length - 1].multiplier;
 
 // Establish the speed multiplier based on the time it took
 export const getSpeedMultiplier = (elapsedSeconds: number) =>
   Array.findFirst(SPEED_MULTIPLIER_RULES, ({ maxSeconds }) => elapsedSeconds < maxSeconds).pipe(
     Option.map(({ multiplier }) => multiplier),
-    // Unreachable: the table's last rule is the catch-all (maxSeconds: Infinity),
-    // so findFirst always matches. The default only keeps the total return type
-    Option.getOrElse(() => 0.8)
+    Option.getOrElse(() => CATCH_ALL_SPEED_MULTIPLIER)
   );
 
 // Resolve the base score value per the turn in which the word is solved
@@ -26,7 +34,7 @@ export const getBasePointsPerTurn = (currentTurn: WordChallenge["currentTurn"]) 
 
 // Calculate elapsed time in seconds, treating an unstarted timer as zero seconds
 export const getElapsedSeconds = (startTime: WordChallenge["startTime"], endTime: DateTime.Utc) =>
-  Option.map(startTime, (startTime) => DateTime.distance(startTime, endTime).pipe(Duration.toSeconds)).pipe(Option.getOrElse(() => 0));
+  Option.map(startTime, (start) => DateTime.distance(start, endTime).pipe(Duration.toSeconds)).pipe(Option.getOrElse(() => 0));
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
 export const potentialScoreAsPercentage = (potentialScore: WordScore["wordScore"]) =>

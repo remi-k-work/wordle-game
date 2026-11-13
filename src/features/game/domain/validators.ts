@@ -25,9 +25,6 @@ export const classifyKey = (pressedKey: string): ClassifiedKey => {
   return LETTER_REGEX.test(letter) ? { kind: "letter", letter } : { kind: "invalid" };
 };
 
-// Validate the guess entry as the user types from the keyboard in real time
-export const isGuessKeyValid = (pressedKey: string) => classifyKey(pressedKey).kind !== "invalid";
-
 // Accept or reject the submitted guess
 export const canSubmitGuess = (
   currentGuessWord: WordChallenge["currentGuessWord"],

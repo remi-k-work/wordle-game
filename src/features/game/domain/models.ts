@@ -73,7 +73,7 @@ export const WordMeta = Schema.Struct({
 // persisted field (an Option there, a required value here) cannot drift
 const RunId = Schema.Trim.check(Schema.isUUID());
 const RunTimestamp = Schema.DateTimeUtc;
-const RunPoints = Schema.Int.check(Schema.isGreaterThanOrEqualTo(0));
+const RunPoints = Schema.Natural;
 
 // Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
 export const RunSession = Schema.Struct({
@@ -97,10 +97,10 @@ export const RunResult = Schema.Struct({
 
 // Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)
 export const WordScore = Schema.Struct({
-  wordScore: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
-  basePointsPerTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  wordScore: Schema.Natural,
+  basePointsPerTurn: Schema.Natural,
   speedMultiplier: Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0)),
-  timeSeconds: Schema.Int.check(Schema.isGreaterThanOrEqualTo(0)),
+  timeSeconds: Schema.Natural,
 });
 
 // Represents the state of the current word challenge being in progress

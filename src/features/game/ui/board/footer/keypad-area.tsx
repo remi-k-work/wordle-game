@@ -3,7 +3,7 @@ import { useCallback } from "react";
 
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
-import { HashMap, Option } from "effect";
+import { Array, HashMap, Option, Result } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
@@ -47,10 +47,15 @@ export function KeypadArea({ keys }: { keys: Keypad }) {
   // though `availableKeys` is a new array each render; `KeypadArea` re-renders
   // only when `keypadColors` changes (its sole atom subscription), so a
   // `useMemo` here would never cache across renders — the derivation runs on
-  // every render either way
-  const availableKeys = keys
-    .map((letter) => ({ letter, color: Option.getOrElse(HashMap.get(keypadColors, letter), () => EMPTY_KEY_COLOR) }))
-    .filter(({ color }) => color !== "grey");
+  // every render either way. One pass (`filterMap`) instead of map-then-filter:
+  // a greyed key fails the transformation and is dropped in the same traversal
+  // (v4's `filterMap` discards failures, the same shape `domain/sonar.ts` uses)
+  const availableKeys = Array.filterMap(keys, (letter) => {
+    // Absent keys (nothing guessed yet) carry the empty color; only keys the
+    // player has genuinely ruled out are dropped
+    const color = Option.getOrElse(HashMap.get(keypadColors, letter), () => EMPTY_KEY_COLOR);
+    return color === "grey" ? Result.failVoid : Result.succeed({ letter, color });
+  });
 
   const handleKeyPressed = useCallback(
     (pressedKey: string) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey }),

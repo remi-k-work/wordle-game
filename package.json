@@ -45,9 +45,9 @@
     "clsx": "^2.1.1",
     "effect": "^4.1.4",
     "embla-carousel-react": "^8.6.0",
-    "gt-react": "^11.4.20",
-    "gt-tanstack-start": "^11.4.20",
-    "motion": "^14.12.0",
+    "gt-react": "^11.4.22",
+    "gt-tanstack-start": "^11.4.22",
+    "motion": "^14.13.0",
     "next-themes": "^0.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -68,13 +68,13 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.3.0",
     "dotenv": "^18.0.10",
-    "gt": "^2.27.3",
+    "gt": "^2.28.2",
     "tailwindcss": "^4",
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.6.0",
     "vite-plus": "1.6.0",
     "vitest": "5.1.0",
-    "wrangler": "^4.160.1"
+    "wrangler": "^4.161.0"
   },
   "allowScripts": {
     "msgpackr-extract@3.0.4": true,

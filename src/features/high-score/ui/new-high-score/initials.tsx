@@ -4,6 +4,7 @@ import { useState } from "react";
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { highScoreIsSubmittingAtom, highScoreMachineAtom } from "@/features/high-score/state/high-score";
+import { useGT } from "gt-react";
 
 // components
 import { Button } from "@base-ui/react/button";
@@ -33,6 +34,7 @@ const sanitizeInitials = (typed: string) =>
 export function Initials() {
   const highScoreMachineEvent = useAtomSet(highScoreMachineAtom);
   const [initials, setInitials] = useState("");
+  const gt = useGT();
 
   const isSubmitting = useAtomValue(highScoreIsSubmittingAtom);
   const canSubmit = initials.length === INITIALS_LENGTH && !isSubmitting;
@@ -52,6 +54,10 @@ export function Initials() {
         size={5}
         maxLength={INITIALS_LENGTH}
         placeholder="AAA"
+        // The descriptive copy is a sibling paragraph, not a label, so the
+        // input carries its own accessible name (the placeholder alone is not
+        // one); `gt` resolves it under the active locale
+        aria-label={gt("Enter your arcade initials")}
         value={initials}
         onChange={(ev) => setInitials(sanitizeInitials(ev.target.value))}
         disabled={isSubmitting}

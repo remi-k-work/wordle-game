@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { Option, Schema } from "effect";
+import { Option, Predicate, Schema } from "effect";
 import { msg } from "gt-react";
 import { HighScorePage } from "@/features/high-score/domain/models";
 
@@ -24,6 +24,11 @@ import { DistributionChartsSkeleton } from "@/features/charts/ui/distribution-ch
 import { FrequencyChartsSkeleton } from "@/features/charts/ui/frequency-charts/skeleton";
 import { FooterLink } from "@/ui/footer-link";
 
+// Schema.decodeUnknownOption builds a parser on every call, so build it once at
+// module scope instead of once per loader run (the loader re-runs whenever `sl`
+// changes) — the same convention the RPC handlers and the charts DB follow
+const decodeHighScorePage = Schema.decodeUnknownOption(HighScorePage);
+
 // Lazy chart sections (recharts, embla). Each one loads its own chunk via a concrete
 // module path — a shared barrel import would fuse them all (plus every other section)
 // into one chunk, so e.g. mounting the embla slider would also download recharts
@@ -43,7 +48,7 @@ export const Route = createFileRoute("/high-score")({
   // errors thrown here into SearchParamError, not a 404); the strict decode — and the hard
   // 404 on invalid `?sl=` — happens in the loader
   validateSearch: (search: { sl?: unknown }) => ({
-    sl: typeof search.sl === "string" ? search.sl : undefined,
+    sl: Predicate.isString(search.sl) ? search.sl : undefined,
   }),
 
   // `search` is not provided to loaders (router-core demotivates shortcutting it);
@@ -51,7 +56,7 @@ export const Route = createFileRoute("/high-score")({
   loaderDeps: ({ search: { sl } }) => ({ sl }),
 
   loader: ({ deps }) => {
-    const page = Schema.decodeUnknownOption(HighScorePage)({ params: {}, searchParams: { sl: deps.sl } });
+    const page = decodeHighScorePage({ params: {}, searchParams: { sl: deps.sl } });
     if (Option.isNone(page)) throw notFound();
     return { sl: page.value.searchParams.sl } as const;
   },
