@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsVoiceRateAtom } from "@/features/settings/state/game-settings";
+import { gameSettingsMachineSendAtom, gameSettingsVoiceRateAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { T } from "gt-react";
@@ -17,7 +17,7 @@ const RATE_CONTROL = { name: "voiceRate", label: <T>Rate</T>, min: 0.5, max: 2, 
 
 export function Rate() {
   const voiceRate = useAtomValue(gameSettingsVoiceRateAtom);
-  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
+  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineSendAtom);
 
   return (
     <VoiceSlider {...RATE_CONTROL} value={voiceRate} onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceRateChanged", voiceRate: value })} />

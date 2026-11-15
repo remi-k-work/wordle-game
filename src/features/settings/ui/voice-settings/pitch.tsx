@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsVoicePitchAtom } from "@/features/settings/state/game-settings";
+import { gameSettingsMachineSendAtom, gameSettingsVoicePitchAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { T } from "gt-react";
@@ -17,7 +17,7 @@ const PITCH_CONTROL = { name: "voicePitch", label: <T>Pitch</T>, min: 0.5, max: 
 
 export function Pitch() {
   const voicePitch = useAtomValue(gameSettingsVoicePitchAtom);
-  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
+  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineSendAtom);
 
   return (
     <VoiceSlider {...PITCH_CONTROL} value={voicePitch} onValueChange={(value) => gameSettingsMachineEvent({ type: "voicePitchChanged", voicePitch: value })} />

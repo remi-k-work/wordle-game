@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/can-apply";
 import { T, useGT } from "gt-react";
 
@@ -24,7 +24,7 @@ const HACKS = [
 // keeping that row out of here is what stops every override state change from
 // re-rendering the whole menu
 export function HacksMenu() {
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
+  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineSendAtom);
 
   const canApplyHackEmp = useAtomValue(overdriveHacksCanApplyHackAtom("emp"));
   const canApplyHackSonar = useAtomValue(overdriveHacksCanApplyHackAtom("sonar"));

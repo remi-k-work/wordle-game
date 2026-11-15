@@ -1,87 +1,51 @@
 // services, features, and other libraries
-import { Number } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
-import { setup, assign, assertEvent } from "xstate";
-import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { Effect, Number, Schema } from "effect";
+import { Atom, AtomRegistry } from "effect/reactivity";
+import { setupEffect } from "@xstate/effect";
+import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
 import { otherSolutionsLanguage } from "@/features/game/domain/helpers";
-
-// types
-import type { GameSettings } from "@/features/settings/domain/models";
+import { GameSettings } from "@/features/settings/domain/models";
+import { SolutionsLanguage } from "@/features/game/domain/models";
 
 // constants
 import { VOICE_PITCH_RANGE, VOICE_RATE_RANGE, VOICE_VOLUME_RANGE } from "@/features/settings/domain/constants";
 
-export const gameSettingsMachine = setup({
-  types: {} as {
-    events:
-      | { readonly type: "solutionsLanguageToggled" }
-      | { readonly type: "voiceVoiceChanged"; readonly voiceVoice: GameSettings["voiceVoice"] }
-      | { readonly type: "voiceVolumeChanged"; readonly voiceVolume: GameSettings["voiceVolume"] }
-      | { readonly type: "voiceRateChanged"; readonly voiceRate: GameSettings["voiceRate"] }
-      | { readonly type: "voicePitchChanged"; readonly voicePitch: GameSettings["voicePitch"] };
-    context: GameSettings;
-    input: GameSettings;
+export const gameSettingsMachine = setupEffect({
+  schemas: {
+    context: GameSettings,
+    input: GameSettings,
+    events: {
+      solutionsLanguageToggled: Schema.Struct({}),
+      voiceVoiceChanged: Schema.Struct({ voiceVoice: GameSettings.fields.voiceVoice }),
+      voiceVolumeChanged: Schema.Struct({ voiceVolume: GameSettings.fields.voiceVolume }),
+      voiceRateChanged: Schema.Struct({ voiceRate: GameSettings.fields.voiceRate }),
+      voicePitchChanged: Schema.Struct({ voicePitch: GameSettings.fields.voicePitch }),
+    },
+    actions: { onSolutionsLanguageToggled: { params: Schema.Struct({ solutionsLanguage: SolutionsLanguage }) } },
   },
   actions: {
-    // Toggle the solutions language (the language rule itself lives in the
-    // game domain, shared with every other place that switches language)
-    toggleSolutionsLanguage: assign({
-      solutionsLanguage: ({ context }) => otherSolutionsLanguage(context.solutionsLanguage),
-    }),
-
-    // The voice related settings. Each slider event is clamped to the range its
-    // schema enforces before entering context: the persisted schema rejects
-    // out-of-range values, and `Atom.kvs` surfaces that rejection on an atom
-    // nobody observes — the value would be shown but never stored. The ranges
-    // come from the domain models so the schema and the reducer cannot drift
-    changeVoiceVoice: assign({
-      voiceVoice: ({ event }) => {
-        assertEvent(event, "voiceVoiceChanged");
-        return event.voiceVoice;
-      },
-    }),
-    changeVoiceVolume: assign({
-      voiceVolume: ({ event }) => {
-        assertEvent(event, "voiceVolumeChanged");
-        return Number.clamp(VOICE_VOLUME_RANGE)(event.voiceVolume);
-      },
-    }),
-    changeVoiceRate: assign({
-      voiceRate: ({ event }) => {
-        assertEvent(event, "voiceRateChanged");
-        return Number.clamp(VOICE_RATE_RANGE)(event.voiceRate);
-      },
-    }),
-    changeVoicePitch: assign({
-      voicePitch: ({ event }) => {
-        assertEvent(event, "voicePitchChanged");
-        return Number.clamp(VOICE_PITCH_RANGE)(event.voicePitch);
-      },
-    }),
-
-    // Notify all the other machines about the solutions language change. The
-    // actions run in declaration order, so the notification carries the
-    // ALREADY-TOGGLED value (the language the app is switching to)
-    onSolutionsLanguageToggled: ({ context }) =>
-      runClientCommand(Atom.set(gameFlowMachineAtom, { type: "language.changed", solutionsLanguage: context.solutionsLanguage })),
+    // Notify all the other machines about the solutions language change
+    onSolutionsLanguageToggled: ({ solutionsLanguage }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Atom.set(gameFlowMachineSendAtom, { type: "language.changed", solutionsLanguage }),
   },
 }).createMachine({
   id: "gameSettings",
   context: ({ input }) => ({ ...input }) satisfies GameSettings,
-  // A single "active" state: the machine never branches, it exists to own the
-  // settings context with the snapshot/persistence plumbing createMachineAtom
-  // provides — a reducer in machine clothing, deliberately
   initial: "active",
 
   states: {
     active: {
       on: {
-        solutionsLanguageToggled: { actions: ["toggleSolutionsLanguage", "onSolutionsLanguageToggled"] },
-        voiceVoiceChanged: { actions: "changeVoiceVoice" },
-        voiceVolumeChanged: { actions: "changeVoiceVolume" },
-        voiceRateChanged: { actions: "changeVoiceRate" },
-        voicePitchChanged: { actions: "changeVoicePitch" },
+        solutionsLanguageToggled: (args, enq) => {
+          const solutionsLanguage = otherSolutionsLanguage(args.context.solutionsLanguage);
+          enq(args.actions.onSolutionsLanguageToggled, { self: args.self, solutionsLanguage });
+          return { context: { ...args.context, solutionsLanguage } };
+        },
+
+        voiceVoiceChanged: { context: ({ context, event }) => ({ ...context, voiceVoice: event.voiceVoice }) },
+        voiceVolumeChanged: { context: ({ context, event }) => ({ ...context, voiceVolume: Number.clamp(VOICE_VOLUME_RANGE)(event.voiceVolume) }) },
+        voiceRateChanged: { context: ({ context, event }) => ({ ...context, voiceRate: Number.clamp(VOICE_RATE_RANGE)(event.voiceRate) }) },
+        voicePitchChanged: { context: ({ context, event }) => ({ ...context, voicePitch: Number.clamp(VOICE_PITCH_RANGE)(event.voicePitch) }) },
       },
     },
   },

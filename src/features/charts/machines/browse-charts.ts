@@ -1,39 +1,32 @@
 // services, features, and other libraries
-import { assign, setup, assertEvent } from "xstate";
+import { Effect, Schema } from "effect";
+import { setupEffect } from "@xstate/effect";
+import { BrowseCharts } from "@/features/charts/domain/models";
+import { SolutionsLanguage } from "@/features/game/domain/models";
 
 // types
-import type { BrowseCharts } from "@/features/charts/domain/models";
 import type { useUrlScribe } from "@/hooks/use-url-scribe";
+type Navigate = ReturnType<typeof useUrlScribe>["navigate"];
 
 // constants
 import { INITIAL_BROWSE_CHARTS } from "@/features/charts/domain/constants";
 
-export const browseChartsMachine = setup({
-  types: {} as {
-    events:
-      // `browseCharts` is already schema-decoded by use-browse-charts, so the
-      // context only ever holds a validated language
-      | { readonly type: "urlSynced"; browseCharts: BrowseCharts; navigate: ReturnType<typeof useUrlScribe>["navigate"] }
-      | { readonly type: "slChanged"; sl: BrowseCharts["sl"] };
-    context: BrowseCharts & { navigate?: ReturnType<typeof useUrlScribe>["navigate"] };
+const NavigateSchema = Schema.declare<Navigate>((input): input is Navigate => typeof input === "function", { title: "Navigate" });
+
+export const browseChartsMachine = setupEffect({
+  schemas: {
+    context: Schema.Struct({ ...BrowseCharts.fields, navigate: Schema.optional(NavigateSchema) }),
+    events: {
+      urlSynced: Schema.Struct({ browseCharts: BrowseCharts, navigate: NavigateSchema }),
+      slChanged: Schema.Struct({ sl: SolutionsLanguage }),
+    },
+    actions: { navigate: { params: Schema.Struct({ browseCharts: BrowseCharts, navigate: Schema.optional(NavigateSchema) }) } },
   },
   actions: {
-    syncUrl: assign(({ event }) => {
-      assertEvent(event, "urlSynced");
-      // oxlint-disable-next-line typescript/no-misused-spread -- decoded Schema.Class values are plain objects
-      return { ...event.browseCharts, navigate: event.navigate } satisfies BrowseCharts & { navigate?: ReturnType<typeof useUrlScribe>["navigate"] };
-    }),
-
-    changeSl: assign(({ context, event }) => {
-      assertEvent(event, "slChanged");
-      // oxlint-disable-next-line typescript/no-misused-spread -- decoded Schema.Class values are plain objects
-      return { ...context, sl: event.sl } satisfies BrowseCharts;
-    }),
-
-    navigate: ({ context }) => {
-      const { navigate, ...rest } = context;
-      navigate?.("/high-score", rest);
-    },
+    navigate: ({ browseCharts, navigate }) =>
+      Effect.sync(() => {
+        navigate?.("/high-score", browseCharts);
+      }),
   },
   delays: { debounce: 1000 },
 }).createMachine({
@@ -42,13 +35,21 @@ export const browseChartsMachine = setup({
   initial: "idle",
 
   on: {
-    urlSynced: { target: ".idle", actions: "syncUrl" },
-    slChanged: { target: ".debouncing", actions: "changeSl" },
+    urlSynced: { target: ".idle", context: ({ event }) => ({ ...event.browseCharts, navigate: event.navigate }) },
+    slChanged: { target: ".debouncing", context: ({ context, event }) => ({ ...context, sl: event.sl }) },
   },
 
   states: {
     idle: {},
 
-    debouncing: { after: { debounce: { target: "idle", actions: "navigate" } } },
+    debouncing: {
+      after: {
+        debounce: (args, enq) => {
+          const { navigate, ...browseCharts } = args.context;
+          enq(args.actions.navigate, { self: args.self, browseCharts, navigate });
+          return { target: "idle" };
+        },
+      },
+    },
   },
 });

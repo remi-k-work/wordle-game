@@ -12,9 +12,6 @@ import { VOICE_PITCH_RANGE, VOICE_RATE_RANGE, VOICE_VOLUME_RANGE } from "./const
 const Bounded = (minimum: number, maximum: number) => Schema.Finite.check(Schema.isBetween({ minimum, maximum }));
 
 // Persistent storage for game settings
-// Fields are required: decoding an older payload that lacks a newly added
-// field would fail, so any future field must be `Schema.optional` (or carry a
-// `withDecodingDefault`) to stay backward compatible with stored settings
 export const GameSettings = Schema.Struct({
   solutionsLanguage: SolutionsLanguage,
   voiceVoice: Schema.NullOr(Schema.Trim.check(Schema.isNonEmpty())),

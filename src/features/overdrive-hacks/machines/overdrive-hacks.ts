@@ -1,29 +1,22 @@
 // services, features, and other libraries
 import { Array, Effect, Option, Schema } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
-import { effectActor } from "@/lib/effect-actor";
+import { Atom, AtomRegistry } from "effect/reactivity";
+import { createEffectLogic, setupEffect } from "@xstate/effect";
+import { assertEvent } from "xstate";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
-import { setup, assign, assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { gameDataKeypadAtom } from "@/features/game/state/game-data";
-import { runSessionMachineAtom } from "@/features/game/state/run-session";
-import { wordChallengeMachineAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from "@/features/game/state/word-challenge";
+import { runSessionMachineSendAtom } from "@/features/game/state/run-session";
+import { wordChallengeMachineSendAtom, wordChallengeTheSecretWordAtom, wordChallengeWordleGuessesAtom } from "@/features/game/state/word-challenge";
 import { wordMetaTheRiddleAtom, wordMetaWordDefinitionAtom } from "@/features/game/state/word-meta";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/can-apply";
 import { calculateEmpTargets } from "@/features/overdrive-hacks/domain/emp";
 import { calculateSonarTarget } from "@/features/overdrive-hacks/domain/sonar";
-import { modalMachineAtom } from "@/state/modal";
+import { modalMachineSendAtom } from "@/state/modal";
+import { OverdriveHackId, OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 
 // types
-import type { OverdriveHackId, OverdriveHacks, SonarReveal } from "@/features/overdrive-hacks/domain/models";
-
-// A hack actor that cannot read its inputs fails with this instead of a bare
-// NoSuchElementError: the machine's onError branch logs it as a diagnosable
-// failure rather than an anonymous defect
-class HackInputUnavailable extends Schema.TaggedError<HackInputUnavailable, { readonly brand: unique symbol }>()("HackInputUnavailable", {
-  input: Schema.Literals(["theSecretWord", "keypad"]),
-}) {}
+import type { EffectSourceArgs } from "@xstate/effect";
 
 interface ApplyEmpHackInput {
   empNukedLetters: OverdriveHacks["empNukedLetters"];
@@ -40,29 +33,24 @@ interface FetchOverrideAudioInput {
 // constants
 import { initialOverdriveHacks, VOWELS_BY_LANGUAGE, OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
+// A hack actor that cannot read its inputs fails with this instead of a bare
+// NoSuchElementError: the machine's onError branch logs it as a diagnosable
+// failure rather than an anonymous defect
+class HackInputUnavailable extends Schema.TaggedError<HackInputUnavailable, { readonly brand: unique symbol }>()("HackInputUnavailable", {
+  input: Schema.Literals(["theSecretWord", "keypad"]),
+}) {}
+
 // The shared overdrive-hack purchase preamble: check affordability, produce the
-// hack's result, and charge the run score only when a result was produced.
-// Every hack runs through this one gate so the affordability check and the
-// charge cannot drift apart between the three actors
+// hack's result, and charge the run score only when a result was produced
 const withHackPurchase = <A, E, R>(hackId: OverdriveHackId, produce: Effect.Effect<Option.Option<A>, E, R>) =>
   Atom.get(overdriveHacksCanApplyHackAtom(hackId)).pipe(
     Effect.flatMap((canApplyHack) => (canApplyHack ? produce : Effect.succeedNone)),
     Effect.tap((result) =>
-      Option.isSome(result) ? Atom.set(runSessionMachineAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(hackId) }) : Effect.void
+      Option.isSome(result) ? Atom.set(runSessionMachineSendAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(hackId) }) : Effect.void
     )
   );
 
-// One shared onError action for every hack: the hack id is the only difference
-// between the four branches below, so it is a factory argument rather than four
-// hand-written closures that can drift. The id stays inside the message (not a
-// structured field) so the log line a developer greps for does not change
-const logHackFailure =
-  (hackId: string) =>
-  ({ event }: { readonly event: { readonly error: unknown } }) => {
-    void runClientCommand(Effect.logError(`[OVERDRIVE HACK FAILED]: ${hackId}`, event.error));
-  };
-
-const applyEmpHackActor = effectActor(({ empNukedLetters }: ApplyEmpHackInput) =>
+const applyEmpHackActor = createEffectLogic(({ input: { empNukedLetters } }: EffectSourceArgs<ApplyEmpHackInput>) =>
   withHackPurchase(
     "emp",
     Effect.gen(function* () {
@@ -78,7 +66,7 @@ const applyEmpHackActor = effectActor(({ empNukedLetters }: ApplyEmpHackInput) =
   )
 );
 
-const applySonarHackActor = effectActor(({ sonarReveals }: ApplySonarHackInput) =>
+const applySonarHackActor = createEffectLogic(({ input: { sonarReveals } }: EffectSourceArgs<ApplySonarHackInput>) =>
   withHackPurchase(
     "sonar",
     Effect.gen(function* () {
@@ -99,7 +87,7 @@ const applySonarHackActor = effectActor(({ sonarReveals }: ApplySonarHackInput) 
   )
 );
 
-const applyOverrideHackActor = effectActor(() =>
+const applyOverrideHackActor = createEffectLogic(() =>
   withHackPurchase(
     "override",
     Effect.gen(function* () {
@@ -118,7 +106,7 @@ const applyOverrideHackActor = effectActor(() =>
   )
 );
 
-const fetchOverrideAudioActor = effectActor(({ theOverride }: FetchOverrideAudioInput) =>
+const fetchOverrideAudioActor = createEffectLogic(({ input: { theOverride } }: EffectSourceArgs<FetchOverrideAudioInput>) =>
   Effect.gen(function* () {
     const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
@@ -130,29 +118,25 @@ const fetchOverrideAudioActor = effectActor(({ theOverride }: FetchOverrideAudio
   })
 );
 
-export const overdriveHacksMachine = setup({
-  types: {} as {
-    context: OverdriveHacks;
-    events:
-      | { readonly type: "solutionsLanguageChanged" }
-      | { readonly type: "puzzle.started" }
-      | { readonly type: "puzzle.ended" }
-      | { readonly type: "input.keyPressed"; readonly pressedKey: string }
-      | { readonly type: "hack.useRequested"; readonly overdriveHackId: OverdriveHackId }
-      // The invoked actors' done events, declared so onDone can read `event.output`
-      // through assertEvent — the hand-annotated `params` they replace needed a
-      // type-suppression comment per action, which silently disabled every type
-      // error on the statement
-      | { readonly type: "xstate.done.actor.applyEmpHackActor"; readonly output: Option.Option<OverdriveHacks["empNukedLetters"]> }
-      | { readonly type: "xstate.done.actor.applySonarHackActor"; readonly output: Option.Option<SonarReveal> }
-      | { readonly type: "xstate.done.actor.applyOverrideHackActor"; readonly output: OverdriveHacks["theOverride"] }
-      | { readonly type: "xstate.done.actor.fetchOverrideAudioActor"; readonly output: OverdriveHacks["theOverrideAudio"] }
-      // The invoked actors' error events, declared so onError can log the failure
-      // (see the onError branches below) instead of discarding it silently
-      | { readonly type: "xstate.error.actor.applyEmpHackActor"; readonly error: unknown }
-      | { readonly type: "xstate.error.actor.applySonarHackActor"; readonly error: unknown }
-      | { readonly type: "xstate.error.actor.applyOverrideHackActor"; readonly error: unknown }
-      | { readonly type: "xstate.error.actor.fetchOverrideAudioActor"; readonly error: unknown };
+// EMP-nuked keys never reach the word-challenge machine
+const shouldForwardKeyPress = (empNukedLetters: OverdriveHacks["empNukedLetters"], pressedKey: string) =>
+  !Array.contains(empNukedLetters, pressedKey.toUpperCase());
+
+export const overdriveHacksMachine = setupEffect({
+  schemas: {
+    context: OverdriveHacks,
+    events: {
+      solutionsLanguageChanged: Schema.Struct({}),
+      "puzzle.started": Schema.Struct({}),
+      "puzzle.ended": Schema.Struct({}),
+      "input.keyPressed": Schema.Struct({ pressedKey: Schema.String }),
+      "hack.useRequested": Schema.Struct({ overdriveHackId: OverdriveHackId }),
+    },
+    actions: {
+      forwardKeyPress: { params: Schema.Struct({ pressedKey: Schema.String }) },
+      onOverrideHackApplied: { params: Schema.Struct({}) },
+      logHackFailure: { params: Schema.Struct({ hackId: Schema.String, error: Schema.Unknown }) },
+    },
   },
   guards: {
     isEmpHackRequested: ({ event }) => {
@@ -168,57 +152,26 @@ export const overdriveHacksMachine = setup({
       return event.overdriveHackId === "override";
     },
   },
-  actions: {
-    applyEmpHack: assign(({ context, event }) => {
-      assertEvent(event, "xstate.done.actor.applyEmpHackActor");
-      // `getOrElse(() => [])`, not `Option.toArray`: this actor's Option already
-      // wraps the nuked-letter array, so `toArray` would nest it one level deeper
-      // (see `applySonarHack` below, whose Option wraps a single reveal)
-      const empNukedLetters = event.output.pipe(Option.getOrElse(() => []));
-      return { ...context, empNukedLetters: [...context.empNukedLetters, ...empNukedLetters] } satisfies OverdriveHacks;
-    }),
-
-    applySonarHack: assign(({ context, event }) => {
-      assertEvent(event, "xstate.done.actor.applySonarHackActor");
-      const sonarReveals = event.output.pipe(Option.toArray);
-      return { ...context, sonarReveals: [...context.sonarReveals, ...sonarReveals] } satisfies OverdriveHacks;
-    }),
-
-    applyOverrideHack: assign(({ context, event }) => {
-      assertEvent(event, "xstate.done.actor.applyOverrideHackActor");
-      return { ...context, theOverride: event.output } satisfies OverdriveHacks;
-    }),
-
-    onOverrideHackApplied: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "override-hack" })),
-
-    saveOverrideAudio: assign(({ context, event }) => {
-      assertEvent(event, "xstate.done.actor.fetchOverrideAudioActor");
-      return { ...context, theOverrideAudio: event.output } satisfies OverdriveHacks;
-    }),
-
-    // Filter EMP-nuked keys before forwarding keypresses to the word-challenge machine
-    forwardKeyPress: ({ context, event }) => {
-      assertEvent(event, "input.keyPressed");
-      const normalizedKey = event.pressedKey.toUpperCase();
-      // A linear membership test over the handful of nuked letters (the same
-      // `Array.contains` spelling validators.canSubmitGuess uses for the guess
-      // history); word-challenge's greyLetters keeps a HashSet because the same
-      // per-keypress lookup there runs over a far larger key set
-      if (Array.contains(context.empNukedLetters, normalizedKey)) return;
-
-      void runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "keyPressed", pressedKey: event.pressedKey }));
-    },
-  },
   actors: { applyEmpHackActor, applySonarHackActor, applyOverrideHackActor, fetchOverrideAudioActor },
+  actions: {
+    forwardKeyPress: ({ pressedKey }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Atom.set(wordChallengeMachineSendAtom, { type: "keyPressed", pressedKey }),
+
+    // A failed override still opens the modal, which has its own "unavailable" state
+    onOverrideHackApplied: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Atom.set(modalMachineSendAtom, { type: "opened", modalType: "override-hack" }),
+
+    logHackFailure: ({ hackId, error }) => Effect.logError(`[OVERDRIVE HACK FAILED]: ${hackId}`, error),
+  },
 }).createMachine({
   id: "overdriveHacks",
   context: initialOverdriveHacks(),
   initial: "idle",
 
   on: {
-    solutionsLanguageChanged: { target: ".idle", actions: assign(initialOverdriveHacks) },
+    solutionsLanguageChanged: { target: ".idle", context: () => initialOverdriveHacks() },
     "puzzle.started": { target: ".active" },
-    "puzzle.ended": { target: ".idle", actions: assign(initialOverdriveHacks) },
+    "puzzle.ended": { target: ".idle", context: () => initialOverdriveHacks() },
   },
 
   states: {
@@ -227,70 +180,112 @@ export const overdriveHacksMachine = setup({
     // An active puzzle is running — hacks and keypress forwarding are live
     active: {
       on: {
-        "input.keyPressed": { actions: "forwardKeyPress" },
+        "input.keyPressed": (args, enq) => {
+          if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
+            enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
+          }
+        },
         "hack.useRequested": { target: "classifying" },
       },
     },
 
     // Determine which hack specifically needs to be applied
     classifying: {
-      always: [
-        { guard: "isEmpHackRequested", target: "applyingEmpHack" },
-        { guard: "isSonarHackRequested", target: "applyingSonarHack" },
-        { guard: "isOverrideHackRequested", target: "applyingOverrideHack" },
-      ],
+      always: (args) => {
+        if (args.guards.isEmpHackRequested(args)) return { target: "applyingEmpHack" };
+        if (args.guards.isSonarHackRequested(args)) return { target: "applyingSonarHack" };
+        if (args.guards.isOverrideHackRequested(args)) return { target: "applyingOverrideHack" };
+      },
     },
 
     applyingEmpHack: {
-      on: { "input.keyPressed": { actions: "forwardKeyPress" } },
+      on: {
+        "input.keyPressed": (args, enq) => {
+          if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
+            enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
+          }
+        },
+      },
 
       invoke: {
         src: "applyEmpHackActor",
         input: ({ context }) => ({ empNukedLetters: context.empNukedLetters }),
-        onDone: { target: "active", actions: "applyEmpHack" },
-
-        // The hack failed (missing inputs, a rejected RPC): the machine returns
-        // to `active` — the player can retry or play on — but the failure is
-        // logged through the client runtime instead of dying silently with the
-        // actor
-        onError: { target: "active", actions: logHackFailure("emp") },
+        onDone: (args) => ({
+          target: "active",
+          context: { empNukedLetters: [...args.context.empNukedLetters, ...Option.getOrElse(args.output, () => [])] },
+        }),
+        onError: (args, enq) => {
+          enq(args.actions.logHackFailure, { self: args.self, hackId: "emp", error: args.event.error });
+          return { target: "active" };
+        },
       },
     },
 
     applyingSonarHack: {
-      on: { "input.keyPressed": { actions: "forwardKeyPress" } },
+      on: {
+        "input.keyPressed": (args, enq) => {
+          if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
+            enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
+          }
+        },
+      },
 
       invoke: {
         src: "applySonarHackActor",
         input: ({ context }) => ({ sonarReveals: context.sonarReveals }),
-        onDone: { target: "active", actions: "applySonarHack" },
-        onError: { target: "active", actions: logHackFailure("sonar") },
+        onDone: (args) => ({
+          target: "active",
+          context: { sonarReveals: [...args.context.sonarReveals, ...Option.toArray(args.output)] },
+        }),
+        onError: (args, enq) => {
+          enq(args.actions.logHackFailure, { self: args.self, hackId: "sonar", error: args.event.error });
+          return { target: "active" };
+        },
       },
     },
 
     applyingOverrideHack: {
-      on: { "input.keyPressed": { actions: "forwardKeyPress" } },
+      on: {
+        "input.keyPressed": (args, enq) => {
+          if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
+            enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
+          }
+        },
+      },
 
       invoke: {
         src: "applyOverrideHackActor",
-        onDone: { target: "fetchingOverrideAudio", actions: ["applyOverrideHack", "onOverrideHackApplied"] },
-        // A failed override still opens the modal, which has its own
-        // "unavailable" state — the failure is logged like every other hack
-        onError: { target: "active", actions: ["onOverrideHackApplied", logHackFailure("override")] },
+        onDone: (args, enq) => {
+          enq(args.actions.onOverrideHackApplied, { self: args.self });
+          return { target: "fetchingOverrideAudio", context: { theOverride: args.output } };
+        },
+        onError: (args, enq) => {
+          enq(args.actions.onOverrideHackApplied, { self: args.self });
+          enq(args.actions.logHackFailure, { self: args.self, hackId: "override", error: args.event.error });
+          return { target: "active" };
+        },
       },
     },
 
     fetchingOverrideAudio: {
-      on: { "input.keyPressed": { actions: "forwardKeyPress" } },
+      on: {
+        "input.keyPressed": (args, enq) => {
+          if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
+            enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
+          }
+        },
+      },
 
       invoke: {
         src: "fetchOverrideAudioActor",
-
         input: ({ context }) => ({ theOverride: context.theOverride }),
-        onDone: { target: "active", actions: "saveOverrideAudio" },
+        onDone: (args) => ({ target: "active", context: { theOverrideAudio: args.output } }),
 
         // Audio is a non-critical enrichment; even if the actor itself fails unexpectedly, the game remains playable
-        onError: { target: "active", actions: logHackFailure("override audio") },
+        onError: (args, enq) => {
+          enq(args.actions.logHackFailure, { self: args.self, hackId: "override audio", error: args.event.error });
+          return { target: "active" };
+        },
       },
     },
   },

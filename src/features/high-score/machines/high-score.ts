@@ -1,18 +1,17 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
-import { effectActor } from "@/lib/effect-actor";
+import { Effect, Option, Schema } from "effect";
+import { Atom, AtomRegistry } from "effect/reactivity";
+import { createEffectLogic, setupEffect } from "@xstate/effect";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
-import { assign, setup, assertEvent } from "xstate";
 import { msg } from "gt-react";
 import { toastManager } from "@/ui/toastify";
-import { modalMachineAtom } from "@/state/modal";
+import { modalMachineSendAtom } from "@/state/modal";
 import { qualifiesForTop10 } from "@/features/high-score/domain/helpers";
-import { AddHighScore } from "@/features/high-score/domain/models";
+import { AddHighScore, HighScoreMachineContext } from "@/features/high-score/domain/models";
 
 // types
-import type { HighScore, HighScoreMachineContext } from "@/features/high-score/domain/models";
+import type { EffectSourceArgs } from "@xstate/effect";
+import type { HighScore } from "@/features/high-score/domain/models";
 
 interface Top10HighScoresInput {
   solutionsLanguage: HighScoreMachineContext["solutionsLanguage"];
@@ -22,39 +21,54 @@ interface AddHighScoreInput {
   context: HighScoreMachineContext;
 }
 
+// The `runFinished` payload, shared by the four transitions that reset the context with a fresh run
+type RunFinished = {
+  readonly runScore: HighScoreMachineContext["runScore"];
+  readonly streak: HighScoreMachineContext["streak"];
+  readonly solutionsLanguage: HighScoreMachineContext["solutionsLanguage"];
+};
+
 // constants
 import { INITIAL_HIGH_SCORE_CONTEXT } from "@/features/high-score/domain/constants";
 
-const top10HighScoresActor = effectActor(({ solutionsLanguage }: Top10HighScoresInput) =>
+const runFinishedContext = (event: RunFinished) =>
+  ({
+    ...INITIAL_HIGH_SCORE_CONTEXT,
+    runScore: event.runScore,
+    streak: event.streak,
+    solutionsLanguage: event.solutionsLanguage,
+  }) as const satisfies HighScoreMachineContext;
+
+const top10HighScoresActor = createEffectLogic(({ input: { solutionsLanguage } }: EffectSourceArgs<Top10HighScoresInput>) =>
   Effect.flatMap(RpcHighScoreClient, ({ top10HighScores }) => top10HighScores(solutionsLanguage))
 );
 
-const addHighScoreActor = effectActor(({ context }: AddHighScoreInput) =>
+const addHighScoreActor = createEffectLogic(({ input: { context } }: EffectSourceArgs<AddHighScoreInput>) =>
   Effect.flatMap(RpcHighScoreClient, ({ addHighScore }) =>
-    // Explicit field selection: the machine context carries non-wire fields
-    // (e.g. newHighScoreId) that must not ride into the request
+    // Explicit field selection: the machine context carries non-wire fields (e.g. newHighScoreId) that must not ride into the request
     addHighScore(
-      AddHighScore.make({
-        playerName: context.playerName,
-        score: context.runScore,
-        streak: context.streak,
-        solutionsLang: context.solutionsLanguage,
-      })
+      AddHighScore.make({ playerName: context.playerName, score: context.runScore, streak: context.streak, solutionsLang: context.solutionsLanguage })
     )
   )
 );
 
-export const highScoreMachine = setup({
-  types: {} as {
-    events:
-      | {
-          readonly type: "runFinished";
-          runScore: HighScoreMachineContext["runScore"];
-          streak: HighScoreMachineContext["streak"];
-          solutionsLanguage: HighScoreMachineContext["solutionsLanguage"];
-        }
-      | { readonly type: "initialsSubmitted"; playerName: HighScoreMachineContext["playerName"] };
-    context: HighScoreMachineContext;
+export const highScoreMachine = setupEffect({
+  schemas: {
+    context: HighScoreMachineContext,
+    events: {
+      runFinished: Schema.Struct({
+        runScore: HighScoreMachineContext.fields.runScore,
+        streak: HighScoreMachineContext.fields.streak,
+        solutionsLanguage: HighScoreMachineContext.fields.solutionsLanguage,
+      }),
+      initialsSubmitted: Schema.Struct({ playerName: HighScoreMachineContext.fields.playerName }),
+    },
+    actions: {
+      onSuccess: { params: Schema.Struct({}) },
+      onNoLongerQualified: { params: Schema.Struct({}) },
+      onFailure: { params: Schema.Struct({}) },
+      showHighScoreModal: { params: Schema.Struct({}) },
+    },
   },
   guards: {
     // Determine if the current run qualifies for the high score
@@ -63,54 +77,27 @@ export const highScoreMachine = setup({
       // the 10th-place entry (shared with the DB service's post-lock re-check)
       qualifiesForTop10(params.top10HighScores, context.runScore, context.streak),
   },
+  actors: { top10HighScoresActor, addHighScoreActor },
+  delays: { delay: 3000 },
   actions: {
-    saveRunData: assign(({ event }) => {
-      assertEvent(event, "runFinished");
-      // Explicit field selection rather than spreading `event`: a spread-derived
-      // property is not checked by `satisfies`, so the event's `type` would land
-      // in the context (which has no such field) unchecked
-      return {
-        ...INITIAL_HIGH_SCORE_CONTEXT,
-        runScore: event.runScore,
-        streak: event.streak,
-        solutionsLanguage: event.solutionsLanguage,
-      } as const satisfies HighScoreMachineContext;
-    }),
-
-    saveInitials: assign(({ context, event }) => {
-      assertEvent(event, "initialsSubmitted");
-      return { ...context, playerName: event.playerName } as const satisfies HighScoreMachineContext;
-    }),
-
-    saveNewHighScoreId: assign(
-      ({ context }, params: { newHighScoreId: HighScoreMachineContext["newHighScoreId"] }) =>
-        ({ ...context, newHighScoreId: params.newHighScoreId }) as const satisfies HighScoreMachineContext
-    ),
-
     onSuccess: () =>
-      toastManager.add({
-        title: msg("Score Recorded"),
-        description: msg("Good luck on your next run!"),
+      Effect.sync(() => {
+        toastManager.add({ title: msg("Score Recorded"), description: msg("Good luck on your next run!") });
       }),
 
     onNoLongerQualified: () =>
-      toastManager.add({
-        type: "error",
-        title: msg("Leaderboard Updated"),
-        description: msg("This score no longer qualifies for the Top 10."),
+      Effect.sync(() => {
+        toastManager.add({ type: "error", title: msg("Leaderboard Updated"), description: msg("This score no longer qualifies for the Top 10.") });
       }),
 
     onFailure: () =>
-      toastManager.add({
-        type: "error",
-        title: msg("Submission Failed"),
-        description: msg("Failed to save your score. Please try again later."),
+      Effect.sync(() => {
+        toastManager.add({ type: "error", title: msg("Submission Failed"), description: msg("Failed to save your score. Please try again later.") });
       }),
 
-    showHighScoreModal: () => runClientCommand(Atom.set(modalMachineAtom, { type: "opened", modalType: "high-score" })),
+    showHighScoreModal: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Atom.set(modalMachineSendAtom, { type: "opened", modalType: "high-score" }),
   },
-  actors: { top10HighScoresActor, addHighScoreActor },
-  delays: { delay: 3000 },
 }).createMachine({
   id: "highScore",
   context: INITIAL_HIGH_SCORE_CONTEXT,
@@ -119,7 +106,7 @@ export const highScoreMachine = setup({
   states: {
     awaitingFinishedRun: {
       on: {
-        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
       },
     },
 
@@ -127,12 +114,8 @@ export const highScoreMachine = setup({
       invoke: {
         src: "top10HighScoresActor",
         input: ({ context }) => ({ solutionsLanguage: context.solutionsLanguage }),
-        onDone: [
-          { guard: { type: "qualifiesForHighScore", params: ({ event }) => ({ top10HighScores: event.output }) }, target: "enteringInitials" },
-
-          // Did not qualify, go back to sleep
-          { target: "awaitingFinishedRun" },
-        ],
+        onDone: (args) =>
+          args.guards.qualifiesForHighScore(args, { top10HighScores: args.event.output }) ? { target: "enteringInitials" } : { target: "awaitingFinishedRun" },
 
         // Silently fail or handle gracefully
         onError: { target: "awaitingFinishedRun" },
@@ -141,8 +124,8 @@ export const highScoreMachine = setup({
 
     enteringInitials: {
       on: {
-        initialsSubmitted: { target: "submitting", actions: "saveInitials" },
-        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+        initialsSubmitted: { target: "submitting", context: ({ context, event }) => ({ ...context, playerName: event.playerName }) },
+        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
       },
     },
 
@@ -150,36 +133,42 @@ export const highScoreMachine = setup({
       invoke: {
         src: "addHighScoreActor",
         input: ({ context }) => ({ context }),
-        onDone: [
-          {
-            guard: ({ event }) => Option.isSome(event.output),
-            target: "success",
-            actions: { type: "saveNewHighScoreId", params: ({ event }) => ({ newHighScoreId: event.output }) },
-          },
-          { target: "awaitingFinishedRun", actions: "onNoLongerQualified" },
-        ],
+        onDone: (args, enq) => {
+          const { event } = args;
+          if (Option.isSome(event.output)) return { target: "success", context: { ...args.context, newHighScoreId: event.output } };
+          enq(args.actions.onNoLongerQualified, { self: args.self });
+          return { target: "awaitingFinishedRun" };
+        },
         onError: { target: "failure" },
       },
     },
 
     success: {
-      entry: "onSuccess",
+      entry: (_args, enq) => {
+        enq(_args.actions.onSuccess, { self: _args.self });
+      },
 
       on: {
-        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
       },
 
       after: {
-        delay: { target: "awaitingFinishedRun", actions: "showHighScoreModal" },
+        // The delayed modal show is likewise a transition function
+        delay: (_args, enq) => {
+          enq(_args.actions.showHighScoreModal, { self: _args.self });
+          return { target: "awaitingFinishedRun" };
+        },
       },
     },
 
     failure: {
-      entry: "onFailure",
+      entry: (_args, enq) => {
+        enq(_args.actions.onFailure, { self: _args.self });
+      },
 
       on: {
-        initialsSubmitted: { target: "submitting", actions: "saveInitials" },
-        runFinished: { target: "checkingQualification", actions: "saveRunData" },
+        initialsSubmitted: { target: "submitting", context: ({ context, event }) => ({ ...context, playerName: event.playerName }) },
+        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
       },
     },
   },

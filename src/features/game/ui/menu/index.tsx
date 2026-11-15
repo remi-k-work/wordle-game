@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { modalMachineAtom } from "@/state/modal";
+import { modalMachineSendAtom } from "@/state/modal";
 import { T, useGT } from "gt-react";
 
 // components
@@ -21,7 +21,7 @@ const MENU_MODALS = [
 ] as const;
 
 export function GameMenu() {
-  const modalMachineEvent = useAtomSet(modalMachineAtom);
+  const modalMachineEvent = useAtomSet(modalMachineSendAtom);
   const gt = useGT();
 
   return (

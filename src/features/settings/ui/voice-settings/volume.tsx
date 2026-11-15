@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsVoiceVolumeAtom } from "@/features/settings/state/game-settings";
+import { gameSettingsMachineSendAtom, gameSettingsVoiceVolumeAtom } from "@/features/settings/state/game-settings";
 
 // components
 import { T } from "gt-react";
@@ -15,7 +15,7 @@ const VOLUME_CONTROL = { name: "voiceVolume", label: <T>Volume</T>, min: 0, max:
 
 export function Volume() {
   const voiceVolume = useAtomValue(gameSettingsVoiceVolumeAtom);
-  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
+  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineSendAtom);
 
   return (
     <VoiceSlider

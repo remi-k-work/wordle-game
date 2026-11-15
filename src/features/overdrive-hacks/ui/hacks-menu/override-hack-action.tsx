@@ -3,11 +3,11 @@ import { Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import {
   overdriveHacksIsApplyingOverrideAtom,
-  overdriveHacksMachineAtom,
+  overdriveHacksMachineSendAtom,
   overdriveHacksTheOverrideAtom,
 } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/can-apply";
-import { modalMachineAtom } from "@/state/modal";
+import { modalMachineSendAtom } from "@/state/modal";
 import { T } from "gt-react";
 
 // components
@@ -42,8 +42,8 @@ export function OverrideHackAction({ onClicked }: OverrideHackActionProps) {
   const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
   const isApplyingOverride = useAtomValue(overdriveHacksIsApplyingOverrideAtom);
 
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
-  const modalMachineEvent = useAtomSet(modalMachineAtom);
+  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineSendAtom);
+  const modalMachineEvent = useAtomSet(modalMachineSendAtom);
 
   if (Option.isSome(theOverride)) {
     return (

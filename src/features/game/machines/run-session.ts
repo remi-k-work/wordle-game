@@ -1,113 +1,76 @@
-// oxlint-disable effecttsgo/crypto-random-uuid typescript/no-misused-spread
-
 // services, features, and other libraries
-import { DateTime, Effect, Option } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
-import { setup, assign, assertEvent } from "xstate";
+import { Cause, DateTime, Effect, Option, Schema } from "effect";
+import { Atom, AtomRegistry } from "effect/reactivity";
+import { setupEffect } from "@xstate/effect";
+import { assertEvent } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
-import { highScoreMachineAtom } from "@/features/high-score/state/high-score";
+import { highScoreMachineSendAtom } from "@/features/high-score/state/high-score";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state/actions";
 import { runResultAtom } from "@/features/game/state/run-session";
-
-// types
-import type { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain/models";
+import { RunDeathReason, RunSession, WordChallenge, WordScore } from "@/features/game/domain/models";
 
 // constants
 import { INITIAL_RUN_SESSION } from "@/features/game/domain/constants";
 
-export const runSessionMachine = setup({
-  types: {} as {
-    events:
-      | { readonly type: "solutionsLanguageChanged" }
-      | { readonly type: "startedNewRun" }
-      | { readonly type: "forfeitedRun"; readonly wordChallenge: WordChallenge }
-      | { readonly type: "wordWon"; readonly wordScore: WordScore }
-      | { readonly type: "runScoreSpent"; readonly amount: WordScore["wordScore"] }
-      | { readonly type: "wordLost" };
-    context: RunSession;
-    input: RunSession;
+const finishActiveRunContext = (context: RunSession) =>
+  ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession;
+
+export const runSessionMachine = setupEffect({
+  schemas: {
+    context: RunSession,
+
+    // The machine is hydrated from the persisted KVS atom, whose value is the createActor input
+    input: RunSession,
+    events: {
+      solutionsLanguageChanged: Schema.Struct({}),
+      startedNewRun: Schema.Struct({}),
+      forfeitedRun: Schema.Struct({ wordChallenge: WordChallenge }),
+      wordWon: Schema.Struct({ wordScore: WordScore }),
+      runScoreSpent: Schema.Struct({ amount: WordScore.fields.wordScore }),
+      wordLost: Schema.Struct({}),
+    },
+    actions: {
+      clearFinishedRun: { params: Schema.Struct({}) },
+      trackStartedNewRun: { params: Schema.Struct({}) },
+      saveFinishedRun: { params: Schema.Struct({ runSession: RunSession, deathReason: RunDeathReason }) },
+      trackForfeitedRun: { params: Schema.Struct({ runSession: RunSession, wordChallenge: WordChallenge }) },
+      onRunFinished: { params: Schema.Struct({ runSession: RunSession }) },
+    },
   },
   guards: { hasActiveRun: ({ context }) => Option.isSome(context.runId) },
   actions: {
-    // Start a new arcade run, wiping previous run stats but preserving historical "best" stats
-    // NOTE: `assign` is synchronous, so `Clock`/`DateTime.now` (Effects) and the
-    // `Crypto` service are unavailable here — `crypto.randomUUID()`/`DateTime.nowUnsafe()`
-    // are the correct tools; Effect's `Random` has no UUID API regardless
-    startNewRun: assign(
-      ({ context }) =>
-        ({
-          ...INITIAL_RUN_SESSION,
-          runId: Option.some(crypto.randomUUID()),
-          createdAt: Option.some(DateTime.nowUnsafe()),
-          bestRunScore: context.bestRunScore,
-          bestStreak: context.bestStreak,
-        }) as const satisfies RunSession
-    ),
-
-    // Bank volatile points into the persistent run session
-    bankWord: assign(({ context, event }) => {
-      assertEvent(event, "wordWon");
-
-      const runScore = context.runScore + event.wordScore.wordScore;
-      const streak = context.streak + 1;
-
-      return {
-        ...context,
-        runScore,
-        streak,
-        bestRunScore: Math.max(context.bestRunScore, runScore),
-        bestStreak: Math.max(context.bestStreak, streak),
-      } as const satisfies RunSession;
-    }),
-
-    // Score spending is a generic run concern
-    spendRunScore: assign(({ context, event }) => {
-      assertEvent(event, "runScoreSpent");
-      return { ...context, runScore: Math.max(0, context.runScore - event.amount) } as const satisfies RunSession;
-    }),
-
-    // Finish the active run by clearing identifiers, but LEAVE runScore, streak, and createdAt intact for the UI!
-    finishActiveRun: assign(
-      ({ context }) => ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession
-    ),
-
-    clearFinishedRun: () => runClientCommand(Atom.set(runResultAtom, Option.none())),
-
-    saveFinishedRun: ({ context }, params: { deathReason: RunDeathReason }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          const now = yield* DateTime.now;
-          const runId = yield* Effect.fromOption(context.runId);
-          const createdAt = Option.getOrElse(context.createdAt, () => now);
-          yield* Atom.set(
-            runResultAtom,
-            Option.some({ runId, createdAt, finishedAt: now, runScore: context.runScore, streak: context.streak, deathReason: params.deathReason })
-          );
-        })
-      ),
+    // The completed-run summary belongs to the result UI, not durable storage: clearing it is an atom write
+    clearFinishedRun: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> => Atom.set(runResultAtom, Option.none()),
 
     // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-    trackStartedNewRun: () => runClientCommand(trackStartedNewRun()),
+    trackStartedNewRun: () => trackStartedNewRun(),
+
+    // Build the immutable completed-run summary; `runId` is present by invariant for any active run,
+    // so the Option lift cannot fail in practice (its typed failure still rides the machine's error channel)
+    saveFinishedRun: ({ runSession, deathReason }): Effect.Effect<void, Cause.NoSuchElementError, AtomRegistry.AtomRegistry> =>
+      Effect.gen(function* () {
+        const now = yield* DateTime.now;
+        const runId = yield* Effect.fromOption(runSession.runId);
+        const createdAt = Option.getOrElse(runSession.createdAt, () => now);
+        yield* Atom.set(
+          runResultAtom,
+          Option.some({ runId, createdAt, finishedAt: now, runScore: runSession.runScore, streak: runSession.streak, deathReason })
+        );
+      }),
 
     // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-    // The telemetry action guards the no-active-run case itself, so no outer check is needed here
-    trackForfeitedRun: ({ context, event }) => {
-      assertEvent(event, "forfeitedRun");
-      return runClientCommand(trackForfeitedRun(context, event.wordChallenge));
-    },
+    trackForfeitedRun: ({ runSession, wordChallenge }) => trackForfeitedRun(runSession, wordChallenge),
 
     // Notify high score machine that a run has finished
-    onRunFinished: ({ context }) =>
-      runClientCommand(
-        Effect.gen(function* () {
-          const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-          yield* Atom.set(highScoreMachineAtom, { type: "runFinished", runScore: context.runScore, streak: context.streak, solutionsLanguage });
-        })
-      ),
+    onRunFinished: ({ runSession }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Effect.gen(function* () {
+        const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+        yield* Atom.set(highScoreMachineSendAtom, { type: "runFinished", runScore: runSession.runScore, streak: runSession.streak, solutionsLanguage });
+      }),
   },
 }).createMachine({
   id: "runSession",
+
   // Hydrate the machine with the input from the KVS Atom
   context: ({ input }) => ({ ...input }) satisfies RunSession,
   initial: "classifying",
@@ -115,35 +78,72 @@ export const runSessionMachine = setup({
   states: {
     // Determine whether we are restoring an active or completed run
     classifying: {
-      always: [{ guard: "hasActiveRun", target: "active" }, { target: "inactive" }],
+      always: (args) => (args.guards.hasActiveRun(args) ? { target: "active" } : { target: "inactive" }),
     },
 
     inactive: {
       on: {
         // Start a brand-new arcade run
-        startedNewRun: { target: "active", actions: ["trackStartedNewRun", "startNewRun", "clearFinishedRun"] },
+        startedNewRun: (args, enq) => {
+          enq(args.actions.trackStartedNewRun, { self: args.self });
+          enq(args.actions.clearFinishedRun, { self: args.self });
+          return {
+            target: "active",
+            context: {
+              ...INITIAL_RUN_SESSION,
+              runId: Option.some(crypto.randomUUID()),
+              createdAt: Option.some(DateTime.nowUnsafe()),
+              bestRunScore: args.context.bestRunScore,
+              bestStreak: args.context.bestStreak,
+            },
+          };
+        },
       },
     },
 
     active: {
       on: {
-        solutionsLanguageChanged: { target: "inactive", actions: ["finishActiveRun", "clearFinishedRun"] },
+        // A language change abandons the active run
+        solutionsLanguageChanged: (args, enq) => {
+          enq(args.actions.clearFinishedRun, { self: args.self });
+          return { target: "inactive", context: finishActiveRunContext(args.context) };
+        },
 
         // Forfeit the active run
-        forfeitedRun: {
-          target: "inactive",
-          actions: ["trackForfeitedRun", { type: "saveFinishedRun", params: { deathReason: "Forfeit" } }, "onRunFinished", "finishActiveRun"],
+        forfeitedRun: (args, enq) => {
+          assertEvent(args.event, "forfeitedRun");
+          enq(args.actions.trackForfeitedRun, { self: args.self, runSession: args.context, wordChallenge: args.event.wordChallenge });
+          enq(args.actions.saveFinishedRun, { self: args.self, runSession: args.context, deathReason: "Forfeit" });
+          enq(args.actions.onRunFinished, { self: args.self, runSession: args.context });
+          return { target: "inactive", context: finishActiveRunContext(args.context) };
         },
 
         // Word won, bank volatile points
-        wordWon: { actions: "bankWord" },
+        wordWon: (args) => {
+          assertEvent(args.event, "wordWon");
+          const runScore = args.context.runScore + args.event.wordScore.wordScore;
+          const streak = args.context.streak + 1;
+          return {
+            context: {
+              ...args.context,
+              runScore,
+              streak,
+              bestRunScore: Math.max(args.context.bestRunScore, runScore),
+              bestStreak: Math.max(args.context.bestStreak, streak),
+            },
+          };
+        },
 
-        runScoreSpent: { actions: "spendRunScore" },
+        runScoreSpent: (args) => {
+          assertEvent(args.event, "runScoreSpent");
+          return { context: { ...args.context, runScore: Math.max(0, args.context.runScore - args.event.amount) } };
+        },
 
-        // Word lost, finish the active run
-        wordLost: {
-          target: "inactive",
-          actions: [{ type: "saveFinishedRun", params: { deathReason: "Guesses" } }, "onRunFinished", "finishActiveRun"],
+        // Word lost, finish the active run (same shape as forfeit, without the forfeit telemetry)
+        wordLost: (args, enq) => {
+          enq(args.actions.saveFinishedRun, { self: args.self, runSession: args.context, deathReason: "Guesses" });
+          enq(args.actions.onRunFinished, { self: args.self, runSession: args.context });
+          return { target: "inactive", context: finishActiveRunContext(args.context) };
         },
       },
     },

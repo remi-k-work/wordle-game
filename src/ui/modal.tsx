@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { modalMachineAtom } from "@/state/modal";
+import { modalMachineSendAtom } from "@/state/modal";
 
 // components
 import { Dialog } from "@base-ui/react/dialog";
@@ -19,7 +19,7 @@ interface ModalProps {
 import { DIALOG_BACKDROP_CLASSES, DIALOG_POPUP_CLASSES, DIALOG_TITLE_CLASSES, DIALOG_VIEWPORT_CLASSES } from "@/ui/dialog-chrome";
 
 export function Modal({ isOpen = false, title, children }: ModalProps) {
-  const modalMachineEvent = useAtomSet(modalMachineAtom);
+  const modalMachineEvent = useAtomSet(modalMachineSendAtom);
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && modalMachineEvent({ type: "closed" })}>

@@ -5,7 +5,7 @@ import { useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Array, HashMap, Option, Result } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // components
@@ -19,40 +19,14 @@ import type { Keypad } from "@/features/game/domain/models";
 import { KEYPAD_SKELETON_LETTERS } from "@/features/game/domain/constants";
 
 const EMPTY_KEY_COLOR = "" as const;
-
-// Fully static class string, hoisted so neither the live keypad nor its
-// skeleton re-runs it through twMerge — the two must render the same shell
 const KEYPAD_AREA_CLASSES = cn("block rounded-md bg-surface-3 p-1", "md:grid md:grid-cols-[auto_1fr_auto] md:gap-2 md:[grid-template-areas:'back_pool_enter']");
 
-// `KeypadArea` is hoisted to module scope. Defining it inside `Footer`'s body
-// would recreate its component identity on every `Footer` render, remounting
-// the entire keypad subtree (AnimatePresence, motion keys, Backspace/Enter
-// buttons) each time; as a module-level component its identity is stable, so
-// only the atoms it actually subscribes to can re-render it
-//
-// `Toolbar` is intentionally rendered by `Footer` as a sibling of `KeypadArea`,
-// not inside it: `KeypadArea` subscribes to keypad colors and re-renders on
-// every keystroke that repaints a key; if `Toolbar` lived inside `KeypadArea`, the
-// toolbar (HacksMenu, Riddle, GameLangChanger, GameFlowButton) would be dragged
-// into those re-renders even though none of it depends on keypad state; as a
-// sibling, `Toolbar` only re-renders when `Footer` itself re-renders — which
-// happens only once, when `gameDataKeypad` flips from `None` to `Some`
 export function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineAtom);
+  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineSendAtom);
 
-  // Attach each key's color and drop greyed-out keys; the pool only needs the
-  // keys it renders; `KeypadPool` destructures `letter`/`color` to primitives,
-  // and `KeypadKey` is memoized, so unchanged keys bail out by value even
-  // though `availableKeys` is a new array each render; `KeypadArea` re-renders
-  // only when `keypadColors` changes (its sole atom subscription), so a
-  // `useMemo` here would never cache across renders — the derivation runs on
-  // every render either way. One pass (`filterMap`) instead of map-then-filter:
-  // a greyed key fails the transformation and is dropped in the same traversal
-  // (v4's `filterMap` discards failures, the same shape `domain/sonar.ts` uses)
   const availableKeys = Array.filterMap(keys, (letter) => {
-    // Absent keys (nothing guessed yet) carry the empty color; only keys the
-    // player has genuinely ruled out are dropped
+    // Absent keys (nothing guessed yet) carry the empty color; only keys the player has genuinely ruled out are dropped
     const color = Option.getOrElse(HashMap.get(keypadColors, letter), () => EMPTY_KEY_COLOR);
     return color === "grey" ? Result.failVoid : Result.succeed({ letter, color });
   });

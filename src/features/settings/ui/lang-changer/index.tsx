@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
+import { gameSettingsMachineSendAtom, gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { T, useGT } from "gt-react";
 
 // components
@@ -20,7 +20,7 @@ interface GameLangChangerProps {
 // of the same name that switches the website locale (see @/ui/header/lang-changer)
 export function GameLangChanger({ keepText = false, onClicked }: GameLangChangerProps) {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
-  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
+  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineSendAtom);
   const gt = useGT();
 
   return (

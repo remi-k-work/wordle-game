@@ -1,8 +1,7 @@
 // services, features, and other libraries
-import { useAtomValue } from "@effect/atom-react";
-import { runClientCommand } from "@/lib/runtime-client";
+import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { alertIsForfeitRunAtom } from "@/state/alert";
-import { confirmForfeitRun } from "@/features/game/state/actions";
+import { confirmForfeitRunAtom } from "@/features/game/state/actions";
 import { useGT } from "gt-react";
 
 // components
@@ -12,10 +11,11 @@ import { Content } from "./content";
 export function ForfeitRunAlert() {
   // Derived boolean atom: re-renders only when visibility actually flips
   const isOpen = useAtomValue(alertIsForfeitRunAtom);
+  const confirmForfeitRun = useAtomSet(confirmForfeitRunAtom);
   const gt = useGT();
 
   return (
-    <Alert isOpen={isOpen} title={gt("Forfeit Run")} onOkayed={() => runClientCommand(confirmForfeitRun)}>
+    <Alert isOpen={isOpen} title={gt("Forfeit Run")} onOkayed={() => confirmForfeitRun()}>
       <Content />
     </Alert>
   );

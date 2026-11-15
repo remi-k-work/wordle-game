@@ -9,11 +9,14 @@ export default defineConfig({
   lint: {
     extends: [recommended],
     plugins: ["eslint", "typescript", "react", "jsx-a11y", "import", "vitest", "unicorn", "oxc"],
-    jsPlugins: [{ name: "vite-plus", specifier: "vite-plus/oxlint-plugin" }],
-    ignorePatterns: [],
+    jsPlugins: [
+      { name: "vite-plus", specifier: "vite-plus/oxlint-plugin" },
+      { name: "xstate-effect", specifier: "@xstate/effect/oxlint" },
+    ],
     rules: {
       "react/rules-of-hooks": "error",
       "vite-plus/prefer-vite-plus-imports": "error",
+      "xstate-effect/no-inline-effect": "error",
       "effecttsgo/unstable-api-usage": "off",
 
       // --- @effect/vitest support ---

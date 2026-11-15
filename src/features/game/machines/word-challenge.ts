@@ -1,16 +1,14 @@
 // services, features, and other libraries
-import { Array, DateTime, HashSet, Option, Effect } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
-import { setup, assign, assertEvent } from "xstate";
+import { Array, DateTime, Effect, HashSet, Option, Schema } from "effect";
+import { Atom, AtomRegistry } from "effect/reactivity";
+import { setupEffect } from "@xstate/effect";
+import { assertEvent } from "xstate";
 import { calculateScore, computeGreyLetters } from "@/features/game/domain/game-logic";
 import { canSubmitGuess, classifyKey } from "@/features/game/domain/validators";
-import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state/actions";
-
-// types
-import type { TheSecretWord, WordChallenge } from "@/features/game/domain/models";
+import { TheSecretWord, WordChallenge } from "@/features/game/domain/models";
 
 // constants
 import { initialWordChallenge, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
@@ -19,15 +17,65 @@ import { initialWordChallenge, MAX_TURNS, WORD_LENGTH } from "@/features/game/do
 // `isValidWord` guard doesn't allocate a fresh HashSet on every keystroke
 const EMPTY_DICTIONARY = HashSet.empty<string>();
 
-export const wordChallengeMachine = setup({
-  types: {} as {
-    events:
-      | { readonly type: "solutionsLanguageChanged" }
-      | { readonly type: "gameDataLoaded"; readonly dictionary: WordChallenge["dictionary"] }
-      | { readonly type: "secretWordPicked"; readonly theSecretWord: TheSecretWord }
-      | { readonly type: "keyPressed"; readonly pressedKey: string }
-      | { readonly type: "forfeitedRun" };
-    context: WordChallenge;
+// Save the dictionary provided by the game data machine (no word yet)
+const saveGameDataContext = (dictionary: WordChallenge["dictionary"]): WordChallenge => ({ ...initialWordChallenge(), dictionary });
+
+// Set up the board for a new puzzle with the secret word from gameDataMachine
+const startNewPuzzleContext = (dictionary: WordChallenge["dictionary"], theSecretWord: TheSecretWord): WordChallenge => ({
+  ...initialWordChallenge(),
+  dictionary,
+  theSecretWord: Option.some(theSecretWord),
+});
+
+// Append a letter (never past full length); lazily start the clock on the first letter
+const addLetterContext = (context: WordChallenge, pressedKey: string): WordChallenge => ({
+  ...context,
+  currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + pressedKey.toUpperCase() : context.currentGuessWord,
+  startTime: Option.orElse(context.startTime, () => Option.some(DateTime.nowUnsafe())),
+});
+
+// Remove the last letter from the current guess word
+const removeLetterContext = (context: WordChallenge): WordChallenge => ({ ...context, currentGuessWord: context.currentGuessWord.slice(0, -1) });
+
+// Record the guess, advance the turn, and recompute grey letters once per submission
+const submitGuessContext = (context: WordChallenge): WordChallenge => {
+  const wordleGuesses = Array.append(context.wordleGuesses, context.currentGuessWord);
+  return {
+    ...context,
+    currentGuessWord: "",
+    wordleGuesses,
+    currentTurn: context.currentTurn + 1,
+    greyLetters: Option.match(context.theSecretWord, {
+      onNone: () => context.greyLetters,
+      onSome: (theSecretWord) => computeGreyLetters(theSecretWord, wordleGuesses),
+    }),
+  };
+};
+
+// Calculate the player's word score from the turn they won on and how long it took
+const calculateScoreContext = (context: WordChallenge): WordChallenge => ({
+  ...context,
+  wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.nowUnsafe())),
+});
+
+export const wordChallengeMachine = setupEffect({
+  schemas: {
+    context: WordChallenge,
+    events: {
+      solutionsLanguageChanged: Schema.Struct({}),
+      gameDataLoaded: Schema.Struct({ dictionary: WordChallenge.fields.dictionary }),
+      secretWordPicked: Schema.Struct({ theSecretWord: TheSecretWord }),
+      keyPressed: Schema.Struct({ pressedKey: Schema.String }),
+      forfeitedRun: Schema.Struct({}),
+    },
+    actions: {
+      trackInvalidGuessSubmitted: { params: Schema.Struct({}) },
+      trackValidGuessSubmitted: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+      trackWordWon: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+      onWordWon: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+      trackWordLost: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+      onWordLost: { params: Schema.Struct({}) },
+    },
   },
   guards: {
     isValidWord: ({ context }) =>
@@ -64,96 +112,35 @@ export const wordChallengeMachine = setup({
       const key = classifyKey(event.pressedKey);
       if (key.kind !== "letter") return false;
 
-      // Prevent typing letters already ruled out by genuine guesses.
-      // `greyLetters` is maintained at submit time, so this hot path (it runs
-      // on every keypress) is a pure O(1) set lookup
+      // Prevent typing letters already ruled out by genuine guesses
       return !HashSet.has(context.greyLetters, key.letter);
     },
   },
   actions: {
-    // Save the dictionary provided by the game data machine (no word yet)
-    saveGameData: assign(({ event }) => {
-      assertEvent(event, "gameDataLoaded");
-      return { ...initialWordChallenge(), dictionary: event.dictionary } as const satisfies WordChallenge;
-    }),
-
-    // Set up the board for a new puzzle with the secret word from gameDataMachine
-    startNewPuzzle: assign(({ context, event }) => {
-      assertEvent(event, "secretWordPicked");
-      return {
-        ...initialWordChallenge(),
-        dictionary: context.dictionary,
-        theSecretWord: Option.some(event.theSecretWord),
-      } as const satisfies WordChallenge;
-    }),
-
-    addLetter: assign(({ context, event }) => {
-      assertEvent(event, "keyPressed");
-      const normalizedKey = event.pressedKey.toUpperCase();
-      return {
-        ...context,
-        // Letters can no longer be appended once the word has reached full length
-        currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + normalizedKey : context.currentGuessWord,
-
-        // Lazily assign startTime on the very first letter typed
-        startTime: Option.orElse(context.startTime, () => Option.some(DateTime.nowUnsafe())),
-      } as const satisfies WordChallenge;
-    }),
-
-    // Remove the last letter from the current guess word
-    removeLetter: assign(({ context }) => ({ ...context, currentGuessWord: context.currentGuessWord.slice(0, -1) }) as const satisfies WordChallenge),
-
-    // Update the game state by adding it to the list of wordle guesses and incrementing the current turn
-    // `greyLetters` is recomputed here — once per submission — so the keypress guard above never has to
-    submitGuess: assign(({ context }) => {
-      const wordleGuesses = Array.append(context.wordleGuesses, context.currentGuessWord);
-      return {
-        ...context,
-        currentGuessWord: "",
-        wordleGuesses,
-        currentTurn: context.currentTurn + 1,
-        greyLetters: Option.match(context.theSecretWord, {
-          onNone: () => context.greyLetters,
-          onSome: (theSecretWord) => computeGreyLetters(theSecretWord, wordleGuesses),
-        }),
-      } as const satisfies WordChallenge;
-    }),
-
-    // Calculates the player's word score based on the turn they won on and how long it took them
-    calculateScore: assign(
-      ({ context }) =>
-        ({
-          ...context,
-          wordScore: Option.some(calculateScore(context.currentTurn - 1, context.startTime, DateTime.nowUnsafe())),
-        }) as const satisfies WordChallenge
-    ),
-
     // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
-    trackInvalidGuessSubmitted: () => runClientCommand(trackInvalidGuessSubmitted()),
+    trackInvalidGuessSubmitted: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> => trackInvalidGuessSubmitted(),
 
     // Track metrics related to submitting a valid guess (stream 2 -> global_pulse)
-    trackValidGuessSubmitted: ({ context }) => runClientCommand(trackValidGuessSubmitted(context)),
+    trackValidGuessSubmitted: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> => trackValidGuessSubmitted(wordChallenge),
 
     // Track metrics related to the event of winning the game (stream 2 -> global_pulse)
-    trackWordWon: ({ context }) =>
-      runClientCommand(Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordWon(runSession, context)))),
+    trackWordWon: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordWon(runSession, wordChallenge))),
 
-    // `wordScore` is guaranteed `Some` here (calculateScore runs first in the
-    // same entry array), but the branch is total anyway: an impossible `None`
-    // resolves as a no-op instead of a NoSuchElementError that has no recovery
-    onWordWon: ({ context }) =>
-      runClientCommand(
-        Option.match(context.wordScore, {
-          onNone: () => Effect.void,
-          onSome: (wordScore) => Atom.set(gameFlowMachineAtom, { type: "word.won", wordScore }),
-        })
-      ),
+    // `wordScore` is guaranteed `Some` here (the `wordWon` entry patches it before
+    // enqueuing), but the branch is total anyway: an impossible `None` resolves as
+    // a no-op instead of a NoSuchElementError that has no recovery
+    onWordWon: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Option.match(wordChallenge.wordScore, {
+        onNone: () => Effect.void,
+        onSome: (wordScore) => Atom.set(gameFlowMachineSendAtom, { type: "word.won", wordScore }),
+      }),
 
     // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
-    trackWordLost: ({ context }) =>
-      runClientCommand(Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordLost(runSession, context)))),
+    trackWordLost: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordLost(runSession, wordChallenge))),
 
-    onWordLost: () => runClientCommand(Atom.set(gameFlowMachineAtom, { type: "word.lost" })),
+    onWordLost: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> => Atom.set(gameFlowMachineSendAtom, { type: "word.lost" }),
   },
 }).createMachine({
   id: "wordChallenge",
@@ -162,16 +149,27 @@ export const wordChallengeMachine = setup({
 
   on: {
     // Language changed → reset to awaiting new data
-    solutionsLanguageChanged: { target: ".awaitingGameData", actions: assign(initialWordChallenge) },
+    solutionsLanguageChanged: { target: ".awaitingGameData", context: () => initialWordChallenge() },
 
     // Forfeit the active run
-    forfeitedRun: ".runForfeited",
+    forfeitedRun: { target: ".runForfeited" },
 
     // Data loaded (initial or after language change) → park in idle
-    gameDataLoaded: { target: ".idle", actions: "saveGameData" },
+    gameDataLoaded: {
+      target: ".idle",
+      context: (args) => {
+        assertEvent(args.event, "gameDataLoaded");
+        return saveGameDataContext(args.event.dictionary);
+      },
+    },
 
-    // New puzzle word picked by gameDataMachine → start typing
-    secretWordPicked: { guard: ({ context }) => Option.isSome(context.dictionary), target: ".typing", actions: "startNewPuzzle" },
+    // New puzzle word picked by gameDataMachine → start typing (only once a dictionary exists)
+    secretWordPicked: (args) => {
+      assertEvent(args.event, "secretWordPicked");
+      const dictionary = args.context.dictionary;
+      if (!Option.isSome(dictionary)) return;
+      return { target: ".typing", context: startNewPuzzleContext(dictionary, args.event.theSecretWord) };
+    },
   },
 
   states: {
@@ -185,42 +183,73 @@ export const wordChallengeMachine = setup({
     typing: {
       on: {
         // The machine now routes the raw keyboard input natively
-        keyPressed: [
-          { guard: "isEnterKey", target: "validating" },
-          { guard: "isBackspaceKey", actions: "removeLetter" },
-          { guard: "isValidLetterKey", actions: "addLetter" },
-        ],
+        keyPressed: (args) => {
+          if (args.guards.isEnterKey(args)) return { target: "validating" };
+          if (args.guards.isBackspaceKey(args)) return { context: removeLetterContext(args.context) };
+          if (args.guards.isValidLetterKey(args)) {
+            assertEvent(args.event, "keyPressed");
+            return { context: addLetterContext(args.context, args.event.pressedKey) };
+          }
+        },
       },
     },
 
     // Immediately decide whether the submitted guess is valid
     validating: {
-      always: [{ guard: "isValidWord", target: "revealing", actions: ["trackValidGuessSubmitted", "submitGuess"] }, { target: "rejected" }],
+      always: (args, enq) => {
+        if (args.guards.isValidWord(args)) {
+          enq(args.actions.trackValidGuessSubmitted, { self: args.self, wordChallenge: args.context });
+          return { target: "revealing", context: submitGuessContext(args.context) };
+        }
+        return { target: "rejected" };
+      },
     },
 
     // Invalid word entered; recover as soon as the user edits it
     rejected: {
-      entry: "trackInvalidGuessSubmitted",
+      entry: (args, enq) => {
+        enq(args.actions.trackInvalidGuessSubmitted, { self: args.self });
+      },
 
       // Only allow Backspace to manually interrupt the error state
-      on: { keyPressed: [{ guard: "isBackspaceKey", target: "typing", actions: "removeLetter" }] },
+      on: {
+        keyPressed: (args) => {
+          if (args.guards.isBackspaceKey(args)) return { target: "typing", context: removeLetterContext(args.context) };
+        },
+      },
 
       // Auto-recover back to typing after the CSS "shake" animation completes
-      after: { 4000: "typing" },
+      after: { 4000: { target: "typing" } },
     },
 
     // Inputs are locked while tile flip animations play
     revealing: {
-      after: { 1500: [{ guard: "isGameWon", target: "wordWon" }, { guard: "isGameLost", target: "wordLost" }, { target: "typing" }] },
+      after: {
+        1500: (args) => {
+          if (args.guards.isGameWon(args)) return { target: "wordWon" };
+          if (args.guards.isGameLost(args)) return { target: "wordLost" };
+          return { target: "typing" };
+        },
+      },
     },
 
     // Word won, waiting for next word being requested
     wordWon: {
-      entry: ["calculateScore", "trackWordWon", "onWordWon"],
+      entry: (args, enq) => {
+        const context = calculateScoreContext(args.context);
+        enq(args.actions.trackWordWon, { self: args.self, wordChallenge: context });
+        enq(args.actions.onWordWon, { self: args.self, wordChallenge: context });
+        return { context };
+      },
     },
 
     // Word lost, waiting for the new run to start
-    wordLost: { entry: ["trackWordLost", "onWordLost"] },
+    wordLost: {
+      entry: (args, enq) => {
+        enq(args.actions.trackWordLost, { self: args.self, wordChallenge: args.context });
+        enq(args.actions.onWordLost, { self: args.self });
+      },
+    },
 
     // Run forfeited, waiting for the new run to start
     runForfeited: {},

@@ -2,8 +2,8 @@
 import { cn } from "@/lib/utils";
 import { Match } from "effect";
 import { useAtomSet } from "@effect/atom-react";
-import { alertMachineAtom } from "@/state/alert";
-import { gameFlowMachineAtom } from "@/features/game/state/game-flow";
+import { alertMachineSendAtom } from "@/state/alert";
+import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
 import { T, useGT } from "gt-react";
 
 // components
@@ -74,8 +74,8 @@ function resolveFlowAction(
 // `GameFlowButtonLive` renders the button for a resolved flow action; all domain logic about what each variant means lives in `resolveFlowAction`
 export function GameFlowButtonLive({ variant, className, keepText = false, onClicked, ...rest }: GameFlowButtonLiveProps) {
   const gt = useGT();
-  const gameFlowMachineEvent = useAtomSet(gameFlowMachineAtom);
-  const alertMachineEvent = useAtomSet(alertMachineAtom);
+  const gameFlowMachineEvent = useAtomSet(gameFlowMachineSendAtom);
+  const alertMachineEvent = useAtomSet(alertMachineSendAtom);
 
   const action = resolveFlowAction(variant, {
     gt,

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { gameSettingsMachineAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state/game-settings";
+import { gameSettingsMachineSendAtom, gameSettingsSolutionsLanguageAtom, gameSettingsVoiceAtom } from "@/features/settings/state/game-settings";
 import { speechVoicesAtom } from "@/hooks/use-speech-voices";
 import { matchLanguage } from "@/features/game/domain/helpers";
 import { useGT } from "gt-react";
@@ -29,7 +29,7 @@ const VOICE_POPUP_CLASSES = cn(
 export function Voice() {
   const solutionsLanguage = useAtomValue(gameSettingsSolutionsLanguageAtom);
   const selectedVoice = useAtomValue(gameSettingsVoiceAtom);
-  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineAtom);
+  const gameSettingsMachineEvent = useAtomSet(gameSettingsMachineSendAtom);
   const gt = useGT();
   const speechVoices = useAtomValue(speechVoicesAtom);
 

@@ -1,8 +1,7 @@
 // services, features, and other libraries
-import { Effect, Layer, Logger, ManagedRuntime } from "effect";
+import { Layer, Logger, ManagedRuntime } from "effect";
 import { Atom, AtomRegistry, Reactivity } from "effect/reactivity";
 import { BrowserCrypto, BrowserKeyValueStore } from "@effect/platform-browser";
-import { degradeCause } from "@/domain/helpers";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { RpcHighScoreClient } from "@/features/high-score/rpc/client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -12,9 +11,7 @@ import { HubTracerLayer } from "@/features/telemetry/services/hub-tracer";
 import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 
-// One memo map shared by every runtime below (and by the atom runtime
-// factory): layers are built once and reused across runtimes instead of being
-// re-created per ManagedRuntime instance
+// One memo map shared by every runtime below (and by the atom runtime factory)
 const sharedMemoMap = Layer.makeMemoMapUnsafe();
 const runtimeFactory = Atom.context({ memoMap: sharedMemoMap });
 
@@ -41,20 +38,7 @@ const TelemetryStarterLayer = Layer.mergeAll(LoggerLayer, TelemetryWorkerLayer, 
 // RuntimeTelemetryStarter = runs the telemetry worker; RuntimeAtom = the standard app runtime
 export const RuntimeTelemetryStarter = runtimeFactory(TelemetryStarterLayer);
 export const RuntimeAtom = runtimeFactory(MainLayer);
+
+// Minimal runtime for UI-only machines (pure event routing, no services): atoms hosted here start without building the RPC/browser stack
+export const RuntimeAtomMinimal = runtimeFactory(Layer.empty);
 export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: sharedMemoMap });
-
-// The services code run through RuntimeClient may require: exactly what it provides
-// This keeps the requirements channel precise (service identifiers only) instead of
-// widening it through `Parameters<typeof runPromise>[0]`, whose unresolved
-// generics collapse the error channel to `unknown`
-export type ClientRuntimeServices = Layer.Success<typeof MainLayer>;
-
-// Runs an Effect from a fire-and-forget XState command action. Failures are logged
-// but never reject, so unhandled Promise rejections cannot escape the synchronous
-// XState action contract. The shared `degradeCause` policy (in @/domain/helpers)
-// logs every real failure first — nothing silently swallowed — and leaves a pure
-// interruption both unlogged and propagating, so a cancelled command still
-// cancels instead of resolving as success. Sharing the policy is what keeps this
-// and the RPC handler recovery (`degradeToNone`) in sync
-export const runClientCommand = <A, E>(effect: Effect.Effect<A, E, ClientRuntimeServices>): Promise<void> =>
-  RuntimeClient.runPromise(degradeCause(Effect.asVoid(effect), Effect.void));

@@ -1,31 +1,30 @@
 // services, features, and other libraries
-import { Effect, Option, Random } from "effect";
-import { Atom } from "effect/reactivity";
-import { runClientCommand } from "@/lib/runtime-client";
-import { effectActor } from "@/lib/effect-actor";
+import { Effect, Random, Schema } from "effect";
+import { Atom, AtomRegistry } from "effect/reactivity";
+import { createEffectLogic, setupEffect } from "@xstate/effect";
 import { RpcGameClient } from "@/features/game/rpc/client";
-import { assign, setup } from "xstate";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
-import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
-import { wordMetaMachineAtom } from "@/features/game/state/word-meta";
-import { overdriveHacksMachineAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { wordChallengeMachineSendAtom } from "@/features/game/state/word-challenge";
+import { wordMetaMachineSendAtom } from "@/features/game/state/word-meta";
+import { overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
 // types
-import type { GameData, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
+import type { EffectSourceArgs } from "@xstate/effect";
 
 interface OnLoadingInput {
   solutionsLanguage?: SolutionsLanguage;
 }
 
 interface SelectSecretWordInput {
-  solutions: Option.Option<ReadonlyArray<TheSecretWord>>;
+  solutions: GameData["solutions"];
 }
 
 // constants
 import { initialGameData } from "@/features/game/domain/constants";
 
 // Load the needed game data and create the dictionary of valid words
-const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: OnLoadingInput) =>
+const onLoadingActor = createEffectLogic(({ input: { solutionsLanguage: requestedLanguage } }: EffectSourceArgs<OnLoadingInput>) =>
   Effect.gen(function* () {
     const solutionsLanguage = requestedLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
 
@@ -39,44 +38,43 @@ const onLoadingActor = effectActor(({ solutionsLanguage: requestedLanguage }: On
   })
 );
 
-const selectSecretWordActor = effectActor(({ solutions }: SelectSecretWordInput) => Effect.flatMap(Effect.fromOption(solutions), Random.choice));
+const selectSecretWordActor = createEffectLogic(({ input: { solutions } }: EffectSourceArgs<SelectSecretWordInput>) =>
+  Effect.flatMap(Effect.fromOption(solutions), Random.choice)
+);
 
-export const gameDataMachine = setup({
-  types: {} as {
-    events:
-      | { readonly type: "solutionsLanguageChanged"; readonly solutionsLanguage: SolutionsLanguage }
-      | { readonly type: "nextWordRequested" }
-      | { readonly type: "retryRequested" };
-    context: GameData;
-  },
-  actions: {
-    // Save the loaded game data
-    saveGameData: assign(({ context }, params: { gameData: GameData }) => ({ ...context, ...params.gameData }) as const satisfies GameData),
-
-    // The secret word must never be logged here (or anywhere else): the browser
-    // console is part of the player's attack surface, and `theSecretWord` only
-    // fans out to the three machines that need it
-    onSecretWordSelected: (_, { theSecretWord }: { theSecretWord: TheSecretWord }) =>
-      runClientCommand(
-        Effect.all([
-          // *** TEST CODE ***
-          // *** TEST CODE ***
-          // *** TEST CODE ***
-          Effect.log(`The Secret Word: ${theSecretWord}`),
-          // *** TEST CODE ***
-          // *** TEST CODE ***
-          // *** TEST CODE ***
-
-          Atom.set(wordMetaMachineAtom, { type: "secretWordPicked", theSecretWord }),
-          Atom.set(wordChallengeMachineAtom, { type: "secretWordPicked", theSecretWord }),
-          Atom.set(overdriveHacksMachineAtom, { type: "puzzle.started" }),
-        ])
-      ),
-
-    // Notify the word challenge machine that game data is ready (no word yet — idle state)
-    onGameDataLoaded: ({ context }) => runClientCommand(Atom.set(wordChallengeMachineAtom, { type: "gameDataLoaded", dictionary: context.dictionary })),
+export const gameDataMachine = setupEffect({
+  schemas: {
+    context: GameData,
+    events: {
+      solutionsLanguageChanged: Schema.Struct({ solutionsLanguage: SolutionsLanguage }),
+      nextWordRequested: Schema.Struct({}),
+      retryRequested: Schema.Struct({}),
+    },
+    actions: {
+      onSecretWordSelected: { params: Schema.Struct({ theSecretWord: TheSecretWord }) },
+      onGameDataLoaded: { params: Schema.Struct({ dictionary: Schema.Option(Schema.HashSet(TheSecretWord)) }) },
+    },
   },
   actors: { onLoadingActor, selectSecretWordActor },
+  actions: {
+    onSecretWordSelected: ({ theSecretWord }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+      Effect.all([
+        // *** TEST CODE ***
+        // *** TEST CODE ***
+        // *** TEST CODE ***
+        Effect.log(`The Secret Word: ${theSecretWord}`),
+        // *** TEST CODE ***
+        // *** TEST CODE ***
+        // *** TEST CODE ***
+
+        Atom.set(wordMetaMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
+        Atom.set(wordChallengeMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
+        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.started" }),
+      ]).pipe(Effect.asVoid),
+
+    // Notify the word challenge machine that game data is ready (no word yet — idle state)
+    onGameDataLoaded: ({ dictionary }) => Atom.set(wordChallengeMachineSendAtom, { type: "gameDataLoaded", dictionary }),
+  },
 }).createMachine({
   id: "gameData",
   context: initialGameData(),
@@ -91,8 +89,11 @@ export const gameDataMachine = setup({
 
         // The solutions language is supplied by the event that triggered this load
         input: ({ event }) => (event.type === "solutionsLanguageChanged" ? { solutionsLanguage: event.solutionsLanguage } : {}),
-        onDone: { target: "ready", actions: [{ type: "saveGameData", params: ({ event }) => ({ gameData: event.output }) }, "onGameDataLoaded"] },
-        onError: "failure",
+        onDone: (args, enq) => {
+          enq(args.actions.onGameDataLoaded, { self: args.self, dictionary: args.output.dictionary });
+          return { target: "ready", context: { ...args.context, ...args.output } };
+        },
+        onError: { target: "failure" },
       },
     },
 
@@ -102,11 +103,14 @@ export const gameDataMachine = setup({
       invoke: {
         src: "selectSecretWordActor",
         input: ({ context }) => ({ solutions: context.solutions }),
-        onDone: { target: "ready", actions: { type: "onSecretWordSelected", params: ({ event }) => ({ theSecretWord: event.output }) } },
-        onError: "failure",
+        onDone: (args, enq) => {
+          enq(args.actions.onSecretWordSelected, { self: args.self, theSecretWord: args.output });
+          return { target: "ready" };
+        },
+        onError: { target: "failure" },
       },
     },
 
-    failure: { on: { retryRequested: "loading" } },
+    failure: { on: { retryRequested: { target: "loading" } } },
   },
 });

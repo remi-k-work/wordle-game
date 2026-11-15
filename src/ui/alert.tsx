@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { alertMachineAtom } from "@/state/alert";
+import { alertMachineSendAtom } from "@/state/alert";
 import { T } from "gt-react";
 
 // components
@@ -24,7 +24,7 @@ interface AlertProps {
 import { DIALOG_BACKDROP_CLASSES, DIALOG_FOOTER_CLASSES, DIALOG_POPUP_CLASSES, DIALOG_TITLE_CLASSES, DIALOG_VIEWPORT_CLASSES } from "@/ui/dialog-chrome";
 
 export function Alert({ isOpen = false, title, onOkayed, children }: AlertProps) {
-  const alertMachineEvent = useAtomSet(alertMachineAtom);
+  const alertMachineEvent = useAtomSet(alertMachineSendAtom);
 
   return (
     <AlertDialog.Root open={isOpen} onOpenChange={(open) => !open && alertMachineEvent({ type: "cancelled" })}>

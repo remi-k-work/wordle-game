@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { wordChallengeHasWonAtom } from "@/features/game/state/word-challenge";
-import { modalIsOpenAtom, modalMachineAtom } from "@/state/modal";
+import { modalIsOpenAtom, modalMachineSendAtom } from "@/state/modal";
 import { T, useGT } from "gt-react";
 
 // components
@@ -20,7 +20,7 @@ import { DIALOG_FOOTER_CLASSES } from "@/ui/dialog-chrome";
 export function WinOrLoseModal() {
   // Derived boolean atom: re-renders only when visibility actually flips
   const isOpen = useAtomValue(modalIsOpenAtom("status"));
-  const modalMachineEvent = useAtomSet(modalMachineAtom);
+  const modalMachineEvent = useAtomSet(modalMachineSendAtom);
 
   // Do we have a winner? When the player correctly guesses the secret word, we have a winner
   const hasWon = useAtomValue(wordChallengeHasWonAtom);
