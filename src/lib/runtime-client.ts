@@ -37,8 +37,6 @@ const TelemetryStarterLayer = Layer.mergeAll(LoggerLayer, TelemetryWorkerLayer, 
 
 // RuntimeTelemetryStarter = runs the telemetry worker; RuntimeAtom = the standard app runtime
 export const RuntimeTelemetryStarter = runtimeFactory(TelemetryStarterLayer);
-export const RuntimeAtom = runtimeFactory(MainLayer);
 
-// Minimal runtime for UI-only machines (pure event routing, no services): atoms hosted here start without building the RPC/browser stack
-export const RuntimeAtomMinimal = runtimeFactory(Layer.empty);
+export const RuntimeAtom = runtimeFactory(MainLayer);
 export const RuntimeClient = ManagedRuntime.make(MainLayer, { memoMap: sharedMemoMap });

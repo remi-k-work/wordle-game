@@ -1,10 +1,12 @@
 // services, features, and other libraries
 import { Atom } from "effect/reactivity";
+import { createActorAtoms } from "@xstate/effect/atom";
+import { RuntimeAtom } from "@/lib/runtime-client";
 import { wordMetaMachine } from "@/features/game/machines/word-meta";
-import { createMachineAtom } from "@/domain/machine-atom";
+import { createMachineState } from "@/lib/machine-atoms";
 
-// The word meta machine is now a living actor inside the effect atom
-export const wordMetaMachineAtom = createMachineAtom(wordMetaMachine);
+const wordMetaMachineBag = createActorAtoms(RuntimeAtom, wordMetaMachine);
+export const { snapshot: wordMetaMachineAtom, send: wordMetaMachineSendAtom } = createMachineState(wordMetaMachine, wordMetaMachineBag);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const wordMetaTheRiddleAtom = wordMetaMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theRiddle));

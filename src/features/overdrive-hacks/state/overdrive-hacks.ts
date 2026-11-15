@@ -1,10 +1,12 @@
 // services, features, and other libraries
 import { Array, HashMap, Option } from "effect";
 import { Atom } from "effect/reactivity";
+import { createActorAtoms } from "@xstate/effect/atom";
+import { RuntimeAtom } from "@/lib/runtime-client";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
 import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
-import { createMachineAtom } from "@/domain/machine-atom";
+import { createMachineState } from "@/lib/machine-atoms";
 
 // types
 import type { BoardTile } from "@/features/game/domain/models";
@@ -12,8 +14,8 @@ import type { BoardTile } from "@/features/game/domain/models";
 // constants
 import { EMPTY_TILE_KEY } from "@/features/game/domain/constants";
 
-// The overdrive hacks machine is now a living actor inside the effect atom
-export const overdriveHacksMachineAtom = createMachineAtom(overdriveHacksMachine);
+const overdriveHacksMachineBag = createActorAtoms(RuntimeAtom, overdriveHacksMachine);
+export const { snapshot: overdriveHacksMachineAtom, send: overdriveHacksMachineSendAtom } = createMachineState(overdriveHacksMachine, overdriveHacksMachineBag);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const overdriveHacksEmpNukedLettersAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.empNukedLetters));
@@ -21,8 +23,7 @@ export const overdriveHacksSonarRevealsAtom = overdriveHacksMachineAtom.pipe(Ato
 export const overdriveHacksTheOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverride));
 export const overdriveHacksTheOverrideAudioAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverrideAudio));
 
-// Derived boolean: subscribe to this instead of the full snapshot when only
-// the machine state (not context) is needed
+// Derived boolean: subscribe to this instead of the full snapshot when only the machine state (not context) is needed
 export const overdriveHacksIsApplyingOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("applyingOverrideHack")));
 export const overdriveHacksIsIdleAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("idle")));
 

@@ -1,10 +1,12 @@
 // services, features, and other libraries
 import { Array, DateTime, HashMap, Option } from "effect";
 import { Atom } from "effect/reactivity";
+import { createActorAtoms } from "@xstate/effect/atom";
 import { wordChallengeMachine } from "@/features/game/machines/word-challenge";
+import { RuntimeAtom } from "@/lib/runtime-client";
 import { calculatePotentialScore, computeKeypadState } from "@/features/game/domain/game-logic";
 import { formatGuess } from "@/features/game/domain/formatters";
-import { createMachineAtom } from "@/domain/machine-atom";
+import { createMachineState } from "@/lib/machine-atoms";
 
 // types
 import type { Color, Tile } from "@/features/game/domain/models";
@@ -12,8 +14,8 @@ import type { Color, Tile } from "@/features/game/domain/models";
 // constants
 import { EMPTY_TILE_KEY, MAX_TURNS, WORD_LENGTH } from "@/features/game/domain/constants";
 
-// The word challenge machine is now a living actor inside the effect atom
-export const wordChallengeMachineAtom = createMachineAtom(wordChallengeMachine);
+const wordChallengeMachineBag = createActorAtoms(RuntimeAtom, wordChallengeMachine);
+export const { snapshot: wordChallengeMachineAtom, send: wordChallengeMachineSendAtom } = createMachineState(wordChallengeMachine, wordChallengeMachineBag);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const wordChallengeTheSecretWordAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theSecretWord));
@@ -30,7 +32,7 @@ export const wordChallengeHasWonAtom = wordChallengeMachineAtom.pipe(Atom.map((s
 // A once-a-second clock signal, in the same shape as Effect's own
 // `Atom.windowFocusSignal`: the read registers a listener, publishes a new tick
 // with `setSelf`, and tears the listener down through `addFinalizer` when the
-// atom loses its last subscriber (so no timer survives an unmounted board).
+// atom loses its last subscriber (so no timer survives an unmounted board)
 // No `window` (SSR) means a single value and no listener
 const secondTickAtom = Atom.readable<number>((get) => {
   if (typeof window === "undefined") return 0;

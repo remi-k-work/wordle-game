@@ -1,10 +1,12 @@
 // services, features, and other libraries
 import { Atom } from "effect/reactivity";
+import { createActorAtoms } from "@xstate/effect/atom";
+import { RuntimeAtom } from "@/lib/runtime-client";
 import { browseChartsMachine } from "@/features/charts/machines/browse-charts";
-import { createMachineAtom } from "@/domain/machine-atom";
+import { createMachineState } from "@/lib/machine-atoms";
 
-// The browse charts machine is now a living actor inside the effect atom
-export const browseChartsMachineAtom = createMachineAtom(browseChartsMachine);
+const browseChartsMachineBag = createActorAtoms(RuntimeAtom, browseChartsMachine);
+export const { snapshot: browseChartsMachineAtom, send: browseChartsMachineSendAtom } = createMachineState(browseChartsMachine, browseChartsMachineBag);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const browseChartsSolutionsLanguageAtom = browseChartsMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sl));

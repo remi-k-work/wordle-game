@@ -1,10 +1,12 @@
 // services, features, and other libraries
 import { Atom } from "effect/reactivity";
+import { createActorAtoms } from "@xstate/effect/atom";
+import { RuntimeAtom } from "@/lib/runtime-client";
 import { gameDataMachine } from "@/features/game/machines/game-data";
-import { createMachineAtom } from "@/domain/machine-atom";
+import { createMachineState } from "@/lib/machine-atoms";
 
-// The game data machine is now a living actor inside the effect atom
-export const gameDataMachineAtom = createMachineAtom(gameDataMachine);
+const gameDataMachineBag = createActorAtoms(RuntimeAtom, gameDataMachine);
+export const { snapshot: gameDataMachineAtom, send: gameDataMachineSendAtom } = createMachineState(gameDataMachine, gameDataMachineBag);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const gameDataKeypadAtom = gameDataMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.keypad));

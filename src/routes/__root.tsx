@@ -43,8 +43,6 @@ const KEYWORDS = [
 
 // Site-wide tags only; meta dedupes by name/property keeping the leaf value, so
 // routes that declare their own title (e.g. /high-score) override the one here
-// The root canonical "/" replaces the "every page canonicalizes to /" behavior
-// the Next.js root metadata used to produce
 export const ROOT_HEAD = {
   meta: [
     { charSet: "utf-8" },
@@ -103,8 +101,6 @@ function RootComponent() {
 }
 
 // The html document shell; the router streams the route components into it
-// next-themes keeps working: it only needs the suppressHydrationWarning marker
-// and the `class` attribute mode (no React-specific framework hooks)
 function RootDocument({ children }: { children: ReactNode }) {
   const { locale, translations } = Route.useLoaderData();
 
@@ -114,9 +110,6 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {/* GTProvider fronts the whole document: the standalone FooterLink also calls
-            useGT, so it renders inside the provider (unlike the Next.js layout, where
-            the server-side getGT() worked without any context) */}
         <GTProvider locale={locale} translations={translations}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AtomRegistryProvider>
