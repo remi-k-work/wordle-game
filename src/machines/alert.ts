@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
+import { Effect, Predicate, Schema } from "effect";
 import { assertEvent } from "xstate";
 import { createEffectLogic, setupEffect } from "@xstate/effect";
 
@@ -17,7 +17,7 @@ class AlertOkayedError extends Schema.TaggedError<AlertOkayedError, { readonly b
 // invoke actor's input. Effect Schema has no built-in function type, so it is
 // declared with a type guard (the only shape Effect Schema offers for opaque
 // values)
-const OkayedCallback = Schema.declare<() => void | Promise<void>>((input): input is () => void | Promise<void> => typeof input === "function", {
+const OkayedCallback = Schema.declare<() => void | Promise<void>>((input): input is () => void | Promise<void> => Predicate.isFunction(input), {
   title: "OkayedCallback",
 });
 

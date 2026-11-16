@@ -40,16 +40,20 @@ const runFinishedContext = (event: RunFinished) =>
   }) as const satisfies HighScoreMachineContext;
 
 const top10HighScoresActor = createEffectLogic(({ input: { solutionsLanguage } }: EffectSourceArgs<Top10HighScoresInput>) =>
-  Effect.flatMap(RpcHighScoreClient, ({ top10HighScores }) => top10HighScores(solutionsLanguage))
+  Effect.gen(function* () {
+    const { top10HighScores } = yield* RpcHighScoreClient;
+    return yield* top10HighScores(solutionsLanguage);
+  })
 );
 
 const addHighScoreActor = createEffectLogic(({ input: { context } }: EffectSourceArgs<AddHighScoreInput>) =>
-  Effect.flatMap(RpcHighScoreClient, ({ addHighScore }) =>
+  Effect.gen(function* () {
+    const { addHighScore } = yield* RpcHighScoreClient;
     // Explicit field selection: the machine context carries non-wire fields (e.g. newHighScoreId) that must not ride into the request
-    addHighScore(
+    return yield* addHighScore(
       AddHighScore.make({ playerName: context.playerName, score: context.runScore, streak: context.streak, solutionsLang: context.solutionsLanguage })
-    )
-  )
+    );
+  })
 );
 
 export const highScoreMachine = setupEffect({
@@ -133,12 +137,16 @@ export const highScoreMachine = setupEffect({
       invoke: {
         src: "addHighScoreActor",
         input: ({ context }) => ({ context }),
-        onDone: (args, enq) => {
-          const { event } = args;
-          if (Option.isSome(event.output)) return { target: "success", context: { ...args.context, newHighScoreId: event.output } };
-          enq(args.actions.onNoLongerQualified, { self: args.self });
-          return { target: "awaitingFinishedRun" };
-        },
+        onDone: (args, enq) =>
+          // A `Some` means the submission took the last slot; `None` means the
+          // board filled up meanwhile, so the run no longer qualifies
+          Option.match(args.event.output, {
+            onSome: (id) => ({ target: "success", context: { ...args.context, newHighScoreId: Option.some(id) } }),
+            onNone: () => {
+              enq(args.actions.onNoLongerQualified, { self: args.self });
+              return { target: "awaitingFinishedRun" };
+            },
+          }),
         onError: { target: "failure" },
       },
     },
