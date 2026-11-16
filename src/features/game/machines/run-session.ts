@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { Cause, DateTime, Effect, Option, Schema } from "effect";
+import { SecureRandom } from "effect/crypto";
 import { Atom, AtomRegistry } from "effect/reactivity";
 import { setupEffect } from "@xstate/effect";
 import { assertEvent } from "xstate";
@@ -91,7 +92,10 @@ export const runSessionMachine = setupEffect({
             target: "active",
             context: {
               ...INITIAL_RUN_SESSION,
-              runId: Option.some(crypto.randomUUID()),
+              // The sync context updater has no Effect context, so this uses the
+              // `*Unsafe` primitive documented for exactly that case (it draws
+              // from `globalThis.crypto`, like the `SecureRandom` service does)
+              runId: Option.some(SecureRandom.uuidV4Unsafe()),
               createdAt: Option.some(DateTime.nowUnsafe()),
               bestRunScore: args.context.bestRunScore,
               bestStreak: args.context.bestStreak,

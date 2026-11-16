@@ -14,9 +14,6 @@ const highScoreMachineBag = createActorAtoms(RuntimeAtom, highScoreMachine);
 export const { snapshot: highScoreMachineAtom, send: highScoreMachineSendAtom } = createMachineState(highScoreMachine, highScoreMachineBag);
 
 // Specialized selectors for granular state access and optimized re-renders
-export const highScorePlayerNameAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.playerName));
-export const highScoreRunScoreAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.runScore));
-export const highScoreStreakAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.streak));
 export const highScoreNewHighScoreIdAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.newHighScoreId));
 
 // Derived boolean: subscribe to this instead of the full snapshot when only the machine state (not context) is needed

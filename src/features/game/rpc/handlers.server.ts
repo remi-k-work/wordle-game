@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, HashSet, Layer, Option, Record, Schema } from "effect";
+import { Effect, HashSet, Layer, Option, Record, Schema, String } from "effect";
 import { RpcGame } from "./requests";
 import { Keypad, TheSecretWord } from "@/features/game/domain/models";
 import { matchLanguage } from "@/features/game/domain/helpers";
@@ -76,7 +76,14 @@ const RpcGameLayer = RpcGame.toLayer({
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
-    Effect.succeed(getWordDefinition(theSecretWord, solutionsLanguage).pipe(Option.map(formatTextForTTS))),
+    getWordDefinition(theSecretWord, solutionsLanguage).pipe(
+      Option.map(formatTextForTTS),
+      // A definition of only markdown/whitespace normalizes to "", which would
+      // violate the declared success schema (`Option(NonEmpty)`): drop it so the
+      // client decodes a plain None (same policy the AI path applies)
+      Option.filter(String.isNonEmpty),
+      Effect.succeed
+    ),
 
   fetchRiddleAudio: fetchSpeechAudio,
   fetchWordDefinitionAudio: fetchSpeechAudio,
