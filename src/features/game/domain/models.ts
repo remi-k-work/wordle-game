@@ -16,7 +16,6 @@ export type Keypad = typeof Keypad.Type;
 export type Letter = typeof Letter.Type;
 export type Tile = typeof Tile.Type;
 
-export type GameData = typeof GameData.Type;
 export type WordMeta = typeof WordMeta.Type;
 export type RunSession = typeof RunSession.Type;
 export type RunResult = typeof RunResult.Type;
@@ -54,12 +53,6 @@ export type BoardTile = Tile & { readonly isSonarReveal: boolean };
 // The wordle grid and the keypad
 export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLength(WORD_LENGTH))).check(Schema.isMaxLength(MAX_TURNS));
 export const Keypad = Schema.Array(Letter);
-
-export const GameData = Schema.Struct({
-  solutions: Schema.Option(Schema.Array(TheSecretWord)),
-  dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
-  keypad: Schema.Option(Keypad),
-});
 
 export const WordMeta = Schema.Struct({
   theRiddle: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),

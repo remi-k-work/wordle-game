@@ -3,7 +3,7 @@ import { HashSet, Option, Record } from "effect";
 import { msg } from "gt-react";
 
 // types
-import type { Color, GameData, Letter, RunSession, SolutionsLanguage, WordChallenge, WordMeta } from "./models";
+import type { Color, Letter, RunSession, SolutionsLanguage, WordChallenge, WordMeta } from "./models";
 
 // Stable category identifiers for UI presentation (the message map above is the source of truth)
 export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP;
@@ -99,16 +99,6 @@ export const POTENTIAL_SCORE_RANGE = {
   min: Math.round(Math.min(...BASE_POINTS_PER_TURN) * Math.min(...SPEED_MULTIPLIERS)),
   max: Math.round(Math.max(...BASE_POINTS_PER_TURN) * Math.max(...SPEED_MULTIPLIERS)),
 } as const;
-
-// A factory rather than a shared constant, like initialWordMeta and
-// initialWordChallenge below: the value becomes the machine's live context, so
-// a module global would be aliased into every running game
-export const initialGameData = () =>
-  ({
-    solutions: Option.none(),
-    dictionary: Option.none(),
-    keypad: Option.none(),
-  }) as const satisfies GameData;
 
 // A factory rather than a shared constant: the machine's `clearWordMeta` action
 // returns it directly, so a constant would alias a module global into every live

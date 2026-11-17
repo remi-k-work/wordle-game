@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { Rpc, RpcGroup } from "effect/rpc";
-import { GameData, SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain/models";
+import { SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain/models";
+import { GameData } from "@/features/game/machines/game-data/models";
 import { SpeechRequest } from "@/domain/models";
 
 // Payload shapes reused by several RPCs
