@@ -1,9 +1,5 @@
 // services, features, and other libraries
-import { Array, Option, Schema } from "effect";
-import { BrowseCharts } from "./models";
-
-// constants
-import { INITIAL_BROWSE_CHARTS } from "./constants";
+import { Array, Option } from "effect";
 
 // BucketKey
 // ---------------------------------------------------------------------------
@@ -17,11 +13,6 @@ import { INITIAL_BROWSE_CHARTS } from "./constants";
 export type BucketKey<Row> = {
   [K in keyof Row & string]: null extends Row[K] ? K : never;
 }[keyof Row & string];
-
-// Schema.decodeUnknownOption builds a parser on every call, so build it once at
-// module scope instead of once per URL change — the same reason the telemetry
-// worker, the charts DB and the game RPC handlers hoist their decoders
-const decodeBrowseChartsOption = Schema.decodeUnknownOption(BrowseCharts);
 
 // Telemetry stores histograms in cumulative form because they are easy to
 // aggregate in SQL. This helper converts cumulative buckets back into a
@@ -63,17 +54,6 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
 
   return distribution;
 };
-
-/**
- * Decodes the raw URL query (as parsed by use-url-scribe) into BrowseCharts.
- *
- * A hand-edited, unknown, or missing `sl` is rejected by the schema and falls
- * back to INITIAL_BROWSE_CHARTS instead of flowing a bogus value into the
- * browse-charts machine, the chart RPC payloads, and matchLanguage (which maps
- * anything that is not "En" to Polish)
- */
-export const decodeBrowseCharts = (searchEntries: Readonly<Record<string, string>>) =>
-  Option.getOrElse(decodeBrowseChartsOption(searchEntries), () => INITIAL_BROWSE_CHARTS);
 
 // Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
 export const nullToInfinity = (value: number | null) => value ?? Infinity;

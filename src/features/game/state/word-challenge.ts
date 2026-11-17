@@ -24,8 +24,6 @@ export const wordChallengeWordleGuessesAtom = wordChallengeMachineAtom.pipe(Atom
 export const wordChallengeCurrentTurnAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.currentTurn));
 export const wordChallengeStartTimeAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.startTime));
 export const wordChallengeWordScoreAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.wordScore));
-
-// Derived booleans: subscribe to these instead of the full snapshot when only the machine state (not context) is needed
 export const wordChallengeIsRejectedAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("rejected")));
 export const wordChallengeHasWonAtom = wordChallengeMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("wordWon")));
 

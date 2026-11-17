@@ -15,11 +15,7 @@ export const { snapshot: highScoreMachineAtom, send: highScoreMachineSendAtom } 
 
 // Specialized selectors for granular state access and optimized re-renders
 export const highScoreNewHighScoreIdAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.newHighScoreId));
-
-// Derived boolean: subscribe to this instead of the full snapshot when only the machine state (not context) is needed
 export const highScoreIsSubmittingAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("submitting")));
-
-// Derived boolean: the initials form is only visible while entering initials, submitting, or failing
 export const highScoreIsFormVisibleAtom = highScoreMachineAtom.pipe(
   Atom.map((snapshot) => snapshot.matches("enteringInitials") || snapshot.matches("submitting") || snapshot.matches("failure"))
 );

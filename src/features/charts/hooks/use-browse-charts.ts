@@ -4,7 +4,7 @@ import { useEffect } from "react";
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { browseChartsMachineSendAtom, browseChartsSolutionsLanguageAtom } from "@/features/charts/state/browse-charts";
-import { decodeBrowseCharts } from "@/features/charts/domain/helpers";
+import { decodeBrowseCharts } from "@/features/charts/machines/browse-charts/helpers";
 import { useUrlScribe } from "@/hooks/use-url-scribe";
 
 export function useBrowseCharts() {

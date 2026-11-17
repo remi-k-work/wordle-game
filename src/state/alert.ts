@@ -11,5 +11,5 @@ import { ALERT_FORFEIT_RUN_STATE } from "@/machines/alert/constants";
 const alertMachineBag = createActorAtoms(RuntimeAtom, alertMachine);
 export const { snapshot: alertMachineAtom, send: alertMachineSendAtom } = createMachineState(alertMachine, alertMachineBag);
 
-// Derived boolean: subscribe to this instead of the full snapshot when only the machine state (not context) is needed
+// Specialized selectors for granular state access and optimized re-renders
 export const alertIsForfeitRunAtom = alertMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches(ALERT_FORFEIT_RUN_STATE)));
