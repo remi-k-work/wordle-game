@@ -2,7 +2,7 @@
 import { Cause, Duration, Effect, ExecutionPlan, Option, Schedule, Schema } from "effect";
 import { LanguageModel, Model, Prompt } from "effect/ai";
 import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
-import { riddleGenerationOptions } from "@/features/game/domain/riddle2";
+import { riddleGenerationOptions } from "@/features/game/domain/riddle";
 
 // types
 import type { SolutionsLanguage, WordMeta } from "@/features/game/domain/models";

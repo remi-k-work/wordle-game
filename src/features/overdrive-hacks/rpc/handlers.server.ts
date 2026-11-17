@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
 import { RpcOverdriveHacks } from "./requests";
-import { generateOverride } from "@/features/overdrive-hacks/domain/override2";
-import { AiClientsWithHttp } from "@/domain/fallback-plan2";
+import { generateOverride } from "@/features/overdrive-hacks/domain/override";
+import { AiClientsWithHttp } from "@/domain/fallback-plan";
 import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 

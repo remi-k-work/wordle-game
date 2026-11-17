@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Option } from "effect";
-import { generateSingleField2 } from "@/domain/generate-single-field2";
+import { generateSingleField } from "@/domain/generate-single-field";
 import { matchLanguage } from "./helpers";
 
 // types
@@ -82,4 +82,4 @@ export const generateRiddle = (
   theSecretWord: TheSecretWord,
   solutionsLanguage: SolutionsLanguage,
   wordDefinition: WordMeta["wordDefinition"] = Option.none()
-) => generateSingleField2(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));
+) => generateSingleField(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));

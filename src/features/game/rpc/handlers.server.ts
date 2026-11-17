@@ -3,9 +3,9 @@ import { Effect, HashSet, Layer, Option, Record, Schema, String } from "effect";
 import { RpcGame } from "./requests";
 import { Keypad, TheSecretWord } from "@/features/game/domain/models";
 import { matchLanguage } from "@/features/game/domain/helpers";
-import { generateRiddle } from "@/features/game/domain/riddle2";
+import { generateRiddle } from "@/features/game/domain/riddle";
 import { formatTextForTTS } from "@/domain/formatters";
-import { AiClientsWithHttp } from "@/domain/fallback-plan2";
+import { AiClientsWithHttp } from "@/domain/fallback-plan";
 import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 

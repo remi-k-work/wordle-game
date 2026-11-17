@@ -2,7 +2,7 @@
 import { Cause, Effect, Option, Predicate, Schema, String } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/ai";
 import { AiProviderError } from "./errors";
-import { makeFallbackPlan2 } from "./fallback-plan2";
+import { makeFallbackPlan2 } from "./fallback-plan";
 import { formatTextForTTS } from "./formatters";
 
 // types
@@ -18,7 +18,7 @@ const describeFailure = (error: unknown) =>
   Predicate.hasProperty(error, "message") && Predicate.isString(error.message) ? error.message : String.String(error);
 
 // Raw single-field generation against whichever `LanguageModel` is in scope
-export const generateSingleField2 = Effect.fn("generateSingleField2")(
+export const generateSingleField = Effect.fn("generateSingleField")(
   function* ({ instructions, userPrompt, fieldName, description }: GenerateSingleFieldOptions) {
     const languageModel = yield* LanguageModel.LanguageModel;
     const modelName = yield* Model.ModelName;

@@ -2,13 +2,13 @@ import "dotenv/config";
 
 // services, features, and other libraries
 import { Effect } from "effect";
-import { AiClientsWithHttp, makeFallbackPlan2 } from "@/domain/fallback-plan2";
+import { AiClientsWithHttp, makeFallbackPlan2 } from "@/domain/fallback-plan";
 import { generateRiddle, planFor, runCase } from "./riddle-proof";
 import { runSeed } from "./runtime";
 
 // constants
 import { PROOF_TEST_CASES } from "./riddle-proof";
-import { CLOUDFLARE_AI_MODELS } from "@/domain/fallback-plan2";
+import { CLOUDFLARE_AI_MODELS } from "@/domain/fallback-plan";
 
 const main = Effect.gen(function* () {
   yield* Effect.log("Proving Effect AI + Cloudflare Workers AI generateObject end-to-end...\n");

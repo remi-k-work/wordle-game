@@ -2,7 +2,7 @@ import "dotenv/config";
 
 // services, features, and other libraries
 import { Effect, Option, Record, Schema } from "effect";
-import { AiClientsWithHttp } from "@/domain/fallback-plan2";
+import { AiClientsWithHttp } from "@/domain/fallback-plan";
 import { planFor, runCase, generateRiddle } from "./riddle-proof";
 import { runSeed } from "./runtime";
 
