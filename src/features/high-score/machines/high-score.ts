@@ -40,20 +40,16 @@ const runFinishedContext = (event: RunFinished) =>
   }) as const satisfies HighScoreMachineContext;
 
 const top10HighScoresActor = createEffectLogic(({ input: { solutionsLanguage } }: EffectSourceArgs<Top10HighScoresInput>) =>
-  Effect.gen(function* () {
-    const { top10HighScores } = yield* RpcHighScoreClient;
-    return yield* top10HighScores(solutionsLanguage);
-  })
+  Effect.flatMap(RpcHighScoreClient, ({ top10HighScores }) => top10HighScores(solutionsLanguage))
 );
 
 const addHighScoreActor = createEffectLogic(({ input: { context } }: EffectSourceArgs<AddHighScoreInput>) =>
-  Effect.gen(function* () {
-    const { addHighScore } = yield* RpcHighScoreClient;
+  Effect.flatMap(RpcHighScoreClient, ({ addHighScore }) =>
     // Explicit field selection: the machine context carries non-wire fields (e.g. newHighScoreId) that must not ride into the request
-    return yield* addHighScore(
+    addHighScore(
       AddHighScore.make({ playerName: context.playerName, score: context.runScore, streak: context.streak, solutionsLang: context.solutionsLanguage })
-    );
-  })
+    )
+  )
 );
 
 export const highScoreMachine = setupEffect({

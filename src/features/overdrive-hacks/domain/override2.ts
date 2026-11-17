@@ -116,7 +116,7 @@ export const generateOverride = (
 ) =>
   generateSingleField2({
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
-    prompt: matchLanguage(
+    userPrompt: matchLanguage(
       solutionsLanguage,
       OVERRIDE_PROMPT_EN(theSecretWord, wordDefinition, theRiddle, wordleGuesses),
       OVERRIDE_PROMPT_PL(theSecretWord, wordDefinition, theRiddle, wordleGuesses)

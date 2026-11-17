@@ -49,7 +49,7 @@ export const generateRiddle = Effect.fn("generateRiddle")(function* (
   const schema = Schema.Struct({ riddle: Schema.Trim.pipe(Schema.annotate({ description: options.description })) });
   const prompt = Prompt.fromMessages([
     Prompt.systemMessage({ content: options.instructions }),
-    Prompt.userMessage({ content: [Prompt.textPart({ text: options.prompt })] }),
+    Prompt.userMessage({ content: [Prompt.textPart({ text: options.userPrompt })] }),
   ]);
 
   const { value } = yield* languageModel.generateObject({ prompt, schema });

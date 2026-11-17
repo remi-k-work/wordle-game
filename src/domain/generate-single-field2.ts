@@ -8,34 +8,30 @@ import { formatTextForTTS } from "./formatters";
 // types
 interface GenerateSingleFieldOptions {
   readonly instructions: string;
-  readonly prompt: string;
+  readonly userPrompt: string;
   readonly fieldName: string;
   readonly description: string;
 }
 
-// Surfaces a message from an unknown failure without assuming an Error shape.
+// Surfaces a message from an unknown failure without assuming an Error shape
 const describeFailure = (error: unknown) =>
   Predicate.hasProperty(error, "message") && Predicate.isString(error.message) ? error.message : String.String(error);
 
 // Raw single-field generation against whichever `LanguageModel` is in scope
 export const generateSingleField2 = Effect.fn("generateSingleField2")(
-  function* ({ instructions, fieldName, description, ...options }: GenerateSingleFieldOptions) {
+  function* ({ instructions, userPrompt, fieldName, description }: GenerateSingleFieldOptions) {
     const languageModel = yield* LanguageModel.LanguageModel;
     const modelName = yield* Model.ModelName;
 
     const schema = Schema.Struct({ [fieldName]: Schema.Trim.pipe(Schema.annotate({ description })) });
     const prompt = Prompt.fromMessages([
       Prompt.systemMessage({ content: instructions }),
-      Prompt.userMessage({ content: [Prompt.textPart({ text: options.prompt })] }),
+      Prompt.userMessage({ content: [Prompt.textPart({ text: userPrompt })] }),
     ]);
 
     return yield* languageModel.generateObject({ prompt, schema }).pipe(
       // Normalize for TTS and keep only non-empty output (an empty riddle is no riddle)
       Effect.map(({ value }) => Option.liftPredicate(formatTextForTTS(value[fieldName]), String.isNonEmpty)),
-      // A pure interruption (the request was cancelled) is normal lifecycle, not
-      // an unsuccessful attempt: logging it would report every cancellation as a
-      // model failure, on top of the error the shared `degradeCause` recovery
-      // policy in domain/helpers deliberately never emits for one
       Effect.tapCauseIf(
         (cause) => !Cause.hasInterruptsOnly(cause),
         (cause) => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(cause)}`)

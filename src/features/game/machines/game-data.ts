@@ -58,11 +58,22 @@ export const gameDataMachine = setupEffect({
   actors: { onLoadingActor, selectSecretWordActor },
   actions: {
     onSecretWordSelected: ({ theSecretWord }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-      Effect.all([
-        Atom.set(wordMetaMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
-        Atom.set(wordChallengeMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.started" }),
-      ]).pipe(Effect.asVoid),
+      Effect.all(
+        [
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+          Effect.log(`The Secret Word: ${theSecretWord}`),
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+          // *** TEST CODE ***
+
+          Atom.set(wordMetaMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
+          Atom.set(wordChallengeMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
+          Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.started" }),
+        ],
+        { discard: true }
+      ),
 
     // Notify the word challenge machine that game data is ready (no word yet — idle state)
     onGameDataLoaded: ({ dictionary }) => Atom.set(wordChallengeMachineSendAtom, { type: "gameDataLoaded", dictionary }),

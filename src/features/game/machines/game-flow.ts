@@ -44,11 +44,11 @@ export const gameFlowMachine = setupEffect({
         Atom.set(modalMachineSendAtom, { type: "closed" }),
         Atom.set(runSessionMachineSendAtom, { type: "startedNewRun" }),
         Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" }),
-      ]).pipe(Effect.asVoid),
+      ], { discard: true }),
 
     // Between words: close the modal and ask game-data for the next word
     requestNextWord: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-      Effect.all([Atom.set(modalMachineSendAtom, { type: "closed" }), Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" })]).pipe(Effect.asVoid),
+      Effect.all([Atom.set(modalMachineSendAtom, { type: "closed" }), Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" })], { discard: true }),
 
     // Forfeit the active run: abandon the run session + word challenge, stop the overdrive hacks, and open the status modal
     forfeitRun: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
@@ -57,7 +57,7 @@ export const gameFlowMachine = setupEffect({
         Atom.set(wordChallengeMachineSendAtom, { type: "forfeitedRun" }),
         Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.ended" }),
         Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
-      ]).pipe(Effect.asVoid),
+      ], { discard: true }),
 
     // Bank the won word into the run session, stop the hacks, show the status modal
     bankWonWord: ({ wordScore }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
@@ -65,7 +65,7 @@ export const gameFlowMachine = setupEffect({
         Atom.set(runSessionMachineSendAtom, { type: "wordWon", wordScore }),
         Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.ended" }),
         Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
-      ]).pipe(Effect.asVoid),
+      ], { discard: true }),
 
     // The run died on guesses: finish it, stop the hacks, show the status modal
     finishLostRun: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
@@ -73,7 +73,7 @@ export const gameFlowMachine = setupEffect({
         Atom.set(runSessionMachineSendAtom, { type: "wordLost" }),
         Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.ended" }),
         Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
-      ]).pipe(Effect.asVoid),
+      ], { discard: true }),
 
     // Language change abandons every in-flight feature machine and reloads the game data for the new language
     changeLanguage: ({ solutionsLanguage }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
@@ -83,7 +83,7 @@ export const gameFlowMachine = setupEffect({
         Atom.set(overdriveHacksMachineSendAtom, { type: "solutionsLanguageChanged" }),
         Atom.set(wordMetaMachineSendAtom, { type: "resetRequested" }),
         Atom.set(gameDataMachineSendAtom, { type: "solutionsLanguageChanged", solutionsLanguage }),
-      ]).pipe(Effect.asVoid),
+      ], { discard: true }),
   },
 }).createMachine({
   id: "gameFlow",

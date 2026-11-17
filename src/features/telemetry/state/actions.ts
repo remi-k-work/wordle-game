@@ -7,11 +7,10 @@ import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/gam
 
 // types
 import type { RunDeathReason, RunSession, SolutionsLanguage, WordChallenge } from "@/features/game/domain/models";
+type SharedAttributes = { readonly sessionId: string; readonly solutionsLanguage: SolutionsLanguage };
 
 // constants
 import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/domain/constants";
-
-type SharedAttributes = { readonly sessionId: string; readonly solutionsLanguage: SolutionsLanguage };
 
 // The turn the player actually guessed on (the machine increments `currentTurn` on submit)
 const guessedTurnOf = (wordChallenge: WordChallenge) => wordChallenge.currentTurn - 1;
@@ -52,7 +51,9 @@ export const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (runS
   // We calculate the total real-world time the run was alive, clamped at 0 so a
   // persisted `createdAt` ahead of the current clock (skew, tampering) cannot make
   // the duration negative — `AddArcadeRunSummary` rejects negatives, which would
-  // drop the whole run summary downstream
+  // drop the whole run summary downstream. The upper bound is `Infinity` ("none
+  // to enforce"), and `clamp` still folds a non-finite duration into the same
+  // floor rather than letting `NaN` reach the schema
   const now = yield* DateTime.now;
   const createdAt = Option.getOrElse(runSession.createdAt, () => now);
   const durationSeconds = Number.clamp({ minimum: 0, maximum: Infinity })(DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor));
@@ -67,7 +68,7 @@ export const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (runS
         deathReason,
         // The secret word is only meaningful for "Guesses" deaths; every other
         // death reason (and a puzzle that never had one) degrades to "N/A"
-        failedOnWord: Option.getOrElse(deathReason === "Guesses" ? wordChallenge.theSecretWord : Option.none(), () => "N/A"),
+        failedOnWord: deathReason === "Guesses" ? Option.getOrElse(wordChallenge.theSecretWord, () => "N/A") : "N/A",
         finalScore,
         finalStreak,
         durationSeconds,

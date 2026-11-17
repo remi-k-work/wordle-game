@@ -45,9 +45,8 @@ Kontekst: Ukryte słowo to "LUSTRO"
 Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój ruch, lecz nie mam własnego umysłu. Czym jestem?
 `;
 
-// A definition is optional because the riddle flow must still work when the
-// definition asset is unavailable. When present, it disambiguates exotic words
-// and homonyms without adding another RPC round-trip
+// A definition is optional because the riddle flow must still work when the definition asset is unavailable
+// when present, it disambiguates exotic words and homonyms without adding another RPC round-trip
 const definitionContextEn = (wordDefinition: WordMeta["wordDefinition"]) =>
   Option.match(wordDefinition, {
     onSome: (value) =>
@@ -66,19 +65,18 @@ const RIDDLE_PROMPT_PL = (wordDefinition: WordMeta["wordDefinition"]) => `${defi
 const DESCRIPTION_EN = "Plain prose, a short riddle (1-3 sentences) ending in a question, TTS-friendly. No Markdown or emojis.";
 const DESCRIPTION_PL = "Zwykły tekst, krótka, poprawna gramatycznie zagadka (1-3 zdania) zakończona pytaniem, przyjazna dla TTS. Bez Markdownu i emotikonów.";
 
-// Builds the language-specific generation options for a riddle. Exported so the
-// OpenRouter/Cloudflare proof scripts exercise the exact same prompts as
-// production (single source of truth)
+// Builds the language-specific generation options for a riddle
 export const riddleGenerationOptions = (
   theSecretWord: string,
   solutionsLanguage: SolutionsLanguage,
   wordDefinition: WordMeta["wordDefinition"] = Option.none()
-) => ({
-  instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
-  prompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN(wordDefinition), RIDDLE_PROMPT_PL(wordDefinition)),
-  fieldName: "riddle",
-  description: matchLanguage(solutionsLanguage, DESCRIPTION_EN, DESCRIPTION_PL),
-});
+) =>
+  ({
+    instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
+    userPrompt: matchLanguage(solutionsLanguage, RIDDLE_PROMPT_EN(wordDefinition), RIDDLE_PROMPT_PL(wordDefinition)),
+    fieldName: "riddle",
+    description: matchLanguage(solutionsLanguage, DESCRIPTION_EN, DESCRIPTION_PL),
+  }) as const;
 
 export const generateRiddle = (
   theSecretWord: TheSecretWord,

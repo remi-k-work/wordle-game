@@ -5,6 +5,19 @@ import { BrowseCharts } from "./models";
 // constants
 import { INITIAL_BROWSE_CHARTS } from "./constants";
 
+// BucketKey
+// ---------------------------------------------------------------------------
+// The bucket column of a distribution row: the string keys whose value may be
+// null (the trailing cumulative-total bucket). Deriving the key from the column
+// type keeps non-bucket columns (the counts, the percentages) out of the
+// bucket's type, where passing one would silently no-op
+// Shared by the DB layer (which drops or keeps that row) and the state layer
+// (which resolves it to an unbounded bucket), so both spell the same column
+// concept once
+export type BucketKey<Row> = {
+  [K in keyof Row & string]: null extends Row[K] ? K : never;
+}[keyof Row & string];
+
 // Schema.decodeUnknownOption builds a parser on every call, so build it once at
 // module scope instead of once per URL change — the same reason the telemetry
 // worker, the charts DB and the game RPC handlers hoist their decoders
@@ -61,3 +74,29 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
  */
 export const decodeBrowseCharts = (searchEntries: Readonly<Record<string, string>>) =>
   Option.getOrElse(decodeBrowseChartsOption(searchEntries), () => INITIAL_BROWSE_CHARTS);
+
+// Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
+export const nullToInfinity = (value: number | null) => value ?? Infinity;
+
+/**
+ * Resolves an open-ended distribution's trailing NULL bucket to `Infinity` ("20+
+ * seconds", "5+ wins"). The NULL row is the cumulative total the percentages are
+ * derived from, so ChartsDB deliberately keeps it; the state layer is what turns
+ * it into a chartable open-ended bucket
+ *
+ * `bucket` is typed by `BucketKey`, so the call site can only name a column whose
+ * value may be null — passing a count or a percentage column fails to compile
+ * rather than silently becoming a no-op
+ *
+ * `Row` is constrained to `object` rather than `Readonly<Record<string, unknown>>`
+ * so decoded `Schema.Class` rows (whose type has no index signature) are accepted
+ * too: the bucket key is still derived from the column type, so the compile-time
+ * guarantee above is unchanged
+ */
+export const withUnboundedBucket =
+  <Row extends object>(bucket: BucketKey<Row>) =>
+  (rows: ReadonlyArray<Row>): Row[] =>
+    // Spreading each row (a decoded Schema.Class) deliberately drops its
+    // prototype: the rows feed recharts as plain data objects, and no consumer
+    // calls a class method on them
+    rows.map((row) => ({ ...row, [bucket]: nullToInfinity(row[bucket] as number | null) }));

@@ -4,22 +4,23 @@ import { Atom } from "effect/reactivity";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { sessionIdAtom } from "@/features/player/state/player";
+import { withUnboundedBucket } from "@/features/charts/domain/helpers";
 
 // types
 import type { Context } from "effect";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { AnyAvgStatArgs, AnyCounterArgs, BestRunTrophyCardArgs } from "@/features/charts/domain/models";
+import type {
+  AnyAvgStatArgs,
+  AnyCounterArgs,
+  BestRunTrophyCardArgs,
+  ArcadeStreakDistributionData,
+  TimeToSolveDistributionData,
+} from "@/features/charts/domain/models";
 
-// Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
-const nullToInfinity = (value: number | null) => value ?? Infinity;
-
-// One session-scoped chart read: resolves the telemetry RPC client, tags the
-// request with the player's session id, and caches the result for 5 minutes
-// of idle time (remounts within that window reuse it instead of refetching)
+// One session-scoped chart read: resolves the telemetry RPC client
 const chartAtom = <A, E>(fetch: (client: Context.Service.Shape<typeof RpcTelemetryClient>, sessionId: string) => Effect.Effect<A, E>) =>
   RuntimeAtom.atom((get) => {
-    // Read the session id inside the atom read context so this atom re-runs
-    // (and re-subscribes) when the player's session changes
+    // Read the session id inside the atom read context so this atom re-runs (and re-subscribes) when the player's session changes
     const sessionId = get(sessionIdAtom);
 
     return Effect.flatMap(RpcTelemetryClient, (client) => fetch(client, sessionId));
@@ -29,12 +30,15 @@ export const guessDistributionAtom = Atom.family((solutionsLanguage: SolutionsLa
   chartAtom((client, sessionId) => client.getGuessDistribution({ sessionId, solutionsLanguage }))
 );
 
+// The two open-ended distributions resolve their trailing NULL bucket to `Infinity` through the one shared helper
+const unboundedMaxSeconds = withUnboundedBucket<TimeToSolveDistributionData>("maxSeconds");
+const unboundedStreak = withUnboundedBucket<ArcadeStreakDistributionData>("streak");
+
 export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
     client.getTimeToSolveDistribution({ sessionId, solutionsLanguage }).pipe(
       // A non-empty `maxSeconds` is a rounding artifact of the bucket boundary
-      // oxlint-disable-next-line typescript/no-misused-spread -- spreading a decoded Schema.Class row deliberately drops its prototype: the rows feed recharts as plain data objects, and no consumer calls a class method on them
-      Effect.map((data) => data.map((row) => ({ ...row, maxSeconds: nullToInfinity(row.maxSeconds) })))
+      Effect.map(unboundedMaxSeconds)
     )
   )
 );
@@ -42,10 +46,8 @@ export const timeToSolveDistributionAtom = Atom.family((solutionsLanguage: Solut
 export const arcadeStreakDistributionAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>
   chartAtom((client, sessionId) =>
     client.getArcadeStreakDistribution({ sessionId, solutionsLanguage }).pipe(
-      // Same deliberate prototype drop as timeToSolveDistribution above: the
-      // rows are recharts data, not class instances anyone calls methods on
-      // oxlint-disable-next-line typescript/no-misused-spread
-      Effect.map((data) => data.map((row) => ({ ...row, streak: nullToInfinity(row.streak) })))
+      // Same open-ended bucket rule, applied to the streak column
+      Effect.map(unboundedStreak)
     )
   )
 );

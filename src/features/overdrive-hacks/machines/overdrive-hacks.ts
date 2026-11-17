@@ -212,7 +212,7 @@ export const overdriveHacksMachine = setupEffect({
         input: ({ context }) => ({ empNukedLetters: context.empNukedLetters }),
         onDone: (args) => ({
           target: "active",
-          context: { empNukedLetters: [...args.context.empNukedLetters, ...Option.getOrElse(args.output, () => [])] },
+          context: { empNukedLetters: Array.appendAll(args.context.empNukedLetters, Option.getOrElse(args.output, Array.empty)) },
         }),
         onError: (args, enq) => {
           enq(args.actions.logHackFailure, { self: args.self, hackId: "emp", error: args.event.error });

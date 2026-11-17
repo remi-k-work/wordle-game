@@ -4,21 +4,30 @@ import { FetchHttpClient } from "effect/http";
 import { OpenAiClient, OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter";
 
-// Builds one fallback step: the provider to try, bounded attempts, and a shared
-// retry policy; both provider clients go through this so the ladder cannot end
-// up retrying Cloudflare and OpenRouter differently
+// The fallback ladder, as data: one rung per (model id, provider-specific config) pair, in attempt order
+export const CLOUDFLARE_AI_MODELS = [
+  { id: "@cf/google/gemma-4-26b-a4b-it", config: { strictJsonSchema: true, chat_template_kwargs: { enable_thinking: false } } },
+  { id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", config: { strictJsonSchema: true } },
+  { id: "@cf/openai/gpt-oss-120b", config: { strictJsonSchema: true, reasoning_effort: "low" } },
+] as const;
+
+export const OPENROUTER_AI_MODELS = [
+  { id: "google/gemma-4-26b-a4b-it", config: { strictJsonSchema: true, reasoning_effort: "none" } },
+  { id: "google/gemma-4-31b-it", config: { strictJsonSchema: true, reasoning_effort: "none" } },
+  { id: "openrouter/free", config: { strictJsonSchema: true, reasoning_effort: "low" } },
+] as const;
+
+// Builds one fallback step: the provider to try, bounded attempts, and a shared retry policy
 const aiStep = <A>(provide: A) => ({ provide, attempts: 2, schedule: Schedule.exponential("1 second", 2) });
 
-// Builds the shared fallback ladder for any LanguageModel service; Cloudflare is always tried first because it runs closest to the Worker
-// Gemma is the quality-first primary with thinking disabled to avoid multi-minute reasoning turns
-// Llama and GPT-OSS are the remaining Cloudflare fallbacks; OpenRouter is strictly secondary
+// This helper maps a rung tuple to a step tuple, keeping the positions intact
+const toSteps = <Rungs extends ReadonlyArray<unknown>, Step>(rungs: Rungs, toStep: (rung: Rungs[number]) => Step): { -readonly [K in keyof Rungs]: Step } =>
+  rungs.map(toStep) as { -readonly [K in keyof Rungs]: Step };
+
+// Builds the shared fallback ladder for any LanguageModel service from the rung tables above
 export const makeFallbackPlan2 = ExecutionPlan.make(
-  aiStep(OpenAiLanguageModel.model("@cf/google/gemma-4-26b-a4b-it", { strictJsonSchema: true, chat_template_kwargs: { enable_thinking: false } })),
-  aiStep(OpenAiLanguageModel.model("@cf/meta/llama-3.3-70b-instruct-fp8-fast", { strictJsonSchema: true })),
-  aiStep(OpenAiLanguageModel.model("@cf/openai/gpt-oss-120b", { strictJsonSchema: true, reasoning_effort: "low" })),
-  aiStep(OpenRouterLanguageModel.model("google/gemma-4-26b-a4b-it", { strictJsonSchema: true, reasoning_effort: "none" })),
-  aiStep(OpenRouterLanguageModel.model("google/gemma-4-31b-it", { strictJsonSchema: true, reasoning_effort: "none" })),
-  aiStep(OpenRouterLanguageModel.model("openrouter/free", { strictJsonSchema: true, reasoning_effort: "low" }))
+  ...toSteps(CLOUDFLARE_AI_MODELS, ({ id, config }) => aiStep(OpenAiLanguageModel.model(id, config))),
+  ...toSteps(OPENROUTER_AI_MODELS, ({ id, config }) => aiStep(OpenRouterLanguageModel.model(id, config)))
 );
 
 // The OpenRouter client layer, backed by the OpenAI-compatible endpoint
