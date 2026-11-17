@@ -17,8 +17,6 @@ export type Letter = typeof Letter.Type;
 export type Tile = typeof Tile.Type;
 
 export type WordMeta = typeof WordMeta.Type;
-export type RunSession = typeof RunSession.Type;
-export type RunResult = typeof RunResult.Type;
 export type WordScore = typeof WordScore.Type;
 export type WordChallenge = typeof WordChallenge.Type;
 
@@ -59,33 +57,6 @@ export const WordMeta = Schema.Struct({
   wordDefinition: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),
   theRiddleAudio: Schema.Option(Schema.Uint8Array),
   wordDefinitionAudio: Schema.Option(Schema.Uint8Array),
-});
-
-// Wire schemas for the fields the active run session and the completed-run
-// summary both carry: declared once so the two representations of the same
-// persisted field (an Option there, a required value here) cannot drift
-const RunId = Schema.Trim.check(Schema.isUUID());
-const RunTimestamp = Schema.DateTimeUtc;
-const RunPoints = Schema.Natural;
-
-// Represents the state of the current arcade run (points from individual words accumulate here into a persistent total until a loss occurs)
-export const RunSession = Schema.Struct({
-  runId: Schema.Option(RunId),
-  createdAt: Schema.Option(RunTimestamp),
-  runScore: RunPoints,
-  streak: RunPoints,
-  bestRunScore: RunPoints,
-  bestStreak: RunPoints,
-});
-
-// Immutable summary of a completed run. This is intentionally separate from the active persisted session
-export const RunResult = Schema.Struct({
-  runId: RunId,
-  createdAt: RunTimestamp,
-  finishedAt: RunTimestamp,
-  runScore: RunPoints,
-  streak: RunPoints,
-  deathReason: RunDeathReason,
 });
 
 // Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)

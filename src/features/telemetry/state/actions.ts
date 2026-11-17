@@ -6,7 +6,8 @@ import { sessionIdAtom } from "@/features/player/state/player";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // types
-import type { RunDeathReason, RunSession, SolutionsLanguage, WordChallenge } from "@/features/game/domain/models";
+import type { RunDeathReason, SolutionsLanguage, WordChallenge } from "@/features/game/domain/models";
+import type { RunSession } from "@/features/game/machines/run-session/models";
 type SharedAttributes = { readonly sessionId: string; readonly solutionsLanguage: SolutionsLanguage };
 
 // constants

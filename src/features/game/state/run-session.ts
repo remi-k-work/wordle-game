@@ -3,15 +3,15 @@ import { Equal, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { createActorAtoms } from "@xstate/effect/atom";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { RunSession } from "@/features/game/domain/models";
+import { RunSession } from "@/features/game/machines/run-session/models";
 import { runSessionMachine } from "@/features/game/machines/run-session";
 import { createMachineState } from "@/lib/machine-atoms";
 
 // types
-import type { RunResult } from "@/features/game/domain/models";
+import type { RunResult } from "@/features/game/machines/run-session/models";
 
 // constants
-import { INITIAL_RUN_SESSION } from "@/features/game/domain/constants";
+import { INITIAL_RUN_SESSION } from "@/features/game/machines/run-session/constants";
 
 // Persistent storage for tracking the current arcade run progress and high water marks
 const runSessionAtom = Atom.kvs({

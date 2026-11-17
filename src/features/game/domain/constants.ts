@@ -3,7 +3,7 @@ import { HashSet, Option, Record } from "effect";
 import { msg } from "gt-react";
 
 // types
-import type { Color, Letter, RunSession, SolutionsLanguage, WordChallenge, WordMeta } from "./models";
+import type { Color, Letter, SolutionsLanguage, WordChallenge, WordMeta } from "./models";
 
 // Stable category identifiers for UI presentation (the message map above is the source of truth)
 export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP;
@@ -122,15 +122,3 @@ export const initialWordChallenge = () =>
     wordScore: Option.none(),
     greyLetters: HashSet.empty<Letter>(),
   }) as const satisfies WordChallenge;
-
-// A shared constant, safe as a machine spread source (every use spreads it into
-// a fresh object) and as the persisted atom's default value: unlike the
-// factories above it is never returned directly into a live context
-export const INITIAL_RUN_SESSION = {
-  runId: Option.none(),
-  createdAt: Option.none(),
-  runScore: 0,
-  streak: 0,
-  bestRunScore: 0,
-  bestStreak: 0,
-} as const satisfies RunSession;
