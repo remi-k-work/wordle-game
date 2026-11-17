@@ -6,7 +6,7 @@ import { alertMachine } from "@/machines/alert";
 import { createMachineState } from "@/lib/machine-atoms";
 
 // constants
-import { ALERT_FORFEIT_RUN_STATE } from "@/machines/alert";
+import { ALERT_FORFEIT_RUN_STATE } from "@/machines/alert/constants";
 
 const alertMachineBag = createActorAtoms(RuntimeAtom, alertMachine);
 export const { snapshot: alertMachineAtom, send: alertMachineSendAtom } = createMachineState(alertMachine, alertMachineBag);

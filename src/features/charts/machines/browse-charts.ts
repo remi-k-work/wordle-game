@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
+import { Effect, Predicate, Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
 import { BrowseCharts } from "@/features/charts/domain/models";
 import { SolutionsLanguage } from "@/features/game/domain/models";
@@ -11,16 +11,16 @@ type Navigate = ReturnType<typeof useUrlScribe>["navigate"];
 // constants
 import { INITIAL_BROWSE_CHARTS } from "@/features/charts/domain/constants";
 
-const NavigateSchema = Schema.declare<Navigate>((input): input is Navigate => typeof input === "function", { title: "Navigate" });
+const Navigate = Schema.declare<Navigate>((input): input is Navigate => Predicate.isFunction(input), { title: "Navigate" });
 
 export const browseChartsMachine = setupEffect({
   schemas: {
-    context: Schema.Struct({ ...BrowseCharts.fields, navigate: Schema.optional(NavigateSchema) }),
+    context: Schema.Struct({ ...BrowseCharts.fields, navigate: Schema.optional(Navigate) }),
     events: {
-      urlSynced: Schema.Struct({ browseCharts: BrowseCharts, navigate: NavigateSchema }),
+      urlSynced: Schema.Struct({ browseCharts: BrowseCharts, navigate: Navigate }),
       slChanged: Schema.Struct({ sl: SolutionsLanguage }),
     },
-    actions: { navigate: { params: Schema.Struct({ browseCharts: BrowseCharts, navigate: Schema.optional(NavigateSchema) }) } },
+    actions: { navigate: { params: Schema.Struct({ browseCharts: BrowseCharts, navigate: Schema.optional(Navigate) }) } },
   },
   actions: {
     navigate: ({ browseCharts, navigate }) =>

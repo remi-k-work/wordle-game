@@ -6,7 +6,7 @@ import { modalMachine } from "@/machines/modal";
 import { createMachineState } from "@/lib/machine-atoms";
 
 // types
-import type { ModalType } from "@/machines/modal";
+import type { ModalType } from "@/machines/modal/models";
 
 const modalMachineBag = createActorAtoms(RuntimeAtom, modalMachine);
 export const { snapshot: modalMachineAtom, send: modalMachineSendAtom } = createMachineState(modalMachine, modalMachineBag);
