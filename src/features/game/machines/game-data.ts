@@ -59,14 +59,6 @@ export const gameDataMachine = setupEffect({
   actions: {
     onSecretWordSelected: ({ theSecretWord }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
       Effect.all([
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-        Effect.log(`The Secret Word: ${theSecretWord}`),
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-        // *** TEST CODE ***
-
         Atom.set(wordMetaMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
         Atom.set(wordChallengeMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
         Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.started" }),

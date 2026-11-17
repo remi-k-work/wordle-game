@@ -9,11 +9,17 @@ import type { Rpc } from "effect/rpc";
 // Whether a cause is a real failure (a typed error or a defect) rather than a pure interruption
 const isFailure = (cause: Cause.Cause<unknown>) => !Cause.hasInterruptsOnly(cause);
 
-// The shared recovery policy for non-critical Effect work: every real failure is logged first and then degraded
+// The shared recovery policy for non-critical Effect work: every real failure is logged first and then degraded.
+// A single catchCauseIf replaces the previous tapCauseIf + catchCauseIf pair (which checked the same predicate
+// twice), logging a readable cause summary before falling back to the recovery.
 export const degradeCause = <A, B, E, R>(effect: Effect.Effect<A, E, R>, recovery: Effect.Effect<B, never, never>) =>
   effect.pipe(
-    Effect.tapCauseIf(isFailure, Effect.logError),
-    Effect.catchCauseIf(isFailure, () => recovery),
+    Effect.catchCauseIf(isFailure, (cause) =>
+      Effect.gen(function* () {
+        yield* Effect.logError(Cause.pretty(cause));
+        return yield* recovery;
+      })
+    ),
     Effect.orDie
   );
 
