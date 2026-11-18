@@ -1,27 +1,17 @@
 // services, features, and other libraries
-import { Option, Record } from "effect";
+import { Record } from "effect";
 
 // types
 import type { SolutionsLanguage } from "@/features/game/domain/models";
-import type { OverdriveHackId, OverdriveHacks } from "./models";
+import type { OverdriveHackId } from "./models";
 
 // constants
 export const EMP_LETTER_COUNT = 3;
 
-export const OVERDRIVE_HACK_COSTS = { emp: 1500, sonar: 2000, override: 3000 } as const satisfies Record.ReadonlyRecord<OverdriveHackId, number>;
+const OVERDRIVE_HACK_COSTS = { emp: 1500, sonar: 2000, override: 3000 } as const satisfies Record.ReadonlyRecord<OverdriveHackId, number>;
 export const OVERDRIVE_HACK_COST = (hackId: OverdriveHackId) => OVERDRIVE_HACK_COSTS[hackId];
 
 export const VOWELS_BY_LANGUAGE = {
   En: ["A", "E", "I", "O", "U"],
   Pl: ["A", "Ą", "E", "Ę", "I", "O", "Ó", "U", "Y"],
 } as const satisfies Record.ReadonlyRecord<SolutionsLanguage, readonly string[]>;
-
-// A factory rather than a shared constant: every machine reset gets its own empty
-// arrays, so a single in-place mutation cannot leak into every live context
-export const initialOverdriveHacks = () =>
-  ({
-    empNukedLetters: [],
-    sonarReveals: [],
-    theOverride: Option.none(),
-    theOverrideAudio: Option.none(),
-  }) as const satisfies OverdriveHacks;

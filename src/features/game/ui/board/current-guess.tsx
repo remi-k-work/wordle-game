@@ -15,7 +15,7 @@ import { GuessTile } from "./guess-tile";
 // types
 import type { Tile } from "@/features/game/domain/models";
 import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
-import type { OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
+import type { OverdriveHacks } from "@/features/overdrive-hacks/machines/overdrive-hacks/models";
 
 // constants
 // The typing row lays its tiles out on the same tracks as the rows around it, so

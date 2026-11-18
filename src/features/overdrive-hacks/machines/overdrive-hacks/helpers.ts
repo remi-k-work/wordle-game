@@ -1,0 +1,26 @@
+// services, features, and other libraries
+import { Array, Effect, Option } from "effect";
+import { Atom } from "effect/reactivity";
+import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/can-apply";
+import { runSessionMachineSendAtom } from "@/features/game/state/run-session";
+
+// types
+import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
+import { OverdriveHacks } from "./models";
+
+// constants
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
+
+// The shared overdrive-hack purchase preamble: check affordability, produce the
+// hack's result, and charge the run score only when a result was produced
+export const withHackPurchase = <A, E, R>(hackId: OverdriveHackId, produce: Effect.Effect<Option.Option<A>, E, R>) =>
+  Atom.get(overdriveHacksCanApplyHackAtom(hackId)).pipe(
+    Effect.flatMap((canApplyHack) => (canApplyHack ? produce : Effect.succeedNone)),
+    Effect.tap((result) =>
+      Option.isSome(result) ? Atom.set(runSessionMachineSendAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(hackId) }) : Effect.void
+    )
+  );
+
+// EMP-nuked keys never reach the word-challenge machine
+export const shouldForwardKeyPress = (empNukedLetters: OverdriveHacks["empNukedLetters"], pressedKey: string) =>
+  !Array.contains(empNukedLetters, pressedKey.toUpperCase());
