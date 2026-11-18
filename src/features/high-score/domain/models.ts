@@ -3,13 +3,10 @@ import { Effect, Schema } from "effect";
 import { SolutionsLanguage } from "@/features/game/domain/models";
 import { BasePage } from "@/domain/models";
 
-// types
-export type HighScoreMachineContext = typeof HighScoreMachineContext.Type;
-
 // Represents the high score entry for a player
-export class HighScore extends Schema.Class<HighScore, { readonly brand: unique symbol }>("HighScore")({
+export class HighScoreEntry extends Schema.Class<HighScoreEntry, { readonly brand: unique symbol }>("HighScoreEntry")({
   id: Schema.Int.check(Schema.isGreaterThan(0)),
-  playerName: Schema.Trim.pipe(Schema.check(Schema.isNonEmpty()), Schema.check(Schema.isMaxLength(3))),
+  playerName: Schema.Trim.check(Schema.isNonEmpty(), Schema.isMaxLength(3)),
   score: Schema.Natural,
   streak: Schema.Natural,
   solutionsLang: SolutionsLanguage,
@@ -18,22 +15,6 @@ export class HighScore extends Schema.Class<HighScore, { readonly brand: unique 
   // schema must accept `Date` and turn it into a `DateTime.Utc`
   createdAt: Schema.DateTimeUtcFromDate,
 }) {}
-
-// The schema for adding a new high score entry (the required fields only)
-export class AddHighScore extends Schema.Class<AddHighScore, { readonly brand: unique symbol }>("AddHighScore")({
-  playerName: HighScore.fields.playerName,
-  score: HighScore.fields.score,
-  streak: HighScore.fields.streak,
-  solutionsLang: HighScore.fields.solutionsLang,
-}) {}
-
-export const HighScoreMachineContext = Schema.Struct({
-  playerName: HighScore.fields.playerName,
-  runScore: HighScore.fields.score,
-  streak: HighScore.fields.streak,
-  solutionsLanguage: HighScore.fields.solutionsLang,
-  newHighScoreId: Schema.Option(HighScore.fields.id),
-});
 
 // The high score page with all its inputs (params and searchParams)
 export class HighScorePage extends BasePage.extend<HighScorePage>("HighScorePage")({

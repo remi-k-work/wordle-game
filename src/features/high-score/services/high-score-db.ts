@@ -1,7 +1,8 @@
 // services, features, and other libraries
 import { Context, Effect, Layer, Option, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
-import { HighScore, AddHighScore } from "@/features/high-score/domain/models";
+import { HighScoreEntry } from "@/features/high-score/domain/models";
+import { AddNewHighScore } from "@/features/high-score/machines/high-score/models";
 import { qualifiesForTop10 } from "@/features/high-score/domain/helpers";
 import { SolutionsLanguage } from "@/features/game/domain/models";
 import { dieOnDbFailure } from "@/domain/helpers";
@@ -12,20 +13,20 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
 
     const top10HighScoresQuery = SqlSchema.findAll({
       Request: SolutionsLanguage,
-      Result: HighScore,
+      Result: HighScoreEntry,
       execute: (solutionsLanguage) =>
         sql`SELECT id, player_name, score, streak, solutions_lang, created_at FROM high_score WHERE solutions_lang = ${solutionsLanguage} ORDER BY score DESC, streak DESC LIMIT 10`,
     });
 
-    const insertHighScoreQuery = SqlSchema.findOne({
-      Request: AddHighScore,
-      Result: Schema.Struct({ id: HighScore.fields.id }),
+    const addNewHighScoreQuery = SqlSchema.findOne({
+      Request: AddNewHighScore,
+      Result: Schema.Struct({ id: HighScoreEntry.fields.id }),
       execute: (request) => sql`INSERT INTO high_score ${sql.insert(request)} RETURNING id`,
     });
 
     return {
       top10HighScores: (solutionsLanguage: SolutionsLanguage) => dieOnDbFailure(top10HighScoresQuery(solutionsLanguage)),
-      addHighScore: (request: AddHighScore) =>
+      addNewHighScore: (request: AddNewHighScore) =>
         sql
           .withTransaction(
             Effect.gen(function* () {
@@ -34,7 +35,7 @@ export class HighScoreDB extends Context.Service<HighScoreDB>()("HighScoreDB", {
               const currentTop10 = yield* top10HighScoresQuery(request.solutionsLang);
               if (!qualifiesForTop10(currentTop10, request.score, request.streak)) return Option.none();
 
-              const { id } = yield* insertHighScoreQuery(request);
+              const { id } = yield* addNewHighScoreQuery(request);
               return Option.some(id);
             })
           )

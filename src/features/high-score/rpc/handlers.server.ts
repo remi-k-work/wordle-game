@@ -8,14 +8,12 @@ import { makeRpcHandler } from "@/domain/helpers.server";
 // constants
 import { RPC_HIGH_SCORE_PATH } from "@/domain/constants";
 
-// Every handler is a pass-through to the same DB service method, so the
-// service lookup is hoisted once and the handlers delegate point-free
+// Every handler is a pass-through to the same DB service method, so the service lookup is hoisted once and the handlers delegate point-free
 const highScoreDB = Effect.service(HighScoreDB);
 
 const RpcHighScoreLayer = RpcHighScore.toLayer({
   top10HighScores: (solutionsLanguage) => Effect.flatMap(highScoreDB, (db) => db.top10HighScores(solutionsLanguage)),
-
-  addHighScore: (payload) => Effect.flatMap(highScoreDB, (db) => db.addHighScore(payload)),
+  addNewHighScore: (payload) => Effect.flatMap(highScoreDB, (db) => db.addNewHighScore(payload)),
 }).pipe(Layer.provide(HighScoreDB.layer), Layer.provide(PgLive));
 
 export const handler = makeRpcHandler(RpcHighScore, RPC_HIGH_SCORE_PATH, RpcHighScoreLayer);
