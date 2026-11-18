@@ -1,9 +1,9 @@
 // services, features, and other libraries
-import { HashSet, Option, Record } from "effect";
+import { Option, Record } from "effect";
 import { msg } from "gt-react";
 
 // types
-import type { Color, Letter, SolutionsLanguage, WordChallenge, WordMeta } from "./models";
+import type { Color, SolutionsLanguage, WordMeta } from "./models";
 
 // Stable category identifiers for UI presentation (the message map above is the source of truth)
 export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP;
@@ -110,15 +110,3 @@ export const initialWordMeta = () =>
     theRiddleAudio: Option.none(),
     wordDefinitionAudio: Option.none(),
   }) as const satisfies WordMeta;
-
-export const initialWordChallenge = () =>
-  ({
-    dictionary: Option.none(),
-    theSecretWord: Option.none(),
-    currentGuessWord: "",
-    wordleGuesses: [],
-    currentTurn: 1,
-    startTime: Option.none(),
-    wordScore: Option.none(),
-    greyLetters: HashSet.empty<Letter>(),
-  }) as const satisfies WordChallenge;

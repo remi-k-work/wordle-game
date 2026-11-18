@@ -3,7 +3,8 @@ import { Array, HashMap, Option } from "effect";
 import { msg } from "gt-react";
 
 // types
-import type { TheSecretWord, Tile, WordChallenge } from "./models";
+import type { TheSecretWord, Tile } from "./models";
+import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import type { SpeedMultiplierCategory } from "./constants";
 
 // constants

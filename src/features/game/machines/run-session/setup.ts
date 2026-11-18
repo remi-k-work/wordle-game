@@ -2,7 +2,8 @@
 import { Cause, DateTime, Effect, Option, Schema } from "effect";
 import { Atom, AtomRegistry } from "effect/reactivity";
 import { setupEffect } from "@xstate/effect";
-import { RunDeathReason, WordChallenge, WordScore } from "@/features/game/domain/models";
+import { RunDeathReason, WordScore } from "@/features/game/domain/models";
+import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state/actions";
 import { runResultAtom } from "@/features/game/state/run-session";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";

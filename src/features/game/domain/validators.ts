@@ -2,7 +2,8 @@
 import { Array, HashSet } from "effect";
 
 // types
-import type { TheSecretWord, WordChallenge } from "./models";
+import type { TheSecretWord } from "./models";
+import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 type ClassifiedKey =
   | { readonly kind: "enter" }

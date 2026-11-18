@@ -2,7 +2,8 @@
 import { Array, DateTime, Duration, Number, Option, Record } from "effect";
 
 // types
-import type { Color, SolutionsLanguage, WordChallenge, WordScore } from "./models";
+import type { Color, SolutionsLanguage, WordScore } from "./models";
+import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 // constants
 import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_MULTIPLIER_RULES } from "./constants";

@@ -9,16 +9,13 @@ export type TheSecretWord = typeof TheSecretWord.Type;
 export type FailedOnWord = typeof FailedOnWord.Type;
 export type SolutionsLanguage = typeof SolutionsLanguage.Type;
 export type RunDeathReason = typeof RunDeathReason.Type;
-
 export type Color = typeof Color.Type;
 export type WordleGrid = typeof WordleGrid.Type;
 export type Keypad = typeof Keypad.Type;
 export type Letter = typeof Letter.Type;
 export type Tile = typeof Tile.Type;
-
 export type WordMeta = typeof WordMeta.Type;
 export type WordScore = typeof WordScore.Type;
-export type WordChallenge = typeof WordChallenge.Type;
 
 // A single normalized letter — shared by the grid, keypad, grey-letter set and overdrive hacks
 export const Letter = Schema.Trim.check(Schema.isBetweenLength(1, 1));
@@ -26,7 +23,7 @@ export const Letter = Schema.Trim.check(Schema.isBetweenLength(1, 1));
 export const TheSecretWord = Schema.Trim.check(Schema.isBetweenLength(WORD_LENGTH, WORD_LENGTH));
 
 // The word a run died on, or the "N/A" sentinel when the run never reached a
-// word (e.g. forfeited during arcade setup). A single string schema (not a
+// word (e.g. forfeited during arcade setup); a single string schema (not a
 // Union of two string members): SchemaBinary requires union members to be
 // uniquely identifiable on the wire, and two plain-string members are not
 export const FailedOnWord = Schema.Trim.check(
@@ -42,10 +39,7 @@ export const Color = Schema.Literals(["grey", "yellow", "green", "red", ""]);
 // A single tile in the wordle grid
 export const Tile = Schema.Struct({ tileKey: Letter, color: Color });
 
-// A tile as the board renders it: the decoded tile plus the presentation fact its
-// leaves need. Resolved by the grid projection (see `overdriveHacksWordleGridAtom`)
-// rather than re-derived inside the memoized row/tile components — the same reason
-// `CurrentGuessTile` carries its own `isSonarReveal` (see board/current-guess)
+// A tile as the board renders it: the decoded tile plus the presentation fact its leaves need
 export type BoardTile = Tile & { readonly isSonarReveal: boolean };
 
 // The wordle grid and the keypad
@@ -65,18 +59,4 @@ export const WordScore = Schema.Struct({
   basePointsPerTurn: Schema.Natural,
   speedMultiplier: Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0)),
   timeSeconds: Schema.Natural,
-});
-
-// Represents the state of the current word challenge being in progress
-export const WordChallenge = Schema.Struct({
-  dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
-  theSecretWord: Schema.Option(TheSecretWord),
-  currentGuessWord: Schema.Trim,
-  wordleGuesses: Schema.Array(TheSecretWord),
-  currentTurn: Schema.Int.check(Schema.isGreaterThanOrEqualTo(1)),
-  startTime: Schema.Option(Schema.DateTimeUtc),
-  wordScore: Schema.Option(WordScore),
-  // Letters ruled out ("grey") by the submitted guesses — maintained at submit
-  // time so the per-keypress guard is an O(1) set lookup
-  greyLetters: Schema.HashSet(Letter),
 });

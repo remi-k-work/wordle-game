@@ -2,7 +2,8 @@
 import { Effect, Schema } from "effect";
 import { Atom, AtomRegistry } from "effect/reactivity";
 import { setupEffect } from "@xstate/effect";
-import { SolutionsLanguage, WordChallenge, WordScore } from "@/features/game/domain/models";
+import { SolutionsLanguage, WordScore } from "@/features/game/domain/models";
+import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import { modalMachineSendAtom } from "@/state/modal";
 import { runSessionMachineSendAtom } from "@/features/game/state/run-session";
 import { gameDataMachineSendAtom } from "@/features/game/state/game-data";

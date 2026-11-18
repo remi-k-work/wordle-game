@@ -4,7 +4,8 @@ import { getBasePointsPerTurn, getElapsedSeconds, getSpeedMultiplier, pickStrong
 import { formatGuess } from "./formatters";
 
 // types
-import type { Color, TheSecretWord, WordChallenge, WordScore } from "./models";
+import type { Color, TheSecretWord, WordScore } from "./models";
+import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 // Calculates the player's word score based on the turn they won on and how long it took them
 // This denotes the volatile points earned for the current word before they are banked into the run

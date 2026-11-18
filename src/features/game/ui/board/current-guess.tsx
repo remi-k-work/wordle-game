@@ -13,7 +13,8 @@ import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
 import { GuessTile } from "./guess-tile";
 
 // types
-import type { Tile, WordChallenge } from "@/features/game/domain/models";
+import type { Tile } from "@/features/game/domain/models";
+import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import type { OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 
 // constants
