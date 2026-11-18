@@ -14,7 +14,6 @@ export type WordleGrid = typeof WordleGrid.Type;
 export type Keypad = typeof Keypad.Type;
 export type Letter = typeof Letter.Type;
 export type Tile = typeof Tile.Type;
-export type WordMeta = typeof WordMeta.Type;
 export type WordScore = typeof WordScore.Type;
 
 // A single normalized letter — shared by the grid, keypad, grey-letter set and overdrive hacks
@@ -45,13 +44,6 @@ export type BoardTile = Tile & { readonly isSonarReveal: boolean };
 // The wordle grid and the keypad
 export const WordleGrid = Schema.Array(Schema.Array(Tile).check(Schema.isMaxLength(WORD_LENGTH))).check(Schema.isMaxLength(MAX_TURNS));
 export const Keypad = Schema.Array(Letter);
-
-export const WordMeta = Schema.Struct({
-  theRiddle: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),
-  wordDefinition: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),
-  theRiddleAudio: Schema.Option(Schema.Uint8Array),
-  wordDefinitionAudio: Schema.Option(Schema.Uint8Array),
-});
 
 // Represents the results of a single word challenge (specifically denotes the volatile points earned for solving a specific word)
 export const WordScore = Schema.Struct({

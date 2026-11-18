@@ -5,7 +5,8 @@ import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle";
 
 // types
-import type { SolutionsLanguage, WordMeta } from "@/features/game/domain/models";
+import type { SolutionsLanguage } from "@/features/game/domain/models";
+import type { WordMeta } from "@/features/game/machines/word-meta/models";
 
 export type GeneratedRiddle = {
   readonly modelName: string;

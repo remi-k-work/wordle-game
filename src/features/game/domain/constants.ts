@@ -1,9 +1,9 @@
 // services, features, and other libraries
-import { Option, Record } from "effect";
+import { Record, String } from "effect";
 import { msg } from "gt-react";
 
 // types
-import type { Color, SolutionsLanguage, WordMeta } from "./models";
+import type { Color, Letter, SolutionsLanguage } from "./models";
 
 // Stable category identifiers for UI presentation (the message map above is the source of truth)
 export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MESSAGE_MAP;
@@ -12,17 +12,10 @@ export type SpeedMultiplierCategory = keyof typeof SPEED_MULTIPLIER_CATEGORY_MES
 export const WORD_LENGTH = 5;
 export const MAX_TURNS = 6;
 
-// The board's "no letter in this position" tile key. Not a valid `Letter` (that
-// schema requires one character), so it exists purely as the rendering sentinel
-// for an empty tile — shared by the grid factory, the typing row and the
-// sonar-grid projection so the sentinel is not re-invented per file
-export const EMPTY_TILE_KEY = "";
+// The board's "no letter in this position" tile key
+export const EMPTY_TILE_KEY = String.empty;
 
 // Skeleton keypad letters per language, mirroring the keypad build assets
-// (src/assets/data/keypad-{en,pl}.json) that the live pool renders once the RPC
-// has loaded them. The placeholder must show the same keys — Polish has 32,
-// including the diacritics and no Q/V/X — or the loading pool visibly changes
-// size when the real one arrives
 export const KEYPAD_SKELETON_LETTERS = {
   En: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"],
   Pl: [
@@ -59,7 +52,7 @@ export const KEYPAD_SKELETON_LETTERS = {
     "Ź",
     "Ż",
   ],
-} as const satisfies Record.ReadonlyRecord<SolutionsLanguage, ReadonlyArray<string>>;
+} as const satisfies Record.ReadonlyRecord<SolutionsLanguage, ReadonlyArray<Letter>>;
 
 // Partial lookups: indexing with a turn past MAX_TURNS or an unknown multiplier yields `undefined`, so callers must handle absence (e.g. `?? 0`)
 export const BASE_POINTS_PER_TURN_MAP: Readonly<{ [index: number]: number }> = { 1: 1000, 2: 800, 3: 600, 4: 400, 5: 200, 6: 100 };
@@ -99,14 +92,3 @@ export const POTENTIAL_SCORE_RANGE = {
   min: Math.round(Math.min(...BASE_POINTS_PER_TURN) * Math.min(...SPEED_MULTIPLIERS)),
   max: Math.round(Math.max(...BASE_POINTS_PER_TURN) * Math.max(...SPEED_MULTIPLIERS)),
 } as const;
-
-// A factory rather than a shared constant: the machine's `clearWordMeta` action
-// returns it directly, so a constant would alias a module global into every live
-// context — the same reasoning as `initialWordChallenge`/`initialOverdriveHacks`
-export const initialWordMeta = () =>
-  ({
-    theRiddle: Option.none(),
-    wordDefinition: Option.none(),
-    theRiddleAudio: Option.none(),
-    wordDefinitionAudio: Option.none(),
-  }) as const satisfies WordMeta;

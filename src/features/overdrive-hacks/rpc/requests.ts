@@ -1,6 +1,7 @@
 // services, features, and other libraries
 import { Rpc, RpcGroup } from "effect/rpc";
-import { SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain/models";
+import { SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
+import { WordMeta } from "@/features/game/machines/word-meta/models";
 import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import { OverdriveHacks } from "@/features/overdrive-hacks/domain/models";
 import { SpeechRequest } from "@/domain/models";

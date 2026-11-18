@@ -5,7 +5,8 @@ import { formatGuess } from "@/features/game/domain/formatters";
 import { matchLanguage } from "@/features/game/domain/helpers";
 
 // types
-import type { Color, SolutionsLanguage, TheSecretWord, WordMeta } from "@/features/game/domain/models";
+import type { Color, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
+import type { WordMeta } from "@/features/game/machines/word-meta/models";
 import type { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 // constants

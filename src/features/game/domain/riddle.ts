@@ -4,7 +4,8 @@ import { generateSingleField } from "@/domain/generate-single-field";
 import { matchLanguage } from "./helpers";
 
 // types
-import type { SolutionsLanguage, TheSecretWord, WordMeta } from "./models";
+import type { WordMeta } from "@/features/game/machines/word-meta/models";
+import type { SolutionsLanguage, TheSecretWord } from "./models";
 
 // constants
 const SYSTEM_PROMPT_EN = (theSecretWord: TheSecretWord) => `
