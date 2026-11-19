@@ -3,12 +3,12 @@ import { Equal } from "effect";
 import { Atom } from "effect/reactivity";
 import { createActorAtoms } from "@xstate/effect/atom";
 import { RuntimeAtom } from "@/lib/runtime-client";
-import { GameSettings } from "@/features/settings/domain/models";
+import { GameSettings } from "@/features/settings/machines/game-settings/models";
 import { gameSettingsMachine } from "@/features/settings/machines/game-settings";
 import { createMachineState } from "@/lib/machine-atoms";
 
 // constants
-import { INITIAL_GAME_SETTINGS } from "@/features/settings/domain/constants";
+import { INITIAL_GAME_SETTINGS } from "@/features/settings/machines/game-settings/constants";
 
 // Persistent storage for game settings
 const gameSettingsAtom = Atom.kvs({
