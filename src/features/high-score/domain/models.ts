@@ -18,5 +18,5 @@ export class HighScoreEntry extends Schema.Class<HighScoreEntry, { readonly bran
 
 // The high score page with all its inputs (params and searchParams)
 export class HighScorePage extends BasePage.extend<HighScorePage>("HighScorePage")({
-  searchParams: Schema.Struct({ sl: SolutionsLanguage.pipe(Schema.withDecodingDefault(Effect.succeed("En"))) }),
+  searchParams: Schema.Struct({ sl: SolutionsLanguage.pipe(Schema.withDecodingDefaultType(Effect.succeed("En"))) }),
 }) {}

@@ -8,8 +8,8 @@ const PageSearchParams = Schema.Record(Schema.Trim, Schema.Union([Schema.Trim, S
 
 // Represents the base route/page inputs
 export class BasePage extends Schema.Class<BasePage, { readonly brand: unique symbol }>("BasePage")({
-  params: PageParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
-  searchParams: PageSearchParams.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
+  params: PageParams.pipe(Schema.withDecodingDefaultType(Effect.succeed({}))),
+  searchParams: PageSearchParams.pipe(Schema.withDecodingDefaultType(Effect.succeed({}))),
 }) {}
 
 export class SpeechRequest extends Schema.Class<SpeechRequest, { readonly brand: unique symbol }>("SpeechRequest")({

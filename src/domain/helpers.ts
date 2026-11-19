@@ -7,12 +7,14 @@ import { FetchHttpClient } from "effect/http";
 import type { Rpc } from "effect/rpc";
 
 // Whether a cause is a real failure (a typed error or a defect) rather than a pure interruption
-const isFailure = (cause: Cause.Cause<unknown>) => !Cause.hasInterruptsOnly(cause);
+// shared by every log-then-recover site so the predicate lives in one place
+export const isRealFailure = (cause: Cause.Cause<unknown>) => !Cause.hasInterruptsOnly(cause);
 
 // The shared recovery policy for non-critical Effect work: every real failure is logged first and then degraded
 export const degradeCause = <A, B, E, R>(effect: Effect.Effect<A, E, R>, recovery: Effect.Effect<B, never, never>) =>
   effect.pipe(
-    Effect.catchCauseIf(isFailure, (cause) => Effect.andThen(Effect.logError(Cause.pretty(cause)), recovery)),
+    Effect.tapCauseIf(isRealFailure, (cause) => Effect.logError(Cause.pretty(cause))),
+    Effect.catchCauseIf(isRealFailure, () => recovery),
     Effect.orDie
   );
 

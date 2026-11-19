@@ -50,5 +50,5 @@ export const createMachineState = <M extends AnyStateMachine, ER = never>(
     }
   ).pipe(Atom.keepAlive);
 
-  return { snapshot, send } as const;
+  return { snapshot, send };
 };

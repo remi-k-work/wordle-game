@@ -40,14 +40,16 @@ export class OpenRouter extends Context.Service<OpenRouter>()("OpenRouter", {
         const request = yield* HttpClientRequest.post("/audio/speech").pipe(HttpClientRequest.bodyJson(speechRequest));
         const response = yield* client.execute(request).pipe(
           // Surface upstream status + body (e.g. rate-limit details) instead of burying them in `cause`
-          Effect.catchTag("HttpClientError", (clientError) =>
-            Effect.gen(function* () {
-              const response = clientError.response;
-              if (response === undefined) return yield* new OpenRouterError({ cause: clientError });
-              const responseBody = yield* response.text.pipe(Effect.orElseSucceed(() => "<unreadable body>"));
-              return yield* new OpenRouterError({ cause: clientError, status: response.status, responseBody });
-            })
-          )
+          Effect.catchTag("HttpClientError", (clientError) => {
+            const errorResponse = clientError.response;
+            if (errorResponse === undefined) return new OpenRouterError({ cause: clientError });
+            // `Schema.TaggedError` instances are themselves failing Effects, so
+            // `Effect.flatMap` into one yields the error — no nested generator needed
+            return errorResponse.text.pipe(
+              Effect.orElseSucceed(() => "<unreadable body>"),
+              Effect.flatMap((responseBody) => new OpenRouterError({ cause: clientError, status: errorResponse.status, responseBody }))
+            );
+          })
         );
 
         // Decode response body as ArrayBuffer using the getter on the response object

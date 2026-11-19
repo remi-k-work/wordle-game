@@ -37,7 +37,7 @@ export type BucketKey<Row> = {
  * adding a second pass to hunt for the max is wasteful
  */
 export const cumulativeToDistribution = <T extends { personal: number; global: number }, TResult>(
-  rows: readonly T[],
+  rows: ReadonlyArray<T>,
   mapResult: (row: T, discretePersonal: number, discreteGlobal: number, personalPct: number, globalPct: number) => TResult
 ): TResult[] => {
   const { personal: totalPersonal, global: totalGlobal } = Option.getOrElse(Array.last(rows), () => ({ personal: 0, global: 0 }));

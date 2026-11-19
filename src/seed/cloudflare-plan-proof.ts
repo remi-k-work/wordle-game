@@ -2,7 +2,7 @@ import "dotenv/config";
 
 // services, features, and other libraries
 import { Effect } from "effect";
-import { AiClientsWithHttp, makeFallbackPlan2 } from "@/domain/fallback-plan";
+import { AiClientsWithHttp, makeFallbackPlan } from "@/domain/fallback-plan";
 import { generateRiddle, planFor, runCase } from "./riddle-proof";
 import { runSeed } from "./runtime";
 
@@ -39,7 +39,7 @@ const main = Effect.gen(function* () {
       runCase(
         `production ladder / ${solutionsLanguage}`,
         theSecretWord,
-        generateRiddle(theSecretWord, solutionsLanguage).pipe(Effect.withExecutionPlan(makeFallbackPlan2))
+        generateRiddle(theSecretWord, solutionsLanguage).pipe(Effect.withExecutionPlan(makeFallbackPlan))
       ),
     { discard: true }
   );

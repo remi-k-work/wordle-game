@@ -23,4 +23,11 @@ export const pgConfig: PgClient.PgPoolConfig = { transformQueryNames: String.cam
 // scheduler (see domain/helpers.server.ts) — both fixes are required
 
 export const makePgClientLayer = (url: Redacted.Redacted<string>) =>
-  PgClient.layer({ ...pgConfig, url, idleTimeout: "10 seconds", connectTimeout: "10 seconds", ...(IS_WORKERD ? { connectionTTL: "0 seconds" } : {}) });
+  PgClient.layer({
+    ...pgConfig,
+    url,
+    idleTimeout: "10 seconds",
+    connectTimeout: "10 seconds",
+    // `undefined` disables the TTL (pool reuse stays on for Node); "0 seconds" disables reuse (workerd)
+    connectionTTL: IS_WORKERD ? "0 seconds" : undefined,
+  });

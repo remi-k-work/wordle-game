@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Config, Effect, ExecutionPlan, Layer, Schedule } from "effect";
+import { Array, Config, Effect, ExecutionPlan, Layer, Schedule } from "effect";
 import { FetchHttpClient } from "effect/http";
 import { OpenAiClient, OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter";
@@ -20,14 +20,10 @@ export const OPENROUTER_AI_MODELS = [
 // Builds one fallback step: the provider to try, bounded attempts, and a shared retry policy
 const aiStep = <A>(provide: A) => ({ provide, attempts: 2, schedule: Schedule.exponential("1 second", 2) });
 
-// This helper maps a rung tuple to a step tuple, keeping the positions intact
-const toSteps = <Rungs extends ReadonlyArray<unknown>, Step>(rungs: Rungs, toStep: (rung: Rungs[number]) => Step): { -readonly [K in keyof Rungs]: Step } =>
-  rungs.map(toStep) as { -readonly [K in keyof Rungs]: Step };
-
 // Builds the shared fallback ladder for any LanguageModel service from the rung tables above
-export const makeFallbackPlan2 = ExecutionPlan.make(
-  ...toSteps(CLOUDFLARE_AI_MODELS, ({ id, config }) => aiStep(OpenAiLanguageModel.model(id, config))),
-  ...toSteps(OPENROUTER_AI_MODELS, ({ id, config }) => aiStep(OpenRouterLanguageModel.model(id, config)))
+export const makeFallbackPlan = ExecutionPlan.make(
+  ...Array.map(CLOUDFLARE_AI_MODELS, ({ id, config }) => aiStep(OpenAiLanguageModel.model(id, config))),
+  ...Array.map(OPENROUTER_AI_MODELS, ({ id, config }) => aiStep(OpenRouterLanguageModel.model(id, config)))
 );
 
 // The OpenRouter client layer, backed by the OpenAI-compatible endpoint

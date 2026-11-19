@@ -41,7 +41,7 @@ export class ChartsDB extends Context.Service<ChartsDB>()("ChartsDB", {
 
     const makeDistributionGetter = <Row extends { readonly personal: number; readonly global: number }, Data>(
       queryFn: (request: AnyChartArgs) => Effect.Effect<ReadonlyArray<Row>, never, never>,
-      decodeData: (chartData: readonly Row[]) => Effect.Effect<ReadonlyArray<Data>, Schema.SchemaError, never>,
+      decodeData: (chartData: ReadonlyArray<Row>) => Effect.Effect<ReadonlyArray<Data>, Schema.SchemaError, never>,
       bucket: { readonly key: BucketKey<Row>; readonly nullBucket: "dropNull" | "keepNull" }
     ) =>
       Effect.fnUntraced(function* (request: AnyChartArgs) {
