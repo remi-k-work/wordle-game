@@ -2,8 +2,9 @@
 import { Cause, Effect, Option, Predicate, Schema, String } from "effect";
 import { AiError, LanguageModel, Model, Prompt } from "effect/ai";
 import { AiProviderError } from "./errors";
-import { makeFallbackPlan2 } from "./fallback-plan";
+import { makeFallbackPlan } from "./fallback-plan";
 import { formatTextForTTS } from "./formatters";
+import { isRealFailure } from "./helpers";
 
 // types
 interface GenerateSingleFieldOptions {
@@ -32,13 +33,12 @@ export const generateSingleField = Effect.fn("generateSingleField")(
     return yield* languageModel.generateObject({ prompt, schema }).pipe(
       // Normalize for TTS and keep only non-empty output (an empty riddle is no riddle)
       Effect.map(({ value }) => Option.liftPredicate(formatTextForTTS(value[fieldName]), String.isNonEmpty)),
-      Effect.tapCauseIf(
-        (cause) => !Cause.hasInterruptsOnly(cause),
-        (cause) => Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(cause)}`)
+      Effect.tapCauseIf(isRealFailure, (cause) =>
+        Effect.logError(`The attempt to generate output using the "${modelName}" model was unsuccessful. ${Cause.pretty(cause)}`)
       )
     );
   },
-  Effect.withExecutionPlan(makeFallbackPlan2),
+  Effect.withExecutionPlan(makeFallbackPlan),
   Effect.mapError((error) =>
     AiError.isAiError(error)
       ? AiProviderError.fromAiError(error)
