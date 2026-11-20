@@ -14,14 +14,13 @@ import { SPAN_LOG_RUN_COMPLETED, SPAN_LOG_WORD_WON } from "@/features/telemetry/
 // Metric counter/gauge state carries bigint on bigint-backed platforms, which JSON cannot encode
 const bigIntToJson = (value: number | bigint) => (Predicate.isBigInt(value) ? value.toString() : value);
 
-const normalizeMetricPayload = (snapshot: Metric.Metric.Snapshot) =>
-  pipe(
-    Match.value(snapshot),
-    Match.when({ type: "Frequency" }, ({ state }) => ({ occurrences: Object.fromEntries(state.occurrences) })),
-    Match.when({ type: "Counter" }, ({ state }) => ({ ...state, count: bigIntToJson(state.count) })),
-    Match.when({ type: "Gauge" }, ({ state }) => ({ value: bigIntToJson(state.value) })),
-    Match.orElse(({ state }) => state)
-  );
+// Matcher compiled once at module scope instead of rebuilt per metric snapshot
+const normalizeMetricPayload = Match.type<Metric.Metric.Snapshot>().pipe(
+  Match.when({ type: "Frequency" }, ({ state }) => ({ occurrences: Object.fromEntries(state.occurrences) })),
+  Match.when({ type: "Counter" }, ({ state }) => ({ ...state, count: bigIntToJson(state.count) })),
+  Match.when({ type: "Gauge" }, ({ state }) => ({ value: bigIntToJson(state.value) })),
+  Match.orElse(({ state }) => state)
+);
 
 // fromJsonString combines JSON.parse + schema decoding (and JSON.stringify + encoding on the way back)
 const MetricPayloadFromJson = Schema.fromJsonString(Schema.Unknown);

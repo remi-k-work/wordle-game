@@ -24,7 +24,7 @@ export const startNewPuzzleContext = (dictionary: WordChallenge["dictionary"], t
 export const addLetterContext = (context: WordChallenge, pressedKey: string): WordChallenge => ({
   ...context,
   currentGuessWord: context.currentGuessWord.length < WORD_LENGTH ? context.currentGuessWord + pressedKey.toUpperCase() : context.currentGuessWord,
-  startTime: Option.orElse(context.startTime, () => Option.some(DateTime.nowUnsafe())),
+  startTime: Option.orElseSome(context.startTime, () => DateTime.nowUnsafe()),
 });
 
 // Remove the last letter from the current guess word

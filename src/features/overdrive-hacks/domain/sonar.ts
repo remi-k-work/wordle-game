@@ -54,4 +54,4 @@ export const calculateSonarTarget = Effect.fnUntraced(function* (
 // An Effect HashMap (like every other collection in this codebase) rather than a
 // native Map, so lookups yield an Option and the two idioms do not mix
 export const sonarVowelByPosition = (reveals: ReadonlyArray<SonarReveal>): HashMap.HashMap<number, SonarReveal["vowel"]> =>
-  HashMap.fromIterable(Array.flatMap(reveals, (reveal) => reveal.positions.map((position) => [position, reveal.vowel] as const)));
+  HashMap.fromIterable(Array.flatMap(reveals, (reveal) => Array.map(reveal.positions, (position) => [position, reveal.vowel] as const)));

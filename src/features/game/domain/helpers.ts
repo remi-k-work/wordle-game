@@ -35,7 +35,10 @@ export const getBasePointsPerTurn = (currentTurn: WordChallenge["currentTurn"]) 
 
 // Calculate elapsed time in seconds, treating an unstarted timer as zero seconds
 export const getElapsedSeconds = (startTime: WordChallenge["startTime"], endTime: DateTime.Utc) =>
-  Option.map(startTime, (start) => DateTime.distance(start, endTime).pipe(Duration.toSeconds)).pipe(Option.getOrElse(() => 0));
+  startTime.pipe(
+    Option.map((start) => DateTime.distance(start, endTime).pipe(Duration.toSeconds)),
+    Option.getOrElse(() => 0)
+  );
 
 // Represent the "live" potential word score as a percentage (normalize only against the maximum possible score)
 export const potentialScoreAsPercentage = (potentialScore: WordScore["wordScore"]) =>

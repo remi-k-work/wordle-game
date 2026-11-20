@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, FileSystem, HashSet, Record, Schema } from "effect";
+import { Array, Effect, FileSystem, HashSet, Record, Schema } from "effect";
 
 class SeedJsonParseError extends Schema.TaggedError<SeedJsonParseError, { readonly brand: unique symbol }>()("SeedJsonParseError", {
   file: Schema.String,
@@ -44,12 +44,13 @@ export const makeSync = Effect.fn("makeSync")(function* (solutionsPath: string, 
   const definitions = yield* asSeedError(definitionsPath)(decodeDefinitions(definitionsRaw));
 
   // Convert solutions into an uppercase HashSet for O(1) lookups
-  const solutionsSet = HashSet.fromIterable(solutions.map((w) => w.toUpperCase()));
+  const solutionsSet = HashSet.fromIterable(Array.map(solutions, (w) => w.toUpperCase()));
 
   // Normalize definition keys to uppercase once, then keep only known solutions
+  // Record.filter receives (value, key), so we test the key (word) against solutionsSet
   const cleanDefinitions = Record.filter(
     Record.mapKeys(definitions, (word) => word.toUpperCase()),
-    (word) => HashSet.has(solutionsSet, word)
+    (_definition, word) => HashSet.has(solutionsSet, word)
   );
   const removalCount = Record.size(definitions) - Record.size(cleanDefinitions);
 

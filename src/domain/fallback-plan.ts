@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Config, Effect, ExecutionPlan, Layer, Schedule } from "effect";
+import { Array, Config, ExecutionPlan, Layer, Schedule } from "effect";
 import { FetchHttpClient } from "effect/http";
 import { OpenAiClient, OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { OpenRouterClient, OpenRouterLanguageModel } from "@effect/ai-openrouter";
@@ -27,22 +27,13 @@ export const makeFallbackPlan = ExecutionPlan.make(
 );
 
 // The OpenRouter client layer, backed by the OpenAI-compatible endpoint
-const OpenRouterClientLayer = Layer.unwrap(
-  Effect.gen(function* () {
-    const apiKey = yield* Config.Redacted("OPENROUTER_API_KEY");
-    return Layer.effect(OpenRouterClient.OpenRouterClient, OpenRouterClient.make({ apiKey }));
-  })
-).pipe(Layer.provide(FetchHttpClient.layer));
+const OpenRouterClientLayer = OpenRouterClient.layerConfig({ apiKey: Config.Redacted("OPENROUTER_API_KEY") }).pipe(Layer.provide(FetchHttpClient.layer));
 
 // Cloudflare Workers AI client, backed by its OpenAI-compatible endpoint; the compat client appends /chat/completions to this base URL
-export const CloudflareClientLayer = Layer.unwrap(
-  Effect.gen(function* () {
-    const apiKey = yield* Config.Redacted("CLOUDFLARE_WORKERS_AI_API_TOKEN");
-    const accountId = yield* Config.String("CLOUDFLARE_ACCOUNT_ID");
-
-    return OpenAiClient.layer({ apiKey, apiUrl: `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1` });
-  })
-).pipe(Layer.provide(FetchHttpClient.layer));
+export const CloudflareClientLayer = OpenAiClient.layerConfig({
+  apiKey: Config.Redacted("CLOUDFLARE_WORKERS_AI_API_TOKEN"),
+  apiUrl: Config.String("CLOUDFLARE_ACCOUNT_ID").pipe(Config.map((accountId) => `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`)),
+}).pipe(Layer.provide(FetchHttpClient.layer));
 
 // Both provider clients are required because the fallback ladder mixes them
 export const AiClientsWithHttp = Layer.mergeAll(OpenRouterClientLayer, CloudflareClientLayer);
