@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Option } from "effect";
+import { Array, Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { createEffectLogic } from "@xstate/effect";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
@@ -69,7 +69,7 @@ export const applySonarHackActor = createEffectLogic(
           theSecretWord,
           wordleGuesses,
           VOWELS_BY_LANGUAGE[solutionsLanguage],
-          sonarReveals.map((reveal) => reveal.vowel)
+          Array.map(sonarReveals, (reveal) => reveal.vowel)
         );
       })
     );
