@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Cause, DateTime, Effect, Option, Schema } from "effect";
+import { DateTime, Effect, Option, Schema } from "effect";
 import { Atom, AtomRegistry } from "effect/reactivity";
 import { setupEffect } from "@xstate/effect";
 import { RunDeathReason, WordScore } from "@/features/game/domain/models";
@@ -42,25 +42,24 @@ export const setup = setupEffect({
 
     // Build the immutable completed-run summary; `runId` is present by invariant for any active run,
     // so the Option lift cannot fail in practice (its typed failure still rides the machine's error channel)
-    saveFinishedRun: ({ runSession, deathReason }): Effect.Effect<void, Cause.NoSuchElementError, AtomRegistry.AtomRegistry> =>
-      Effect.gen(function* () {
-        const now = yield* DateTime.now;
-        const runId = yield* Effect.fromOption(runSession.runId);
-        const createdAt = Option.getOrElse(runSession.createdAt, () => now);
-        yield* Atom.set(
-          runResultAtom,
-          Option.some({ runId, createdAt, finishedAt: now, runScore: runSession.runScore, streak: runSession.streak, deathReason })
-        );
-      }),
+    saveFinishedRun: Effect.fnUntraced(function* (
+      // Explicit param type: unlike a plain arrow, the generator passed to
+      // Effect.fnUntraced gets no contextual typing from the actions record
+      { runSession, deathReason }: { readonly runSession: RunSession; readonly deathReason: RunDeathReason }
+    ) {
+      const now = yield* DateTime.now;
+      const runId = yield* Effect.fromOption(runSession.runId);
+      const createdAt = Option.getOrElse(runSession.createdAt, () => now);
+      yield* Atom.set(runResultAtom, Option.some({ runId, createdAt, finishedAt: now, runScore: runSession.runScore, streak: runSession.streak, deathReason }));
+    }),
 
     // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
     trackForfeitedRun: ({ runSession, wordChallenge }) => trackForfeitedRun(runSession, wordChallenge),
 
     // Notify high score machine that a run has finished
-    onRunFinished: ({ runSession }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-      Effect.gen(function* () {
-        const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
-        yield* Atom.set(highScoreMachineSendAtom, { type: "runFinished", runScore: runSession.runScore, streak: runSession.streak, solutionsLanguage });
-      }),
+    onRunFinished: Effect.fnUntraced(function* ({ runSession }: { readonly runSession: RunSession }) {
+      const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+      yield* Atom.set(highScoreMachineSendAtom, { type: "runFinished", runScore: runSession.runScore, streak: runSession.streak, solutionsLanguage });
+    }),
   },
 });

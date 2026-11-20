@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
+import { Predicate } from "effect";
 import { msg, useMessages } from "gt-react";
 
 // components
@@ -49,7 +50,7 @@ export function ToastItem({ toast }: ToastItemProps) {
   const messages = useMessages();
 
   // Toast copy is authored outside React (e.g. XState actions) with `msg()`; resolve it here, under GTProvider, so it follows the active locale
-  const resolveMessage = (content: ReactNode) => (typeof content === "string" ? messages(content) : content);
+  const resolveMessage = (content: ReactNode) => (Predicate.isString(content) ? messages(content) : content);
 
   return (
     <Toast.Root toast={toast} className={TOAST_ROOT_CLASS}>

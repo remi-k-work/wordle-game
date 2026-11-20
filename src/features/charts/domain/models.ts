@@ -4,6 +4,9 @@ import { FailedOnWord, RunDeathReason, SolutionsLanguage, TheSecretWord } from "
 
 // types
 export type BucketAlias = "turn" | "max_seconds" | "streak";
+// `any` (not `unknown`) is deliberate: the query factories bind `<R extends RowCodec>`
+// and hand `R` to `SqlSchema.findAll({ Result })`, so `R["Type"]` must stay assignable
+// to any concrete row type — `unknown` would degrade the inferred result to `unknown[]`
 export type RowCodec = Schema.ConstraintCodec<any>;
 
 // constants

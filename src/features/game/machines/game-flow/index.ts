@@ -9,6 +9,18 @@ export const gameFlowMachine = setup.createMachine({
   context: ({ input }) => ({ ...input }),
   initial: "classifying",
 
+  on: {
+    // A language change resets every feature machine and returns the flow to the
+    // ready screen from any state — one machine-level handler instead of a copy
+    // per state (the same pattern the other feature machines use for their
+    // global events, e.g. word-challenge's solutionsLanguageChanged)
+    "language.changed": (args, enq) => {
+      assertEvent(args.event, "language.changed");
+      enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
+      return { target: "ready" };
+    },
+  },
+
   states: {
     classifying: {
       always: (args) => {
@@ -24,26 +36,12 @@ export const gameFlowMachine = setup.createMachine({
           enq(args.actions.startRun, { self: args.self });
           return { target: "starting" };
         },
-
-        // A language change keeps the current screen but resets every feature
-        "language.changed": (args, enq) => {
-          assertEvent(args.event, "language.changed");
-          enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
-        },
       },
     },
 
     // Transient: a new run was requested, move straight into play
     starting: {
       always: { target: "playing" },
-
-      on: {
-        "language.changed": (args, enq) => {
-          assertEvent(args.event, "language.changed");
-          enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
-          return { target: "ready" };
-        },
-      },
     },
 
     // A run is being played
@@ -65,12 +63,6 @@ export const gameFlowMachine = setup.createMachine({
           enq(args.actions.forfeitRun, { self: args.self, wordChallenge: args.event.wordChallenge });
           return { target: "ready" };
         },
-
-        "language.changed": (args, enq) => {
-          assertEvent(args.event, "language.changed");
-          enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
-          return { target: "ready" };
-        },
       },
     },
 
@@ -80,12 +72,6 @@ export const gameFlowMachine = setup.createMachine({
         "word.nextRequested": (args, enq) => {
           enq(args.actions.requestNextWord, { self: args.self });
           return { target: "starting" };
-        },
-
-        "language.changed": (args, enq) => {
-          assertEvent(args.event, "language.changed");
-          enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
-          return { target: "ready" };
         },
       },
     },

@@ -8,24 +8,30 @@ class ContainerError extends Schema.TaggedError<ContainerError, { readonly brand
   cause: Schema.Defect(),
 }) {}
 
-class PgContainer extends Context.Service<PgContainer>()("test/PgContainer", {
-  make: Effect.acquireRelease(
-    Effect.tryPromise({
-      try: () => new PostgreSqlContainer("postgres:alpine").start(),
-      catch: (cause) => new ContainerError({ cause }),
-    }),
-    (container) =>
+class PgContainer extends Context.Service<
+  PgContainer,
+  {
+    readonly getConnectionUri: () => string;
+  }
+>()("test/PgContainer") {
+  static layer = Layer.effect(
+    PgContainer,
+    Effect.acquireRelease(
       Effect.tryPromise({
-        try: () => container.stop(),
+        try: () => new PostgreSqlContainer("postgres:alpine").start(),
         catch: (cause) => new ContainerError({ cause }),
-        // A `stop()` that throws synchronously (rather than rejecting) surfaces
-        // as a defect, which an error-based `tapError` would skip — teardown is
-        // where a silent failure costs the most, so the log is cause-based like
-        // every other log-then-recover in this repo
-      }).pipe(Effect.tapCause(Effect.logError), Effect.orDie)
-  ),
-}) {
-  static layer = Layer.effect(this, this.make);
+      }),
+      (container) =>
+        Effect.tryPromise({
+          try: () => container.stop(),
+          catch: (cause) => new ContainerError({ cause }),
+          // A `stop()` that throws synchronously (rather than rejecting) surfaces
+          // as a defect, which an error-based `tapError` would skip — teardown is
+          // where a silent failure costs the most, so the log is cause-based like
+          // every other log-then-recover in this repo
+        }).pipe(Effect.tapCause(Effect.logError), Effect.orDie)
+    ).pipe(Effect.map((container) => PgContainer.of({ getConnectionUri: () => container.getConnectionUri() })))
+  );
 
   // Reuses pgConfig (transformQueryNames / transformResultNames / transformJson)
   // so the test exercises the same column-alias rewriting as production (F1)

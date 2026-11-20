@@ -19,8 +19,8 @@ interface FetchAudioInput {
   wordDefinition: WordMeta["wordDefinition"];
 }
 
-export const onLoadingActor = createEffectLogic(({ input: { theSecretWord } }: EffectSourceArgs<OnLoadingInput>) =>
-  Effect.gen(function* () {
+export const onLoadingActor = createEffectLogic(
+  Effect.fnUntraced(function* ({ input: { theSecretWord } }: EffectSourceArgs<OnLoadingInput>) {
     const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
     // Load both pieces of metadata independently; we use "result" mode so a failure in one request does not interrupt the other request
@@ -38,8 +38,8 @@ export const onLoadingActor = createEffectLogic(({ input: { theSecretWord } }: E
   })
 );
 
-export const fetchAudioActor = createEffectLogic(({ input: { theRiddle, wordDefinition } }: EffectSourceArgs<FetchAudioInput>) =>
-  Effect.gen(function* () {
+export const fetchAudioActor = createEffectLogic(
+  Effect.fnUntraced(function* ({ input: { theRiddle, wordDefinition } }: EffectSourceArgs<FetchAudioInput>) {
     const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
     // Both TTS fetches are independent (inputs already in context), so run them concurrently; we use "result" mode so a failure

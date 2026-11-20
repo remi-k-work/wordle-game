@@ -19,8 +19,8 @@ interface SelectSecretWordInput {
 }
 
 // Load the needed game data and create the dictionary of valid words
-export const onLoadingActor = createEffectLogic(({ input: { requestedLanguage } }: EffectSourceArgs<OnLoadingInput>) =>
-  Effect.gen(function* () {
+export const onLoadingActor = createEffectLogic(
+  Effect.fnUntraced(function* ({ input: { requestedLanguage } }: EffectSourceArgs<OnLoadingInput>) {
     const solutionsLanguage = requestedLanguage ?? (yield* Atom.get(gameSettingsSolutionsLanguageAtom));
 
     const { fetchSolutions, fetchDictionary, fetchKeypad } = yield* RpcGameClient;
@@ -33,6 +33,8 @@ export const onLoadingActor = createEffectLogic(({ input: { requestedLanguage } 
   })
 );
 
-export const selectSecretWordActor = createEffectLogic(({ input: { solutions } }: EffectSourceArgs<SelectSecretWordInput>) =>
-  Effect.flatMap(Effect.fromOption(solutions), Random.choice)
+export const selectSecretWordActor = createEffectLogic(
+  Effect.fnUntraced(function* ({ input: { solutions } }: EffectSourceArgs<SelectSecretWordInput>) {
+    return yield* Effect.fromOption(solutions).pipe(Effect.flatMap(Random.choice));
+  })
 );

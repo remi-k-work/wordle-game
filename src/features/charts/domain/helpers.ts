@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Option } from "effect";
+import { Array, Option, Predicate } from "effect";
 
 // BucketKey
 // ---------------------------------------------------------------------------
@@ -56,7 +56,10 @@ export const cumulativeToDistribution = <T extends { personal: number; global: n
 };
 
 // Treats a missing cumulative-total bucket (NULL) as unbounded (Infinity) for charting
-export const nullToInfinity = (value: number | null) => value ?? Infinity;
+// Takes `unknown` so generic bucket reads (`Row[BucketKey<Row>]`, not provably
+// `number | null` to the compiler) pass without a cast; any non-number resolves
+// to Infinity, which for a NULL bucket is exactly the intent
+export const nullToInfinity = (value: unknown) => (Predicate.isNumber(value) ? value : Infinity);
 
 /**
  * Resolves an open-ended distribution's trailing NULL bucket to `Infinity` ("20+
@@ -79,4 +82,4 @@ export const withUnboundedBucket =
     // Spreading each row (a decoded Schema.Class) deliberately drops its
     // prototype: the rows feed recharts as plain data objects, and no consumer
     // calls a class method on them
-    rows.map((row) => ({ ...row, [bucket]: nullToInfinity(row[bucket] as number | null) }));
+    Array.map(rows, (row) => ({ ...row, [bucket]: nullToInfinity(row[bucket]) }));

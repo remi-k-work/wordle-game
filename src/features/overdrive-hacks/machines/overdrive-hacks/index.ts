@@ -78,7 +78,7 @@ export const overdriveHacksMachine = setup.createMachine({
         input: ({ context }) => ({ sonarReveals: context.sonarReveals }),
         onDone: (args) => ({
           target: "active",
-          context: { sonarReveals: [...args.context.sonarReveals, ...Option.toArray(args.output)] },
+          context: { sonarReveals: Array.appendAll(args.context.sonarReveals, Option.toArray(args.output)) },
         }),
         onError: (args, enq) => {
           enq(args.actions.logHackFailure, { self: args.self, hackId: "sonar", error: args.event.error });

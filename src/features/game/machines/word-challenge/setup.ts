@@ -44,11 +44,7 @@ export const setup = setupEffect({
 
     // Do we have a winner? When the player correctly guesses the secret word, we have a winner
     // Only true when both the secret word and the last guess are present and equal
-    isGameWon: ({ context }) =>
-      Option.match(Option.all([context.theSecretWord, Array.last(context.wordleGuesses)]), {
-        onNone: () => false,
-        onSome: ([secret, last]) => secret === last,
-      }),
+    isGameWon: ({ context }) => Option.exists(Option.all([context.theSecretWord, Array.last(context.wordleGuesses)]), ([secret, last]) => secret === last),
 
     // Do we have a loser? When the player runs out of turns, we have a loser
     isGameLost: ({ context }) => context.currentTurn > MAX_TURNS,
