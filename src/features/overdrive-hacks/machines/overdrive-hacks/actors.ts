@@ -103,10 +103,9 @@ export const fetchOverrideAudioActor = createEffectLogic(
   Effect.fnUntraced(function* ({ input: { theOverride } }: EffectSourceArgs<FetchOverrideAudioInput>) {
     const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
+    if (Option.isNone(theOverride)) return Option.none();
+
     const { fetchOverrideAudio } = yield* RpcOverdriveHacksClient;
-    return yield* Option.match(theOverride, {
-      onNone: () => Effect.succeedNone,
-      onSome: (override) => fetchOverrideAudio({ input: override, solutionsLanguage }),
-    });
+    return yield* fetchOverrideAudio({ input: theOverride.value, solutionsLanguage });
   })
 );

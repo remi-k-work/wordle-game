@@ -55,10 +55,8 @@ const buildFeedbackLines = (
   theSecretWord: TheSecretWord,
   colorToString: (color: Color) => string = (color) => color
 ) =>
-  wordleGuesses.map((guess, i) => {
-    const feedbackString = formatGuess(theSecretWord, guess)
-      .map((t) => `${t.tileKey} ${colorToString(t.color)}`)
-      .join(", ");
+  Array.map(wordleGuesses, (guess, i) => {
+    const feedbackString = Array.map(formatGuess(theSecretWord, guess), (t) => `${t.tileKey} ${colorToString(t.color)}`).join(", ");
     return `${i + 1}. ${guess} -> ${feedbackString}\n`;
   });
 

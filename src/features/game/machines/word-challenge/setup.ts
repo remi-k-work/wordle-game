@@ -83,10 +83,7 @@ export const setup = setupEffect({
     // enqueuing), but the branch is total anyway: an impossible `None` resolves as
     // a no-op instead of a NoSuchElementError that has no recovery
     onWordWon: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-      Option.match(wordChallenge.wordScore, {
-        onNone: () => Effect.void,
-        onSome: (wordScore) => Atom.set(gameFlowMachineSendAtom, { type: "word.won", wordScore }),
-      }),
+      Option.isSome(wordChallenge.wordScore) ? Atom.set(gameFlowMachineSendAtom, { type: "word.won", wordScore: wordChallenge.wordScore.value }) : Effect.void,
 
     // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
     trackWordLost: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>

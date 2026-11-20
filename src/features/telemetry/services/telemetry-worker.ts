@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Effect, Layer, Predicate, Stream, Duration, Match, Metric, Schedule, Schema, pipe } from "effect";
+import { Array, Effect, Layer, Predicate, Record, Stream, Duration, Match, Metric, Schedule, Schema, pipe } from "effect";
 import { SecureRandom } from "effect/crypto/SecureRandom";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
@@ -16,7 +16,7 @@ const bigIntToJson = (value: number | bigint) => (Predicate.isBigInt(value) ? va
 
 // Matcher compiled once at module scope instead of rebuilt per metric snapshot
 const normalizeMetricPayload = Match.type<Metric.Metric.Snapshot>().pipe(
-  Match.when({ type: "Frequency" }, ({ state }) => ({ occurrences: Object.fromEntries(state.occurrences) })),
+  Match.when({ type: "Frequency" }, ({ state }) => ({ occurrences: Record.fromEntries(state.occurrences) })),
   Match.when({ type: "Counter" }, ({ state }) => ({ ...state, count: bigIntToJson(state.count) })),
   Match.when({ type: "Gauge" }, ({ state }) => ({ value: bigIntToJson(state.value) })),
   Match.orElse(({ state }) => state)

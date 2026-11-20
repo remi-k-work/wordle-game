@@ -47,14 +47,10 @@ export const fetchAudioActor = createEffectLogic(
     const { fetchRiddleAudio, fetchWordDefinitionAudio } = yield* RpcGameClient;
     const { theRiddleAudioResult, wordDefinitionAudioResult } = yield* Effect.all(
       {
-        theRiddleAudioResult: Option.match(theRiddle, {
-          onNone: () => Effect.succeedNone,
-          onSome: (riddle) => fetchRiddleAudio({ input: riddle, solutionsLanguage }),
-        }),
-        wordDefinitionAudioResult: Option.match(wordDefinition, {
-          onNone: () => Effect.succeedNone,
-          onSome: (definition) => fetchWordDefinitionAudio({ input: definition, solutionsLanguage }),
-        }),
+        theRiddleAudioResult: Option.isSome(theRiddle) ? fetchRiddleAudio({ input: theRiddle.value, solutionsLanguage }) : Effect.succeedNone,
+        wordDefinitionAudioResult: Option.isSome(wordDefinition)
+          ? fetchWordDefinitionAudio({ input: wordDefinition.value, solutionsLanguage })
+          : Effect.succeedNone,
       },
       { mode: "result", concurrency: 2 }
     );

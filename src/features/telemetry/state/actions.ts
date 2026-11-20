@@ -34,12 +34,11 @@ export const logWordWon = Effect.fn(SPAN_LOG_WORD_WON)(function* (runSession: Ru
   const { solutionsLanguage } = yield* sharedAttributes();
   const guessedTurn = guessedTurnOf(wordChallenge);
 
-  yield* Option.match(Option.all({ runId: runSession.runId, theSecretWord: wordChallenge.theSecretWord, wordScore: wordChallenge.wordScore }), {
-    onNone: () => Effect.void,
-    onSome: ({ runId, theSecretWord, wordScore }) =>
-      // `timeSeconds` is already an Int by schema, so it needs no flooring
-      Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: wordScore.timeSeconds }),
-  });
+  const details = Option.all({ runId: runSession.runId, theSecretWord: wordChallenge.theSecretWord, wordScore: wordChallenge.wordScore });
+  if (Option.isSome(details)) {
+    const { runId, theSecretWord, wordScore } = details.value;
+    yield* Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: wordScore.timeSeconds });
+  }
 });
 
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
@@ -60,22 +59,20 @@ export const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (runS
   const createdAt = Option.getOrElse(runSession.createdAt, () => now);
   const durationSeconds = Number.clamp({ minimum: 0, maximum: Infinity })(DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor));
 
-  yield* Option.match(runSession.runId, {
-    onNone: () => Effect.void,
-    onSome: (runId) =>
-      Effect.annotateCurrentSpan({
-        runId,
-        sessionId,
-        solutionsLanguage,
-        deathReason,
-        // The secret word is only meaningful for "Guesses" deaths; every other
-        // death reason (and a puzzle that never had one) degrades to "N/A"
-        failedOnWord: deathReason === "Guesses" ? Option.getOrElse(wordChallenge.theSecretWord, () => "N/A") : "N/A",
-        finalScore,
-        finalStreak,
-        durationSeconds,
-      }),
-  });
+  if (Option.isSome(runSession.runId)) {
+    yield* Effect.annotateCurrentSpan({
+      runId: runSession.runId.value,
+      sessionId,
+      solutionsLanguage,
+      deathReason,
+      // The secret word is only meaningful for "Guesses" deaths; every other
+      // death reason (and a puzzle that never had one) degrades to "N/A"
+      failedOnWord: deathReason === "Guesses" ? Option.getOrElse(wordChallenge.theSecretWord, () => "N/A") : "N/A",
+      finalScore,
+      finalStreak,
+      durationSeconds,
+    });
+  }
 });
 
 // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
@@ -126,10 +123,9 @@ export const trackWordWon = Effect.fnUntraced(function* (runSession: RunSession,
   yield* trackMetric(attributes, metrics.guessesToWin, guessedTurn);
 
   // `timeToSolve` needs the volatile word score, which may be absent; skip it gracefully instead of failing
-  yield* Option.match(wordChallenge.wordScore, {
-    onNone: () => Effect.void,
-    onSome: (score) => trackMetric(attributes, metrics.timeToSolve, score.timeSeconds),
-  });
+  if (Option.isSome(wordChallenge.wordScore)) {
+    yield* trackMetric(attributes, metrics.timeToSolve, wordChallenge.wordScore.value.timeSeconds);
+  }
 
   yield* trackMetric(attributes, metrics.gamesPlayed, 1);
   if (guessedTurn === 1) yield* trackMetric(attributes, metrics.perfectGames, 1);
@@ -150,10 +146,9 @@ export const trackWordLost = Effect.fnUntraced(function* (runSession: RunSession
   yield* trackMetric(attributes, metrics.arcadeRunLength, streak);
 
   // `failedWords` needs the secret word; skip it if the puzzle never had one
-  yield* Option.match(wordChallenge.theSecretWord, {
-    onNone: () => Effect.void,
-    onSome: (secretWord) => trackMetric(attributes, metrics.failedWords, secretWord),
-  });
+  if (Option.isSome(wordChallenge.theSecretWord)) {
+    yield* trackMetric(attributes, metrics.failedWords, wordChallenge.theSecretWord.value);
+  }
 
   yield* trackMetric(attributes, metrics.runDeathReason, "Guesses");
 

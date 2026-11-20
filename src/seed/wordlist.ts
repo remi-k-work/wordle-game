@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Effect, FileSystem, Schema } from "effect";
+import { Array, Effect, FileSystem, Result, Schema, String } from "effect";
 
 // constants
 import { WORD_LENGTH } from "@/features/game/domain/constants";
@@ -39,11 +39,11 @@ export const makeWordlistSync = Effect.fn("makeWordlistSync")(function* ({ input
   yield* Effect.log("Processing and filtering words...");
 
   // Parse, filter, and uppercase the words
-  const validWords = rawTexts.flatMap((rawText) =>
-    rawText
-      .split("\n")
-      .map((word) => word.trim().toUpperCase())
-      .filter((word) => word.length === WORD_LENGTH)
+  const validWords = Array.flatMap(rawTexts, (rawText) =>
+    Array.filterMap(String.linesIterator(rawText), (line) => {
+      const word = line.trim().toUpperCase();
+      return word.length === WORD_LENGTH ? Result.succeed(word) : Result.failVoid;
+    })
   );
 
   // Deduplicate (just in case the raw file has duplicates)
