@@ -62,24 +62,26 @@ function buildCurrentGuessTiles(
   // `None` by construction instead of `undefined` behind a `string` type
   const typedLetters = Array.fromIterable(currentGuessWord);
 
-  return Array.makeBy(WORD_LENGTH, (position): CurrentGuessTile =>
-    Option.match(Array.get(typedLetters, position), {
-      onSome: (typedLetter) => ({
-        tileKey: typedLetter,
+  return Array.makeBy(WORD_LENGTH, (position): CurrentGuessTile => {
+    const typedLetter = Array.get(typedLetters, position);
+    if (Option.isSome(typedLetter)) {
+      return {
+        tileKey: typedLetter.value,
         color: isInvalidGuess ? "red" : "",
         // No `!== ""` check: `currentGuessWord` only ever grows by appending
         // letters, so a present position always holds a real letter
         isLastTyped: position === typedLetters.length - 1,
         isSonarReveal: false,
-      }),
+      };
+    }
 
-      onNone: () =>
-        Option.match(HashMap.get(vowelByPosition, position), {
-          onSome: (vowel) => ({ tileKey: vowel, color: "green", isLastTyped: false, isSonarReveal: true }),
-          onNone: () => ({ tileKey: EMPTY_TILE_KEY, color: "", isLastTyped: false, isSonarReveal: false }),
-        }),
-    })
-  );
+    const vowel = HashMap.get(vowelByPosition, position);
+    if (Option.isSome(vowel)) {
+      return { tileKey: vowel.value, color: "green", isLastTyped: false, isSonarReveal: true };
+    }
+
+    return { tileKey: EMPTY_TILE_KEY, color: "", isLastTyped: false, isSonarReveal: false };
+  });
 }
 
 // `CurrentGuess` owns no props, so React would re-render it by default whenever

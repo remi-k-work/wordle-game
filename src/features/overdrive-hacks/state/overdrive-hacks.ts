@@ -46,14 +46,14 @@ export const overdriveHacksWordleGridAtom = Atom.make((get) => {
   // a projection that sometimes carries the flag and sometimes does not
   const vowelByPosition = sonarVowelByPosition(reveals);
 
-  return wordleGrid.map((row) =>
-    row.map((tile, index): BoardTile =>
-      Option.match(HashMap.get(vowelByPosition, index), {
-        // A tile is only a reveal when the base grid leaves its position empty:
-        // a letter the player typed is never a reveal
-        onNone: () => ({ ...tile, isSonarReveal: false }),
-        onSome: (vowel) => (tile.tileKey === EMPTY_TILE_KEY ? { tileKey: vowel, color: "green", isSonarReveal: true } : { ...tile, isSonarReveal: false }),
-      })
-    )
+  return Array.map(wordleGrid, (row) =>
+    Array.map(row, (tile, index): BoardTile => {
+      const reveal = HashMap.get(vowelByPosition, index);
+      // A tile is only a reveal when the base grid leaves its position empty:
+      // a letter the player typed is never a reveal
+      return Option.isSome(reveal) && tile.tileKey === EMPTY_TILE_KEY
+        ? { tileKey: reveal.value, color: "green", isSonarReveal: true }
+        : { ...tile, isSonarReveal: false };
+    })
   );
 });

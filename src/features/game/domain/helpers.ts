@@ -10,11 +10,7 @@ import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_
 
 // Pick the color with the higher priority; `a` comes from HashMap.get (already
 // an Option) so accepting Option directly avoids an intermediate getOrUndefined
-export const pickStrongerColor = (a: Option.Option<Color>, b: Color) =>
-  Option.match(a, {
-    onNone: () => b,
-    onSome: (color) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[color] ? b : color),
-  });
+export const pickStrongerColor = (a: Option.Option<Color>, b: Color) => (Option.isNone(a) || COLOR_PRIORITY[b] > COLOR_PRIORITY[a.value] ? b : a.value);
 
 // The last rule is the catch-all (`maxSeconds: Infinity`), so `findFirst` below
 // always matches and the fallback is unreachable — it only keeps the return

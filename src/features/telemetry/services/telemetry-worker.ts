@@ -44,7 +44,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const instanceId = yield* uuidV4();
 
     // Decodes a span's attributes and forwards the event through the matching RPC
-    const processSpan = (name: string, attributesObject: Record<string, unknown>) =>
+    const processSpan = (name: string, attributesObject: Record.ReadonlyRecord<string, unknown>) =>
       pipe(
         Match.value(name),
         Match.when(SPAN_LOG_WORD_WON, () => decodeRunWordEvent(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
@@ -64,7 +64,7 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
         spanBatch,
         ({ name, attributes }) =>
           // Convert the attributes map to a plain object for schema decoding and validation
-          processSpan(name, Object.fromEntries(attributes)).pipe(
+          processSpan(name, Record.fromEntries(attributes)).pipe(
             // Telemetry is non-critical: a malformed event or a failed insert
             // is logged and dropped instead of killing the background stream
             // for the rest of the session

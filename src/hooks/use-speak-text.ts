@@ -69,17 +69,14 @@ export function useSpeakText() {
     const selectedVoice = Option.firstSomeOf([exactByName, defaultInLang, anyInLang, fallback]);
 
     // Set the voice and language appropriately
-    Option.match(selectedVoice, {
-      onSome: (voice) => {
-        utterance.voice = voice;
+    if (Option.isSome(selectedVoice)) {
+      utterance.voice = selectedVoice.value;
 
-        // CRITICAL FOR ANDROID: Sync lang directly from the voice object
-        utterance.lang = voice.lang;
-      },
-      onNone: () => {
-        utterance.lang = matchLanguage(solutionsLanguage, "en-US", "pl-PL");
-      },
-    });
+      // CRITICAL FOR ANDROID: Sync lang directly from the voice object
+      utterance.lang = selectedVoice.value.lang;
+    } else {
+      utterance.lang = matchLanguage(solutionsLanguage, "en-US", "pl-PL");
+    }
 
     // Set volume, rate, and pitch according to our voice settings
     utterance.volume = voiceVolume;

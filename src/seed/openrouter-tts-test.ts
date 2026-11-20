@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Array, Cause, Effect, FileSystem, Option } from "effect";
+import { Array, Cause, Effect, FileSystem } from "effect";
 import { OpenRouter } from "@/services/open-router.server";
 import { OpenRouterError } from "@/domain/errors";
 import { runSeed } from "./runtime";
@@ -18,14 +18,11 @@ const MAX_BODY_PREVIEW = 2000;
 
 // Render failures as strings: pretty-printing truncates nested objects, so log the enriched fields.
 // Non-HTTP failures (e.g. schema issues) fall back to a full cause rendering.
-const renderFailure = (error: OpenRouterError): string =>
-  Option.match(Option.fromUndefinedOr(error.status), {
-    onNone: () => Cause.pretty(Cause.fail(error)),
-    onSome: (status) => {
-      const body = Option.getOrElse(Option.fromNullishOr(error.responseBody), () => "<empty body>");
-      return `HTTP ${status}: ${body.length > MAX_BODY_PREVIEW ? `${body.slice(0, MAX_BODY_PREVIEW)}…` : body}`;
-    },
-  });
+const renderFailure = (error: OpenRouterError): string => {
+  if (error.status === undefined) return Cause.pretty(Cause.fail(error));
+  const body = error.responseBody ?? "<empty body>";
+  return `HTTP ${error.status}: ${body.length > MAX_BODY_PREVIEW ? `${body.slice(0, MAX_BODY_PREVIEW)}…` : body}`;
+};
 
 const main = Effect.gen(function* () {
   yield* Effect.log("Testing the OpenRouter TTS API (EN/PL voice matrix)...\n");

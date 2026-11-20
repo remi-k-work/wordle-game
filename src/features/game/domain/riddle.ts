@@ -49,17 +49,13 @@ Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój r
 // A definition is optional because the riddle flow must still work when the definition asset is unavailable
 // when present, it disambiguates exotic words and homonyms without adding another RPC round-trip
 const definitionContextEn = (wordDefinition: WordMeta["wordDefinition"]) =>
-  Option.match(wordDefinition, {
-    onSome: (value) =>
-      `Official dictionary meaning for reference: "${value}"\n-> Use this only to identify the intended sense of the secret word. Do not quote or closely paraphrase it, and never repeat the secret word or its inflected forms.\n\n`,
-    onNone: () => "",
-  });
+  Option.isSome(wordDefinition)
+    ? `Official dictionary meaning for reference: "${wordDefinition.value}"\n-> Use this only to identify the intended sense of the secret word. Do not quote or closely paraphrase it, and never repeat the secret word or its inflected forms.\n\n`
+    : "";
 const definitionContextPl = (wordDefinition: WordMeta["wordDefinition"]) =>
-  Option.match(wordDefinition, {
-    onSome: (value) =>
-      `Oficjalna definicja słownikowa do wglądu: "${value}"\n-> Użyj jej wyłącznie do ustalenia właściwego znaczenia ukrytego słowa. Nie cytuj jej ani nie parafrazuj zbyt blisko; nigdy nie powtarzaj ukrytego słowa ani jego form odmienionych.\n\n`,
-    onNone: () => "",
-  });
+  Option.isSome(wordDefinition)
+    ? `Oficjalna definicja słownikowa do wglądu: "${wordDefinition.value}"\n-> Użyj jej wyłącznie do ustalenia właściwego znaczenia ukrytego słowa. Nie cytuj jej ani nie parafrazuj zbyt blisko; nigdy nie powtarzaj ukrytego słowa ani jego form odmienionych.\n\n`
+    : "";
 
 const RIDDLE_PROMPT_EN = (wordDefinition: WordMeta["wordDefinition"]) => `${definitionContextEn(wordDefinition)}Craft the riddle now.`;
 const RIDDLE_PROMPT_PL = (wordDefinition: WordMeta["wordDefinition"]) => `${definitionContextPl(wordDefinition)}Stwórz zagadkę teraz.`;

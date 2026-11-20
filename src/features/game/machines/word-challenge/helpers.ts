@@ -38,10 +38,7 @@ export const submitGuessContext = (context: WordChallenge): WordChallenge => {
     currentGuessWord: String.empty,
     wordleGuesses,
     currentTurn: context.currentTurn + 1,
-    greyLetters: Option.match(context.theSecretWord, {
-      onNone: () => context.greyLetters,
-      onSome: (theSecretWord) => computeGreyLetters(theSecretWord, wordleGuesses),
-    }),
+    greyLetters: Option.isSome(context.theSecretWord) ? computeGreyLetters(context.theSecretWord.value, wordleGuesses) : context.greyLetters,
   };
 };
 

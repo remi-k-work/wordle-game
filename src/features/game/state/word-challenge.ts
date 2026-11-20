@@ -57,23 +57,18 @@ export const wordChallengePotentialScoreAtom = Atom.make((get) => {
 const emptyRow = (): Tile[] => Array.makeBy(WORD_LENGTH, (): Tile => ({ tileKey: EMPTY_TILE_KEY, color: "" }));
 
 // Derive the full 6x5 grid state for rendering based on completed guesses
-export const wordChallengeWordleGridAtom = Atom.make((get) =>
-  Option.match(get(wordChallengeTheSecretWordAtom), {
-    onNone: () => Array.makeBy(MAX_TURNS, emptyRow),
-    onSome: (theSecretWord) =>
-      Array.makeBy(MAX_TURNS, (rowIndex) =>
-        Option.match(Array.get(get(wordChallengeWordleGuessesAtom), rowIndex), {
-          onNone: emptyRow,
-          onSome: (guess) => formatGuess(theSecretWord, guess),
-        })
-      ),
-  })
-);
+export const wordChallengeWordleGridAtom = Atom.make((get) => {
+  const theSecretWord = get(wordChallengeTheSecretWordAtom);
+  if (Option.isNone(theSecretWord)) return Array.makeBy(MAX_TURNS, emptyRow);
+  const guesses = get(wordChallengeWordleGuessesAtom);
+  return Array.makeBy(MAX_TURNS, (rowIndex) => {
+    const guess = Array.get(guesses, rowIndex);
+    return Option.isSome(guess) ? formatGuess(theSecretWord.value, guess.value) : emptyRow();
+  });
+});
 
 // Current coloring state of the keypad keys based solely on genuine guess history
-export const wordChallengeKeypadColorsAtom = Atom.make((get) =>
-  Option.match(get(wordChallengeTheSecretWordAtom), {
-    onNone: () => HashMap.empty<string, Color>(),
-    onSome: (theSecretWord) => computeKeypadState(theSecretWord, get(wordChallengeWordleGuessesAtom)),
-  })
-);
+export const wordChallengeKeypadColorsAtom = Atom.make((get) => {
+  const theSecretWord = get(wordChallengeTheSecretWordAtom);
+  return Option.isSome(theSecretWord) ? computeKeypadState(theSecretWord.value, get(wordChallengeWordleGuessesAtom)) : HashMap.empty<string, Color>();
+});

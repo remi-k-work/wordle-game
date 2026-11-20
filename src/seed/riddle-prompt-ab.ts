@@ -36,7 +36,7 @@ const Definitions = Schema.Record(Schema.String, Schema.String);
 // enable `noUncheckedIndexedAccess`) — the same reason the RPC handler's
 // `getWordDefinition` reads its decoded record this way
 // Combinator-based (no Effect.fn/gen wrapper) per Effect conventions for reusable functions
-const getDefinition = (definitions: Readonly<Record<string, string>>, theSecretWord: TheSecretWord) =>
+const getDefinition = (definitions: Record.ReadonlyRecord<string, string>, theSecretWord: TheSecretWord) =>
   Record.get(definitions, theSecretWord).pipe(Effect.fromOption(() => new MissingDefinitionError({ theSecretWord })));
 
 const main = Effect.gen(function* () {

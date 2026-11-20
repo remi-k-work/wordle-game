@@ -41,16 +41,15 @@ export const highScoreMachine = setup.createMachine({
       invoke: {
         src: "addNewHighScoreActor",
         input: ({ context }) => ({ context }),
-        onDone: (args, enq) =>
+        onDone: (args, enq) => {
           // A `Some` means the submission took the last slot; `None` means the
           // board filled up meanwhile, so the run no longer qualifies
-          Option.match(args.event.output, {
-            onSome: (id) => ({ target: "success", context: { ...args.context, newHighScoreId: Option.some(id) } }),
-            onNone: () => {
-              enq(args.actions.onNoLongerQualified, { self: args.self });
-              return { target: "awaitingFinishedRun" };
-            },
-          }),
+          if (Option.isSome(args.event.output)) {
+            return { target: "success", context: { ...args.context, newHighScoreId: args.event.output } };
+          }
+          enq(args.actions.onNoLongerQualified, { self: args.self });
+          return { target: "awaitingFinishedRun" };
+        },
         onError: { target: "failure" },
       },
     },

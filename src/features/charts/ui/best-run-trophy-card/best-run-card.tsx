@@ -22,10 +22,7 @@ interface BestRunCardProps {
 export function BestRunCard({ Tag = "section", variant, title, bestRun }: BestRunCardProps) {
   return (
     <BestRunCardFrame Tag={Tag} variant={variant} title={title}>
-      {Option.match(bestRun, {
-        onNone: () => <BestRunCardEmpty />,
-        onSome: (bestRun) => <BestRunCardFilled bestRun={bestRun} />,
-      })}
+      {Option.isSome(bestRun) ? <BestRunCardFilled bestRun={bestRun.value} /> : <BestRunCardEmpty />}
     </BestRunCardFrame>
   );
 }
