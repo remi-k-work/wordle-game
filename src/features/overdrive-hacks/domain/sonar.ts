@@ -25,7 +25,10 @@ export const computeSonarCandidates = (
     // A vowel that has never been guessed (absent from the keypad state) is
     // still worth revealing; a guessed one only once the player has ruled it out
     const color = HashMap.get(keypadState, vowel);
-    return Option.isNone(color) || color.value === "grey";
+    return Option.match(color, {
+      onNone: () => true,
+      onSome: (c) => c === "grey",
+    });
   });
 };
 

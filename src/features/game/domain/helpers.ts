@@ -10,7 +10,11 @@ import { BASE_POINTS_PER_TURN_MAP, COLOR_PRIORITY, POTENTIAL_SCORE_RANGE, SPEED_
 
 // Pick the color with the higher priority; `a` comes from HashMap.get (already
 // an Option) so accepting Option directly avoids an intermediate getOrUndefined
-export const pickStrongerColor = (a: Option.Option<Color>, b: Color) => (Option.isNone(a) || COLOR_PRIORITY[b] > COLOR_PRIORITY[a.value] ? b : a.value);
+export const pickStrongerColor = (a: Option.Option<Color>, b: Color): Color =>
+  Option.match(a, {
+    onNone: () => b,
+    onSome: (prev) => (COLOR_PRIORITY[b] > COLOR_PRIORITY[prev] ? b : prev),
+  });
 
 // The last rule is the catch-all (`maxSeconds: Infinity`), so `findFirst` below
 // always matches and the fallback is unreachable — it only keeps the return
@@ -48,5 +52,5 @@ export const matchLanguage = <T>(language: SolutionsLanguage, en: T, pl: T): T =
 
 // The language to switch to when the setting is toggled. A lookup table (not a
 // ternary) so adding a third language is a compile error in exactly one place
-export const otherSolutionsLanguage = (language: SolutionsLanguage) =>
-  ({ En: "Pl", Pl: "En" } satisfies Record.ReadonlyRecord<SolutionsLanguage, SolutionsLanguage>)[language];
+const OTHER_SOLUTIONS_LANGUAGE = { En: "Pl", Pl: "En" } as const satisfies Record.ReadonlyRecord<SolutionsLanguage, SolutionsLanguage>;
+export const otherSolutionsLanguage = (language: SolutionsLanguage): SolutionsLanguage => OTHER_SOLUTIONS_LANGUAGE[language];

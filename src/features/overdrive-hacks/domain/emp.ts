@@ -29,7 +29,7 @@ export const computeEmpCandidates = (
       // An absent key means the letter was never guessed, so it is still a
       // candidate; `computeKeypadState` never stores any other colour for an
       // unguessed letter, so absence is the only signal worth reading here
-      Option.isNone(HashMap.get(keypadState, letter))
+      !HashMap.has(keypadState, letter)
   );
 };
 

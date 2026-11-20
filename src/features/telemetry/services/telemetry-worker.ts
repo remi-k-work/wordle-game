@@ -44,13 +44,11 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     const instanceId = yield* uuidV4();
 
     // Decodes a span's attributes and forwards the event through the matching RPC
-    const processSpan = (name: string, attributesObject: Record.ReadonlyRecord<string, unknown>) =>
-      pipe(
-        Match.value(name),
-        Match.when(SPAN_LOG_WORD_WON, () => decodeRunWordEvent(attributesObject).pipe(Effect.flatMap(addRunWordEvent))),
-        Match.when(SPAN_LOG_RUN_COMPLETED, () => decodeArcadeRunSummary(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary))),
-        Match.orElse(() => Effect.void)
-      );
+    const processSpan = (name: string, attributesObject: Record.ReadonlyRecord<string, unknown>) => {
+      if (name === SPAN_LOG_WORD_WON) return decodeRunWordEvent(attributesObject).pipe(Effect.flatMap(addRunWordEvent));
+      if (name === SPAN_LOG_RUN_COMPLETED) return decodeArcadeRunSummary(attributesObject).pipe(Effect.flatMap(addArcadeRunSummary));
+      return Effect.void;
+    };
 
     // Batching that involves collecting up to 50 spans or waiting a maximum of 5 seconds
     const processSpanBatch = Effect.fnUntraced(function* (spanBatch: ReadonlyArray<Tracer.Span>) {

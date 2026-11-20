@@ -37,17 +37,17 @@ function buildRunScoreSummary(
   activeRunScore: number,
   activeStreak: number
 ): Option.Option<RunScoreSummary> {
-  if (Option.isSome(runResult)) {
-    const { createdAt, finishedAt, runScore, streak } = runResult.value;
-    return Option.some({ createdAt: Option.some(createdAt), finishedAt: Option.some(finishedAt), runScore, streak });
-  }
-
-  return Option.map(activeRunId, () => ({
-    createdAt: activeCreatedAt,
-    finishedAt: Option.none<DateTime.DateTime>(),
-    runScore: activeRunScore,
-    streak: activeStreak,
-  }));
+  return Option.match(runResult, {
+    onSome: ({ createdAt, finishedAt, runScore, streak }) =>
+      Option.some({ createdAt: Option.some(createdAt), finishedAt: Option.some(finishedAt), runScore, streak }),
+    onNone: () =>
+      Option.map(activeRunId, () => ({
+        createdAt: activeCreatedAt,
+        finishedAt: Option.none<DateTime.DateTime>(),
+        runScore: activeRunScore,
+        streak: activeStreak,
+      })),
+  });
 }
 
 export function RunScore() {
