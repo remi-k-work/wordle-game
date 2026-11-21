@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Atom } from "effect/reactivity";
 import { SolutionsLanguage, WordScore } from "@/features/game/domain/models";
 import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import { modalMachineSendAtom } from "@/state/modal";
@@ -24,9 +24,9 @@ export const Actions = {
   changeLanguage: { params: Schema.Struct({ solutionsLanguage: SolutionsLanguage }) },
 };
 
-export const actions = {
+export const actions: ActionImplementations<typeof Actions> = {
   // Start a brand-new run: close the modal, start the run session, pick the first word
-  startRun: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+  startRun: () =>
     Effect.all(
       [
         Atom.set(modalMachineSendAtom, { type: "closed" }),
@@ -37,11 +37,11 @@ export const actions = {
     ),
 
   // Between words: close the modal and ask game-data for the next word
-  requestNextWord: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+  requestNextWord: () =>
     Effect.all([Atom.set(modalMachineSendAtom, { type: "closed" }), Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" })], { discard: true }),
 
   // Forfeit the active run: abandon the run session + word challenge, stop the overdrive hacks, and open the status modal
-  forfeitRun: ({ wordChallenge }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+  forfeitRun: ({ wordChallenge }) =>
     Effect.all(
       [
         Atom.set(runSessionMachineSendAtom, { type: "forfeitedRun", wordChallenge }),
@@ -53,7 +53,7 @@ export const actions = {
     ),
 
   // Bank the won word into the run session, stop the hacks, show the status modal
-  bankWonWord: ({ wordScore }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+  bankWonWord: ({ wordScore }) =>
     Effect.all(
       [
         Atom.set(runSessionMachineSendAtom, { type: "wordWon", wordScore }),
@@ -64,7 +64,7 @@ export const actions = {
     ),
 
   // The run died on guesses: finish it, stop the hacks, show the status modal
-  finishLostRun: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+  finishLostRun: () =>
     Effect.all(
       [
         Atom.set(runSessionMachineSendAtom, { type: "wordLost" }),
@@ -75,7 +75,7 @@ export const actions = {
     ),
 
   // Language change abandons every in-flight feature machine and reloads the game data for the new language
-  changeLanguage: ({ solutionsLanguage }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+  changeLanguage: ({ solutionsLanguage }) =>
     Effect.all(
       [
         Atom.set(runSessionMachineSendAtom, { type: "solutionsLanguageChanged" }),
@@ -86,4 +86,4 @@ export const actions = {
       ],
       { discard: true }
     ),
-} satisfies ActionImplementations<typeof Actions>;
+};

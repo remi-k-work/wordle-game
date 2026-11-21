@@ -1,5 +1,6 @@
 // services, features, and other libraries
 import type { Effect, Schema } from "effect";
+import type { AtomRegistry } from "effect/reactivity";
 import type { EffectActionArgs, EffectSchema } from "@xstate/effect";
 
 // types
@@ -11,10 +12,14 @@ import type { EventObject, MachineContext } from "xstate";
 export type ActionArgs<TParams extends EffectSchema> = Schema.Schema.Type<TParams> & Pick<EffectActionArgs, "self">;
 
 // Action sources derived from their params schemas, so the schemas stay the
-// single source of truth; `satisfies` keeps each implementation's Effect
-// channels literal, which is what RequirementsFrom reads
+// single source of truth. The signatures are pinned here rather than inferred
+// from each body: action bodies write to send atoms whose types come from the
+// machines that register these actions, so inference would chase the whole
+// graph and form a cycle. The record requires AtomRegistry (the environment of
+// the atom-writing implementations; pure actions satisfy it too), and the
+// `unknown` error leaves room for actions such as run-session's Option lift
 export type ActionImplementations<TSchemas extends Record<string, { params: EffectSchema }>> = {
-  [K in keyof TSchemas]: (args: ActionArgs<TSchemas[K]["params"]>) => Effect.Effect<void, unknown, unknown>;
+  [K in keyof TSchemas]: (args: ActionArgs<TSchemas[K]["params"]>) => Effect.Effect<void, unknown, AtomRegistry.AtomRegistry>;
 };
 
 // The subset of the transition args a guard receives; guards in this codebase

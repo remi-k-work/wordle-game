@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Atom } from "effect/reactivity";
 import { TheSecretWord } from "@/features/game/domain/models";
 import { wordChallengeMachineSendAtom } from "@/features/game/state/word-challenge";
 import { wordMetaMachineSendAtom } from "@/features/game/state/word-meta";
@@ -16,8 +16,8 @@ export const Actions = {
   onGameDataLoaded: { params: Schema.Struct({ dictionary: Schema.Option(Schema.HashSet(TheSecretWord)) }) },
 };
 
-export const actions = {
-  onSecretWordSelected: ({ theSecretWord }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
+export const actions: ActionImplementations<typeof Actions> = {
+  onSecretWordSelected: ({ theSecretWord }) =>
     Effect.all(
       [
         // *** TEST CODE ***
@@ -37,4 +37,4 @@ export const actions = {
 
   // Notify the word challenge machine that game data is ready (no word yet — idle state)
   onGameDataLoaded: ({ dictionary }) => Atom.set(wordChallengeMachineSendAtom, { type: "gameDataLoaded", dictionary }),
-} satisfies ActionImplementations<typeof Actions>;
+};

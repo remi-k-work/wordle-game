@@ -1,6 +1,6 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Schema } from "effect";
+import { Atom } from "effect/reactivity";
 import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
 import { SolutionsLanguage } from "@/features/game/domain/models";
 
@@ -13,8 +13,7 @@ export const Actions = {
   onSolutionsLanguageToggled: { params: Schema.Struct({ solutionsLanguage: SolutionsLanguage }) },
 };
 
-export const actions = {
+export const actions: ActionImplementations<typeof Actions> = {
   // Notify all the other machines about the solutions language change
-  onSolutionsLanguageToggled: ({ solutionsLanguage }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-    Atom.set(gameFlowMachineSendAtom, { type: "language.changed", solutionsLanguage }),
-} satisfies ActionImplementations<typeof Actions>;
+  onSolutionsLanguageToggled: ({ solutionsLanguage }) => Atom.set(gameFlowMachineSendAtom, { type: "language.changed", solutionsLanguage }),
+};

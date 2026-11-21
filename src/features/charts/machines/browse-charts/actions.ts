@@ -11,9 +11,9 @@ export const Actions = {
   navigate: { params: Schema.Struct({ browseCharts: BrowseCharts, navigate: Schema.optional(Navigate) }) },
 };
 
-export const actions = {
+export const actions: ActionImplementations<typeof Actions> = {
   navigate: ({ browseCharts, navigate }) =>
     Effect.sync(() => {
       navigate?.("/high-score", browseCharts);
     }),
-} satisfies ActionImplementations<typeof Actions>;
+};

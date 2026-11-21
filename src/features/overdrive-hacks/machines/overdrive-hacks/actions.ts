@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Atom } from "effect/reactivity";
 import { wordChallengeMachineSendAtom } from "@/features/game/state/word-challenge";
 import { modalMachineSendAtom } from "@/state/modal";
 
@@ -15,13 +15,11 @@ export const Actions = {
   logHackFailure: { params: Schema.Struct({ hackId: Schema.String, error: Schema.Unknown }) },
 };
 
-export const actions = {
-  forwardKeyPress: ({ pressedKey }): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-    Atom.set(wordChallengeMachineSendAtom, { type: "keyPressed", pressedKey }),
+export const actions: ActionImplementations<typeof Actions> = {
+  forwardKeyPress: ({ pressedKey }) => Atom.set(wordChallengeMachineSendAtom, { type: "keyPressed", pressedKey }),
 
   // A failed override still opens the modal, which has its own "unavailable" state
-  onOverrideHackApplied: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-    Atom.set(modalMachineSendAtom, { type: "opened", modalType: "override-hack" }),
+  onOverrideHackApplied: () => Atom.set(modalMachineSendAtom, { type: "opened", modalType: "override-hack" }),
 
   logHackFailure: ({ hackId, error }) => Effect.logError(`[OVERDRIVE HACK FAILED]: ${hackId}`, error),
-} satisfies ActionImplementations<typeof Actions>;
+};

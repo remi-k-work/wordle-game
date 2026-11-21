@@ -10,6 +10,6 @@ export const Actions = {
   logFailure: { params: Schema.Struct({ error: Schema.Defect() }) },
 };
 
-export const actions = {
+export const actions: ActionImplementations<typeof Actions> = {
   logFailure: ({ error }) => Effect.logError("[ALERT OKAYED FAILED]:", error),
-} satisfies ActionImplementations<typeof Actions>;
+};

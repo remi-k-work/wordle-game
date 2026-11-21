@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { DateTime, Effect, Option, Schema } from "effect";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Atom } from "effect/reactivity";
 import { RunDeathReason } from "@/features/game/domain/models";
 import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state/actions";
@@ -14,8 +14,8 @@ import type { ActionArgs, ActionImplementations } from "@/lib/machine-setup";
 
 // The params schemas are the single source of truth for what each action is
 // enqueued with; setup.ts wires them into `schemas.actions`
-export const saveFinishedRunParams = Schema.Struct({ runSession: RunSession, deathReason: RunDeathReason });
-export const onRunFinishedParams = Schema.Struct({ runSession: RunSession });
+const saveFinishedRunParams = Schema.Struct({ runSession: RunSession, deathReason: RunDeathReason });
+const onRunFinishedParams = Schema.Struct({ runSession: RunSession });
 
 export const Actions = {
   clearFinishedRun: { params: Schema.Struct({}) },
@@ -25,9 +25,9 @@ export const Actions = {
   onRunFinished: { params: onRunFinishedParams },
 };
 
-export const actions = {
+export const actions: ActionImplementations<typeof Actions> = {
   // The completed-run summary belongs to the result UI, not durable storage: clearing it is an atom write
-  clearFinishedRun: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> => Atom.set(runResultAtom, Option.none()),
+  clearFinishedRun: () => Atom.set(runResultAtom, Option.none()),
 
   // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
   trackStartedNewRun: () => trackStartedNewRun(),
@@ -51,4 +51,4 @@ export const actions = {
     const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
     yield* Atom.set(highScoreMachineSendAtom, { type: "runFinished", runScore: runSession.runScore, streak: runSession.streak, solutionsLanguage });
   }),
-} satisfies ActionImplementations<typeof Actions>;
+};

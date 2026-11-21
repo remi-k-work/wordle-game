@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Effect, Schema } from "effect";
-import { Atom, AtomRegistry } from "effect/reactivity";
+import { Atom } from "effect/reactivity";
 import { msg } from "gt-react";
 import { toastManager } from "@/ui/toastify";
 import { modalMachineSendAtom } from "@/state/modal";
@@ -17,7 +17,7 @@ export const Actions = {
   showHighScoreModal: { params: Schema.Struct({}) },
 };
 
-export const actions = {
+export const actions: ActionImplementations<typeof Actions> = {
   onSuccess: () =>
     Effect.sync(() => {
       toastManager.add({ title: msg("Score Recorded"), description: msg("Good luck on your next run!") });
@@ -33,6 +33,5 @@ export const actions = {
       toastManager.add({ type: "error", title: msg("Submission Failed"), description: msg("Failed to save your score. Please try again later.") });
     }),
 
-  showHighScoreModal: (): Effect.Effect<void, never, AtomRegistry.AtomRegistry> =>
-    Atom.set(modalMachineSendAtom, { type: "opened", modalType: "high-score" }),
-} satisfies ActionImplementations<typeof Actions>;
+  showHighScoreModal: () => Atom.set(modalMachineSendAtom, { type: "opened", modalType: "high-score" }),
+};
