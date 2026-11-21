@@ -4,8 +4,8 @@ import { Keypad, SolutionsLanguage, TheSecretWord } from "@/features/game/domain
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type GameData = typeof GameData.Type;
+export type Events = EventUnion<typeof Events>;
 
 export const GameData = Schema.Struct({
   solutions: Schema.Option(Schema.Array(TheSecretWord)),
@@ -20,4 +20,9 @@ export const Events = {
   retryRequested: Schema.Struct({}),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  onSecretWordSelected: { params: Schema.Struct({ theSecretWord: TheSecretWord }) },
+  onGameDataLoaded: { params: Schema.Struct({ dictionary: Schema.Option(Schema.HashSet(TheSecretWord)) }) },
+};

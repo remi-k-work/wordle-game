@@ -4,8 +4,8 @@ import { Letter, TheSecretWord, WordScore } from "@/features/game/domain/models"
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type WordChallenge = typeof WordChallenge.Type;
+export type Events = EventUnion<typeof Events>;
 
 // Represents the state of the current word challenge being in progress
 export const WordChallenge = Schema.Struct({
@@ -30,4 +30,13 @@ export const Events = {
   forfeitedRun: Schema.Struct({}),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  trackInvalidGuessSubmitted: { params: Schema.Struct({}) },
+  trackValidGuessSubmitted: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+  trackWordWon: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+  onWordWon: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+  trackWordLost: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+  onWordLost: { params: Schema.Struct({}) },
+};

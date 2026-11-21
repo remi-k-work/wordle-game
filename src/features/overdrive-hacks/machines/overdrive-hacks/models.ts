@@ -5,8 +5,8 @@ import { OverdriveHackId, SonarReveal } from "@/features/overdrive-hacks/domain/
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type OverdriveHacks = typeof OverdriveHacks.Type;
+export type Events = EventUnion<typeof Events>;
 
 // Per-puzzle overdrive hack state
 export const OverdriveHacks = Schema.Struct({
@@ -25,4 +25,10 @@ export const Events = {
   "hack.useRequested": Schema.Struct({ overdriveHackId: OverdriveHackId }),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  forwardKeyPress: { params: Schema.Struct({ pressedKey: Schema.String }) },
+  onOverrideHackApplied: { params: Schema.Struct({}) },
+  logHackFailure: { params: Schema.Struct({ hackId: Schema.String, error: Schema.Unknown }) },
+};

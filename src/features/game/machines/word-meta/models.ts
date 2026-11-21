@@ -4,8 +4,8 @@ import { TheSecretWord } from "@/features/game/domain/models";
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type WordMeta = typeof WordMeta.Type;
+export type Events = EventUnion<typeof Events>;
 
 export const WordMeta = Schema.Struct({
   theRiddle: Schema.Option(Schema.Trim.check(Schema.isNonEmpty())),
@@ -19,5 +19,3 @@ export const Events = {
   secretWordPicked: Schema.Struct({ theSecretWord: TheSecretWord }),
   resetRequested: Schema.Struct({}),
 };
-
-export type Events = EventUnion<typeof Events>;

@@ -5,8 +5,8 @@ import { Bounded } from "@/features/settings/domain/models";
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type GameSettings = typeof GameSettings.Type;
+export type Events = EventUnion<typeof Events>;
 
 // constants
 import { VOICE_PITCH_RANGE, VOICE_RATE_RANGE, VOICE_VOLUME_RANGE } from "@/features/settings/domain/constants";
@@ -29,4 +29,8 @@ export const Events = {
   voicePitchChanged: Schema.Struct({ voicePitch: GameSettings.fields.voicePitch }),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  onSolutionsLanguageToggled: { params: Schema.Struct({ solutionsLanguage: SolutionsLanguage }) },
+};

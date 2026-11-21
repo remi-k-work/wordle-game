@@ -3,8 +3,8 @@ import { Predicate, Schema } from "effect";
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type OkayedCallback = () => void | Promise<void>;
+export type Events = EventUnion<typeof Events>;
 
 // The confirm callback rides along on the `okayed` event, so its type is the invoke actor's input
 export const OkayedCallback = Schema.declare<OkayedCallback>((input): input is OkayedCallback => Predicate.isFunction(input), { title: "OkayedCallback" });
@@ -16,4 +16,8 @@ export const Events = {
   cancelled: Schema.Struct({}),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  logFailure: { params: Schema.Struct({ error: Schema.Defect() }) },
+};

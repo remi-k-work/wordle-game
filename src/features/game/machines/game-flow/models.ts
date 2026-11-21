@@ -5,6 +5,7 @@ import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
+export type Events = EventUnion<typeof Events>;
 
 // The machine only ever carries one flag: whether a persisted run session was active when the flow started
 export const GameFlow = Schema.Struct({ hasActiveRun: Schema.Boolean });
@@ -19,4 +20,13 @@ export const Events = {
   "language.changed": Schema.Struct({ solutionsLanguage: SolutionsLanguage }),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  startRun: { params: Schema.Struct({}) },
+  requestNextWord: { params: Schema.Struct({}) },
+  forfeitRun: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
+  bankWonWord: { params: Schema.Struct({ wordScore: WordScore }) },
+  finishLostRun: { params: Schema.Struct({}) },
+  changeLanguage: { params: Schema.Struct({ solutionsLanguage: SolutionsLanguage }) },
+};

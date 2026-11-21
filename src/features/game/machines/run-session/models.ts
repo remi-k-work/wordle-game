@@ -5,9 +5,9 @@ import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type RunSession = typeof RunSession.Type;
 export type RunResult = typeof RunResult.Type;
+export type Events = EventUnion<typeof Events>;
 
 // Wire schemas for the fields the active run session and the completed-run summary both carry
 const RunId = Schema.Trim.check(Schema.isUUID());
@@ -44,4 +44,15 @@ export const Events = {
   wordLost: Schema.Struct({}),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+const saveFinishedRunParams = Schema.Struct({ runSession: RunSession, deathReason: RunDeathReason });
+const onRunFinishedParams = Schema.Struct({ runSession: RunSession });
+
+export const Actions = {
+  clearFinishedRun: { params: Schema.Struct({}) },
+  trackStartedNewRun: { params: Schema.Struct({}) },
+  saveFinishedRun: { params: saveFinishedRunParams },
+  trackForfeitedRun: { params: Schema.Struct({ runSession: RunSession, wordChallenge: WordChallenge }) },
+  onRunFinished: { params: onRunFinishedParams },
+};

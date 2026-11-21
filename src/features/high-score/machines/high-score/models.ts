@@ -4,8 +4,8 @@ import { HighScoreEntry } from "@/features/high-score/domain/models";
 
 // types
 import type { EventUnion } from "@/lib/machine-setup";
-
 export type HighScore = typeof HighScore.Type;
+export type Events = EventUnion<typeof Events>;
 
 export const HighScore = Schema.Struct({
   playerName: HighScoreEntry.fields.playerName,
@@ -33,4 +33,11 @@ export const Events = {
   initialsSubmitted: Schema.Struct({ playerName: HighScore.fields.playerName }),
 };
 
-export type Events = EventUnion<typeof Events>;
+// Action params are part of the machine's interface; implementations receive
+// exactly these params (plus `self`)
+export const Actions = {
+  onSuccess: { params: Schema.Struct({}) },
+  onNoLongerQualified: { params: Schema.Struct({}) },
+  onFailure: { params: Schema.Struct({}) },
+  showHighScoreModal: { params: Schema.Struct({}) },
+};
