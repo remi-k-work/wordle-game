@@ -27,7 +27,7 @@ export const Events = {
   gameDataLoaded: Schema.Struct({ dictionary: WordChallenge.fields.dictionary }),
   secretWordPicked: Schema.Struct({ theSecretWord: TheSecretWord }),
   keyPressed: Schema.Struct({ pressedKey: Schema.String }),
-  forfeitedRun: Schema.Struct({}),
+  runForfeited: Schema.Struct({}),
 };
 
 // Action params are part of the machine's interface; implementations receive

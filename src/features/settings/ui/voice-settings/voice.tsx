@@ -75,7 +75,7 @@ export function Voice() {
         name="voiceVoice"
         items={voices}
         value={selectedValue}
-        onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceVoiceChanged", voiceVoice: value })}
+        onValueChange={(value) => gameSettingsMachineEvent({ type: "voiceChanged", voiceVoice: value })}
       >
         <VoiceLabel />
         <VoiceTrigger />

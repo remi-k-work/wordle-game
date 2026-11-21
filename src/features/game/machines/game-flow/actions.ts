@@ -14,11 +14,11 @@ import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   // Start a brand-new run: close the modal, start the run session, pick the first word
-  startRun: () =>
+  startNewRun: () =>
     Effect.all(
       [
         Atom.set(modalMachineSendAtom, { type: "closed" }),
-        Atom.set(runSessionMachineSendAtom, { type: "startedNewRun" }),
+        Atom.set(runSessionMachineSendAtom, { type: "newRunStarted" }),
         Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" }),
       ],
       { discard: true }
@@ -32,9 +32,9 @@ export const actions: ActionImplementations<typeof Actions> = {
   forfeitRun: ({ wordChallenge }) =>
     Effect.all(
       [
-        Atom.set(runSessionMachineSendAtom, { type: "forfeitedRun", wordChallenge }),
-        Atom.set(wordChallengeMachineSendAtom, { type: "forfeitedRun" }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.ended" }),
+        Atom.set(runSessionMachineSendAtom, { type: "runForfeited", wordChallenge }),
+        Atom.set(wordChallengeMachineSendAtom, { type: "runForfeited" }),
+        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleEnded" }),
         Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
       ],
       { discard: true }
@@ -45,7 +45,7 @@ export const actions: ActionImplementations<typeof Actions> = {
     Effect.all(
       [
         Atom.set(runSessionMachineSendAtom, { type: "wordWon", wordScore }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.ended" }),
+        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleEnded" }),
         Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
       ],
       { discard: true }
@@ -56,7 +56,7 @@ export const actions: ActionImplementations<typeof Actions> = {
     Effect.all(
       [
         Atom.set(runSessionMachineSendAtom, { type: "wordLost" }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.ended" }),
+        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleEnded" }),
         Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
       ],
       { discard: true }

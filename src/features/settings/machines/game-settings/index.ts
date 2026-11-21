@@ -23,7 +23,7 @@ export const gameSettingsMachine = setup.createMachine({
           return { context: { ...args.context, solutionsLanguage } };
         },
 
-        voiceVoiceChanged: { context: ({ context, event }) => ({ ...context, voiceVoice: event.voiceVoice }) },
+        voiceChanged: { context: ({ context, event }) => ({ ...context, voiceVoice: event.voiceVoice }) },
         voiceVolumeChanged: { context: ({ context, event }) => ({ ...context, voiceVolume: Number.clamp(VOICE_VOLUME_RANGE)(event.voiceVolume) }) },
         voiceRateChanged: { context: ({ context, event }) => ({ ...context, voiceRate: Number.clamp(VOICE_RATE_RANGE)(event.voiceRate) }) },
         voicePitchChanged: { context: ({ context, event }) => ({ ...context, voicePitch: Number.clamp(VOICE_PITCH_RANGE)(event.voicePitch) }) },

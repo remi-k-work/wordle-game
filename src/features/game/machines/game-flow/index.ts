@@ -14,8 +14,8 @@ export const gameFlowMachine = setup.createMachine({
     // ready screen from any state — one machine-level handler instead of a copy
     // per state (the same pattern the other feature machines use for their
     // global events, e.g. word-challenge's solutionsLanguageChanged)
-    "language.changed": (args, enq) => {
-      assertEvent(args.event, "language.changed");
+    solutionsLanguageChanged: (args, enq) => {
+      assertEvent(args.event, "solutionsLanguageChanged");
       enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
       return { target: "ready" };
     },
@@ -32,8 +32,8 @@ export const gameFlowMachine = setup.createMachine({
     // No active run: invite the player to start one
     ready: {
       on: {
-        "run.startRequested": (args, enq) => {
-          enq(args.actions.startRun, { self: args.self });
+        newRunStarted: (args, enq) => {
+          enq(args.actions.startNewRun, { self: args.self });
           return { target: "starting" };
         },
       },
@@ -47,19 +47,19 @@ export const gameFlowMachine = setup.createMachine({
     // A run is being played
     playing: {
       on: {
-        "word.won": (args, enq) => {
-          assertEvent(args.event, "word.won");
+        wordWon: (args, enq) => {
+          assertEvent(args.event, "wordWon");
           enq(args.actions.bankWonWord, { self: args.self, wordScore: args.event.wordScore });
           return { target: "betweenWords" };
         },
 
-        "word.lost": (args, enq) => {
+        wordLost: (args, enq) => {
           enq(args.actions.finishLostRun, { self: args.self });
           return { target: "ready" };
         },
 
-        "run.forfeitConfirmed": (args, enq) => {
-          assertEvent(args.event, "run.forfeitConfirmed");
+        runForfeited: (args, enq) => {
+          assertEvent(args.event, "runForfeited");
           enq(args.actions.forfeitRun, { self: args.self, wordChallenge: args.event.wordChallenge });
           return { target: "ready" };
         },
@@ -69,7 +69,7 @@ export const gameFlowMachine = setup.createMachine({
     // The run continues: wait for the player to ask for the next word
     betweenWords: {
       on: {
-        "word.nextRequested": (args, enq) => {
+        nextWordRequested: (args, enq) => {
           enq(args.actions.requestNextWord, { self: args.self });
           return { target: "starting" };
         },

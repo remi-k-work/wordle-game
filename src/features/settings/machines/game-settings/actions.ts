@@ -8,5 +8,5 @@ import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   // Notify all the other machines about the solutions language change
-  onSolutionsLanguageToggled: ({ solutionsLanguage }) => Atom.set(gameFlowMachineSendAtom, { type: "language.changed", solutionsLanguage }),
+  onSolutionsLanguageToggled: ({ solutionsLanguage }) => Atom.set(gameFlowMachineSendAtom, { type: "solutionsLanguageChanged", solutionsLanguage }),
 };

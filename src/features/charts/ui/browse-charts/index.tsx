@@ -14,7 +14,7 @@ export function BrowseCharts() {
     <BrowseChartsShell
       label={gt("Switch Chart Vocabulary Language")}
       checked={sl === "Pl"}
-      onCheckedChange={(isPl) => browseChartsMachineEvent({ type: "slChanged", sl: isPl ? "Pl" : "En" })}
+      onCheckedChange={(isPl) => browseChartsMachineEvent({ type: "solutionsLanguageChanged", solutionsLanguage: isPl ? "Pl" : "En" })}
     />
   );
 }

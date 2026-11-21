@@ -44,7 +44,7 @@ export function HacksMenu() {
               badge={<HackCost hackId={id} />}
               disabled={!canApplyById[id]}
               onClicked={() => {
-                overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: id });
+                overdriveHacksMachineEvent({ type: "hackRequested", overdriveHackId: id });
                 close();
               }}
             />

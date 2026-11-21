@@ -16,6 +16,6 @@ export const confirmForfeitRunAtom = Atom.writable<null, void>(
   () => null,
   (ctx) => {
     const wordChallenge = ctx.get(wordChallengeMachineAtom).context;
-    ctx.set(gameFlowMachineSendAtom, { type: "run.forfeitConfirmed", wordChallenge });
+    ctx.set(gameFlowMachineSendAtom, { type: "runForfeited", wordChallenge });
   }
 );

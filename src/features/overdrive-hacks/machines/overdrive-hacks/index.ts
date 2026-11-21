@@ -13,8 +13,8 @@ export const overdriveHacksMachine = setup.createMachine({
 
   on: {
     solutionsLanguageChanged: { target: ".idle", context: () => INITIAL_OVERDRIVE_HACKS() },
-    "puzzle.started": { target: ".active" },
-    "puzzle.ended": { target: ".idle", context: () => INITIAL_OVERDRIVE_HACKS() },
+    puzzleStarted: { target: ".active" },
+    puzzleEnded: { target: ".idle", context: () => INITIAL_OVERDRIVE_HACKS() },
   },
 
   states: {
@@ -23,12 +23,12 @@ export const overdriveHacksMachine = setup.createMachine({
     // An active puzzle is running — hacks and keypress forwarding are live
     active: {
       on: {
-        "input.keyPressed": (args, enq) => {
+        keyPressed: (args, enq) => {
           if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
             enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
           }
         },
-        "hack.useRequested": { target: "classifying" },
+        hackRequested: { target: "classifying" },
       },
     },
 
@@ -43,7 +43,7 @@ export const overdriveHacksMachine = setup.createMachine({
 
     applyingEmpHack: {
       on: {
-        "input.keyPressed": (args, enq) => {
+        keyPressed: (args, enq) => {
           if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
             enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
           }
@@ -66,7 +66,7 @@ export const overdriveHacksMachine = setup.createMachine({
 
     applyingSonarHack: {
       on: {
-        "input.keyPressed": (args, enq) => {
+        keyPressed: (args, enq) => {
           if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
             enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
           }
@@ -89,7 +89,7 @@ export const overdriveHacksMachine = setup.createMachine({
 
     applyingOverrideHack: {
       on: {
-        "input.keyPressed": (args, enq) => {
+        keyPressed: (args, enq) => {
           if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
             enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
           }
@@ -112,7 +112,7 @@ export const overdriveHacksMachine = setup.createMachine({
 
     fetchingOverrideAudio: {
       on: {
-        "input.keyPressed": (args, enq) => {
+        keyPressed: (args, enq) => {
           if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
             enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
           }

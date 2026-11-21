@@ -9,10 +9,12 @@ import type { Events, OverdriveHacks } from "./models";
 type Args = GuardArgs<OverdriveHacks, Events>;
 
 // The three guards differ only by the requested hack, so they share one implementation
-const isHackRequested = (overdriveHackId: OverdriveHackId) => ({ event }: Args) => {
-  assertEvent(event, "hack.useRequested");
-  return event.overdriveHackId === overdriveHackId;
-};
+const isHackRequested =
+  (overdriveHackId: OverdriveHackId) =>
+  ({ event }: Args) => {
+    assertEvent(event, "hackRequested");
+    return event.overdriveHackId === overdriveHackId;
+  };
 
 export const guards = {
   isEmpHackRequested: isHackRequested("emp"),

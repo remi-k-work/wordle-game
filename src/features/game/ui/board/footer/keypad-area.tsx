@@ -31,10 +31,7 @@ export function KeypadArea({ keys }: { keys: Keypad }) {
     return color === "grey" ? Result.failVoid : Result.succeed({ letter, color });
   });
 
-  const handleKeyPressed = useCallback(
-    (pressedKey: string) => overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey }),
-    [overdriveHacksMachineEvent]
-  );
+  const handleKeyPressed = useCallback((pressedKey: string) => overdriveHacksMachineEvent({ type: "keyPressed", pressedKey }), [overdriveHacksMachineEvent]);
 
   return (
     <section className={KEYPAD_AREA_CLASSES}>

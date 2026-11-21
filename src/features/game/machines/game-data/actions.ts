@@ -23,7 +23,7 @@ export const actions: ActionImplementations<typeof Actions> = {
 
         Atom.set(wordMetaMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
         Atom.set(wordChallengeMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzle.started" }),
+        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleStarted" }),
       ],
       { discard: true }
     ),

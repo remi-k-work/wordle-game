@@ -17,7 +17,7 @@ export function useGameKeyboardInput() {
       (ev) => {
         const isAltGr = ev.getModifierState("AltGraph");
         if ((ev.ctrlKey && !isAltGr) || ev.metaKey) return;
-        overdriveHacksMachineEvent({ type: "input.keyPressed", pressedKey: ev.key });
+        overdriveHacksMachineEvent({ type: "keyPressed", pressedKey: ev.key });
       },
       { signal: controller.signal }
     );

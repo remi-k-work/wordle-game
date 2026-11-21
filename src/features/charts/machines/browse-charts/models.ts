@@ -15,7 +15,7 @@ export const BrowseCharts = Schema.Struct({ sl: SolutionsLanguage });
 // Events are part of the machine's interface
 export const Events = {
   urlSynced: Schema.Struct({ browseCharts: BrowseCharts, navigate: Navigate }),
-  slChanged: Schema.Struct({ sl: SolutionsLanguage }),
+  solutionsLanguageChanged: Schema.Struct({ solutionsLanguage: SolutionsLanguage }),
 };
 
 // Action params are part of the machine's interface; implementations receive

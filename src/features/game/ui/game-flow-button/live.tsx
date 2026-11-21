@@ -79,8 +79,8 @@ export function GameFlowButtonLive({ variant, className, keepText = false, onCli
 
   const action = resolveFlowAction(variant, {
     gt,
-    onNext: () => gameFlowMachineEvent({ type: "word.nextRequested" }),
-    onStart: () => gameFlowMachineEvent({ type: "run.startRequested" }),
+    onNext: () => gameFlowMachineEvent({ type: "nextWordRequested" }),
+    onStart: () => gameFlowMachineEvent({ type: "newRunStarted" }),
     onForfeit: () => alertMachineEvent({ type: "opened", alertType: "forfeit-run" }),
   });
 

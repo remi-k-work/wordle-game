@@ -37,8 +37,8 @@ export const RunResult = Schema.Struct({
 // Events are part of the machine's interface; guards receive this union as `event`
 export const Events = {
   solutionsLanguageChanged: Schema.Struct({}),
-  startedNewRun: Schema.Struct({}),
-  forfeitedRun: Schema.Struct({ wordChallenge: WordChallenge }),
+  newRunStarted: Schema.Struct({}),
+  runForfeited: Schema.Struct({ wordChallenge: WordChallenge }),
   wordWon: Schema.Struct({ wordScore: WordScore }),
   runScoreSpent: Schema.Struct({ amount: WordScore.fields.wordScore }),
   wordLost: Schema.Struct({}),

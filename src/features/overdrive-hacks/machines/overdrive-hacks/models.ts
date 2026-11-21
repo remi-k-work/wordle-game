@@ -19,10 +19,10 @@ export const OverdriveHacks = Schema.Struct({
 // Events are part of the machine's interface; guards receive this union as `event`
 export const Events = {
   solutionsLanguageChanged: Schema.Struct({}),
-  "puzzle.started": Schema.Struct({}),
-  "puzzle.ended": Schema.Struct({}),
-  "input.keyPressed": Schema.Struct({ pressedKey: Schema.String }),
-  "hack.useRequested": Schema.Struct({ overdriveHackId: OverdriveHackId }),
+  puzzleStarted: Schema.Struct({}),
+  puzzleEnded: Schema.Struct({}),
+  keyPressed: Schema.Struct({ pressedKey: Schema.String }),
+  hackRequested: Schema.Struct({ overdriveHackId: OverdriveHackId }),
 };
 
 // Action params are part of the machine's interface; implementations receive

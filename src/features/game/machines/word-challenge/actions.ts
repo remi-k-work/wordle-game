@@ -26,12 +26,12 @@ export const actions: ActionImplementations<typeof Actions> = {
   onWordWon: ({ wordChallenge }) =>
     Option.match(wordChallenge.wordScore, {
       onNone: () => Effect.void,
-      onSome: (wordScore) => Atom.set(gameFlowMachineSendAtom, { type: "word.won", wordScore }),
+      onSome: (wordScore) => Atom.set(gameFlowMachineSendAtom, { type: "wordWon", wordScore }),
     }),
 
   // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
   trackWordLost: ({ wordChallenge }) =>
     Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordLost(runSession, wordChallenge))),
 
-  onWordLost: () => Atom.set(gameFlowMachineSendAtom, { type: "word.lost" }),
+  onWordLost: () => Atom.set(gameFlowMachineSendAtom, { type: "wordLost" }),
 };

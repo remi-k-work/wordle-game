@@ -17,7 +17,7 @@ export const wordChallengeMachine = setup.createMachine({
     solutionsLanguageChanged: { target: ".awaitingGameData", context: () => INITIAL_WORD_CHALLENGE() },
 
     // Forfeit the active run
-    forfeitedRun: { target: ".runForfeited" },
+    runForfeited: { target: ".runForfeited" },
 
     // Data loaded (initial or after language change) → park in idle
     gameDataLoaded: {

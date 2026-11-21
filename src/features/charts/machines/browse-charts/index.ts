@@ -11,7 +11,7 @@ export const browseChartsMachine = setup.createMachine({
 
   on: {
     urlSynced: { target: ".idle", context: ({ event }) => ({ ...event.browseCharts, navigate: event.navigate }) },
-    slChanged: { target: ".debouncing", context: ({ context, event }) => ({ ...context, sl: event.sl }) },
+    solutionsLanguageChanged: { target: ".debouncing", context: ({ context, event }) => ({ ...context, sl: event.solutionsLanguage }) },
   },
 
   states: {

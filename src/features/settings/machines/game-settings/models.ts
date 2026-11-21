@@ -23,7 +23,7 @@ export const GameSettings = Schema.Struct({
 // Events are part of the machine's interface
 export const Events = {
   solutionsLanguageToggled: Schema.Struct({}),
-  voiceVoiceChanged: Schema.Struct({ voiceVoice: GameSettings.fields.voiceVoice }),
+  voiceChanged: Schema.Struct({ voiceVoice: GameSettings.fields.voiceVoice }),
   voiceVolumeChanged: Schema.Struct({ voiceVolume: GameSettings.fields.voiceVolume }),
   voiceRateChanged: Schema.Struct({ voiceRate: GameSettings.fields.voiceRate }),
   voicePitchChanged: Schema.Struct({ voicePitch: GameSettings.fields.voicePitch }),

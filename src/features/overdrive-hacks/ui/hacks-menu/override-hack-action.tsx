@@ -69,7 +69,7 @@ export function OverrideHackAction({ onClicked }: OverrideHackActionProps) {
       label={OVERRIDE_LABEL}
       badge={<HackCost hackId="override" />}
       disabled={!canApplyHackOverride || isApplyingOverride}
-      onClicked={() => overdriveHacksMachineEvent({ type: "hack.useRequested", overdriveHackId: "override" })}
+      onClicked={() => overdriveHacksMachineEvent({ type: "hackRequested", overdriveHackId: "override" })}
     />
   );
 }

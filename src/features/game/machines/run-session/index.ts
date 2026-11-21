@@ -29,7 +29,7 @@ export const runSessionMachine = setup.createMachine({
     inactive: {
       on: {
         // Start a brand-new arcade run
-        startedNewRun: (args, enq) => {
+        newRunStarted: (args, enq) => {
           enq(args.actions.trackStartedNewRun, { self: args.self });
           enq(args.actions.clearFinishedRun, { self: args.self });
           return {
@@ -58,8 +58,8 @@ export const runSessionMachine = setup.createMachine({
         },
 
         // Forfeit the active run
-        forfeitedRun: (args, enq) => {
-          assertEvent(args.event, "forfeitedRun");
+        runForfeited: (args, enq) => {
+          assertEvent(args.event, "runForfeited");
           enq(args.actions.trackForfeitedRun, { self: args.self, runSession: args.context, wordChallenge: args.event.wordChallenge });
           enq(args.actions.saveFinishedRun, { self: args.self, runSession: args.context, deathReason: "Forfeit" });
           enq(args.actions.onRunFinished, { self: args.self, runSession: args.context });
