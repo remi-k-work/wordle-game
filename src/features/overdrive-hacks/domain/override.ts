@@ -68,12 +68,16 @@ const OVERRIDE_PROMPT_EN = (
 ) =>
   [
     `Craft the override clue now based on the following context:\n\n`,
-    Option.isSome(wordDefinition)
-      ? `Official dictionary meaning for reference: "${wordDefinition.value}".\n-> Use this to understand the exact context, but DO NOT copy it verbatim.\n\n`
-      : "",
-    Option.isSome(theRiddle)
-      ? `The player already has this cryptic riddle: "${theRiddle.value}".\n-> Provide a useful delta. Do not repeat the same imagery, phrasing, or tropes.\n\n`
-      : "",
+    Option.match(wordDefinition, {
+      onNone: () => "",
+      onSome: (wordDefinition) =>
+        `Official dictionary meaning for reference: "${wordDefinition}".\n-> Use this to understand the exact context, but DO NOT copy it verbatim.\n\n`,
+    }),
+    Option.match(theRiddle, {
+      onNone: () => "",
+      onSome: (theRiddle) =>
+        `The player already has this cryptic riddle: "${theRiddle}".\n-> Provide a useful delta. Do not repeat the same imagery, phrasing, or tropes.\n\n`,
+    }),
     Array.isReadonlyArrayEmpty(wordleGuesses)
       ? `The player has not made any guesses yet (Turn 1).\n-> Provide a concrete, descriptive real-world category, origin, or general domain where this word is encountered to give them a strong starting point.\n\n`
       : `The player's attempts and Wordle color feedback (green=correct spot, yellow=wrong spot, grey=not in word):\n${buildFeedbackLines(wordleGuesses, theSecretWord).join("")}\n-> Step 1: Assess whether their guesses are close in meaning or structure using the color feedback.\n-> Step 2: Tailor your detailed clue to course-correct them. Provide a direct semantic clue (e.g., real-world usage, synonym, or shared trait) that bridges the gap between their closest guess and the secret word.\n\n`,
@@ -87,12 +91,16 @@ const OVERRIDE_PROMPT_PL = (
 ) =>
   [
     `Stwórz wskazówkę ratunkową teraz, w oparciu o poniższy kontekst:\n\n`,
-    Option.isSome(wordDefinition)
-      ? `Oficjalna definicja słownikowa do wglądu: "${wordDefinition.value}".\n-> Użyj jej, aby zrozumieć dokładny kontekst, ale NIE kopiuj jej dosłownie.\n\n`
-      : "",
-    Option.isSome(theRiddle)
-      ? `Gracz dysponuje już tą zagadką: "${theRiddle.value}".\n-> Zapewnij nową wartość. Nie powtarzaj tych samych skojarzeń, sformułowań ani motywów.\n\n`
-      : "",
+    Option.match(wordDefinition, {
+      onNone: () => "",
+      onSome: (wordDefinition) =>
+        `Oficjalna definicja słownikowa do wglądu: "${wordDefinition}".\n-> Użyj jej, aby zrozumieć dokładny kontekst, ale NIE kopiuj jej dosłownie.\n\n`,
+    }),
+    Option.match(theRiddle, {
+      onNone: () => "",
+      onSome: (theRiddle) =>
+        `Gracz dysponuje już tą zagadką: "${theRiddle}".\n-> Zapewnij nową wartość. Nie powtarzaj tych samych skojarzeń, sformułowań ani motywów.\n\n`,
+    }),
     Array.isReadonlyArrayEmpty(wordleGuesses)
       ? `Gracz nie wypróbował jeszcze żadnych słów (pierwsza tura).\n-> Podaj opisową, konkretną kategorię z prawdziwego świata, pochodzenie lub ogólną dziedzinę, w której występuje to słowo, aby dać mu mocny punkt wyjścia.\n\n`
       : `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n${buildFeedbackLines(wordleGuesses, theSecretWord, colorToPl).join("")}\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`,

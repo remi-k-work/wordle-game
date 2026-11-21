@@ -83,7 +83,7 @@ export const wordChallengeMachine = setup.createMachine({
         },
       },
 
-      // Auto-recover back to typing after the CSS "shake" animation completes
+      // Auto-recover back to typing after the rejected row's CSS pulse animation completes
       after: { 4000: { target: "typing" } },
     },
 

@@ -26,9 +26,15 @@ interface ChartBodyProps {
 const COLORS_PERSONAL = { Forfeit: "var(--color-primary)", Guesses: "var(--color-accent)" } as const;
 const COLORS_GLOBAL = { Forfeit: "var(--color-secondary)", Guesses: "var(--color-accent)" } as const;
 
-// Recharts types the row behind a slice as `any`; narrow it to the row this chart passes in so the color is selected from a typed `reason`
-const PieSlicePersonal = (props: PieSectorShapeProps) => <Sector {...props} fill={COLORS_PERSONAL[(props.payload as ChartedRow).reason]} />;
-const PieSliceGlobal = (props: PieSectorShapeProps) => <Sector {...props} fill={COLORS_GLOBAL[(props.payload as ChartedRow).reason]} />;
+// Recharts types the row behind a slice as `any`; narrow it to the row this chart
+// passes in so the color is selected from a typed `reason`; both pies share one
+// slice component, parameterized by their own color map
+const makePieSlice = (colors: Readonly<Record<ChartedRow["reason"], string>>) => (props: PieSectorShapeProps) => (
+  <Sector {...props} fill={colors[(props.payload as ChartedRow).reason]} />
+);
+
+const PieSlicePersonal = makePieSlice(COLORS_PERSONAL);
+const PieSliceGlobal = makePieSlice(COLORS_GLOBAL);
 
 // Only called with rows to plot: the empty case is a chart-wide concern and is resolved by the container, exactly as it is for the other five charts
 export function ChartBody({ runDeathReasonFrequency, title, tooltipFormatter }: ChartBodyProps) {

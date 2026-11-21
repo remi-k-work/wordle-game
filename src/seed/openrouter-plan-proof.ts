@@ -28,7 +28,7 @@ const main = Effect.gen(function* () {
       proveLanguage(testCase).pipe(
         // Generation failures degrade to a placeholder so the proof always reports
         // something for each language instead of aborting on the first one
-        Effect.tap((riddle) => Effect.log(`${Option.getOrUndefined(riddle)}\n**********************\n`))
+        Effect.tap((riddle) => Effect.log(`${Option.getOrElse(riddle, () => "Riddle unavailable (degraded to None)")}\n**********************\n`))
       ),
     { discard: true }
   );

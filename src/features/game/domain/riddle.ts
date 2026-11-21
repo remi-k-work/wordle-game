@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Option } from "effect";
+import { Effect, Option } from "effect";
 import { generateSingleField } from "@/domain/generate-single-field";
 import { matchLanguage } from "./helpers";
 
@@ -49,13 +49,17 @@ Zagadka: Mogę ukazać ci świat, chociaż nie mam oczu. Powielam każdy twój r
 // A definition is optional because the riddle flow must still work when the definition asset is unavailable
 // when present, it disambiguates exotic words and homonyms without adding another RPC round-trip
 const definitionContextEn = (wordDefinition: WordMeta["wordDefinition"]) =>
-  Option.isSome(wordDefinition)
-    ? `Official dictionary meaning for reference: "${wordDefinition.value}"\n-> Use this only to identify the intended sense of the secret word. Do not quote or closely paraphrase it, and never repeat the secret word or its inflected forms.\n\n`
-    : "";
+  Option.match(wordDefinition, {
+    onNone: () => "",
+    onSome: (wordDefinition) =>
+      `Official dictionary meaning for reference: "${wordDefinition}"\n-> Use this only to identify the intended sense of the secret word. Do not quote or closely paraphrase it, and never repeat the secret word or its inflected forms.\n\n`,
+  });
 const definitionContextPl = (wordDefinition: WordMeta["wordDefinition"]) =>
-  Option.isSome(wordDefinition)
-    ? `Oficjalna definicja słownikowa do wglądu: "${wordDefinition.value}"\n-> Użyj jej wyłącznie do ustalenia właściwego znaczenia ukrytego słowa. Nie cytuj jej ani nie parafrazuj zbyt blisko; nigdy nie powtarzaj ukrytego słowa ani jego form odmienionych.\n\n`
-    : "";
+  Option.match(wordDefinition, {
+    onNone: () => "",
+    onSome: (wordDefinition) =>
+      `Oficjalna definicja słownikowa do wglądu: "${wordDefinition}"\n-> Użyj jej wyłącznie do ustalenia właściwego znaczenia ukrytego słowa. Nie cytuj jej ani nie parafrazuj zbyt blisko; nigdy nie powtarzaj ukrytego słowa ani jego form odmienionych.\n\n`,
+  });
 
 const RIDDLE_PROMPT_EN = (wordDefinition: WordMeta["wordDefinition"]) => `${definitionContextEn(wordDefinition)}Craft the riddle now.`;
 const RIDDLE_PROMPT_PL = (wordDefinition: WordMeta["wordDefinition"]) => `${definitionContextPl(wordDefinition)}Stwórz zagadkę teraz.`;
@@ -75,8 +79,12 @@ export const riddleGenerationOptions = (
     description: matchLanguage(solutionsLanguage, DESCRIPTION_EN, DESCRIPTION_PL),
   }) as const;
 
-export const generateRiddle = (
+// Effect.fn (not a plain arrow) per Effect conventions for reusable
+// Effect-returning functions — same shape as the proof twin in seed/riddle-proof.ts
+export const generateRiddle = Effect.fn("generateRiddle")(function* (
   theSecretWord: TheSecretWord,
   solutionsLanguage: SolutionsLanguage,
   wordDefinition: WordMeta["wordDefinition"] = Option.none()
-) => generateSingleField(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));
+) {
+  return yield* generateSingleField(riddleGenerationOptions(theSecretWord, solutionsLanguage, wordDefinition));
+});

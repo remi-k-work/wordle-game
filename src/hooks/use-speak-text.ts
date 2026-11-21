@@ -19,8 +19,10 @@ export function useSpeakText() {
   return (sanitizedText: string) => {
     if (typeof window === "undefined" || !window.speechSynthesis) {
       // Fire-and-forget through the shared client runtime so browser warnings
-      // share the app's logging sink (same policy as the machine Effect actions)
-      void RuntimeClient.runPromise(Effect.logWarning("Speech Synthesis is not supported in this environment."));
+      // share the app's logging sink (same policy as the machine Effect actions).
+      // runFork (not `void runPromise`) — it returns a Fiber instead of a
+      // dangling Promise, so a failure can never surface as an unhandled rejection
+      RuntimeClient.runFork(Effect.logWarning("Speech Synthesis is not supported in this environment."));
       return;
     }
 

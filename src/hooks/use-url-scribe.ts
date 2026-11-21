@@ -5,11 +5,11 @@ import { useCallback, useMemo } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 // services, features, and other libraries
-import { Predicate } from "effect";
+import { Predicate, Record } from "effect";
 
 // Define a more convenient type for the params object
 type QueryValue = Readonly<string | number | (string | number)[]>;
-type QueryParams = Readonly<Record<string, QueryValue>>;
+type QueryParams = Record.ReadonlyRecord<string, QueryValue>;
 
 // Define the overload signatures interface
 interface NavigateFn {
@@ -25,16 +25,14 @@ interface NavigateFn {
 const serialize = (value: QueryValue) => (Predicate.isString(value) ? value : Predicate.isNumber(value) ? String(value) : value.join(","));
 
 // Merges `paramsToSet` into the current search, mirroring the old URLSearchParams
-// behavior: values are stringified (arrays joined with `,`) and empty strings delete
-const applyParams = (current: Record<string, string | undefined>, values: QueryParams): Record<string, string | undefined> => {
-  const next = { ...current };
-  for (const [key, value] of Object.entries(values)) {
+// behavior: values are stringified (arrays joined with `,`) and empty strings delete.
+// Immutable Record operations (set/remove copy on write) instead of a mutating
+// loop over a spread copy
+const applyParams = (current: Record.ReadonlyRecord<string, string | undefined>, values: QueryParams): Record.ReadonlyRecord<string, string | undefined> =>
+  Record.reduce(values, current, (acc, value, key) => {
     const serialized = serialize(value);
-    if (serialized === "") delete next[key];
-    else next[key] = serialized;
-  }
-  return next;
-};
+    return serialized === "" ? Record.remove(acc, key) : Record.set(acc, key, serialized);
+  });
 
 // A hook to programmatically navigate to a new url with updated search parameters
 // (it preserves existing search params: TanStack Router keeps the current search
@@ -51,10 +49,10 @@ export function useUrlScribe() {
   // search in the app, and leaves this module the only place that knows how a
   // query string is turned into component-readable data
   const searchStr = useRouterState({ select: ({ location }) => location.searchStr });
-  // The explicit `<string>` pins the value type: without it the inferred
-  // entry type leaks `any`, which would let a hand-edited query value flow
-  // into any consumer's typed model unchecked
-  const searchEntries = useMemo(() => Object.fromEntries<string>(new URLSearchParams(searchStr)), [searchStr]);
+  // `Record.fromEntries` (not `Object.fromEntries`) types every entry value as
+  // `string` by construction, so a hand-edited query value cannot leak `any`
+  // into a consumer's typed model and no explicit type argument is needed
+  const searchEntries = useMemo(() => Record.fromEntries(new URLSearchParams(searchStr)), [searchStr]);
 
   // Programmatically navigates to a new url with updated search params
   const navigate = useCallback(
@@ -69,7 +67,7 @@ export function useUrlScribe() {
       // browse-charts machine passes raw string values through)
       void navigateFn({
         to: newRoute,
-        search: (prev: Record<string, string | undefined>) => applyParams(prev, paramsToSet ?? {}),
+        search: (prev: Record.ReadonlyRecord<string, string | undefined>) => applyParams(prev, paramsToSet ?? {}),
       } as Parameters<typeof navigateFn>[0]);
     },
     [navigateFn]

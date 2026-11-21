@@ -51,8 +51,9 @@ function releaseMedia(audio: HTMLAudioElement) {
 
 // Log through the shared client runtime instead of a bare console call, so
 // browser warnings share the app's logging sink (fire-and-forget, mirroring the
-// machine Effect actions: failures cannot reject into a media event callback)
-const logWarning = (message: string, error?: unknown) => void RuntimeClient.runPromise(Effect.logWarning(message, error));
+// machine Effect actions: failures cannot reject into a media event callback).
+// runFork (not `void runPromise`) — returns a Fiber, never a dangling Promise
+const logWarning = (message: string, error?: unknown) => RuntimeClient.runFork(Effect.logWarning(message, error));
 
 // Plays a generated MP3 buffer (e.g. from OpenRouter `generateSpeech`)
 // Bytes live in `wordMetaTheRiddleAudioAtom`; playback outlives the caller on purpose

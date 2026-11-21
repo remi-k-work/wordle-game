@@ -26,16 +26,11 @@ export function TimeToSolveDistributionChart({ solutionsLanguage }: TimeToSolveD
 
   const seriesLabels = makeSeriesLabels({ personalKey: "personalPct", personal: gt("Your Speed"), global: gt("Global Average"), formatValue: formatPercent });
 
-  const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) => {
-    const mult = maxSecondsToSpeedMultiplier(maxSeconds);
-    return Option.isSome(mult)
-      ? emojiOnly
-        ? speedMultiplierToCategoryEmoji(mult.value)
-        : messages(speedMultiplierToCategoryMessage(mult.value))
-      : emojiOnly
-        ? "?"
-        : messages(msg("Unknown"));
-  };
+  const formatSpeedCategory = (maxSeconds: number | null, emojiOnly: boolean = false) =>
+    Option.match(maxSecondsToSpeedMultiplier(maxSeconds), {
+      onNone: () => (emojiOnly ? "?" : messages(msg("Unknown"))),
+      onSome: (mult) => (emojiOnly ? speedMultiplierToCategoryEmoji(mult) : messages(speedMultiplierToCategoryMessage(mult))),
+    });
   const tickFormatter = (tick: number | null) => formatSpeedCategory(tick, true);
   // Recharts hands tooltip labels over as `unknown`; a non-number label (a
   // malformed tick) resolves to the "Unknown" fallback instead of being cast

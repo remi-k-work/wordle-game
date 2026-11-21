@@ -17,7 +17,10 @@ export const withHackPurchase = <A, E, R>(hackId: OverdriveHackId, produce: Effe
   Atom.get(overdriveHacksCanApplyHackAtom(hackId)).pipe(
     Effect.flatMap((canApplyHack) => (canApplyHack ? produce : Effect.succeedNone)),
     Effect.tap((result) =>
-      Option.isSome(result) ? Atom.set(runSessionMachineSendAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(hackId) }) : Effect.void
+      Option.match(result, {
+        onNone: () => Effect.void,
+        onSome: () => Atom.set(runSessionMachineSendAtom, { type: "runScoreSpent", amount: OVERDRIVE_HACK_COST(hackId) }),
+      })
     )
   );
 
