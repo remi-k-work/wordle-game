@@ -3,6 +3,8 @@ import { Schema } from "effect";
 import { HighScoreEntry } from "@/features/high-score/domain/models";
 
 // types
+import type { EventUnion } from "@/lib/machine-setup";
+
 export type HighScore = typeof HighScore.Type;
 
 export const HighScore = Schema.Struct({
@@ -20,3 +22,15 @@ export class AddNewHighScore extends Schema.Class<AddNewHighScore, { readonly br
   streak: HighScoreEntry.fields.streak,
   solutionsLang: HighScoreEntry.fields.solutionsLang,
 }) {}
+
+// Events are part of the machine's interface; guards receive this union as `event`
+export const Events = {
+  runFinished: Schema.Struct({
+    runScore: HighScore.fields.runScore,
+    streak: HighScore.fields.streak,
+    solutionsLanguage: HighScore.fields.solutionsLanguage,
+  }),
+  initialsSubmitted: Schema.Struct({ playerName: HighScore.fields.playerName }),
+};
+
+export type Events = EventUnion<typeof Events>;

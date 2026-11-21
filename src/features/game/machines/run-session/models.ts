@@ -1,8 +1,11 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { RunDeathReason } from "@/features/game/domain/models";
+import { RunDeathReason, WordScore } from "@/features/game/domain/models";
+import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 
 // types
+import type { EventUnion } from "@/lib/machine-setup";
+
 export type RunSession = typeof RunSession.Type;
 export type RunResult = typeof RunResult.Type;
 
@@ -30,3 +33,15 @@ export const RunResult = Schema.Struct({
   streak: RunPoints,
   deathReason: RunDeathReason,
 });
+
+// Events are part of the machine's interface; guards receive this union as `event`
+export const Events = {
+  solutionsLanguageChanged: Schema.Struct({}),
+  startedNewRun: Schema.Struct({}),
+  forfeitedRun: Schema.Struct({ wordChallenge: WordChallenge }),
+  wordWon: Schema.Struct({ wordScore: WordScore }),
+  runScoreSpent: Schema.Struct({ amount: WordScore.fields.wordScore }),
+  wordLost: Schema.Struct({}),
+};
+
+export type Events = EventUnion<typeof Events>;

@@ -4,6 +4,8 @@ import { SolutionsLanguage } from "@/features/game/domain/models";
 import { Bounded } from "@/features/settings/domain/models";
 
 // types
+import type { EventUnion } from "@/lib/machine-setup";
+
 export type GameSettings = typeof GameSettings.Type;
 
 // constants
@@ -17,3 +19,14 @@ export const GameSettings = Schema.Struct({
   voiceRate: Bounded(VOICE_RATE_RANGE.minimum, VOICE_RATE_RANGE.maximum),
   voicePitch: Bounded(VOICE_PITCH_RANGE.minimum, VOICE_PITCH_RANGE.maximum),
 });
+
+// Events are part of the machine's interface
+export const Events = {
+  solutionsLanguageToggled: Schema.Struct({}),
+  voiceVoiceChanged: Schema.Struct({ voiceVoice: GameSettings.fields.voiceVoice }),
+  voiceVolumeChanged: Schema.Struct({ voiceVolume: GameSettings.fields.voiceVolume }),
+  voiceRateChanged: Schema.Struct({ voiceRate: GameSettings.fields.voiceRate }),
+  voicePitchChanged: Schema.Struct({ voicePitch: GameSettings.fields.voicePitch }),
+};
+
+export type Events = EventUnion<typeof Events>;

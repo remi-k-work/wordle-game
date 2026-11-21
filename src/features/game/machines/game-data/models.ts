@@ -1,8 +1,10 @@
 // services, features, and other libraries
 import { Schema } from "effect";
-import { Keypad, TheSecretWord } from "@/features/game/domain/models";
+import { Keypad, SolutionsLanguage, TheSecretWord } from "@/features/game/domain/models";
 
 // types
+import type { EventUnion } from "@/lib/machine-setup";
+
 export type GameData = typeof GameData.Type;
 
 export const GameData = Schema.Struct({
@@ -10,3 +12,12 @@ export const GameData = Schema.Struct({
   dictionary: Schema.Option(Schema.HashSet(TheSecretWord)),
   keypad: Schema.Option(Keypad),
 });
+
+// Events are part of the machine's interface
+export const Events = {
+  solutionsLanguageChanged: Schema.Struct({ solutionsLanguage: SolutionsLanguage }),
+  nextWordRequested: Schema.Struct({}),
+  retryRequested: Schema.Struct({}),
+};
+
+export type Events = EventUnion<typeof Events>;

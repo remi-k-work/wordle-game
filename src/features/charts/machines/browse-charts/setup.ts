@@ -1,23 +1,15 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
+import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import { SolutionsLanguage } from "@/features/game/domain/models";
-import { BrowseCharts, Navigate } from "./models";
+import { BrowseCharts, Navigate, Events } from "./models";
+import { Actions, actions } from "./actions";
 
 export const setup = setupEffect({
   schemas: {
     context: Schema.Struct({ ...BrowseCharts.fields, navigate: Schema.optional(Navigate) }),
-    events: {
-      urlSynced: Schema.Struct({ browseCharts: BrowseCharts, navigate: Navigate }),
-      slChanged: Schema.Struct({ sl: SolutionsLanguage }),
-    },
-    actions: { navigate: { params: Schema.Struct({ browseCharts: BrowseCharts, navigate: Schema.optional(Navigate) }) } },
+    events: Events,
+    actions: Actions,
   },
-  actions: {
-    navigate: ({ browseCharts, navigate }) =>
-      Effect.sync(() => {
-        navigate?.("/high-score", browseCharts);
-      }),
-  },
+  actions,
   delays: { debounce: 1000 },
 });

@@ -1,20 +1,14 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import { OkayedCallback } from "./models";
+import { Events } from "./models";
 import { runOkayedActor } from "./actors";
+import { Actions, actions } from "./actions";
 
 export const setup = setupEffect({
   schemas: {
-    events: {
-      opened: Schema.Struct({ alertType: Schema.Literal("forfeit-run") }),
-      okayed: Schema.Struct({ onOkayed: OkayedCallback }),
-      cancelled: Schema.Struct({}),
-    },
-    actions: { logFailure: { params: Schema.Struct({ error: Schema.Defect() }) } },
+    events: Events,
+    actions: Actions,
   },
   actors: { runOkayedActor },
-  actions: {
-    logFailure: ({ error }) => Effect.logError("[ALERT OKAYED FAILED]:", error),
-  },
+  actions,
 });
