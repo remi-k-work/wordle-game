@@ -17,7 +17,9 @@ export const gameFlowMachine = setup.createMachine({
     solutionsLanguageChanged: (args, enq) => {
       assertEvent(args.event, "solutionsLanguageChanged");
       enq(args.actions.changeLanguage, { self: args.self, solutionsLanguage: args.event.solutionsLanguage });
-      return { target: "ready" };
+      // `.ready` (not `ready`): a target on the root node resolves against the
+      // root's children, so it must be prefixed with `.` — a bare key throws E13
+      return { target: ".ready" };
     },
   },
 
