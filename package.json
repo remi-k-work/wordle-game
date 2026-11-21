@@ -27,7 +27,7 @@
     "upload": "npm run build && wrangler versions upload --preview-alias staging",
     "deploy": "npm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
-    "prepare": "effect-tsgo patch --oxlint"
+    "prepare": "effect-tsgo patch --typescript --oxlint --tsrs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -71,8 +71,8 @@
     "gt": "^2.28.4",
     "tailwindcss": "^4",
     "typescript": "^7.0.2",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.6.0",
-    "vite-plus": "1.6.0",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
+    "vite-plus": "1.7.0",
     "vitest": "5.1.0",
     "wrangler": "^4.166.0"
   },
@@ -87,7 +87,7 @@
     "protobufjs@7.6.6": true
   },
   "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.6.0",
+    "vite": "npm:@voidzero-dev/vite-plus-core@8.3.8000",
     "vitest": "5.1.0"
   }
 }

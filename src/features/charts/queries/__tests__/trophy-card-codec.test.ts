@@ -56,7 +56,7 @@ describe("trophy card RPC wire schemas", () => {
     })
   );
 
-  it.effect("SchemaBinary round-trips the forfeit sentinel row (failedOnWord = \"N/A\")", () =>
+  it.effect('SchemaBinary round-trips the forfeit sentinel row (failedOnWord = "N/A")', () =>
     Effect.gen(function* () {
       const value = sentinelValue();
       expect(yield* roundTrip(SchemaBinary.toCodec(BestRunTrophyCardData), value)).toEqual(value);
