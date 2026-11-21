@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import { BrowseCharts, Navigate, Events } from "./models";
-import { Actions, actions } from "./actions";
+import { BrowseCharts, Navigate, Events, Actions } from "./models";
+import { actions } from "./actions";
 
 export const setup = setupEffect({
   schemas: {

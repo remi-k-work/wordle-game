@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { setupEffect } from "@xstate/effect";
-import { HighScore, Events } from "./models";
+import { HighScore, Events, Actions } from "./models";
 import { top10HighScoresActor, addNewHighScoreActor } from "./actors";
-import { Actions, actions } from "./actions";
+import { actions } from "./actions";
 import { guards } from "./guards";
 
 export const setup = setupEffect({

@@ -1,8 +1,8 @@
 // services, features, and other libraries
 import { setupEffect } from "@xstate/effect";
-import { Events } from "./models";
+import { Events, Actions } from "./models";
 import { runOkayedActor } from "./actors";
-import { Actions, actions } from "./actions";
+import { actions } from "./actions";
 
 export const setup = setupEffect({
   schemas: {
