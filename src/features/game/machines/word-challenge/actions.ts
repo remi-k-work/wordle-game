@@ -1,24 +1,13 @@
 // services, features, and other libraries
-import { Effect, Option, Schema } from "effect";
+import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state/actions";
 import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
-import { WordChallenge } from "./models";
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
-
-// The params schemas are the single source of truth for what each action is
-// enqueued with; setup.ts wires them into `schemas.actions`
-export const Actions = {
-  trackInvalidGuessSubmitted: { params: Schema.Struct({}) },
-  trackValidGuessSubmitted: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
-  trackWordWon: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
-  onWordWon: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
-  trackWordLost: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
-  onWordLost: { params: Schema.Struct({}) },
-};
+import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)

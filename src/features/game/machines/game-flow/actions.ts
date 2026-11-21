@@ -1,8 +1,6 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import { Atom } from "effect/reactivity";
-import { SolutionsLanguage, WordScore } from "@/features/game/domain/models";
-import { WordChallenge } from "@/features/game/machines/word-challenge/models";
 import { modalMachineSendAtom } from "@/state/modal";
 import { runSessionMachineSendAtom } from "@/features/game/state/run-session";
 import { gameDataMachineSendAtom } from "@/features/game/state/game-data";
@@ -12,17 +10,7 @@ import { overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
-
-// The params schemas are the single source of truth for what each action is
-// enqueued with; setup.ts wires them into `schemas.actions`
-export const Actions = {
-  startRun: { params: Schema.Struct({}) },
-  requestNextWord: { params: Schema.Struct({}) },
-  forfeitRun: { params: Schema.Struct({ wordChallenge: WordChallenge }) },
-  bankWonWord: { params: Schema.Struct({ wordScore: WordScore }) },
-  finishLostRun: { params: Schema.Struct({}) },
-  changeLanguage: { params: Schema.Struct({ solutionsLanguage: SolutionsLanguage }) },
-};
+import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   // Start a brand-new run: close the modal, start the run session, pick the first word

@@ -1,15 +1,9 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
-import { BrowseCharts, Navigate } from "./models";
+import { Effect } from "effect";
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
-
-// The params schemas are the single source of truth for what each action is
-// enqueued with; setup.ts wires them into `schemas.actions`
-export const Actions = {
-  navigate: { params: Schema.Struct({ browseCharts: BrowseCharts, navigate: Schema.optional(Navigate) }) },
-};
+import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   navigate: ({ browseCharts, navigate }) =>

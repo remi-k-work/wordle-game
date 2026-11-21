@@ -1,19 +1,12 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import { Atom } from "effect/reactivity";
 import { wordChallengeMachineSendAtom } from "@/features/game/state/word-challenge";
 import { modalMachineSendAtom } from "@/state/modal";
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
-
-// The params schemas are the single source of truth for what each action is
-// enqueued with; setup.ts wires them into `schemas.actions`
-export const Actions = {
-  forwardKeyPress: { params: Schema.Struct({ pressedKey: Schema.String }) },
-  onOverrideHackApplied: { params: Schema.Struct({}) },
-  logHackFailure: { params: Schema.Struct({ hackId: Schema.String, error: Schema.Unknown }) },
-};
+import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   forwardKeyPress: ({ pressedKey }) => Atom.set(wordChallengeMachineSendAtom, { type: "keyPressed", pressedKey }),

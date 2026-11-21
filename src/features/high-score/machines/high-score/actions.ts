@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import { Atom } from "effect/reactivity";
 import { msg } from "gt-react";
 import { toastManager } from "@/ui/toastify";
@@ -7,15 +7,7 @@ import { modalMachineSendAtom } from "@/state/modal";
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
-
-// The params schemas are the single source of truth for what each action is
-// enqueued with; setup.ts wires them into `schemas.actions`
-export const Actions = {
-  onSuccess: { params: Schema.Struct({}) },
-  onNoLongerQualified: { params: Schema.Struct({}) },
-  onFailure: { params: Schema.Struct({}) },
-  showHighScoreModal: { params: Schema.Struct({}) },
-};
+import type { Actions } from "./models";
 
 export const actions: ActionImplementations<typeof Actions> = {
   onSuccess: () =>
