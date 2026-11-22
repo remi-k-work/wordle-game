@@ -40,6 +40,6 @@ export const gameDataMachine = setup.createMachine({
       },
     },
 
-    failure: { on: { retryRequested: { target: "loading" } } },
+    failure: {},
   },
 });

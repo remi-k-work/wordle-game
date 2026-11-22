@@ -38,6 +38,7 @@ export const RunResult = Schema.Struct({
 export const Events = {
   solutionsLanguageChanged: Schema.Struct({}),
   newRunStarted: Schema.Struct({}),
+  nextWordRequested: Schema.Struct({}),
   runForfeited: Schema.Struct({ wordChallenge: WordChallenge }),
   wordWon: Schema.Struct({ wordScore: WordScore }),
   runScoreSpent: Schema.Struct({ amount: WordScore.fields.wordScore }),
@@ -55,4 +56,13 @@ export const Actions = {
   saveFinishedRun: { params: saveFinishedRunParams },
   trackForfeitedRun: { params: Schema.Struct({ runSession: RunSession, wordChallenge: WordChallenge }) },
   onRunFinished: { params: onRunFinishedParams },
+
+  // Command fan-outs owned by the run session: it knows when a run starts,
+  // advances to the next word, or ends, so it is the one that tells the other
+  // feature machines and the modal what to do
+  startNewRun: { params: Schema.Struct({}) },
+  requestNextWord: { params: Schema.Struct({}) },
+  bankWonWord: { params: Schema.Struct({}) },
+  finishLostRun: { params: Schema.Struct({}) },
+  forfeitRun: { params: Schema.Struct({}) },
 };

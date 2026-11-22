@@ -22,7 +22,9 @@ export const overdriveHacksEmpNukedLettersAtom = overdriveHacksMachineAtom.pipe(
 export const overdriveHacksSonarRevealsAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.sonarReveals));
 export const overdriveHacksTheOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverride));
 export const overdriveHacksTheOverrideAudioAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.theOverrideAudio));
-export const overdriveHacksIsApplyingOverrideAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("applyingOverrideHack")));
+export const overdriveHacksIsApplyingOverrideAtom = overdriveHacksMachineAtom.pipe(
+  Atom.map((snapshot) => snapshot.matches({ active: "applyingOverrideHack" }))
+);
 export const overdriveHacksIsIdleAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("idle")));
 
 export const overdriveHacksKeypadColorsAtom = Atom.make((get) =>

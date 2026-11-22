@@ -11,5 +11,7 @@ export const setup = setupEffect({
     actions: Actions,
   },
   guards,
+  // Named delays so the reveal/reject windows are readable here and overridable in tests
+  delays: { revealDuration: 1500, rejectedDuration: 4000 },
   actions,
 });

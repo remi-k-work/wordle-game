@@ -16,9 +16,7 @@ export const { snapshot: highScoreMachineAtom, send: highScoreMachineSendAtom } 
 // Specialized selectors for granular state access and optimized re-renders
 export const highScoreNewHighScoreIdAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.newHighScoreId));
 export const highScoreIsSubmittingAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("submitting")));
-export const highScoreIsFormVisibleAtom = highScoreMachineAtom.pipe(
-  Atom.map((snapshot) => snapshot.matches("enteringInitials") || snapshot.matches("submitting") || snapshot.matches("failure"))
-);
+export const highScoreIsFormVisibleAtom = highScoreMachineAtom.pipe(Atom.map((snapshot) => snapshot.matches("form") || snapshot.matches("submitting")));
 
 // Atom to fetch the top 10 high scores (5-minute idle TTL like the chart atoms, so remounts within a session reuse the result instead of refetching)
 export const top10HighScoresAtom = Atom.family((solutionsLanguage: SolutionsLanguage) =>

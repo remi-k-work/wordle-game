@@ -11,29 +11,42 @@ export const highScoreMachine = setup.createMachine({
   context: INITIAL_HIGH_SCORE,
   initial: "awaitingFinishedRun",
 
+  on: {
+    // A newly finished run always takes over, whatever the machine was doing
+    runFinished: { target: ".checkingQualification", context: ({ event }) => runFinishedContext(event) },
+  },
+
   states: {
-    awaitingFinishedRun: {
-      on: {
-        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
-      },
-    },
+    awaitingFinishedRun: {},
 
     checkingQualification: {
       invoke: {
         src: "top10HighScoresActor",
         input: ({ context }) => ({ solutionsLanguage: context.solutionsLanguage }),
         onDone: (args) =>
-          args.guards.qualifiesForHighScore(args, { top10HighScores: args.event.output }) ? { target: "enteringInitials" } : { target: "awaitingFinishedRun" },
+          args.guards.qualifiesForHighScore(args, { top10HighScores: args.event.output }) ? { target: "form" } : { target: "awaitingFinishedRun" },
 
         // Silently fail or handle gracefully
         onError: { target: "awaitingFinishedRun" },
       },
     },
 
-    enteringInitials: {
+    // The two states that show the initials form; they share the submit transition
+    form: {
+      initial: "enteringInitials",
+
       on: {
         initialsSubmitted: { target: "submitting", context: ({ context, event }) => ({ ...context, playerName: event.playerName }) },
-        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
+      },
+
+      states: {
+        enteringInitials: {},
+        failure: {
+          id: "formFailure",
+          entry: (_args, enq) => {
+            enq(_args.actions.onFailure, { self: _args.self });
+          },
+        },
       },
     },
 
@@ -50,7 +63,7 @@ export const highScoreMachine = setup.createMachine({
           enq(args.actions.onNoLongerQualified, { self: args.self });
           return { target: "awaitingFinishedRun" };
         },
-        onError: { target: "failure" },
+        onError: { target: "#formFailure" },
       },
     },
 
@@ -59,27 +72,12 @@ export const highScoreMachine = setup.createMachine({
         enq(_args.actions.onSuccess, { self: _args.self });
       },
 
-      on: {
-        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
-      },
-
       after: {
         // The delayed modal show is likewise a transition function
-        delay: (_args, enq) => {
+        successModalDelay: (_args, enq) => {
           enq(_args.actions.showHighScoreModal, { self: _args.self });
           return { target: "awaitingFinishedRun" };
         },
-      },
-    },
-
-    failure: {
-      entry: (_args, enq) => {
-        enq(_args.actions.onFailure, { self: _args.self });
-      },
-
-      on: {
-        initialsSubmitted: { target: "submitting", context: ({ context, event }) => ({ ...context, playerName: event.playerName }) },
-        runFinished: { target: "checkingQualification", context: ({ event }) => runFinishedContext(event) },
       },
     },
   },

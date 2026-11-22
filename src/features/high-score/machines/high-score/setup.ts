@@ -13,6 +13,6 @@ export const setup = setupEffect({
   },
   guards,
   actors: { top10HighScoresActor, addNewHighScoreActor },
-  delays: { delay: 3000 },
+  delays: { successModalDelay: 3000 },
   actions,
 });

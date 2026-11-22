@@ -2,8 +2,7 @@
 import { Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
 import { trackInvalidGuessSubmitted, trackValidGuessSubmitted, trackWordLost, trackWordWon } from "@/features/telemetry/state/actions";
-import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
-import { runSessionMachineAtom } from "@/features/game/state/run-session";
+import { runSessionMachineAtom, runSessionMachineSendAtom } from "@/features/game/state/run-session";
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
@@ -26,12 +25,12 @@ export const actions: ActionImplementations<typeof Actions> = {
   onWordWon: ({ wordChallenge }) =>
     Option.match(wordChallenge.wordScore, {
       onNone: () => Effect.void,
-      onSome: (wordScore) => Atom.set(gameFlowMachineSendAtom, { type: "wordWon", wordScore }),
+      onSome: (wordScore) => Atom.set(runSessionMachineSendAtom, { type: "wordWon", wordScore }),
     }),
 
   // Track metrics related to the event of losing the game (stream 2 -> global_pulse)
   trackWordLost: ({ wordChallenge }) =>
     Atom.get(runSessionMachineAtom).pipe(Effect.flatMap(({ context: runSession }) => trackWordLost(runSession, wordChallenge))),
 
-  onWordLost: () => Atom.set(gameFlowMachineSendAtom, { type: "wordLost" }),
+  onWordLost: () => Atom.set(runSessionMachineSendAtom, { type: "wordLost" }),
 };

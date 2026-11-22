@@ -17,7 +17,6 @@ export const GameData = Schema.Struct({
 export const Events = {
   solutionsLanguageChanged: Schema.Struct({ solutionsLanguage: SolutionsLanguage }),
   nextWordRequested: Schema.Struct({}),
-  retryRequested: Schema.Struct({}),
 };
 
 // Action params are part of the machine's interface; implementations receive

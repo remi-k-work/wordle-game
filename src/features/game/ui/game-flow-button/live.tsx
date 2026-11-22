@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Match } from "effect";
 import { useAtomSet } from "@effect/atom-react";
 import { alertMachineSendAtom } from "@/state/alert";
-import { gameFlowMachineSendAtom } from "@/features/game/state/game-flow";
+import { runSessionMachineSendAtom } from "@/features/game/state/run-session";
 import { T, useGT } from "gt-react";
 
 // components
@@ -74,13 +74,13 @@ function resolveFlowAction(
 // `GameFlowButtonLive` renders the button for a resolved flow action; all domain logic about what each variant means lives in `resolveFlowAction`
 export function GameFlowButtonLive({ variant, className, keepText = false, onClicked, ...rest }: GameFlowButtonLiveProps) {
   const gt = useGT();
-  const gameFlowMachineEvent = useAtomSet(gameFlowMachineSendAtom);
+  const runSessionMachineEvent = useAtomSet(runSessionMachineSendAtom);
   const alertMachineEvent = useAtomSet(alertMachineSendAtom);
 
   const action = resolveFlowAction(variant, {
     gt,
-    onNext: () => gameFlowMachineEvent({ type: "nextWordRequested" }),
-    onStart: () => gameFlowMachineEvent({ type: "newRunStarted" }),
+    onNext: () => runSessionMachineEvent({ type: "nextWordRequested" }),
+    onStart: () => runSessionMachineEvent({ type: "newRunStarted" }),
     onForfeit: () => alertMachineEvent({ type: "opened", alertType: "forfeit-run" }),
   });
 

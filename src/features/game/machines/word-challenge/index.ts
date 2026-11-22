@@ -61,13 +61,8 @@ export const wordChallengeMachine = setup.createMachine({
 
     // Immediately decide whether the submitted guess is valid
     validating: {
-      always: (args, enq) => {
-        if (args.guards.isValidWord(args)) {
-          enq(args.actions.trackValidGuessSubmitted, { self: args.self, wordChallenge: args.context });
-          return { target: "revealing", context: submitGuessContext(args.context) };
-        }
-        return { target: "rejected" };
-      },
+      type: "choice",
+      choice: (args) => (args.guards.isValidWord(args) ? { target: "revealing" } : { target: "rejected" }),
     },
 
     // Invalid word entered; recover as soon as the user edits it
@@ -84,13 +79,20 @@ export const wordChallengeMachine = setup.createMachine({
       },
 
       // Auto-recover back to typing after the rejected row's CSS pulse animation completes
-      after: { 4000: { target: "typing" } },
+      after: { rejectedDuration: { target: "typing" } },
     },
 
-    // Inputs are locked while tile flip animations play
+    // Inputs are locked while tile flip animations play; the valid-guess bookkeeping
+    // (telemetry + recording the guess) lives here because a choice state cannot
+    // enqueue effects or patch context on its way through
     revealing: {
+      entry: (args, enq) => {
+        enq(args.actions.trackValidGuessSubmitted, { self: args.self, wordChallenge: args.context });
+        return { context: submitGuessContext(args.context) };
+      },
+
       after: {
-        1500: (args) => {
+        revealDuration: (args) => {
           if (args.guards.isGameWon(args)) return { target: "wordWon" };
           if (args.guards.isGameLost(args)) return { target: "wordLost" };
           return { target: "typing" };
