@@ -76,13 +76,11 @@ const RpcGameLayer = RpcGame.toLayer({
     ),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
-    getWordDefinition(theSecretWord, solutionsLanguage).pipe(
-      Option.map(formatTextForTTS),
+    Effect.succeed(
       // A definition of only markdown/whitespace normalizes to "", which would
-      // violate the declared success schema (`Option(NonEmpty)`): drop it so the
-      // client decodes a plain None (same policy the AI path applies)
-      Option.filter(String.isNonEmpty),
-      Effect.succeed
+      // violate the declared success schema (`Option(NonEmpty)`): `liftPredicate`
+      // drops it so the client decodes a plain None (same policy the AI path applies)
+      Option.flatMap(getWordDefinition(theSecretWord, solutionsLanguage), (definition) => Option.liftPredicate(formatTextForTTS(definition), String.isNonEmpty))
     ),
 
   fetchRiddleAudio: fetchSpeechAudio,

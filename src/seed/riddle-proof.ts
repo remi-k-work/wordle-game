@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Cause, Duration, Effect, ExecutionPlan, Option, Schedule, Schema } from "effect";
+import { Duration, Effect, ExecutionPlan, Option, Schedule, Schema, String } from "effect";
 import { LanguageModel, Model, Prompt } from "effect/ai";
 import { OpenAiLanguageModel } from "@effect/ai-openai-compat";
 import { riddleGenerationOptions } from "@/features/game/domain/riddle";
@@ -36,7 +36,7 @@ export const planFor = (id: string, config: typeof OpenAiLanguageModel.Config.Se
 
 // Mirrors the production single-field generation flow (same prompt and schema
 // construction, driven by the shared `riddleGenerationOptions`) while also
-// exposing the model that actually handled the request. `fieldName` is "riddle"
+// exposing the model that actually handled the request; `fieldName` is "riddle"
 // by construction, so the schema is spelled out rather than re-derived
 export const generateRiddle = Effect.fn("generateRiddle")(function* (
   theSecretWord: string,
@@ -58,14 +58,16 @@ export const generateRiddle = Effect.fn("generateRiddle")(function* (
   return { modelName, riddle: value.riddle } as const;
 });
 
-// Runs one proof case, reporting how long it took and which model answered.
+// Runs one proof case, reporting how long it took and which model answered
 // Shared by both riddle proofs so the verbatim-leak check applies to every
-// model they exercise, not just the A/B matrix
+// model they exercise, not just the A/B matrix; all failures are logged and
+// swallowed (proof scripts must not abort on one bad model), so the error
+// channel is `never` in the return type
 export const runCase = <A extends GeneratedRiddle, E, R>(label: string, theSecretWord: string, effect: Effect.Effect<A, E, R>) =>
   effect.pipe(
     Effect.timed,
     Effect.matchEffect({
-      onFailure: (error) => Effect.logError(`Case '${label}' failed. ${Cause.pretty(Cause.fail(error))}`),
+      onFailure: (error) => Effect.logError(`Case '${label}' failed. ${String.String(error)}`),
 
       onSuccess: ([duration, result]) => {
         // Exact-match check only: an inflected or embedded occurrence of the

@@ -31,6 +31,12 @@ interface FetchOverrideAudioInput {
 // constants
 import { VOWELS_BY_LANGUAGE } from "@/features/overdrive-hacks/domain/constants";
 
+// Reads a required hack input from its atom: a missing value fails with
+// HackInputUnavailableError instead of a bare NoSuchElementError, so the
+// machine's onError branch logs a diagnosable failure
+const requireHackInput = <A>(atom: Atom.Atom<Option.Option<A>>, input: HackInputUnavailableError["input"]) =>
+  Atom.get(atom).pipe(Effect.flatMap(Effect.fromOption(() => new HackInputUnavailableError({ input }))));
+
 export const applyEmpHackActor = createEffectLogic(
   Effect.fnUntraced(function* ({ input: { empNukedLetters } }: EffectSourceArgs<ApplyEmpHackInput>) {
     // The input reads stay inside the `produce` effect so they only run when the
@@ -38,12 +44,9 @@ export const applyEmpHackActor = createEffectLogic(
     return yield* withHackPurchase(
       "emp",
       Effect.gen(function* () {
-        const theSecretWord = yield* Effect.fromOption(
-          yield* Atom.get(wordChallengeTheSecretWordAtom),
-          () => new HackInputUnavailableError({ input: "theSecretWord" })
-        );
+        const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
         const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-        const keypad = yield* Effect.fromOption(yield* Atom.get(gameDataKeypadAtom), () => new HackInputUnavailableError({ input: "keypad" }));
+        const keypad = yield* requireHackInput(gameDataKeypadAtom, "keypad");
 
         return yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
       })
@@ -58,10 +61,7 @@ export const applySonarHackActor = createEffectLogic(
     return yield* withHackPurchase(
       "sonar",
       Effect.gen(function* () {
-        const theSecretWord = yield* Effect.fromOption(
-          yield* Atom.get(wordChallengeTheSecretWordAtom),
-          () => new HackInputUnavailableError({ input: "theSecretWord" })
-        );
+        const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
         const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
         const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
@@ -83,10 +83,7 @@ export const applyOverrideHackActor = createEffectLogic(
     return yield* withHackPurchase(
       "override",
       Effect.gen(function* () {
-        const theSecretWord = yield* Effect.fromOption(
-          yield* Atom.get(wordChallengeTheSecretWordAtom),
-          () => new HackInputUnavailableError({ input: "theSecretWord" })
-        );
+        const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
         const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
         const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
         const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);

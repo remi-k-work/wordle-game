@@ -1,7 +1,7 @@
 import "dotenv/config";
 
 // services, features, and other libraries
-import { Array, Cause, Effect, FileSystem } from "effect";
+import { Array, Effect, FileSystem, Option, String } from "effect";
 import { OpenRouter } from "@/services/open-router.server";
 import { OpenRouterError } from "@/domain/errors";
 import { runSeed } from "./runtime";
@@ -16,10 +16,10 @@ const PL_TEXT = "Zagadka: pachnący kwiat o żółtych płatkach, który kwitnie
 // guards against a full HTML error page
 const MAX_BODY_PREVIEW = 2000;
 
-// Render failures as strings: pretty-printing truncates nested objects, so log the enriched fields.
-// Non-HTTP failures (e.g. schema issues) fall back to a full cause rendering.
+// Render failures as strings: pretty-printing truncates nested objects, so log the enriched fields
+// Non-HTTP failures (e.g. schema issues) fall back to the error's own string form
 const renderFailure = (error: OpenRouterError): string => {
-  if (error.status === undefined) return Cause.pretty(Cause.fail(error));
+  if (error.status === undefined) return String.String(error);
   const body = error.responseBody ?? "<empty body>";
   return `HTTP ${error.status}: ${body.length > MAX_BODY_PREVIEW ? `${body.slice(0, MAX_BODY_PREVIEW)}…` : body}`;
 };
@@ -49,14 +49,13 @@ const main = Effect.gen(function* () {
       generateSpeech({ input, voice }).pipe(
         Effect.matchEffect({
           onFailure: (error) => Effect.logError(`Case '${name}' failed. ${renderFailure(error)}`),
-          onSuccess: ({ audioData, generationId }) =>
+          onSuccess: ({ audioData, generationId }) => {
             // Audio artifacts belong in the gitignored scratch directory, not in
             // the source tree next to the script that produced them
-            Effect.gen(function* () {
-              const fileName = `./_scratchpad/output-tts-${name}-${generationId ?? "noid"}.mp3`;
-              yield* fs.writeFile(fileName, audioData);
-              yield* Effect.log(`Case '${name}' saved to '${fileName}'.`);
-            }),
+            const fileName = `./_scratchpad/output-tts-${name}-${Option.getOrElse(generationId, () => "noid")}.mp3`;
+            // Write, then log — plain combinators instead of a nested generator
+            return fs.writeFile(fileName, audioData).pipe(Effect.andThen(Effect.log(`Case '${name}' saved to '${fileName}'.`)));
+          },
         }),
         // Runs after every case, success or failure, as the per-iteration sleep did
         Effect.andThen(Effect.sleep("1 second"))

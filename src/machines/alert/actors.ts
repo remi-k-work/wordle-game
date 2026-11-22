@@ -10,10 +10,10 @@ import type { OkayedCallback } from "./models";
 // Waits for the (possibly promise-returning) confirm callback to settle
 export const runOkayedActor = createEffectLogic(({ input }: EffectSourceArgs<OkayedCallback>) =>
   Effect.tryPromise({
-    // `await` inside an async thunk funnels both a sync throw and a rejection into the error channel
-    try: async () => {
-      await input();
-    },
+    // `Promise.resolve` normalizes the `void | Promise<void>` union, and `tryPromise`
+    // itself maps a synchronous throw from the thunk (as well as a rejection) into
+    // the error channel — no `async` wrapper needed
+    try: () => Promise.resolve(input()),
     catch: (cause) => new AlertOkayedError({ cause }),
   })
 );

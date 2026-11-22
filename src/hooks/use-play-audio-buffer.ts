@@ -1,8 +1,14 @@
 // services, features, and other libraries
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 import { gameSettingsVoiceVolumeAtom } from "@/features/settings/state/game-settings";
 import { RuntimeClient } from "@/lib/runtime-client";
+
+// A rejected `audio.play()` is modeled as a typed error (not bare `unknown` in
+// the error channel) so the failure stays diagnosable through Effect's logging
+class AudioPlaybackError extends Schema.TaggedError<AudioPlaybackError, { readonly brand: unique symbol }>()("AudioPlaybackError", {
+  cause: Schema.Defect(),
+}) {}
 
 // Shared player: one element for the whole app (mirrors window.speechSynthesis)
 let sharedAudio: HTMLAudioElement | null = null;
@@ -101,10 +107,17 @@ export function usePlayAudioBuffer() {
 
     audio.src = url;
 
-    audio.play().catch((error: unknown) => {
-      // Rejected play holds no audio: free the URL right away
-      releaseMedia(audio);
-      logWarning("Audio playback failed.", error);
-    });
+    // Route the DOM promise through Effect's error channel (not a bare .catch):
+    // runFork returns a Fiber, so a failure can never surface as an unhandled rejection
+    RuntimeClient.runFork(
+      Effect.tryPromise({
+        try: () => audio.play(),
+        catch: (cause) => new AudioPlaybackError({ cause }),
+      }).pipe(
+        // Rejected play holds no audio: free the URL right away
+        Effect.tapError(() => Effect.sync(() => releaseMedia(audio))),
+        Effect.catch((error) => Effect.logWarning("Audio playback failed.", error))
+      )
+    );
   };
 }

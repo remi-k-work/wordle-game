@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Array, Option } from "effect";
+import { Array, Effect, Option } from "effect";
 import { generateSingleField } from "@/domain/generate-single-field";
 import { formatGuess } from "@/features/game/domain/formatters";
 import { matchLanguage } from "@/features/game/domain/helpers";
@@ -106,14 +106,17 @@ const OVERRIDE_PROMPT_PL = (
       : `Próby gracza i informacja zwrotna z kolorami (zielony=dobre miejsce, żółty=złe miejsce, szary=brak w słowie):\n${buildFeedbackLines(wordleGuesses, theSecretWord, colorToPl).join("")}\n-> Krok 1: Oceń, czy ich próby są bliskie znaczeniowo lub strukturalnie, używając informacji o kolorach.\n-> Krok 2: Dostosuj swoją szczegółową wskazówkę, aby nakierować ich na właściwy tor. Podaj bezpośrednią wskazówkę semantyczną (np. zastosowanie w życiu codziennym, synonim), która połączy ich najbliższy domysł z ukrytym słowem.\n\n`,
   ].join("");
 
-export const generateOverride = (
+// Effect.fn with a name (not a plain arrow) per Effect conventions for reusable
+// Effect-returning functions — same shape as the sibling generateRiddle in
+// features/game/domain/riddle.ts; the name doubles as the tracing span
+export const generateOverride = Effect.fn("generateOverride")(function* (
   theSecretWord: TheSecretWord,
   wordDefinition: WordMeta["wordDefinition"],
   theRiddle: WordMeta["theRiddle"],
   wordleGuesses: WordChallenge["wordleGuesses"],
   solutionsLanguage: SolutionsLanguage
-) =>
-  generateSingleField({
+) {
+  return yield* generateSingleField({
     instructions: matchLanguage(solutionsLanguage, SYSTEM_PROMPT_EN(theSecretWord), SYSTEM_PROMPT_PL(theSecretWord)),
     userPrompt: matchLanguage(
       solutionsLanguage,
@@ -127,3 +130,4 @@ export const generateOverride = (
       "Niezwykle wnikliwa i opisowa wskazówka wyłącznie w postaci zwykłego tekstu. Szczegółowa, przyjazna dla TTS. Bez Markdownu, emotikonów i wstępów."
     ),
   });
+});

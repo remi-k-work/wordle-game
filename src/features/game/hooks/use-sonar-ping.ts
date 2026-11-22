@@ -2,10 +2,18 @@
 import { useEffect, useRef } from "react";
 
 // services, features, and other libraries
+import { Effect } from "effect";
 import { useAnimate } from "motion/react";
+import { RuntimeClient } from "@/lib/runtime-client";
 
 // constants
 import { MOTION_TOKENS } from "@/lib/motion-tokens";
+
+// Log through the shared client runtime instead of a bare console call, so
+// browser warnings share the app's logging sink (same policy as
+// use-play-audio-buffer / use-speak-text). runFork (not `void runPromise`) —
+// returns a Fiber, never a dangling Promise
+const logWarning = (message: string, error?: unknown) => RuntimeClient.runFork(Effect.logWarning(message, error));
 
 export function useSonarPing(isEnabled: boolean) {
   const [scope, animate] = useAnimate();
@@ -52,10 +60,15 @@ export function useSonarPing(isEnabled: boolean) {
       };
     };
 
-    // motion rejects when a playback is interrupted, and an interruption is
-    // expected here (unmount, or the effect re-running for a new reveal), so the
-    // rejection is swallowed rather than escaping as an unhandled rejection
-    void playSequence().catch(() => {});
+    // motion rejects when a playback is interrupted, and an interruption caused
+    // by this effect's own cleanup is expected (unmount, or the effect
+    // re-running for a new reveal), so that rejection is swallowed rather than
+    // escaping as an unhandled rejection. Any other rejection is unexpected and
+    // is logged through the shared client runtime instead of being silently
+    // dropped — the abort signal is what tells the two apart
+    void playSequence().catch((error: unknown) => {
+      if (!cancelled.signal.aborted) logWarning("Sonar ping animation failed.", error);
+    });
 
     return () => {
       cancelled.abort();

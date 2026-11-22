@@ -79,10 +79,12 @@ describe("gameLogic", () => {
       const keypad = computeKeypadState("APPLE", ["AMPLE", "PAPER"]);
       // AMPLE -> A:green, M:grey, P:green, L:green, E:green
       // PAPER -> P:green, A:yellow, P:green, E:green, R:grey
-      expect(Option.getOrNull(HashMap.get(keypad, "A"))).toBe("green"); // yellow in PAPER, but green in AMPLE
-      expect(Option.getOrNull(HashMap.get(keypad, "M"))).toBe("grey");
-      expect(Option.getOrNull(HashMap.get(keypad, "P"))).toBe("green");
-      expect(Option.getOrNull(HashMap.get(keypad, "R"))).toBe("grey");
+      // Assert the Option itself instead of unwrapping through null: a missing
+      // key fails as a readable Option mismatch instead of a null comparison
+      expect(HashMap.get(keypad, "A")).toEqual(Option.some("green")); // yellow in PAPER, but green in AMPLE
+      expect(HashMap.get(keypad, "M")).toEqual(Option.some("grey"));
+      expect(HashMap.get(keypad, "P")).toEqual(Option.some("green"));
+      expect(HashMap.get(keypad, "R")).toEqual(Option.some("grey"));
     });
   });
 

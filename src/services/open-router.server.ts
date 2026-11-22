@@ -1,11 +1,12 @@
 // services, features, and other libraries
 import { Config, Context, Effect, flow, Layer, Option, Random, Schedule, Schema } from "effect";
-import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/http";
+import { FetchHttpClient, Headers, HttpClient, HttpClientRequest } from "effect/http";
 import { SpeechRequest } from "@/domain/models";
 import { OpenRouterError } from "@/domain/errors";
 import { degradeToNone } from "@/domain/helpers";
 
 // types
+import type { HttpClientError } from "effect/http";
 import type { SolutionsLanguage } from "@/features/game/domain/models";
 
 // constants
@@ -16,13 +17,28 @@ import { VOICES_PL } from "@/domain/constants";
 const decodeSpeechRequest = Schema.decodeEffect(SpeechRequest);
 const isOpenRouterError = Schema.is(OpenRouterError);
 
+// Surface the upstream status + body (e.g. rate-limit details) instead of burying
+// them in `cause`. `Schema.TaggedError` instances are themselves failing Effects, so
+// each branch below yields the error — no nested generator needed
+const toOpenRouterError = (clientError: HttpClientError.HttpClientError): Effect.Effect<never, OpenRouterError> =>
+  Option.fromUndefinedOr(clientError.response).pipe(
+    Option.match({
+      onNone: () => new OpenRouterError({ cause: clientError }),
+      onSome: (errorResponse) =>
+        errorResponse.text.pipe(
+          Effect.orElseSucceed(() => "<unreadable body>"),
+          Effect.flatMap((responseBody) => new OpenRouterError({ cause: clientError, status: errorResponse.status, responseBody }))
+        ),
+    })
+  );
+
 export class OpenRouter extends Context.Service<
   OpenRouter,
   {
     readonly generateSpeech: (request: { readonly input: string; readonly voice?: string }) => Effect.Effect<
       {
         readonly audioData: Uint8Array;
-        readonly generationId: string;
+        readonly generationId: Option.Option<string>;
       },
       OpenRouterError
     >;
@@ -51,19 +67,7 @@ export class OpenRouter extends Context.Service<
 
           // Execute request
           const request = yield* HttpClientRequest.post("/audio/speech").pipe(HttpClientRequest.bodyJson(speechRequest));
-          const response = yield* client.execute(request).pipe(
-            // Surface upstream status + body (e.g. rate-limit details) instead of burying them in `cause`
-            Effect.catchTag("HttpClientError", (clientError) => {
-              const errorResponse = clientError.response;
-              if (errorResponse === undefined) return new OpenRouterError({ cause: clientError });
-              // `Schema.TaggedError` instances are themselves failing Effects, so
-              // `Effect.flatMap` into one yields the error — no nested generator needed
-              return errorResponse.text.pipe(
-                Effect.orElseSucceed(() => "<unreadable body>"),
-                Effect.flatMap((responseBody) => new OpenRouterError({ cause: clientError, status: errorResponse.status, responseBody }))
-              );
-            })
-          );
+          const response = yield* client.execute(request).pipe(Effect.catchTag("HttpClientError", toOpenRouterError));
 
           // Decode response body as ArrayBuffer using the getter on the response object
           const arrayBuffer = yield* response.arrayBuffer;
@@ -71,8 +75,11 @@ export class OpenRouter extends Context.Service<
           // View the ArrayBuffer as a plain Uint8Array (the wire format of WordMeta's audio fields)
           const audioData = new Uint8Array(arrayBuffer);
 
-          // Read header (headers are normalized to lowercase in Effect)
-          const generationId = response.headers["x-generation-id"];
+          // Read the header via `Headers.get`, not an index access: the `Headers`
+          // index signature types every lookup as present (tsconfig does not enable
+          // `noUncheckedIndexedAccess`), but a missing header is `undefined` at
+          // runtime — `Headers.get` returns a `None` instead
+          const generationId = Headers.get(response.headers, "x-generation-id");
 
           return { audioData, generationId } as const;
         },

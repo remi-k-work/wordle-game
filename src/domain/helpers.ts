@@ -10,11 +10,12 @@ import type { Rpc } from "effect/rpc";
 // shared by every log-then-recover site so the predicate lives in one place
 export const isRealFailure = <E>(cause: Cause.Cause<E>) => !Cause.hasInterruptsOnly(cause);
 
-// The shared recovery policy for non-critical Effect work: every real failure is logged first and then degraded
+// The shared recovery policy for non-critical Effect work: every real failure is
+// logged and degraded in one step (the recovery effect cannot fail, so sequencing
+// log-then-recover with `andThen` is safe); pure interrupts fall through to `orDie`
 export const degradeCause = <A, B, E, R>(effect: Effect.Effect<A, E, R>, recovery: Effect.Effect<B, never, never>) =>
   effect.pipe(
-    Effect.tapCauseIf(isRealFailure, (cause) => Effect.logError(Cause.pretty(cause))),
-    Effect.catchCauseIf(isRealFailure, () => recovery),
+    Effect.catchCauseIf(isRealFailure, (cause) => Effect.andThen(Effect.logError(Cause.pretty(cause)), recovery)),
     Effect.orDie
   );
 
@@ -32,5 +33,11 @@ export const makeRpcClient = <Rpcs extends Rpc.Any>(serviceName: string, group: 
   };
 };
 
-// Centralized error-escalation policy for SQL/Schema failures: nothing behind this boundary is recoverable by the caller
-export const dieOnDbFailure = <A, E, R>(effect: Effect.Effect<A, E, R>) => effect.pipe(Effect.tapError(Effect.logError), Effect.orDie);
+// Centralized error-escalation policy for SQL/Schema failures: log the full
+// cause (so defects keep their stack trace, not just typed errors), then
+// escalate to a defect — nothing behind this boundary is recoverable
+export const dieOnDbFailure = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  effect.pipe(
+    Effect.tapCause((cause) => Effect.logError(Cause.pretty(cause))),
+    Effect.orDie
+  );

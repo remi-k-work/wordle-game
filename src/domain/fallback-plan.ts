@@ -18,7 +18,7 @@ export const OPENROUTER_AI_MODELS = [
 ] as const;
 
 // Builds one fallback step: the provider to try, bounded attempts, and a shared retry policy
-const aiStep = <A>(provide: A) => ({ provide, attempts: 2, schedule: Schedule.exponential("1 second", 2) });
+const aiStep = (provide: Layer.Any) => ({ provide, attempts: 2, schedule: Schedule.exponential("1 second", 2) });
 
 // Builds the shared fallback ladder for any LanguageModel service from the rung tables above
 export const makeFallbackPlan = ExecutionPlan.make(

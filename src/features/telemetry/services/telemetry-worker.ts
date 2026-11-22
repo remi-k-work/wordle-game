@@ -1,9 +1,10 @@
 // services, features, and other libraries
-import { Array, Effect, Layer, Predicate, Record, Stream, Duration, Match, Metric, Schedule, Schema, pipe } from "effect";
+import { Array, Cause, Effect, Layer, Predicate, Record, Stream, Duration, Match, Metric, Schedule, Schema } from "effect";
 import { SecureRandom } from "effect/crypto/SecureRandom";
 import { TelemetryHub } from "./telemetry-hub";
 import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { AddArcadeRunSummary, AddGlobalPulse, AddRunWordEvent } from "@/features/telemetry/domain/models";
+import { degradeToNone, isRealFailure } from "@/domain/helpers";
 
 // types
 import type { Tracer } from "effect";
@@ -68,8 +69,9 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
           processSpan(name, Record.fromEntries(attributes)).pipe(
             // Telemetry is non-critical: a malformed event or a failed insert
             // is logged and dropped instead of killing the background stream
-            // for the rest of the session
-            Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Dropping span event:", cause))
+            // for the rest of the session. `isRealFailure` keeps pure
+            // interrupts propagating (shutdown must not be swallowed per-item)
+            Effect.catchCauseIf(isRealFailure, (cause) => Effect.logError("[TelemetryWorker] Dropping span event:", Cause.pretty(cause)))
           ),
         { concurrency: "unbounded" }
       );
@@ -80,31 +82,35 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
       yield* Effect.log("[TelemetryWorker] Received high-signal metric pulse.");
 
       // A snapshot that fails to decode is logged and skipped (Option.none)
-      // so one malformed metric cannot kill the processor stream
+      // via the shared recovery policy (degradeToNone), so one malformed
+      // metric — typed error or defect — cannot kill the processor stream
       const globalPulseRecords = Array.getSomes(
         yield* Effect.forEach(snapshots, (snapshot) => {
           const { id: metricName, attributes } = snapshot;
-          return encodeMetricPayload(normalizeMetricPayload(snapshot)).pipe(
-            // We need to stringify the metric payload in order for equals to work (for stream deduping)
-            Effect.flatMap((metricPayload) =>
-              decodeGlobalPulse({
-                sessionId: attributes?.["sessionId"],
-                instanceId,
-                solutionsLanguage: attributes?.["solutionsLanguage"],
-                metricName,
-                metricPayload,
-              })
-            ),
-            Effect.tapError(Effect.logError),
-            Effect.option
+          return degradeToNone(
+            encodeMetricPayload(normalizeMetricPayload(snapshot)).pipe(
+              // We need to stringify the metric payload in order for equals to work (for stream deduping)
+              Effect.flatMap((metricPayload) =>
+                decodeGlobalPulse({
+                  sessionId: attributes?.["sessionId"],
+                  instanceId,
+                  solutionsLanguage: attributes?.["solutionsLanguage"],
+                  metricName,
+                  metricPayload,
+                })
+              ),
+              Effect.asSome
+            )
           );
         })
       );
 
       if (Array.isReadonlyArrayNonEmpty(globalPulseRecords)) {
         yield* addGlobalPulse(globalPulseRecords).pipe(
-          // Same non-critical policy: log the failure and let the next pulse retry
-          Effect.catchCause((cause) => Effect.logError("[TelemetryWorker] Failed to insert global pulses:", cause))
+          // Same non-critical policy: log the failure and let the next pulse retry.
+          // `isRealFailure` keeps pure interrupts propagating (shutdown must not
+          // be swallowed per-batch)
+          Effect.catchCauseIf(isRealFailure, (cause) => Effect.logError("[TelemetryWorker] Failed to insert global pulses:", Cause.pretty(cause)))
         );
       }
     });
@@ -115,15 +121,14 @@ export const TelemetryWorkerLayer = Layer.effectDiscard(
     // --- Stream 2: Metrics (Native Snapshot Loop via Stream) ---
     // We bypass the OTel bridge and talk directly to the Effect runtime for 100% accuracy
     // Declarative Stream alignment with spanProcessor: poll every 10s, dedup via `Stream.changes` (Equal.equals), no Ref
-    const metricProcessor = pipe(
-      Stream.fromEffectSchedule(Metric.snapshot, Schedule.spaced(Duration.seconds(10))),
+    const metricProcessor = Stream.fromEffectSchedule(Metric.snapshot, Schedule.spaced(Duration.seconds(10))).pipe(
       Stream.changes,
       Stream.runForEach(processMetrics)
     );
 
     // Run both processors in the background (Detach from parent scope). The
     // fibers are supervised with tapCause so a stream-level defect (which the
-    // per-item catchCause guards cannot catch) is logged instead of dying
+    // per-item catchCauseIf guards cannot catch) is logged instead of dying
     // silently inside the scope
     yield* Effect.forkScoped(Effect.tapCause(spanProcessor, (cause) => Effect.logError("[TelemetryWorker] Span processor failed:", cause)));
     yield* Effect.forkScoped(Effect.tapCause(metricProcessor, (cause) => Effect.logError("[TelemetryWorker] Metric processor failed:", cause)));
