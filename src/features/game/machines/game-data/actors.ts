@@ -1,9 +1,10 @@
 // services, features, and other libraries
-import { Effect, Random } from "effect";
+import { Array, Effect, Random } from "effect";
 import { Atom } from "effect/reactivity";
 import { createEffectLogic } from "@xstate/effect";
 import { RpcGameClient } from "@/features/game/rpc/client";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
+import { EmptySolutionsError } from "./errors";
 
 // types
 import type { EffectSourceArgs } from "@xstate/effect";
@@ -35,6 +36,11 @@ export const onLoadingActor = createEffectLogic(
 
 export const selectSecretWordActor = createEffectLogic(
   Effect.fnUntraced(function* ({ input: { solutions } }: EffectSourceArgs<SelectSecretWordInput>) {
-    return yield* Effect.fromOption(solutions).pipe(Effect.flatMap(Random.choice));
+    // Guard explicitly so the failure is a typed, diagnosable error
+    const solutionList = yield* Effect.fromOption(solutions).pipe(
+      Effect.mapError(() => new EmptySolutionsError({ reason: "missing" })),
+      Effect.filterOrFail(Array.isReadonlyArrayNonEmpty, () => new EmptySolutionsError({ reason: "empty" }))
+    );
+    return yield* Random.choice(solutionList);
   })
 );

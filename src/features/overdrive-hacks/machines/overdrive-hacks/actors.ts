@@ -9,8 +9,7 @@ import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { wordMetaTheRiddleAtom, wordMetaWordDefinitionAtom } from "@/features/game/state/word-meta";
 import { calculateEmpTargets } from "@/features/overdrive-hacks/domain/emp";
 import { calculateSonarTarget } from "@/features/overdrive-hacks/domain/sonar";
-import { withHackPurchase } from "./helpers";
-import { HackInputUnavailableError } from "./errors";
+import { requireHackInput, withHackPurchase } from "./helpers";
 
 // types
 import type { EffectSourceArgs } from "@xstate/effect";
@@ -30,12 +29,6 @@ interface FetchOverrideAudioInput {
 
 // constants
 import { VOWELS_BY_LANGUAGE } from "@/features/overdrive-hacks/domain/constants";
-
-// Reads a required hack input from its atom: a missing value fails with
-// HackInputUnavailableError instead of a bare NoSuchElementError, so the
-// machine's onError branch logs a diagnosable failure
-const requireHackInput = <A>(atom: Atom.Atom<Option.Option<A>>, input: HackInputUnavailableError["input"]) =>
-  Atom.get(atom).pipe(Effect.flatMap(Effect.fromOption(() => new HackInputUnavailableError({ input }))));
 
 export const applyEmpHackActor = createEffectLogic(
   Effect.fnUntraced(function* ({ input: { empNukedLetters } }: EffectSourceArgs<ApplyEmpHackInput>) {
