@@ -9,6 +9,9 @@ import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overd
 import type { EffectSourceArgs } from "@xstate/effect";
 import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 
+// constants
+import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
+
 // The hack actors do real RPC work; these tests never let one finish, so a
 // never-resolving Effect holds the machine in an applying state on purpose.
 // The replacement accepts `unknown` input, so one logic stands in for every
@@ -60,26 +63,48 @@ describe("overdriveHacksMachine", () => {
     }).pipe(Effect.scoped)
   );
 
+  it.effect("refuses an unaffordable hack", () =>
+    Effect.gen(function* () {
+      const actor = yield* createEffectActor(machine);
+      yield* sendAndAwait(actor, { type: "puzzleStarted" });
+
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp", runScore: 0 });
+      expect(actor.getSnapshot().matches({ active: "ready" })).toBe(true);
+    }).pipe(Effect.scoped)
+  );
+
+  it.effect("accepts a hack the run can afford", () =>
+    Effect.gen(function* () {
+      const actor = yield* createEffectActor(machine);
+      yield* sendAndAwait(actor, { type: "puzzleStarted" });
+
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp", runScore: OVERDRIVE_HACK_COST("emp") });
+      expect(actor.getSnapshot().matches({ active: "applyingEmpHack" })).toBe(true);
+    }).pipe(Effect.scoped)
+  );
+
   it.effect("refuses a second hack while one is applying", () =>
     Effect.gen(function* () {
       const actor = yield* createEffectActor(machine);
       yield* sendAndAwait(actor, { type: "puzzleStarted" });
 
-      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp" });
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp", runScore: 10_000 });
       expect(actor.getSnapshot().matches({ active: "applyingEmpHack" })).toBe(true);
 
       // No concurrent hacks: a request while applying is ignored
-      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "sonar" });
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "sonar", runScore: 10_000 });
       expect(actor.getSnapshot().matches({ active: "applyingEmpHack" })).toBe(true);
     }).pipe(Effect.scoped)
   );
 
-  it.effect("falls back to ready when the requested hack is unrecognized", () =>
+  it.effect("rejects an unrecognized hack and stays ready", () =>
     Effect.gen(function* () {
       const actor = yield* createEffectActor(machine);
       yield* sendAndAwait(actor, { type: "puzzleStarted" });
 
-      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "unknown" as OverdriveHackId });
+      // An unknown id has no cost, so the affordability guard rejects it before
+      // classification; the machine never leaves `ready`
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "unknown" as OverdriveHackId, runScore: 10_000 });
       expect(actor.getSnapshot().matches({ active: "ready" })).toBe(true);
     }).pipe(Effect.scoped)
   );

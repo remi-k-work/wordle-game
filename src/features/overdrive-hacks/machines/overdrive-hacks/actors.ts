@@ -9,7 +9,7 @@ import { gameDataKeypadAtom } from "@/features/game/state/game-data";
 import { wordMetaTheRiddleAtom, wordMetaWordDefinitionAtom } from "@/features/game/state/word-meta";
 import { calculateEmpTargets } from "@/features/overdrive-hacks/domain/emp";
 import { calculateSonarTarget } from "@/features/overdrive-hacks/domain/sonar";
-import { requireHackInput, withHackPurchase } from "./helpers";
+import { requireHackInput } from "./helpers";
 
 // types
 import type { EffectSourceArgs } from "@xstate/effect";
@@ -32,60 +32,39 @@ import { VOWELS_BY_LANGUAGE } from "@/features/overdrive-hacks/domain/constants"
 
 export const applyEmpHackActor = createEffectLogic(
   Effect.fnUntraced(function* ({ input: { empNukedLetters } }: EffectSourceArgs<ApplyEmpHackInput>) {
-    // The input reads stay inside the `produce` effect so they only run when the
-    // hack is actually affordable (withHackPurchase skips `produce` otherwise)
-    return yield* withHackPurchase(
-      "emp",
-      Effect.gen(function* () {
-        const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
-        const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-        const keypad = yield* requireHackInput(gameDataKeypadAtom, "keypad");
+    const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
+    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+    const keypad = yield* requireHackInput(gameDataKeypadAtom, "keypad");
 
-        return yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
-      })
-    );
+    return yield* calculateEmpTargets(theSecretWord, wordleGuesses, keypad, empNukedLetters);
   })
 );
 
 export const applySonarHackActor = createEffectLogic(
   Effect.fnUntraced(function* ({ input: { sonarReveals } }: EffectSourceArgs<ApplySonarHackInput>) {
-    // The input reads stay inside the `produce` effect so they only run when the
-    // hack is actually affordable (withHackPurchase skips `produce` otherwise)
-    return yield* withHackPurchase(
-      "sonar",
-      Effect.gen(function* () {
-        const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
-        const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-        const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+    const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
+    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-        return yield* calculateSonarTarget(
-          theSecretWord,
-          wordleGuesses,
-          VOWELS_BY_LANGUAGE[solutionsLanguage],
-          Array.map(sonarReveals, (reveal) => reveal.vowel)
-        );
-      })
+    return yield* calculateSonarTarget(
+      theSecretWord,
+      wordleGuesses,
+      VOWELS_BY_LANGUAGE[solutionsLanguage],
+      Array.map(sonarReveals, (reveal) => reveal.vowel)
     );
   })
 );
 
 export const applyOverrideHackActor = createEffectLogic(
   Effect.fnUntraced(function* () {
-    // The input reads stay inside the `produce` effect so they only run when the
-    // hack is actually affordable (withHackPurchase skips `produce` otherwise)
-    return yield* withHackPurchase(
-      "override",
-      Effect.gen(function* () {
-        const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
-        const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
-        const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
-        const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
-        const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
+    const theSecretWord = yield* requireHackInput(wordChallengeTheSecretWordAtom, "theSecretWord");
+    const wordDefinition = yield* Atom.get(wordMetaWordDefinitionAtom);
+    const theRiddle = yield* Atom.get(wordMetaTheRiddleAtom);
+    const wordleGuesses = yield* Atom.get(wordChallengeWordleGuessesAtom);
+    const solutionsLanguage = yield* Atom.get(gameSettingsSolutionsLanguageAtom);
 
-        const { fetchOverride } = yield* RpcOverdriveHacksClient;
-        return yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
-      })
-    );
+    const { fetchOverride } = yield* RpcOverdriveHacksClient;
+    return yield* fetchOverride({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage });
   })
 );
 

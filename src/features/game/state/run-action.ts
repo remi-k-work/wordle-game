@@ -1,5 +1,7 @@
 // services, features, and other libraries
+import { Match } from "effect";
 import { Atom } from "effect/reactivity";
+import { taggedState } from "@xstate/effect";
 import { gameDataMachineAtom } from "@/features/game/state/game-data";
 import { runSessionMachineAtom } from "@/features/game/state/run-session";
 import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
@@ -26,12 +28,16 @@ export const runActionAtom = Atom.make((get): RunAction => {
   )
     return "skeleton";
 
-  // "Next Word" (won a word, OR returning to an active run with no current puzzle)
-  if (runSessionMachineSnapshot.matches({ active: "betweenWords" })) return "next";
-
-  // "Start New Run" (lost, forfeited, or idle with no active run)
-  if (runSessionMachineSnapshot.matches("inactive")) return "start";
-
-  // "Forfeit Run" (default — puzzle in progress)
-  return "forfeit";
+  // The run session is the authority for the run phase; `taggedState` turns its
+  // state value into a discriminated union so every phase must be handled here.
+  // `classifying` is the initial state (and the fallback snapshot before the
+  // actor is ready), so it maps to the loading skeleton rather than Forfeit.
+  // `valueTags` is exhaustive: adding a run-session state without a mapping is a
+  // compile error, and so is mapping a state that no longer exists.
+  return Match.valueTags(taggedState(runSessionMachineSnapshot), {
+    classifying: (): RunAction => "skeleton",
+    inactive: (): RunAction => "start",
+    "active.betweenWords": (): RunAction => "next",
+    "active.playing": (): RunAction => "forfeit",
+  });
 });

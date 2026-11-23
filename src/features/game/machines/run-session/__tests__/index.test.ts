@@ -116,18 +116,29 @@ describe("runSessionMachine", () => {
     }).pipe(Effect.scoped)
   );
 
-  it.effect("spends run score only while a word is in progress", () =>
+  it.effect("charges a hack that completes between words", () =>
     Effect.gen(function* () {
       const actor = yield* createEffectActor(machine, { input: { ...activeRun, runScore: 500 } });
 
-      // between words: the purchase is impossible and the score is untouched
-      yield* sendAndAwait(actor, { type: "runScoreSpent", amount: 120 });
-      expect(actor.getSnapshot().context.runScore).toBe(500);
-
-      // in progress: the purchase is accepted
-      yield* sendAndAwait(actor, { type: "nextWordRequested" });
+      // The word ended while the hack was applying: the run still owns the charge
       yield* sendAndAwait(actor, { type: "runScoreSpent", amount: 120 });
       expect(actor.getSnapshot().context.runScore).toBe(380);
+
+      // In progress charges behave the same
+      yield* sendAndAwait(actor, { type: "nextWordRequested" });
+      yield* sendAndAwait(actor, { type: "runScoreSpent", amount: 120 });
+      expect(actor.getSnapshot().context.runScore).toBe(260);
+    }).pipe(Effect.scoped)
+  );
+
+  it.effect("ignores a charge when no run is active", () =>
+    Effect.gen(function* () {
+      const actor = yield* createEffectActor(machine, { input: { ...INITIAL_RUN_SESSION, runScore: 500 } });
+
+      yield* sendAndAwait(actor, { type: "runScoreSpent", amount: 120 });
+
+      expect(actor.getSnapshot().matches("inactive")).toBe(true);
+      expect(actor.getSnapshot().context.runScore).toBe(500);
     }).pipe(Effect.scoped)
   );
 });

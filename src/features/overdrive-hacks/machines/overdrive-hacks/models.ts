@@ -21,7 +21,7 @@ export const Events = {
   solutionsLanguageChanged: Schema.Struct({}),
   puzzleStarted: Schema.Struct({}),
   puzzleEnded: Schema.Struct({}),
-  hackRequested: Schema.Struct({ overdriveHackId: OverdriveHackId }),
+  hackRequested: Schema.Struct({ overdriveHackId: OverdriveHackId, runScore: Schema.Natural }),
 };
 
 // Action params are part of the machine's interface; implementations receive

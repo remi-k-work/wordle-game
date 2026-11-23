@@ -3,8 +3,8 @@ import { Option } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import {
   overdriveHacksIsApplyingOverrideAtom,
-  overdriveHacksMachineSendAtom,
   overdriveHacksTheOverrideAtom,
+  requestOverdriveHackAtom,
 } from "@/features/overdrive-hacks/state/overdrive-hacks";
 import { overdriveHacksCanApplyHackAtom } from "@/features/overdrive-hacks/state/can-apply";
 import { modalMachineSendAtom } from "@/state/modal";
@@ -42,7 +42,7 @@ export function OverrideHackAction({ onClicked }: OverrideHackActionProps) {
   const theOverride = useAtomValue(overdriveHacksTheOverrideAtom);
   const isApplyingOverride = useAtomValue(overdriveHacksIsApplyingOverrideAtom);
 
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineSendAtom);
+  const requestHack = useAtomSet(requestOverdriveHackAtom("override"));
   const modalMachineEvent = useAtomSet(modalMachineSendAtom);
 
   if (Option.isSome(theOverride)) {
@@ -69,7 +69,7 @@ export function OverrideHackAction({ onClicked }: OverrideHackActionProps) {
       label={OVERRIDE_LABEL}
       badge={<HackCost hackId="override" />}
       disabled={!canApplyHackOverride || isApplyingOverride}
-      onClicked={() => overdriveHacksMachineEvent({ type: "hackRequested", overdriveHackId: "override" })}
+      onClicked={() => requestHack()}
     />
   );
 }

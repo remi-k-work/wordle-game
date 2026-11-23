@@ -77,6 +77,14 @@ export const runSessionMachine = setup.createMachine({
           enq(args.actions.forfeitRun, { self: args.self });
           return { target: "#inactive", context: finishActiveRunContext(args.context) };
         },
+
+        // A completed hack charges the run wherever the run is active, including
+        // the moment a word ends: overdrive is idle between words, so this cannot
+        // admit a new purchase, only settle one already made
+        runScoreSpent: (args) => {
+          assertEvent(args.event, "runScoreSpent");
+          return { context: { ...args.context, runScore: Math.max(0, args.context.runScore - args.event.amount) } };
+        },
       },
       states: {
         // A word challenge is in flight (or its word is being picked)
@@ -106,12 +114,6 @@ export const runSessionMachine = setup.createMachine({
               enq(args.actions.saveFinishedRun, { self: args.self, runSession: args.context, deathReason: "Guesses" });
               enq(args.actions.onRunFinished, { self: args.self, runSession: args.context });
               return { target: "#inactive", context: finishActiveRunContext(args.context) };
-            },
-
-            // Overdrive hacks are only purchasable while a word is in progress
-            runScoreSpent: (args) => {
-              assertEvent(args.event, "runScoreSpent");
-              return { context: { ...args.context, runScore: Math.max(0, args.context.runScore - args.event.amount) } };
             },
           },
         },

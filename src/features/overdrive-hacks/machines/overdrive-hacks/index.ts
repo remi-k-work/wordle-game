@@ -35,7 +35,12 @@ export const overdriveHacksMachine = setup.createMachine({
         // No hack in flight: a new hack may be requested
         ready: {
           on: {
-            hackRequested: { target: "classifying" },
+            // Only an affordable request may start a hack; returning undefined
+            // leaves the event unhandled and the machine in `ready`
+            hackRequested: (args) => {
+              if (args.guards.canAffordHack(args)) return { target: "classifying" };
+              return;
+            },
           },
         },
 

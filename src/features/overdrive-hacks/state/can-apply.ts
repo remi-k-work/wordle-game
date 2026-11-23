@@ -8,8 +8,10 @@ import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 // constants
 import { OVERDRIVE_HACK_COST } from "@/features/overdrive-hacks/domain/constants";
 
-// Determines whether a specific overdrive hack can be used (the player must be able to afford it and a word must be in progress)
-// Kept separate from the overdrive-hacks state module so the machine can read it without a circular import
+// Presentation hint for the hack menu: the player can afford this hack while a
+// word is in progress; the machine owns the actual transition decision; this atom
+// only drives disabled styling; kept separate from the overdrive-hacks state
+// module so UI readers do not depend on its machine/action graph
 export const overdriveHacksCanApplyHackAtom = Atom.family((overdriveHackId: OverdriveHackId) =>
   Atom.make((get) => {
     const runSessionMachineSnapshot = get(runSessionMachineAtom);

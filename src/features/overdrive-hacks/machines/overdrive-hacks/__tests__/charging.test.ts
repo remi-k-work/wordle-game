@@ -42,7 +42,7 @@ describe("overdriveHacksMachine hack charging", () => {
       charged.length = 0;
       const actor = yield* createEffectActor(empSucceedsMachine);
       yield* sendAndAwait(actor, { type: "puzzleStarted" });
-      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp" });
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp", runScore: 10_000 });
 
       yield* waitFor(actor, (current) => current.context.empNukedLetters.length > 0);
 
@@ -55,7 +55,7 @@ describe("overdriveHacksMachine hack charging", () => {
       charged.length = 0;
       const actor = yield* createEffectActor(empYieldsNoneMachine);
       yield* sendAndAwait(actor, { type: "puzzleStarted" });
-      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp" });
+      yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp", runScore: 10_000 });
 
       yield* waitFor(actor, (current) => current.matches({ active: "ready" }));
 

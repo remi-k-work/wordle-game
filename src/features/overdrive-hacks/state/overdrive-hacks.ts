@@ -6,16 +6,31 @@ import { RuntimeAtom } from "@/lib/runtime-client";
 import { overdriveHacksMachine } from "@/features/overdrive-hacks/machines/overdrive-hacks";
 import { sonarVowelByPosition } from "@/features/overdrive-hacks/domain/sonar";
 import { wordChallengeKeypadColorsAtom, wordChallengeWordleGridAtom } from "@/features/game/state/word-challenge";
+import { runSessionRunScoreAtom } from "@/features/game/state/run-session";
 import { createMachineState } from "@/lib/machine-atoms";
 
 // types
 import type { BoardTile } from "@/features/game/domain/models";
+import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 
 // constants
 import { EMPTY_TILE_KEY } from "@/features/game/domain/constants";
 
 const overdriveHacksMachineBag = createActorAtoms(RuntimeAtom, overdriveHacksMachine);
 export const { snapshot: overdriveHacksMachineAtom, send: overdriveHacksMachineSendAtom } = createMachineState(overdriveHacksMachine, overdriveHacksMachineBag);
+
+// The supported way for UI code to request a hack: it reads the current run
+// score at send time, so a stale render never assembles an outdated payload.
+// Affordability is still the machine's decision; the guard is authoritative.
+export const requestOverdriveHackAtom = Atom.family((overdriveHackId: OverdriveHackId) =>
+  Atom.writable<null, void>(
+    () => null,
+    (ctx) => {
+      const runScore = ctx.get(runSessionRunScoreAtom);
+      ctx.set(overdriveHacksMachineSendAtom, { type: "hackRequested", overdriveHackId, runScore });
+    }
+  )
+);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const overdriveHacksEmpNukedLettersAtom = overdriveHacksMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.empNukedLetters));
