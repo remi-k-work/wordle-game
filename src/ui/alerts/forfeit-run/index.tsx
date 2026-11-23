@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
 import { alertIsForfeitRunAtom } from "@/state/alert";
-import { confirmForfeitRunAtom } from "@/features/game/state/actions";
+import { confirmForfeitRunAtom } from "@/features/game/state/run-session";
 import { useGT } from "gt-react";
 
 // components

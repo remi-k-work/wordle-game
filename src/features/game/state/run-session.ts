@@ -5,6 +5,7 @@ import { createActorAtoms } from "@xstate/effect/atom";
 import { RuntimeAtom } from "@/lib/runtime-client";
 import { RunSession } from "@/features/game/machines/run-session/models";
 import { runSessionMachine } from "@/features/game/machines/run-session";
+import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 import { createMachineState } from "@/lib/machine-atoms";
 
 // types
@@ -27,6 +28,15 @@ export const { snapshot: runSessionMachineAtom, send: runSessionMachineSendAtom 
     if (!Equal.equals(get.once(runSessionAtom), snapshot.context)) get.set(runSessionAtom, snapshot.context);
   },
 });
+
+// Confirming a forfeit is a synchronous hop between the run session and the word challenge, so it is a write atom
+export const confirmForfeitRunAtom = Atom.writable<null, void>(
+  () => null,
+  (ctx) => {
+    const wordChallenge = ctx.get(wordChallengeMachineAtom).context;
+    ctx.set(runSessionMachineSendAtom, { type: "runForfeited", wordChallenge });
+  }
+);
 
 // Specialized selectors for granular state access and optimized re-renders
 export const runSessionRunIdAtom = runSessionMachineAtom.pipe(Atom.map((snapshot) => snapshot.context.runId));
