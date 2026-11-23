@@ -9,8 +9,6 @@ import { Toolbar, ToolbarSkeleton } from "./toolbar";
 import { KeypadArea, KeypadAreaSkeleton } from "./keypad-area";
 
 // constants
-// Fully static class string, hoisted so the live footer and its skeleton cannot
-// drift into different outer spacing (matching `HEADER_CLASSES` / `TOOLBAR_CLASSES`)
 const FOOTER_CLASSES = cn("grid gap-1");
 
 export function Footer() {

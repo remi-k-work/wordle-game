@@ -1,16 +1,18 @@
 // tanstack
 import { createFileRoute } from "@tanstack/react-router";
+import { ClientOnly } from "@tanstack/react-router";
 
 // services, features, and other libraries
 import { useAtomValue, useAtomMount } from "@effect/atom-react";
 import { playerSessionAtom } from "@/features/player/state/player";
-import { gameDataIsLoadingOrFailedAtom } from "@/features/game/state/game-data";
+import { gameDataPhaseAtom } from "@/features/game/state/game-data";
 import { useGameKeyboardInput } from "@/features/game/hooks/use-game-keyboard-input";
 
 // components
 import { Header, HeaderSkeleton } from "@/features/game/ui/board/header";
 import { Main, MainSkeleton } from "@/features/game/ui/board/main";
 import { Footer, FooterSkeleton } from "@/features/game/ui/board/footer";
+import { GameDataFailure } from "@/features/game/ui/game-data-failure";
 
 export const Route = createFileRoute("/game")({ component: Game });
 
@@ -22,19 +24,22 @@ function Game() {
   // purely presentational — it only renders the board grid
   useGameKeyboardInput();
 
-  const isLoadingOrFailed = useAtomValue(gameDataIsLoadingOrFailedAtom);
+  const phase = useAtomValue(gameDataPhaseAtom);
 
-  // The shell is identical for loading and loaded states; only the board
-  // sections swap between their real and skeleton variants
-  const HeaderEl = isLoadingOrFailed ? HeaderSkeleton : Header;
-  const MainEl = isLoadingOrFailed ? MainSkeleton : Main;
-  const FooterEl = isLoadingOrFailed ? FooterSkeleton : Footer;
+  // The shell is identical across phases; only the board sections swap; a failed
+  // load shows the failure panel in the board's place, and the header/footer stay
+  // skeletons until the data is ready (a failure panel is not a live game)
+  const HeaderEl = phase === "ready" ? Header : HeaderSkeleton;
+  const MainEl = phase === "failure" ? GameDataFailure : phase === "loading" ? MainSkeleton : Main;
+  const FooterEl = phase === "ready" ? Footer : FooterSkeleton;
 
   return (
-    <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
-      <HeaderEl />
-      <MainEl />
-      <FooterEl />
-    </article>
+    <ClientOnly>
+      <article className="mx-auto grid w-full max-w-4xl grid-cols-1 grid-rows-[auto_1fr_auto] gap-2">
+        <HeaderEl />
+        <MainEl />
+        <FooterEl />
+      </article>
+    </ClientOnly>
   );
 }

@@ -25,4 +25,7 @@ export const actions: ActionImplementations<typeof Actions> = {
 
   // Notify the word challenge machine that game data is ready (no word yet — idle state)
   onGameDataLoaded: ({ dictionary }) => publishGameData({ dictionary }),
+
+  // Log which operation failed and why; the operation travels with the failure state's input, so a retry can target exactly that operation
+  onGameDataFailed: ({ operation, error }) => Effect.logError(`[GAME DATA FAILED]: ${operation}`, error),
 };
