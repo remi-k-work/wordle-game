@@ -1,7 +1,7 @@
 // services, features, and other libraries
 import { cn } from "@/lib/utils";
 import { useAtomValue } from "@effect/atom-react";
-import { gameFlowVariantAtom } from "@/features/game/state/game-flow-variant";
+import { runActionAtom } from "@/features/game/state/run-action";
 
 // components
 import { Button } from "@base-ui/react/button";
@@ -31,7 +31,7 @@ interface GameFlowButtonProps extends GameFlowChromeProps {
 // both variants accept the same contract, so re-stating each prop would be two
 // more places to keep in sync every time the button gains one
 export function GameFlowButton(props: GameFlowButtonProps) {
-  const variant = useAtomValue(gameFlowVariantAtom);
+  const variant = useAtomValue(runActionAtom);
 
   // `onClicked` is withheld from the skeleton instead of riding along with the
   // spread. A disabled skeleton has no action to notify anyone about, and leaving

@@ -1,9 +1,6 @@
 // services, features, and other libraries
 import { Effect } from "effect";
-import { Atom } from "effect/reactivity";
-import { wordChallengeMachineSendAtom } from "@/features/game/state/word-challenge";
-import { wordMetaMachineSendAtom } from "@/features/game/state/word-meta";
-import { overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { publishGameData, publishSecretWord } from "@/features/game/state/commands";
 
 // types
 import type { ActionImplementations } from "@/lib/machine-setup";
@@ -21,13 +18,11 @@ export const actions: ActionImplementations<typeof Actions> = {
         // *** TEST CODE ***
         // *** TEST CODE ***
 
-        Atom.set(wordMetaMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
-        Atom.set(wordChallengeMachineSendAtom, { type: "secretWordPicked", theSecretWord }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleStarted" }),
+        publishSecretWord({ theSecretWord }),
       ],
       { discard: true }
     ),
 
   // Notify the word challenge machine that game data is ready (no word yet — idle state)
-  onGameDataLoaded: ({ dictionary }) => Atom.set(wordChallengeMachineSendAtom, { type: "gameDataLoaded", dictionary }),
+  onGameDataLoaded: ({ dictionary }) => publishGameData({ dictionary }),
 };

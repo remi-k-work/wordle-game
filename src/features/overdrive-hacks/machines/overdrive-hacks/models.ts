@@ -21,14 +21,14 @@ export const Events = {
   solutionsLanguageChanged: Schema.Struct({}),
   puzzleStarted: Schema.Struct({}),
   puzzleEnded: Schema.Struct({}),
-  keyPressed: Schema.Struct({ pressedKey: Schema.String }),
   hackRequested: Schema.Struct({ overdriveHackId: OverdriveHackId }),
 };
 
 // Action params are part of the machine's interface; implementations receive
 // exactly these params (plus `self`)
 export const Actions = {
-  forwardKeyPress: { params: Schema.Struct({ pressedKey: Schema.String }) },
+  syncBlockedLetters: { params: Schema.Struct({ blockedLetters: Schema.Array(Letter) }) },
+  chargeHack: { params: Schema.Struct({ overdriveHackId: OverdriveHackId }) },
   onOverrideHackApplied: { params: Schema.Struct({}) },
   logHackFailure: { params: Schema.Struct({ hackId: Schema.String, error: Schema.Unknown }) },
 };

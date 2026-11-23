@@ -57,12 +57,10 @@ export const Actions = {
   trackForfeitedRun: { params: Schema.Struct({ runSession: RunSession, wordChallenge: WordChallenge }) },
   onRunFinished: { params: onRunFinishedParams },
 
-  // Command fan-outs owned by the run session: it knows when a run starts,
-  // advances to the next word, or ends, so it is the one that tells the other
-  // feature machines and the modal what to do
-  startNewRun: { params: Schema.Struct({}) },
+  // Command fan-outs owned by the run session: it knows when the next word is
+  // requested or a puzzle ends, so it is the one that tells the other feature
+  // machines and the modal what to do (the fan-out bodies live in state/commands)
   requestNextWord: { params: Schema.Struct({}) },
-  bankWonWord: { params: Schema.Struct({}) },
-  finishLostRun: { params: Schema.Struct({}) },
+  endPuzzle: { params: Schema.Struct({}) },
   forfeitRun: { params: Schema.Struct({}) },
 };

@@ -3,11 +3,11 @@ import { useEffect } from "react";
 
 // services, features, and other libraries
 import { useAtomSet } from "@effect/atom-react";
-import { overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { keyboardMachineSendAtom } from "@/features/game/state/keyboard";
 
 // The game board owns physical keyboard input for as long as it is on screen
 export function useGameKeyboardInput() {
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineSendAtom);
+  const keyboardMachineEvent = useAtomSet(keyboardMachineSendAtom);
 
   useEffect(() => {
     // Single AbortController removes the keyup listener on unmount or re-run
@@ -17,11 +17,11 @@ export function useGameKeyboardInput() {
       (ev) => {
         const isAltGr = ev.getModifierState("AltGraph");
         if ((ev.ctrlKey && !isAltGr) || ev.metaKey) return;
-        overdriveHacksMachineEvent({ type: "keyPressed", pressedKey: ev.key });
+        keyboardMachineEvent({ type: "keyPressed", pressedKey: ev.key });
       },
       { signal: controller.signal }
     );
 
     return () => controller.abort();
-  }, [overdriveHacksMachineEvent]);
+  }, [keyboardMachineEvent]);
 }

@@ -10,9 +10,9 @@ import { wordChallengeMachineAtom } from "@/features/game/state/word-challenge";
 // every keystroke, since typing assigns new machine context every letter
 // The run session is the authority for the run phase; the word challenge and
 // game data only gate the "still loading" skeleton
-export type GameFlowVariant = "skeleton" | "next" | "start" | "forfeit";
+export type RunAction = "skeleton" | "next" | "start" | "forfeit";
 
-export const gameFlowVariantAtom = Atom.make((get): GameFlowVariant => {
+export const runActionAtom = Atom.make((get): RunAction => {
   const runSessionMachineSnapshot = get(runSessionMachineAtom);
   const wordChallengeMachineSnapshot = get(wordChallengeMachineAtom);
   const gameDataMachineSnapshot = get(gameDataMachineAtom);

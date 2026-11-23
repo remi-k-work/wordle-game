@@ -3,15 +3,13 @@ import { DateTime, Option } from "effect";
 import { SecureRandom } from "effect/crypto";
 import { assertEvent } from "xstate";
 import { setup } from "./setup";
+import { finishActiveRunContext } from "./helpers";
 
 // types
 import type { RunSession } from "./models";
 
 // constants
 import { INITIAL_RUN_SESSION } from "./constants";
-
-const finishActiveRunContext = (context: RunSession) =>
-  ({ ...INITIAL_RUN_SESSION, bestRunScore: context.bestRunScore, bestStreak: context.bestStreak }) as const satisfies RunSession;
 
 // The run session owns the whole arcade lifecycle: it restores a persisted run,
 // starts new ones, advances from word to word, and ends a run on a loss or
@@ -42,7 +40,7 @@ export const runSessionMachine = setup.createMachine({
         newRunStarted: (args, enq) => {
           enq(args.actions.trackStartedNewRun, { self: args.self });
           enq(args.actions.clearFinishedRun, { self: args.self });
-          enq(args.actions.startNewRun, { self: args.self });
+          enq(args.actions.requestNextWord, { self: args.self });
           return {
             target: "active",
             context: {
@@ -87,7 +85,7 @@ export const runSessionMachine = setup.createMachine({
             // Word won, bank volatile points and wait between words
             wordWon: (args, enq) => {
               assertEvent(args.event, "wordWon");
-              enq(args.actions.bankWonWord, { self: args.self });
+              enq(args.actions.endPuzzle, { self: args.self });
               const runScore = args.context.runScore + args.event.wordScore.wordScore;
               const streak = args.context.streak + 1;
               return {
@@ -104,7 +102,7 @@ export const runSessionMachine = setup.createMachine({
 
             // Word lost, finish the active run (same shape as forfeit, without the forfeit telemetry)
             wordLost: (args, enq) => {
-              enq(args.actions.finishLostRun, { self: args.self });
+              enq(args.actions.endPuzzle, { self: args.self });
               enq(args.actions.saveFinishedRun, { self: args.self, runSession: args.context, deathReason: "Guesses" });
               enq(args.actions.onRunFinished, { self: args.self, runSession: args.context });
               return { target: "#inactive", context: finishActiveRunContext(args.context) };

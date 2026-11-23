@@ -18,12 +18,12 @@ import { ForwardIcon, PowerIcon, PuzzlePieceIcon } from "@heroicons/react/24/out
 
 // types
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
-import type { GameFlowVariant } from "@/features/game/state/game-flow-variant";
+import type { RunAction } from "@/features/game/state/run-action";
 
 // Every prop of the button except `onClick`: the button's action is resolved from
 // the flow variant, so a caller's handler would be silently discarded here
 interface GameFlowButtonLiveProps extends Omit<ComponentPropsWithoutRef<typeof Button>, "onClick"> {
-  variant: Exclude<GameFlowVariant, "skeleton">;
+  variant: Exclude<RunAction, "skeleton">;
   keepText?: boolean;
   onClicked?: () => void;
 }

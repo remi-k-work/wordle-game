@@ -5,7 +5,8 @@ import { useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { Array, HashMap, Option, Result } from "effect";
 import { useAtomSet, useAtomValue } from "@effect/atom-react";
-import { overdriveHacksKeypadColorsAtom, overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { overdriveHacksKeypadColorsAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { keyboardMachineSendAtom } from "@/features/game/state/keyboard";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 
 // components
@@ -23,7 +24,7 @@ const KEYPAD_AREA_CLASSES = cn("block rounded-md bg-surface-3 p-1", "md:grid md:
 
 export function KeypadArea({ keys }: { keys: Keypad }) {
   const keypadColors = useAtomValue(overdriveHacksKeypadColorsAtom);
-  const overdriveHacksMachineEvent = useAtomSet(overdriveHacksMachineSendAtom);
+  const keyboardMachineEvent = useAtomSet(keyboardMachineSendAtom);
 
   const availableKeys = Array.filterMap(keys, (letter) => {
     // Absent keys (nothing guessed yet) carry the empty color; only keys the player has genuinely ruled out are dropped
@@ -31,7 +32,7 @@ export function KeypadArea({ keys }: { keys: Keypad }) {
     return color === "grey" ? Result.failVoid : Result.succeed({ letter, color });
   });
 
-  const handleKeyPressed = useCallback((pressedKey: string) => overdriveHacksMachineEvent({ type: "keyPressed", pressedKey }), [overdriveHacksMachineEvent]);
+  const handleKeyPressed = useCallback((pressedKey: string) => keyboardMachineEvent({ type: "keyPressed", pressedKey }), [keyboardMachineEvent]);
 
   return (
     <section className={KEYPAD_AREA_CLASSES}>

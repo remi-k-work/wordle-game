@@ -17,10 +17,8 @@ const machine = runSessionMachine.provide({
     saveFinishedRun: () => Effect.void,
     trackForfeitedRun: () => Effect.void,
     onRunFinished: () => Effect.void,
-    startNewRun: () => Effect.void,
     requestNextWord: () => Effect.void,
-    bankWonWord: () => Effect.void,
-    finishLostRun: () => Effect.void,
+    endPuzzle: () => Effect.void,
     forfeitRun: () => Effect.void,
   },
 });

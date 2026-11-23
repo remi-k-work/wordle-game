@@ -1,14 +1,11 @@
 // services, features, and other libraries
 import { DateTime, Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
-import { modalMachineSendAtom } from "@/state/modal";
 import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state/actions";
 import { runResultAtom } from "@/features/game/state/run-session";
-import { gameDataMachineSendAtom } from "@/features/game/state/game-data";
-import { wordChallengeMachineSendAtom } from "@/features/game/state/word-challenge";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { highScoreMachineSendAtom } from "@/features/high-score/state/high-score";
-import { overdriveHacksMachineSendAtom } from "@/features/overdrive-hacks/state/overdrive-hacks";
+import { endPuzzle, forfeitRun, requestNextWord } from "@/features/game/state/commands";
 
 // types
 import type { ActionArgs, ActionImplementations } from "@/lib/machine-setup";
@@ -41,34 +38,9 @@ export const actions: ActionImplementations<typeof Actions> = {
     yield* Atom.set(highScoreMachineSendAtom, { type: "runFinished", runScore: runSession.runScore, streak: runSession.streak, solutionsLanguage });
   }),
 
-  // Start a brand-new run: close the modal and ask game-data for the first word
-  startNewRun: () =>
-    Effect.all([Atom.set(modalMachineSendAtom, { type: "closed" }), Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" })], { discard: true }),
-
-  // Between words: close the modal and ask game-data for the next word
-  requestNextWord: () =>
-    Effect.all([Atom.set(modalMachineSendAtom, { type: "closed" }), Atom.set(gameDataMachineSendAtom, { type: "nextWordRequested" })], { discard: true }),
-
-  // A word was won: stop the overdrive hacks and show the status modal
-  bankWonWord: () =>
-    Effect.all([Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleEnded" }), Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" })], {
-      discard: true,
-    }),
-
-  // The run died on guesses: stop the overdrive hacks and show the status modal
-  finishLostRun: () =>
-    Effect.all([Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleEnded" }), Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" })], {
-      discard: true,
-    }),
-
-  // Forfeit the active run: abandon the word challenge, stop the overdrive hacks, and show the status modal
-  forfeitRun: () =>
-    Effect.all(
-      [
-        Atom.set(wordChallengeMachineSendAtom, { type: "runForfeited" }),
-        Atom.set(overdriveHacksMachineSendAtom, { type: "puzzleEnded" }),
-        Atom.set(modalMachineSendAtom, { type: "opened", modalType: "status" }),
-      ],
-      { discard: true }
-    ),
+  // The cross-machine fan-outs live in state/commands, so the run session's own
+  // action bodies stay limited to its telemetry, result, and high-score duties
+  requestNextWord: () => requestNextWord,
+  endPuzzle: () => endPuzzle,
+  forfeitRun: () => forfeitRun,
 };

@@ -13,14 +13,15 @@ import type { OverdriveHackId } from "@/features/overdrive-hacks/domain/models";
 // never-resolving Effect holds the machine in an applying state on purpose.
 // The replacement accepts `unknown` input, so one logic stands in for every
 // registered actor while leaving the machine with no Effect requirements.
-// `forwardKeyPress` records into `forwarded` so the forwarding is observable.
-const forwarded: string[] = [];
+// `syncBlockedLetters` records into `synced` so the block list sync is observable.
+const synced: ReadonlyArray<string>[] = [];
 
 const hang = createEffectLogic((_args: EffectSourceArgs<unknown>) => Effect.never);
 
 const machine = overdriveHacksMachine.provide({
   actions: {
-    forwardKeyPress: ({ pressedKey }) => Effect.sync(() => void forwarded.push(pressedKey)),
+    syncBlockedLetters: ({ blockedLetters }) => Effect.sync(() => void synced.push(blockedLetters)),
+    chargeHack: () => Effect.void,
     onOverrideHackApplied: () => Effect.void,
     logHackFailure: () => Effect.void,
   },
@@ -33,35 +34,39 @@ const machine = overdriveHacksMachine.provide({
 });
 
 describe("overdriveHacksMachine", () => {
-  it.effect("forwards key presses only while a puzzle is active", () =>
+  it.effect("clears the keyboard block list when a puzzle ends", () =>
     Effect.gen(function* () {
-      forwarded.length = 0;
+      synced.length = 0;
       const actor = yield* createEffectActor(machine);
 
-      // Idle: a physical key press goes nowhere
-      yield* sendAndAwait(actor, { type: "keyPressed", pressedKey: "a" });
-      expect(forwarded).toEqual([]);
-      expect(actor.getSnapshot().matches("idle")).toBe(true);
-
-      // Active: the key press reaches the word challenge
       yield* sendAndAwait(actor, { type: "puzzleStarted" });
-      yield* sendAndAwait(actor, { type: "keyPressed", pressedKey: "b" });
-      expect(forwarded).toEqual(["b"]);
+      yield* sendAndAwait(actor, { type: "puzzleEnded" });
+
+      expect(synced).toEqual([[]]);
+      expect(actor.getSnapshot().matches("idle")).toBe(true);
     }).pipe(Effect.scoped)
   );
 
-  it.effect("keeps forwarding keys while a hack applies, and refuses a second hack", () =>
+  it.effect("clears the keyboard block list when the solutions language changes", () =>
     Effect.gen(function* () {
-      forwarded.length = 0;
+      synced.length = 0;
+      const actor = yield* createEffectActor(machine);
+
+      yield* sendAndAwait(actor, { type: "puzzleStarted" });
+      yield* sendAndAwait(actor, { type: "solutionsLanguageChanged" });
+
+      expect(synced).toEqual([[]]);
+      expect(actor.getSnapshot().matches("idle")).toBe(true);
+    }).pipe(Effect.scoped)
+  );
+
+  it.effect("refuses a second hack while one is applying", () =>
+    Effect.gen(function* () {
       const actor = yield* createEffectActor(machine);
       yield* sendAndAwait(actor, { type: "puzzleStarted" });
 
       yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "emp" });
       expect(actor.getSnapshot().matches({ active: "applyingEmpHack" })).toBe(true);
-
-      // The hoisted handler still forwards physical input mid-hack
-      yield* sendAndAwait(actor, { type: "keyPressed", pressedKey: "c" });
-      expect(forwarded).toEqual(["c"]);
 
       // No concurrent hacks: a request while applying is ignored
       yield* sendAndAwait(actor, { type: "hackRequested", overdriveHackId: "sonar" });

@@ -1,7 +1,6 @@
 // services, features, and other libraries
 import { Array, Option } from "effect";
 import { setup } from "./setup";
-import { shouldForwardKeyPress } from "./helpers";
 
 // constants
 import { INITIAL_OVERDRIVE_HACKS } from "./constants";
@@ -12,28 +11,25 @@ export const overdriveHacksMachine = setup.createMachine({
   initial: "idle",
 
   on: {
-    solutionsLanguageChanged: { target: ".idle", context: () => INITIAL_OVERDRIVE_HACKS() },
+    // A new language (or a puzzle ending) clears the block list: the letters
+    // nuked in the previous puzzle must not filter keys in the next one
+    solutionsLanguageChanged: (args, enq) => {
+      enq(args.actions.syncBlockedLetters, { self: args.self, blockedLetters: [] });
+      return { target: ".idle", context: INITIAL_OVERDRIVE_HACKS() };
+    },
     puzzleStarted: { target: ".active" },
-    puzzleEnded: { target: ".idle", context: () => INITIAL_OVERDRIVE_HACKS() },
+    puzzleEnded: (args, enq) => {
+      enq(args.actions.syncBlockedLetters, { self: args.self, blockedLetters: [] });
+      return { target: ".idle", context: INITIAL_OVERDRIVE_HACKS() };
+    },
   },
 
   states: {
     idle: {},
 
-    // An active puzzle is running — hacks and keypress forwarding are live
+    // An active puzzle is running — hacks are live
     active: {
       initial: "ready",
-
-      // Physical key presses are forwarded to the word challenge from every
-      // state of an active puzzle, so the forwarding lives here once instead of
-      // once per applying state
-      on: {
-        keyPressed: (args, enq) => {
-          if (shouldForwardKeyPress(args.context.empNukedLetters, args.event.pressedKey)) {
-            enq(args.actions.forwardKeyPress, { self: args.self, pressedKey: args.event.pressedKey });
-          }
-        },
-      },
 
       states: {
         // No hack in flight: a new hack may be requested
@@ -59,10 +55,12 @@ export const overdriveHacksMachine = setup.createMachine({
           invoke: {
             src: "applyEmpHackActor",
             input: ({ context }) => ({ empNukedLetters: context.empNukedLetters }),
-            onDone: (args) => ({
-              target: "ready",
-              context: { empNukedLetters: Array.appendAll(args.context.empNukedLetters, Option.getOrElse(args.output, Array.empty)) },
-            }),
+            onDone: (args, enq) => {
+              const empNukedLetters = Array.appendAll(args.context.empNukedLetters, Option.getOrElse(args.output, Array.empty));
+              enq(args.actions.syncBlockedLetters, { self: args.self, blockedLetters: empNukedLetters });
+              if (Option.isSome(args.output)) enq(args.actions.chargeHack, { self: args.self, overdriveHackId: "emp" });
+              return { target: "ready", context: { empNukedLetters } };
+            },
             onError: (args, enq) => {
               enq(args.actions.logHackFailure, { self: args.self, hackId: "emp", error: args.event.error });
               return { target: "ready" };
@@ -74,10 +72,10 @@ export const overdriveHacksMachine = setup.createMachine({
           invoke: {
             src: "applySonarHackActor",
             input: ({ context }) => ({ sonarReveals: context.sonarReveals }),
-            onDone: (args) => ({
-              target: "ready",
-              context: { sonarReveals: Array.appendAll(args.context.sonarReveals, Option.toArray(args.output)) },
-            }),
+            onDone: (args, enq) => {
+              if (Option.isSome(args.output)) enq(args.actions.chargeHack, { self: args.self, overdriveHackId: "sonar" });
+              return { target: "ready", context: { sonarReveals: Array.appendAll(args.context.sonarReveals, Option.toArray(args.output)) } };
+            },
             onError: (args, enq) => {
               enq(args.actions.logHackFailure, { self: args.self, hackId: "sonar", error: args.event.error });
               return { target: "ready" };
@@ -90,6 +88,7 @@ export const overdriveHacksMachine = setup.createMachine({
             src: "applyOverrideHackActor",
             onDone: (args, enq) => {
               enq(args.actions.onOverrideHackApplied, { self: args.self });
+              if (Option.isSome(args.output)) enq(args.actions.chargeHack, { self: args.self, overdriveHackId: "override" });
               return { target: "fetchingOverrideAudio", context: { theOverride: args.output } };
             },
             onError: (args, enq) => {
