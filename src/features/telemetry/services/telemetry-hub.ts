@@ -20,4 +20,12 @@ export class TelemetryHub extends Context.Service<
       return TelemetryHub.of({ spanPubSub });
     })
   );
+
+  // Test-only: a plain unbounded PubSub with the same fan-out semantics as the
+  // live layer, minus the scope-bound shutdown, so a test can publish spans and
+  // read them back without a runtime.
+  static readonly layerTest = Layer.effect(
+    TelemetryHub,
+    PubSub.unbounded<Tracer.Span>().pipe(Effect.map((spanPubSub) => TelemetryHub.of({ spanPubSub })))
+  );
 }

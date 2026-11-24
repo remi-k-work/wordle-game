@@ -17,6 +17,10 @@ import { VOICES_PL } from "@/domain/constants";
 const decodeSpeechRequest = Schema.decodeEffect(SpeechRequest);
 const isOpenRouterError = Schema.is(OpenRouterError);
 
+// The fixed bytes `OpenRouter.layerTest` returns (an MP3 "ID3" tag header), so a
+// test can assert the exact audio that flows through `fetchSpeechAudio`
+export const TEST_SPEECH_AUDIO = Uint8Array.from([0x49, 0x44, 0x33, 0x03]);
+
 // Surface the upstream status + body (e.g. rate-limit details) instead of burying
 // them in `cause`. `Schema.TaggedError` instances are themselves failing Effects, so
 // each branch below yields the error — no nested generator needed
@@ -89,6 +93,15 @@ export class OpenRouter extends Context.Service<
       return OpenRouter.of({ generateSpeech });
     })
   ).pipe(Layer.provide(FetchHttpClient.layer));
+
+  // Test-only: returns a fixed audio buffer and no generation id, so handler and
+  // graph tests can exercise the speech path with no API key, HTTP, or network.
+  static readonly layerTest = Layer.succeed(
+    OpenRouter,
+    OpenRouter.of({
+      generateSpeech: () => Effect.succeed({ audioData: TEST_SPEECH_AUDIO, generationId: Option.none() }),
+    })
+  );
 }
 
 // Shared TTS-audio RPC handler for every speech-capable group: generates speech
