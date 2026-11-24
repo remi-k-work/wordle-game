@@ -33,7 +33,8 @@ import { timeToSolveDistributionQuery } from "@/features/charts/queries/time-to-
 import type { BucketKey } from "@/features/charts/domain/helpers";
 
 // The service shape: every chart query as a typed method returning a defect-free Effect
-// (dieOnDbFailure has already converted all typed errors to defects at the query boundary)
+// (dieOnDbFailure has already converted all typed errors to defects at the query boundary).
+// Kept private: consumers reach it structurally (or via `Context.Service.Shape<typeof ChartsDB>`)
 interface ChartsDBShape {
   readonly getGuessDistribution: (request: AnyChartArgs) => Effect.Effect<ReadonlyArray<GuessDistributionData>>;
   readonly getTimeToSolveDistribution: (request: AnyChartArgs) => Effect.Effect<ReadonlyArray<TimeToSolveDistributionData>>;
@@ -117,4 +118,9 @@ export class ChartsDB extends Context.Service<ChartsDB, ChartsDBShape>()("Charts
       });
     })
   );
+
+  // Test-only: answers chart calls from the supplied fixtures. A query left out
+  // fails loudly (`UnimplementedError`) if it is called, rather than silently
+  // returning empty data.
+  static readonly layerTest = (fixtures: Partial<ChartsDBShape>) => Layer.mock(ChartsDB, fixtures);
 }

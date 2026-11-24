@@ -1,8 +1,26 @@
 // services, features, and other libraries
-import { Array, Context, Effect, Layer, Schema } from "effect";
+import { Array, Context, Effect, Layer, Ref, Schema } from "effect";
 import { SqlClient, SqlSchema } from "effect/sql";
 import { AddGlobalPulse, AddArcadeRunSummary, AddRunWordEvent } from "@/features/telemetry/domain/models";
 import { dieOnDbFailure } from "@/domain/helpers";
+
+// Everything the test layer recorded, so tests can assert the inserts directly.
+// Kept private: `TelemetryDBTestRef` still yields a `Ref` of this shape, and the
+// type is available structurally without naming it.
+interface TelemetryDBTestData {
+  readonly globalPulses: ReadonlyArray<AddGlobalPulse>;
+  readonly arcadeRunSummaries: ReadonlyArray<AddArcadeRunSummary>;
+  readonly runWordEvents: ReadonlyArray<AddRunWordEvent>;
+}
+
+// Test-only: the mutable store behind `TelemetryDB.layerTest` (the docs' test-ref
+// pattern), exposed so tests can inspect what was written.
+export class TelemetryDBTestRef extends Context.Service<TelemetryDBTestRef, Ref.Ref<TelemetryDBTestData>>()("TelemetryDBTestRef") {
+  static readonly layer = Layer.effect(
+    TelemetryDBTestRef,
+    Ref.make<TelemetryDBTestData>({ globalPulses: [], arcadeRunSummaries: [], runWordEvents: [] })
+  );
+}
 
 export class TelemetryDB extends Context.Service<
   TelemetryDB,
@@ -44,4 +62,25 @@ export class TelemetryDB extends Context.Service<
       });
     })
   );
+
+  // Test-only: records every write into `TelemetryDBTestRef` instead of the
+  // database, so tests can assert exactly what was inserted.
+  static readonly layerTest = Layer.effect(
+    TelemetryDB,
+    Effect.gen(function* () {
+      const store = yield* TelemetryDBTestRef;
+
+      return TelemetryDB.of({
+        addGlobalPulse: Effect.fn("TelemetryDB.addGlobalPulse")(function* (request: Array.NonEmptyReadonlyArray<AddGlobalPulse>) {
+          yield* Ref.update(store, (data) => ({ ...data, globalPulses: [...data.globalPulses, ...request] }));
+        }),
+        addArcadeRunSummary: Effect.fn("TelemetryDB.addArcadeRunSummary")(function* (request: AddArcadeRunSummary) {
+          yield* Ref.update(store, (data) => ({ ...data, arcadeRunSummaries: [...data.arcadeRunSummaries, request] }));
+        }),
+        addRunWordEvent: Effect.fn("TelemetryDB.addRunWordEvent")(function* (request: AddRunWordEvent) {
+          yield* Ref.update(store, (data) => ({ ...data, runWordEvents: [...data.runWordEvents, request] }));
+        }),
+      });
+    })
+  ).pipe(Layer.provideMerge(TelemetryDBTestRef.layer));
 }
