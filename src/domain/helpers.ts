@@ -1,6 +1,6 @@
 // services, features, and other libraries
 import { Cause, Context, Effect, Layer, Option } from "effect";
-import { RpcClient, RpcGroup, RpcSerialization } from "effect/rpc";
+import { RpcClient, RpcGroup, RpcSerialization, RpcTest } from "effect/rpc";
 import { FetchHttpClient } from "effect/http";
 
 // types
@@ -22,6 +22,20 @@ export const degradeCause = <A, B, E, R>(effect: Effect.Effect<A, E, R>, recover
 // Runs an AI-backed generation and degrades to `None` on any failure
 export const degradeToNone = <A, E, R>(generate: Effect.Effect<Option.Option<A>, E, R>) => degradeCause(generate, Effect.succeedNone);
 
+// A test-only fake for an RPC client: each method takes the decoded payload and
+// returns an Effect of the decoded success. It is deliberately looser than the
+// real client signature (which is generic over the queue/discard options) so a
+// test can write plain functions; `layerFake` casts it into the client shape.
+export type RpcClientFake<Rpcs extends Rpc.Any> = {
+  readonly [K in Rpcs as K["_tag"]]?: (payload: Rpc.Payload<K>) => Effect.Effect<Rpc.Success<K>>;
+};
+
+// `Layer.mock` cannot name the loosened `RpcClientFake` shape directly (the real
+// client methods are generic), so bridge the two here where `S` is inferred from
+// the service key as a real type parameter.
+const mockRpcClient = <I, S extends object>(key: Context.Key<I, S>, fake: object): Layer.Layer<I> =>
+  Layer.mock(key, fake as Layer.PartialEffectful<S>);
+
 // Builds a class-style RPC client service backed by an HTTP protocol layer for a given RPC group
 export const makeRpcClient = <Rpcs extends Rpc.Any>(serviceName: string, group: RpcGroup.RpcGroup<Rpcs>, path: string) => {
   const ProtocolLive = RpcClient.layerProtocolHttp({ url: path }).pipe(Layer.provide([FetchHttpClient.layer, RpcSerialization.layerSchemaBinary()]));
@@ -30,6 +44,15 @@ export const makeRpcClient = <Rpcs extends Rpc.Any>(serviceName: string, group: 
     make: RpcClient.make(group, { disableTracing: true }),
   }) {
     static readonly layer = Layer.effect(this, this.make).pipe(Layer.provide(ProtocolLive));
+
+    // Test-only: a protocol-faithful in-memory client for this group. Provide
+    // the group's handlers (for example `RpcGame.toLayer({ ... })`) in the
+    // environment to answer its calls; nothing touches HTTP or the network.
+    static readonly layerTest = Layer.effect(this, RpcTest.makeClient(group));
+
+    // Test-only: substitute the client with a content fake. Any method left out
+    // fails loudly (an UnimplementedError defect) if it is ever called.
+    static readonly layerFake = (fake: RpcClientFake<Rpcs>) => mockRpcClient(this, fake);
   };
 };
 
