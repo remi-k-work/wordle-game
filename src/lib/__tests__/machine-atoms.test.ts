@@ -97,7 +97,7 @@ describe("persisted machine hydration", () => {
         runtime,
         key: KEY,
         schema: RunSession,
-        defaultValue: () => INITIAL_RUN_SESSION,
+        defaultValue: INITIAL_RUN_SESSION,
       }).pipe(Atom.keepAlive);
 
       const runSessionMachineBag = Atom.make((get) =>

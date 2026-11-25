@@ -19,7 +19,7 @@ const runSessionAtom = Atom.kvs({
   runtime: RuntimeAtom,
   key: "@wordle/runSession",
   schema: RunSession,
-  defaultValue: () => INITIAL_RUN_SESSION,
+  defaultValue: INITIAL_RUN_SESSION,
 }).pipe(Atom.keepAlive);
 
 const runSessionMachineBag = Atom.make((get) => createActorAtoms(RuntimeAtom, runSessionMachine, { input: get.once(runSessionAtom) })).pipe(Atom.keepAlive);

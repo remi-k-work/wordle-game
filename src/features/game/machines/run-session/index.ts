@@ -21,7 +21,7 @@ export const runSessionMachine = setup.createMachine({
 
   // Hydrate the machine from the persisted KVS atom, falling back to the empty
   // session so the initial snapshot stays total even before input arrives
-  context: ({ input }) => ({ ...INITIAL_RUN_SESSION, ...input }) satisfies RunSession,
+  context: ({ input }) => ({ ...INITIAL_RUN_SESSION(), ...input }) satisfies RunSession,
   initial: "classifying",
 
   states: {
@@ -44,7 +44,7 @@ export const runSessionMachine = setup.createMachine({
           return {
             target: "active",
             context: {
-              ...INITIAL_RUN_SESSION,
+              ...INITIAL_RUN_SESSION(),
               // The sync context updater has no Effect context, so this uses the
               // `*Unsafe` primitive documented for exactly that case (it draws
               // from `globalThis.crypto`, like the `SecureRandom` service does)

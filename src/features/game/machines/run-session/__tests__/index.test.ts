@@ -26,7 +26,7 @@ const machine = runSessionMachine.provide({
 const RUN_ID = "00000000-0000-4000-8000-000000000000";
 
 const activeRun = {
-  ...INITIAL_RUN_SESSION,
+  ...INITIAL_RUN_SESSION(),
   runId: Option.some(RUN_ID),
   createdAt: Option.some(DateTime.makeUnsafe(0)),
 };
@@ -43,14 +43,14 @@ describe("runSessionMachine", () => {
 
   it.effect("classifies a session without a run id as inactive", () =>
     Effect.gen(function* () {
-      const actor = yield* createEffectActor(machine, { input: INITIAL_RUN_SESSION });
+      const actor = yield* createEffectActor(machine, { input: INITIAL_RUN_SESSION() });
       expect(actor.getSnapshot().matches("inactive")).toBe(true);
     }).pipe(Effect.scoped)
   );
 
   it.effect("starts a new run and requests the first word", () =>
     Effect.gen(function* () {
-      const actor = yield* createEffectActor(machine, { input: INITIAL_RUN_SESSION });
+      const actor = yield* createEffectActor(machine, { input: INITIAL_RUN_SESSION() });
 
       yield* sendAndAwait(actor, { type: "newRunStarted" });
       const snapshot = actor.getSnapshot();
@@ -133,7 +133,7 @@ describe("runSessionMachine", () => {
 
   it.effect("ignores a charge when no run is active", () =>
     Effect.gen(function* () {
-      const actor = yield* createEffectActor(machine, { input: { ...INITIAL_RUN_SESSION, runScore: 500 } });
+      const actor = yield* createEffectActor(machine, { input: { ...INITIAL_RUN_SESSION(), runScore: 500 } });
 
       yield* sendAndAwait(actor, { type: "runScoreSpent", amount: 120 });
 
