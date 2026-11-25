@@ -2,17 +2,15 @@
 import { Effect, Layer, Option, String } from "effect";
 import { RpcGame } from "./requests";
 import { GameContent } from "@/features/game/services/game-content";
-import { generateRiddle } from "@/features/game/domain/riddle";
+import { WordEnrichment } from "@/services/word-enrichment.server";
 import { formatTextForTTS } from "@/domain/formatters";
-import { AiClientsWithHttp } from "@/domain/fallback-plan";
-import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
+import { makeRpcHandler } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
 // constants
 import { RPC_GAME_PATH } from "@/domain/constants";
 
-// Content RPCs are pass-throughs to the static asset service; the AI-backed
-// riddle still reads the same service's raw dictionary definition for its prompt
+// Content and AI enrichment both live behind services; this layer is wiring only
 const RpcGameLayer = RpcGame.toLayer({
   fetchSolutions: ({ solutionsLanguage }) => Effect.map(GameContent, (content) => Option.some(content.solutions(solutionsLanguage))),
 
@@ -21,12 +19,11 @@ const RpcGameLayer = RpcGame.toLayer({
   fetchKeypad: ({ solutionsLanguage }) => Effect.map(GameContent, (content) => Option.some(content.keypad(solutionsLanguage))),
 
   fetchRiddle: ({ theSecretWord, solutionsLanguage }) =>
-    Effect.flatMap(GameContent, (content) =>
-      withAiFallback(
-        generateRiddle(theSecretWord, solutionsLanguage, content.definition(theSecretWord, solutionsLanguage)),
-        Effect.succeedSome("No riddle available in the AI off mode.")
-      )
-    ),
+    Effect.gen(function* () {
+      const content = yield* GameContent;
+      const enrichment = yield* WordEnrichment;
+      return yield* enrichment.riddle(theSecretWord, solutionsLanguage, content.definition(theSecretWord, solutionsLanguage));
+    }),
 
   fetchDefinition: ({ solutionsLanguage, theSecretWord }) =>
     Effect.map(GameContent, (content) =>
@@ -42,6 +39,6 @@ const RpcGameLayer = RpcGame.toLayer({
   fetchWordDefinitionAudio: fetchSpeechAudio,
 });
 
-const RpcGameLayerWithAi = RpcGameLayer.pipe(Layer.provide(AiClientsWithHttp), Layer.provide(OpenRouter.layer), Layer.provide(GameContent.layer));
+const RpcGameLayerWithServices = RpcGameLayer.pipe(Layer.provide(WordEnrichment.layer), Layer.provide(OpenRouter.layer), Layer.provide(GameContent.layer));
 
-export const handler = makeRpcHandler(RpcGame, RPC_GAME_PATH, RpcGameLayerWithAi);
+export const handler = makeRpcHandler(RpcGame, RPC_GAME_PATH, RpcGameLayerWithServices);

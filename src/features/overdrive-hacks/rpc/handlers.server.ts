@@ -1,24 +1,21 @@
 // services, features, and other libraries
 import { Effect, Layer } from "effect";
 import { RpcOverdriveHacks } from "./requests";
-import { generateOverride } from "@/features/overdrive-hacks/domain/override";
-import { AiClientsWithHttp } from "@/domain/fallback-plan";
-import { makeRpcHandler, withAiFallback } from "@/domain/helpers.server";
+import { WordEnrichment } from "@/services/word-enrichment.server";
+import { makeRpcHandler } from "@/domain/helpers.server";
 import { fetchSpeechAudio, OpenRouter } from "@/services/open-router.server";
 
 // constants
 import { RPC_OVERDRIVE_HACKS_PATH } from "@/domain/constants";
 
+// Enrichment lives behind the service; this layer is wiring only
 const RpcOverdriveHacksLayer = RpcOverdriveHacks.toLayer({
   fetchOverride: ({ theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage }) =>
-    withAiFallback(
-      generateOverride(theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage),
-      Effect.succeedSome("No override available in the AI off mode.")
-    ),
+    Effect.flatMap(WordEnrichment, (enrichment) => enrichment.override(theSecretWord, wordDefinition, theRiddle, wordleGuesses, solutionsLanguage)),
 
   fetchOverrideAudio: fetchSpeechAudio,
 });
 
-const RpcOverdriveHacksLayerWithAi = RpcOverdriveHacksLayer.pipe(Layer.provide(AiClientsWithHttp), Layer.provide(OpenRouter.layer));
+const RpcOverdriveHacksLayerWithServices = RpcOverdriveHacksLayer.pipe(Layer.provide(WordEnrichment.layer), Layer.provide(OpenRouter.layer));
 
-export const handler = makeRpcHandler(RpcOverdriveHacks, RPC_OVERDRIVE_HACKS_PATH, RpcOverdriveHacksLayerWithAi);
+export const handler = makeRpcHandler(RpcOverdriveHacks, RPC_OVERDRIVE_HACKS_PATH, RpcOverdriveHacksLayerWithServices);
