@@ -1,5 +1,5 @@
 // services, features, and other libraries
-import { Config, Effect, Layer, Option } from "effect";
+import { Config, Context, Effect, Layer, Option } from "effect";
 import { RpcGroup, RpcSerialization, RpcServer } from "effect/rpc";
 import { HttpRouter, HttpServer } from "effect/http";
 import { RpcLogger } from "@/services/rpc-logger";
@@ -67,22 +67,27 @@ export const makeRpcHandler = <Rpcs extends Rpc.Any, LE>(
   return HttpRouter.toWebHandler(RpcLayer, { disableLogger: true });
 };
 
-// Adapts an HttpRouter web handler to TanStack Start's server route-handler shape,
-// which receives the request wrapped in a context object
+// Adapts an HttpRouter web handler to TanStack Start's server route-handler shape, which receives the request wrapped in a context object
 export const routeHandler =
   (webHandler: { readonly handler: (request: Request) => Response | Promise<Response> }) =>
   ({ request }: { request: Request }) =>
     webHandler.handler(request);
 
-// Reads the AI switch from Config, defaulting to "on". AI-backed RPCs call this to skip expensive
-// generation (avoiding rate limits and token usage) when the switch is off
+// Reads the AI switch from Config, defaulting to "on"; only the layer that
+// builds the AI enrichment reads it; callers read the reference below instead
 const readAiSwitch = Config.Literals(["off", "on"], "AI_SWITCH").pipe(Config.withDefault("on"));
+
+// The AI feature flag as a context reference: "on" unless overridden, so AI-backed code can be tested without providing Config
+export const AiSwitch = Context.Reference<"off" | "on">("AiSwitch", { defaultValue: () => "on" });
+
+// The config-backed value for the reference, read once when the layer is built rather than on every AI call
+export const AiSwitchLayer = Layer.effect(AiSwitch, readAiSwitch);
 
 // Runs the AI-backed generation unless the AI switch is off, in which case the
 // cheap fallback is served instead (avoids rate limits and token usage)
 // Combinator-based (no Effect.gen wrapper) per Effect conventions for reusable functions
 export const withAiEnabled = <A, E, R>(generate: Effect.Effect<A, E, R>, fallback: Effect.Effect<A, E, R>) =>
-  Effect.flatMap(readAiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
+  Effect.flatMap(AiSwitch, (aiSwitch) => (aiSwitch === "off" ? fallback : generate));
 
 // Runs the AI-backed generation unless the AI switch is off, in which case the
 // cheap fallback is served instead. The combined result degrades to `None` on

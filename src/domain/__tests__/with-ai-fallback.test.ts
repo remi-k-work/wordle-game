@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@effect/vitest";
 import { Cause, Effect, Exit, Fiber, Logger, Option } from "effect";
-import { withAiFallback } from "../helpers.server";
+import { withAiFallback, AiSwitch } from "../helpers.server";
 
 // `withAiFallback` backs the non-critical AI enrichment RPCs (riddle, override,
 // TTS audio): its job is to degrade to `None` on ANY non-interrupting failure so
@@ -31,6 +31,23 @@ describe("withAiFallback", () => {
 
       expect(result).toStrictEqual(Option.some("a perfectly good riddle"));
     })
+  );
+
+  it.effect("serves the fallback without running the generation when the AI switch is off", () =>
+    Effect.gen(function* () {
+      let generated = false;
+
+      const result = yield* withAiFallback(
+        Effect.sync(() => {
+          generated = true;
+          return Option.some("generated");
+        }),
+        Effect.succeedSome("fallback")
+      );
+
+      expect(result).toStrictEqual(Option.some("fallback"));
+      expect(generated).toBe(false);
+    }).pipe(Effect.provideService(AiSwitch, "off"))
   );
 
   it.effect("lets a pure interruption propagate instead of degrading", () =>
