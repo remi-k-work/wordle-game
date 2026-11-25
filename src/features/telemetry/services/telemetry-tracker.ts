@@ -23,18 +23,22 @@ const guessedTurnOf = (wordChallenge: WordChallenge) => wordChallenge.currentTur
 const trackMetric = <Input>(attributes: TelemetryAttributes, metric: Metric.Metric<Input, unknown>, input: Input) =>
   Metric.update(metric.pipe(Metric.withAttributes(attributes)), input);
 
+// Run `f` with the present value and do nothing when the option is absent;
+// keeps the "skip if absent" policy in one place
+const whenSome = <A>(option: Option.Option<A>, f: (value: A) => Effect.Effect<void>): Effect.Effect<void> =>
+  Option.match(option, { onNone: () => Effect.void, onSome: f });
+
 // This function logs the exact details of an event when a player wins the game (stream 1 -> run_word_event)
 // All three fields are required for the span; if any is absent the annotation is skipped instead of failing
 const logWordWon = Effect.fn(SPAN_LOG_WORD_WON)(function* (attributes: TelemetryAttributes, runSession: RunSession, wordChallenge: WordChallenge) {
   const { solutionsLanguage } = attributes;
   const guessedTurn = guessedTurnOf(wordChallenge);
 
-  const details = Option.all({ runId: runSession.runId, theSecretWord: wordChallenge.theSecretWord, wordScore: wordChallenge.wordScore });
-  yield* Option.match(details, {
-    onNone: () => Effect.void,
-    onSome: ({ runId, theSecretWord, wordScore }) =>
-      Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: wordScore.timeSeconds }),
-  });
+  yield* whenSome(
+    Option.all({ runId: runSession.runId, theSecretWord: wordChallenge.theSecretWord, wordScore: wordChallenge.wordScore }),
+    ({ runId, theSecretWord, wordScore }) =>
+      Effect.annotateCurrentSpan({ runId, solutionsLanguage, theSecretWord, guessedTurn, timeSeconds: wordScore.timeSeconds })
+  );
 });
 
 // A function to log the exact details of a completed arcade run session (stream 1 -> arcade_run_summary)
@@ -60,21 +64,19 @@ const logRunCompleted = Effect.fn(SPAN_LOG_RUN_COMPLETED)(function* (
   const createdAt = Option.getOrElse(runSession.createdAt, () => now);
   const durationSeconds = Number.clamp({ minimum: 0, maximum: Infinity })(DateTime.distance(createdAt, now).pipe(Duration.toSeconds, Math.floor));
 
-  yield* Option.match(runSession.runId, {
-    onNone: () => Effect.void,
-    onSome: (runId) =>
-      Effect.annotateCurrentSpan({
-        runId,
-        sessionId,
-        solutionsLanguage,
-        deathReason,
-        // The secret word is only meaningful for "Guesses" deaths; every other death reason (and a puzzle that never had one) degrades to "N/A"
-        failedOnWord: deathReason === "Guesses" ? Option.getOrElse(wordChallenge.theSecretWord, () => "N/A") : "N/A",
-        finalScore,
-        finalStreak,
-        durationSeconds,
-      }),
-  });
+  yield* whenSome(runSession.runId, (runId) =>
+    Effect.annotateCurrentSpan({
+      runId,
+      sessionId,
+      solutionsLanguage,
+      deathReason,
+      // The secret word is only meaningful for "Guesses" deaths; every other death reason (and a puzzle that never had one) degrades to "N/A"
+      failedOnWord: deathReason === "Guesses" ? Option.getOrElse(wordChallenge.theSecretWord, () => "N/A") : "N/A",
+      finalScore,
+      finalStreak,
+      durationSeconds,
+    })
+  );
 });
 
 // Track metrics related to submitting an invalid guess (stream 2 -> global_pulse)
@@ -120,10 +122,7 @@ const trackWordWon = Effect.fnUntraced(function* (attributes: TelemetryAttribute
   yield* trackMetric(attributes, metrics.guessesToWin, guessedTurn);
 
   // `timeToSolve` needs the volatile word score, which may be absent; skip it gracefully instead of failing
-  yield* Option.match(wordChallenge.wordScore, {
-    onNone: () => Effect.void,
-    onSome: (wordScore) => trackMetric(attributes, metrics.timeToSolve, wordScore.timeSeconds),
-  });
+  yield* whenSome(wordChallenge.wordScore, (wordScore) => trackMetric(attributes, metrics.timeToSolve, wordScore.timeSeconds));
 
   yield* trackMetric(attributes, metrics.gamesPlayed, 1);
   if (guessedTurn === 1) yield* trackMetric(attributes, metrics.perfectGames, 1);
@@ -143,10 +142,7 @@ const trackWordLost = Effect.fnUntraced(function* (attributes: TelemetryAttribut
   yield* trackMetric(attributes, metrics.arcadeRunLength, streak);
 
   // `failedWords` needs the secret word; skip it if the puzzle never had one
-  yield* Option.match(wordChallenge.theSecretWord, {
-    onNone: () => Effect.void,
-    onSome: (theSecretWord) => trackMetric(attributes, metrics.failedWords, theSecretWord),
-  });
+  yield* whenSome(wordChallenge.theSecretWord, (theSecretWord) => trackMetric(attributes, metrics.failedWords, theSecretWord));
 
   yield* trackMetric(attributes, metrics.runDeathReason, "Guesses");
 
