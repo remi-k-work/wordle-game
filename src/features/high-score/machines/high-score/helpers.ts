@@ -12,4 +12,4 @@ interface RunFinished {
 import { INITIAL_HIGH_SCORE } from "./constants";
 
 export const runFinishedContext = (event: RunFinished) =>
-  ({ ...INITIAL_HIGH_SCORE, runScore: event.runScore, streak: event.streak, solutionsLanguage: event.solutionsLanguage }) as const satisfies HighScore;
+  ({ ...INITIAL_HIGH_SCORE(), runScore: event.runScore, streak: event.streak, solutionsLanguage: event.solutionsLanguage }) as const satisfies HighScore;

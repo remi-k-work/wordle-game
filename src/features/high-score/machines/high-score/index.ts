@@ -8,7 +8,7 @@ import { INITIAL_HIGH_SCORE } from "./constants";
 
 export const highScoreMachine = setup.createMachine({
   id: "highScore",
-  context: INITIAL_HIGH_SCORE,
+  context: INITIAL_HIGH_SCORE(),
   initial: "awaitingFinishedRun",
 
   on: {
