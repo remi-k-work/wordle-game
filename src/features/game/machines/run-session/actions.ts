@@ -1,7 +1,8 @@
 // services, features, and other libraries
 import { DateTime, Effect, Option } from "effect";
 import { Atom } from "effect/reactivity";
-import { trackForfeitedRun, trackStartedNewRun } from "@/features/telemetry/state/actions";
+import { TelemetryTracker } from "@/features/telemetry/services/telemetry-tracker";
+import { telemetryAttributes } from "@/features/telemetry/state/telemetry-attributes";
 import { runResultAtom } from "@/features/game/state/run-session";
 import { gameSettingsSolutionsLanguageAtom } from "@/features/settings/state/game-settings";
 import { highScoreMachineSendAtom } from "@/features/high-score/state/high-score";
@@ -16,7 +17,10 @@ export const actions: ActionImplementations<typeof Actions> = {
   clearFinishedRun: () => Atom.set(runResultAtom, Option.none()),
 
   // Track metrics related to the action of starting a new run (stream 2 -> global_pulse)
-  trackStartedNewRun: () => trackStartedNewRun(),
+  trackStartedNewRun: Effect.fnUntraced(function* () {
+    const tracker = yield* TelemetryTracker;
+    yield* tracker.trackStartedNewRun(yield* telemetryAttributes());
+  }),
 
   // Build the immutable completed-run summary; `runId` is present by invariant for any active run,
   // so the Option lift cannot fail in practice (its typed failure still rides the machine's error channel).
@@ -30,7 +34,10 @@ export const actions: ActionImplementations<typeof Actions> = {
   }),
 
   // Track metrics related to the action of forfeiting a run (stream 2 -> global_pulse)
-  trackForfeitedRun: ({ runSession, wordChallenge }) => trackForfeitedRun(runSession, wordChallenge),
+  trackForfeitedRun: Effect.fnUntraced(function* ({ runSession, wordChallenge }: ActionArgs<typeof Actions.trackForfeitedRun.params>) {
+    const tracker = yield* TelemetryTracker;
+    yield* tracker.trackForfeitedRun(yield* telemetryAttributes(), runSession, wordChallenge);
+  }),
 
   // Notify high score machine that a run has finished
   onRunFinished: Effect.fnUntraced(function* ({ runSession }: ActionArgs<typeof Actions.onRunFinished.params>) {

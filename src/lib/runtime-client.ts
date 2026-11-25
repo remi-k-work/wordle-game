@@ -8,6 +8,7 @@ import { RpcTelemetryClient } from "@/features/telemetry/rpc/client";
 import { RpcOverdriveHacksClient } from "@/features/overdrive-hacks/rpc/client";
 import { TelemetryHub } from "@/features/telemetry/services/telemetry-hub";
 import { HubTracerLayer } from "@/features/telemetry/services/hub-tracer";
+import { TelemetryTracker } from "@/features/telemetry/services/telemetry-tracker";
 import { TelemetryWorkerLayer } from "@/features/telemetry/services/telemetry-worker";
 import { sharedAtomRegistry } from "@/ui/atom-registry-provider";
 
@@ -21,13 +22,14 @@ const LoggerLayer = Logger.layer([Logger.consolePretty()]);
 const TelemetryReadyLayer = Layer.mergeAll(HubTracerLayer, RpcTelemetryClient.layer, BrowserCrypto.layer).pipe(Layer.provideMerge(TelemetryHub.layer));
 const AtomReadyLayer = Layer.mergeAll(Layer.succeed(AtomRegistry.AtomRegistry, sharedAtomRegistry), Reactivity.layer, BrowserKeyValueStore.layerLocalStorage);
 
-// Basis for every client-side runtime: console logging + all RPC clients + atoms + tracer/hub
+// Basis for every client-side runtime: console logging + all RPC clients + telemetry + atoms
 const MainLayer = Layer.mergeAll(
   LoggerLayer,
   RpcGameClient.layer,
   RpcHighScoreClient.layer,
   RpcOverdriveHacksClient.layer,
   TelemetryReadyLayer,
+  TelemetryTracker.layer,
   AtomReadyLayer
 );
 
